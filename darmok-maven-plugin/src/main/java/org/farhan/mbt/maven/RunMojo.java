@@ -44,8 +44,14 @@ public class RunMojo extends AbstractMojo {
 	public int timeout;
 
 	// Claude CLI properties
-	@Parameter(property = "model", defaultValue = "sonnet")
-	public String model;
+	@Parameter(property = "modelRed", defaultValue = "opus")
+	public String modelRed;
+
+	@Parameter(property = "modelGreen", defaultValue = "sonnet")
+	public String modelGreen;
+
+	@Parameter(property = "modelRefactor", defaultValue = "sonnet")
+	public String modelRefactor;
 
 	@Parameter(property = "coAuthor", defaultValue = "Claude Sonnet 4.5 <noreply@anthropic.com>")
 	public String coAuthor;
@@ -172,6 +178,16 @@ public class RunMojo extends AbstractMojo {
 					}
 					mojoLog.info("  Completed rgr-red (Duration: " + formatDuration(redDuration) + ")");
 
+					// Run Claude rgr-red skill
+					mojoLog.info("  Running Claude rgr-red...");
+					long claudeRedStart = System.currentTimeMillis();
+					int claudeRedExitCode = runClaudeRgrRed(tag);
+					long claudeRedDuration = System.currentTimeMillis() - claudeRedStart;
+					if (claudeRedExitCode != 0) {
+						throw new MojoExecutionException("Claude rgr-red failed with exit code " + claudeRedExitCode);
+					}
+					mojoLog.info("  Completed Claude rgr-red (Duration: " + formatDuration(claudeRedDuration) + ")");
+
 					// Stage changes
 					git.run(baseDir, "add", ".");
 
@@ -191,7 +207,7 @@ public class RunMojo extends AbstractMojo {
 						mojoLog.info("  [2/2] Skipping rgr-green (tests already passing)");
 					}
 
-					long totalDuration = redDuration + greenDuration;
+					long totalDuration = redDuration + claudeRedDuration + greenDuration;
 					mojoLog.info("");
 					mojoLog.info("  Red-Green workflow completed for tag: " + tag + " (Total Duration: " + formatDuration(totalDuration) + ")");
 					totalProcessed++;
@@ -396,16 +412,22 @@ public class RunMojo extends AbstractMojo {
 		}
 	}
 
+	private int runClaudeRgrRed(String pattern) throws Exception {
+		mojoLog.info("RGR-Red (Claude): Pattern=" + pattern);
+		ClaudeRunner claude = new ClaudeRunner(runnerLog, modelRed, maxRetries, retryWaitSeconds);
+		return claude.run(baseDir + "/../..", "/rgr-red " + project.getArtifactId() + " " + pattern);
+	}
+
 	private int runRgrGreen(String pattern) throws Exception {
 		mojoLog.info("RGR-Green: Pattern=" + pattern);
-		ClaudeRunner claude = new ClaudeRunner(runnerLog, model, maxRetries, retryWaitSeconds);
-		return claude.run(baseDir + "/../..", "/rgr-green sheep-dog-test " + pattern);
+		ClaudeRunner claude = new ClaudeRunner(runnerLog, modelGreen, maxRetries, retryWaitSeconds);
+		return claude.run(baseDir + "/../..", "/rgr-green " + project.getArtifactId() + " " + pattern);
 	}
 
 	private int runRgrRefactor() throws Exception {
-		mojoLog.info("RGR-Refactor: " + pipeline + " sheep-dog-test");
-		ClaudeRunner claude = new ClaudeRunner(runnerLog, model, maxRetries, retryWaitSeconds);
-		return claude.run(baseDir + "/../..", "/rgr-refactor " + pipeline + " sheep-dog-test");
+		mojoLog.info("RGR-Refactor: " + pipeline + " " + project.getArtifactId());
+		ClaudeRunner claude = new ClaudeRunner(runnerLog, modelRefactor, maxRetries, retryWaitSeconds);
+		return claude.run(baseDir + "/../..", "/rgr-refactor " + pipeline + " " + project.getArtifactId());
 	}
 
 	private int runCleanUp() throws Exception {
