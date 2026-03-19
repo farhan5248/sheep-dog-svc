@@ -197,12 +197,21 @@ public class GenFromExistingMojo extends AbstractMojo {
 		}
 		mojoLog.info("  Red: Completed claude (" + formatDuration(redClaudeDuration) + ")");
 
-		git.run(baseDir, "add", ".");
-		commitIfChanged("run-rgr red " + scenarioName, "Red");
-
-		// === GREEN PHASE ===
 		long greenDuration = 0;
-		if (redExitCode == 0) {
+		long refactorDuration = 0;
+
+		if (redExitCode == 100) {
+			// Tests already passing — include scenario removal in red commit
+			mojoLog.info("  Green: Skipped (tests already passing)");
+			removeFirstScenarioFromFile();
+			git.run(baseDir, "add", ".");
+			commitIfChanged("run-rgr red " + scenarioName, "Red");
+		} else {
+			// Tests failing — commit red, then run green and refactor
+			git.run(baseDir, "add", ".");
+			commitIfChanged("run-rgr red " + scenarioName, "Red");
+
+			// === GREEN PHASE ===
 			mojoLog.info("  Green: Running...");
 			long greenStart = System.currentTimeMillis();
 			int greenExitCode = runRgrGreen(tag);
@@ -212,18 +221,11 @@ public class GenFromExistingMojo extends AbstractMojo {
 			}
 			mojoLog.info("  Green: Completed (" + formatDuration(greenDuration) + ")");
 
+			removeFirstScenarioFromFile();
 			git.run(baseDir, "add", ".");
 			commitIfChanged("run-rgr green " + scenarioName, "Green");
-		} else {
-			mojoLog.info("  Green: Skipped (tests already passing)");
-		}
 
-		// === REFACTOR PHASE ===
-		int mainDiffExit = git.run(baseDir, "diff", "HEAD~1", "--quiet", "--", "src/main");
-		boolean hasMainChanges = (mainDiffExit != 0);
-		long refactorDuration = 0;
-
-		if (hasMainChanges) {
+			// === REFACTOR PHASE ===
 			mojoLog.info("  Refactor: Running...");
 			long refactorStart = System.currentTimeMillis();
 			int refactorExit = runRgrRefactor();
@@ -234,20 +236,8 @@ public class GenFromExistingMojo extends AbstractMojo {
 			}
 			mojoLog.info("  Refactor: Completed (" + formatDuration(refactorDuration) + ")");
 
-			removeFirstScenarioFromFile();
 			git.run(baseDir, "add", ".");
 			commitIfChanged("run-rgr refactor " + scenarioName, "Refactor");
-		} else {
-			mojoLog.info("  Refactor: Skipped (no src/main changes)");
-
-			removeFirstScenarioFromFile();
-			git.run(baseDir, "add", ".");
-			int diffQuietExit = git.run(baseDir, "diff", "--cached", "--quiet");
-			if (diffQuietExit != 0) {
-				String commitMsg = "run-rgr cleanup " + scenarioName + "\n\nCo-Authored-By: " + coAuthor;
-				mojoLog.info("  Cleanup: Committing");
-				git.run(baseDir, "commit", "-m", commitMsg);
-			}
 		}
 
 		// === METRIC LINES ===
