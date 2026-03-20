@@ -61,6 +61,9 @@ public class GenFromExistingMojo extends AbstractMojo {
 	@Parameter(property = "onlyChanges", defaultValue = "true")
 	public boolean onlyChanges;
 
+	@Parameter(property = "stage", defaultValue = "true")
+	public boolean stage;
+
 	// Instance fields
 	String baseDir;
 	private GitRunner git;
@@ -112,12 +115,10 @@ public class GenFromExistingMojo extends AbstractMojo {
 			mojoLog.info("RGR Automation Plugin (gen-from-existing)");
 
 			// Clean up
-			mojoLog.debug("Cleanup: Running...");
 			int cleanUpExit = runCleanUp();
 			if (cleanUpExit != 0) {
 				throw new MojoExecutionException("Clean up failed with exit code " + cleanUpExit);
 			}
-			mojoLog.debug("Cleanup: Completed");
 
 			// Process scenarios one at a time until file is empty
 			int totalProcessed = 0;
@@ -194,7 +195,9 @@ public class GenFromExistingMojo extends AbstractMojo {
 		} else {
 			// Tests failing — commit red, then run green and refactor
 			git.run(baseDir, "add", ".");
-			commitIfChanged("run-rgr red " + scenarioName, "Red");
+			if (!stage) {
+				commitIfChanged("run-rgr red " + scenarioName, "Red");
+			}
 
 			// === GREEN PHASE ===
 			mojoLog.info("  Green: Running...");
@@ -208,7 +211,9 @@ public class GenFromExistingMojo extends AbstractMojo {
 
 			removeFirstScenarioFromFile();
 			git.run(baseDir, "add", ".");
-			commitIfChanged("run-rgr green " + scenarioName, "Green");
+			if (!stage) {
+				commitIfChanged("run-rgr green " + scenarioName, "Green");
+			}
 
 			// === REFACTOR PHASE ===
 			mojoLog.info("  Refactor: Running...");
@@ -222,15 +227,16 @@ public class GenFromExistingMojo extends AbstractMojo {
 			mojoLog.info("  Refactor: Completed (" + formatDuration(refactorDuration) + ")");
 
 			git.run(baseDir, "add", ".");
-			commitIfChanged("run-rgr refactor " + scenarioName, "Refactor");
+			String commitMessage = stage ? "run-rgr " + scenarioName : "run-rgr refactor " + scenarioName;
+			commitIfChanged(commitMessage, "Refactor");
 		}
 
 		// === METRIC LINES ===
 		long totalDuration = System.currentTimeMillis() - totalStart;
-		mojoLog.info("METRIC|scenario=" + scenarioName + "|phase=red-maven|duration_ms=" + redMavenDuration);
-		mojoLog.info("METRIC|scenario=" + scenarioName + "|phase=green|duration_ms=" + greenDuration);
-		mojoLog.info("METRIC|scenario=" + scenarioName + "|phase=refactor|duration_ms=" + refactorDuration);
-		mojoLog.info("METRIC|scenario=" + scenarioName + "|phase=total|duration_ms=" + totalDuration);
+		mojoLog.info("  METRIC|scenario=" + scenarioName + "|phase=red-maven|duration_ms=" + redMavenDuration);
+		mojoLog.info("  METRIC|scenario=" + scenarioName + "|phase=green|duration_ms=" + greenDuration);
+		mojoLog.info("  METRIC|scenario=" + scenarioName + "|phase=refactor|duration_ms=" + refactorDuration);
+		mojoLog.info("  METRIC|scenario=" + scenarioName + "|phase=total|duration_ms=" + totalDuration);
 	}
 
 	private void commitIfChanged(String message, String phase) throws Exception {
@@ -396,21 +402,16 @@ public class GenFromExistingMojo extends AbstractMojo {
 	private int runRgrRed(String pattern) throws Exception {
 		String runnerClassName = pattern + "Test";
 
-		mojoLog.debug("RGR-Red: Pattern=" + pattern + ", Runner=" + runnerClassName);
-
 		// Step 1: AsciiDoctor to UML (maven call from specsDir)
-		mojoLog.debug("  STEP 1: AsciiDoctor to UML Conversion");
 		String specsDirAbsolute = Path.of(baseDir, specsDir).normalize().toString();
 		maven.run(specsDirAbsolute, "org.farhan:sheep-dog-dev-svc-maven-plugin:asciidoctor-to-uml",
 				"-Dtags=" + pattern, "-Dhost=" + host, "-DonlyChanges=" + onlyChanges);
 
 		// Step 2: UML to Cucumber-Guice (maven call from baseDir)
-		mojoLog.debug("  STEP 2: UML to Cucumber-Guice Conversion");
 		maven.run(baseDir, "org.farhan:sheep-dog-dev-svc-maven-plugin:uml-to-cucumber-guice",
 				"-Dtags=" + pattern, "-Dhost=" + host, "-DonlyChanges=" + onlyChanges);
 
 		// Step 3: Generate runner class
-		mojoLog.debug("  STEP 3: Generate Runner Class");
 		String runnerClassPath = baseDir
 			+ "/src/test/java/org/farhan/suites/" + runnerClassName + ".java";
 		Files.createDirectories(Path.of(runnerClassPath).getParent());
@@ -419,7 +420,6 @@ public class GenFromExistingMojo extends AbstractMojo {
 		mojoLog.debug("  Created runner class: " + runnerClassPath);
 
 		// Step 4: Run tests
-		mojoLog.debug("  STEP 4: Running tests with " + runnerClassName);
 		int testExitCode = maven.run(baseDir, "test", "-Dtest=" + runnerClassName);
 
 		if (testExitCode == 0) {
@@ -444,13 +444,11 @@ public class GenFromExistingMojo extends AbstractMojo {
 	int runCleanUp() throws Exception {
 		Path sheepDogMain = Path.of(baseDir, "../..").normalize();
 
-		mojoLog.debug("Cleanup: Deleting NUL files...");
 		int deleted = deleteNulFiles(sheepDogMain);
-		mojoLog.debug("Cleanup: Deleted NUL files (" + deleted + " deleted)");
+		mojoLog.debug("  Cleanup: Deleted " + deleted + " NUL files");
 
-		mojoLog.debug("Cleanup: Deleting target directory...");
 		deleteDirectory(Path.of(baseDir, "target"));
-		mojoLog.debug("Cleanup: Deleted target directory");
+		mojoLog.debug("  Cleanup: Deleted target directory");
 		return 0;
 	}
 

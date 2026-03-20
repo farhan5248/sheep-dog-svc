@@ -56,6 +56,9 @@ public class GenFromComparisonMojo extends AbstractMojo {
 	@Parameter(property = "onlyChanges", defaultValue = "true")
 	public boolean onlyChanges;
 
+	@Parameter(property = "stage", defaultValue = "true")
+	public boolean stage;
+
 	public void execute() throws MojoExecutionException {
 		GenFromExistingMojo processor = new GenFromExistingMojo();
 		processor.project = project;
@@ -71,6 +74,7 @@ public class GenFromComparisonMojo extends AbstractMojo {
 		processor.retryWaitSeconds = retryWaitSeconds;
 		processor.pipeline = pipeline;
 		processor.onlyChanges = onlyChanges;
+		processor.stage = stage;
 		processor.setLog(getLog());
 
 		try {
@@ -79,12 +83,10 @@ public class GenFromComparisonMojo extends AbstractMojo {
 			processor.mojoLog.info("RGR Automation Plugin (gen-from-comparison)");
 
 			// Clean up
-			processor.mojoLog.debug("Cleanup: Running...");
 			int cleanUpExit = processor.runCleanUp();
 			if (cleanUpExit != 0) {
 				throw new MojoExecutionException("Clean up failed with exit code " + cleanUpExit);
 			}
-			processor.mojoLog.debug("Cleanup: Completed");
 
 			// Loop: call skill to populate file, then process scenario
 			int totalProcessed = 0;
