@@ -2,13 +2,13 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.farhan</groupId>
 	<artifactId>darmok-maven-plugin</artifactId>
-	<version>1.6-SNAPSHOT</version>
+	<version>1.6</version>
 	<packaging>maven-plugin</packaging>
 	<name>Darmok RGR Automation Maven Plugin</name>
 
 	<scm>
 		<connection>scm:git:https://github.com/farhan5248/sheep-dog-cloud</connection>
-		<tag>HEAD</tag>
+		<tag>darmok-maven-plugin-1.6</tag>
 	</scm>
 
 	<pluginRepositories>
