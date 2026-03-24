@@ -15,12 +15,12 @@ public class LineImpl implements ILine {
 	}
 
 	@Override
-	public String getName() {
+	public String getContent() {
 		return eObject.getContent();
 	}
 
 	@Override
-	public void setName(String value) {
+	public void setContent(String value) {
 		this.eObject.setContent(value);
 	}
 

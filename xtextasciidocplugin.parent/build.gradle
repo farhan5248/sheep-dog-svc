@@ -19,7 +19,7 @@ apply plugin: 'net.researchgate.release'
 // Configuration for Xtext projects
 configure(subprojects.findAll { it.name.startsWith('xtextasciidocplugin') && !it.name.contains('.vscode') }) {
 	ext.xtextVersion = '2.40.0'
-	ext.sheepDogTestVersion = '1.40-SNAPSHOT'
+	ext.sheepDogTestVersion = '1.41-SNAPSHOT'
 	ext.slf4jVersion = '2.0.16'
 	ext.logbackVersion = '1.5.12'
 	repositories {
