@@ -14,7 +14,7 @@ mvn install
 Processes scenarios from a pre-populated `scenarios-list.txt`. Reads the next scenario, runs the red-green-refactor cycle, removes it from the file, and repeats until the file is empty.
 
 ```
-cd C:\Users\Farhan\git\sheep-dog-main\sheep-dog-local\sheep-dog-test
+cd C:\Users\Farhan\git\sheep-dog-main\sheep-dog-local\sheep-dog-grammar
 mvn org.farhan:darmok-maven-plugin:gen-from-existing
 ```
 
@@ -23,7 +23,7 @@ mvn org.farhan:darmok-maven-plugin:gen-from-existing
 Dynamically generates scenarios by calling the `/rgr-gen-from-comparison` skill, which compares the main branch to a RebuildXX branch. The skill writes one scenario to `scenarios-list.txt`, which is then processed through the red-green-refactor cycle. Repeats until the skill leaves the file empty.
 
 ```
-cd C:\Users\Farhan\git\sheep-dog-main\sheep-dog-local\sheep-dog-test
+cd C:\Users\Farhan\git\sheep-dog-main\sheep-dog-local\sheep-dog-grammar
 mvn org.farhan:darmok-maven-plugin:gen-from-comparison
 ```
 

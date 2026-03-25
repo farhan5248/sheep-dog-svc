@@ -1,22 +1,15 @@
 package org.farhan.dsl.asciidoc.impl;
 
-import java.util.ArrayList;
-import java.util.TreeMap;
-
+import org.eclipse.emf.common.util.BasicEList;
 import org.eclipse.emf.common.util.EList;
 import org.farhan.dsl.grammar.IDescription;
-import org.farhan.dsl.grammar.ILine;
 import org.farhan.dsl.grammar.IStepDefinition;
-import org.farhan.dsl.grammar.IStepObject;
 import org.farhan.dsl.grammar.IStepParameters;
-import org.farhan.dsl.grammar.SheepDogUtility;
 import org.farhan.dsl.asciidoc.asciiDoc.StepDefinition;
-import org.farhan.dsl.asciidoc.asciiDoc.StepObject;
 import org.farhan.dsl.asciidoc.asciiDoc.StepParameters;
 
 public class StepDefinitionImpl implements IStepDefinition {
 
-    private StepObjectImpl parent;
     StepDefinition eObject;
 
     public StepDefinitionImpl(StepDefinition value) {
@@ -29,44 +22,8 @@ public class StepDefinitionImpl implements IStepDefinition {
     }
 
     @Override
-    public boolean addLine(ILine value) {
-        org.farhan.dsl.asciidoc.asciiDoc.Description list = eObject.getDescription();
-        if (list == null) {
-            list = org.farhan.dsl.asciidoc.asciiDoc.AsciiDocFactory.eINSTANCE.createDescription();
-            eObject.setDescription(list);
-        }
-        list.getLineList().add(((LineImpl) value).eObject);
-        return true;
-    }
-
-    @Override
-    public boolean addStepParameters(IStepParameters value) {
-
-        EList<StepParameters> unsortedList = eObject.getStepParameterList();
-        TreeMap<String, StepParameters> sortedMap = new TreeMap<String, StepParameters>();
-        StepParameters aStepParameter = ((StepParametersImpl) value).eObject;
-        sortedMap.put(aStepParameter.getName(), aStepParameter);
-        for (StepParameters sp : unsortedList) {
-            sortedMap.put(sp.getName(), sp);
-        }
-        unsortedList.clear();
-        for (String key : sortedMap.keySet()) {
-            unsortedList.add(sortedMap.get(key));
-        }
-        return true;
-    }
-
-    @Override
     public String getName() {
         return eObject.getName();
-    }
-
-    @Override
-    public IStepObject getParent() {
-        if (parent == null) {
-            parent = new StepObjectImpl((StepObject) eObject.eContainer());
-        }
-        return parent;
     }
 
     @Override
@@ -78,30 +35,13 @@ public class StepDefinitionImpl implements IStepDefinition {
     }
 
     @Override
-    public ArrayList<IStepParameters> getStepParameterList() {
-        ArrayList<IStepParameters> list = new ArrayList<IStepParameters>();
+    public EList<IStepParameters> getStepParameterList() {
+        EList<IStepParameters> list = new BasicEList<IStepParameters>();
         for (StepParameters t : eObject.getStepParameterList()) {
             StepParametersImpl stepParameters = new StepParametersImpl((StepParameters) t);
             list.add(stepParameters);
         }
         return list;
-    }
-
-    @Override
-    public IStepParameters getStepParameters(int index) {
-        throw new UnsupportedOperationException("getStepParameters(int index) is not implemented");
-    }
-
-    @Override
-    public IStepParameters getStepParameters(String name) {
-        for (IStepParameters sp : getStepParameterList()) {
-            String rowAsString = SheepDogUtility
-                    .getCellListAsString(sp.getTable().getRowList().getFirst().getCellList());
-            if (name.contentEquals(rowAsString)) {
-                return sp;
-            }
-        }
-        return null;
     }
 
     @Override

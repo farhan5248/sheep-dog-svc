@@ -1,9 +1,10 @@
 package org.farhan.dsl.asciidoc.impl;
 
 import java.io.File;
-import java.util.ArrayList;
 import org.slf4j.Logger;
 import org.farhan.dsl.grammar.SheepDogLoggerFactory;
+import org.eclipse.emf.common.util.BasicEList;
+import org.eclipse.emf.common.util.EList;
 import org.farhan.dsl.grammar.IResourceRepository;
 import org.farhan.dsl.grammar.IStepObject;
 import org.farhan.dsl.grammar.ITestDocument;
@@ -34,7 +35,7 @@ public class TestProjectImpl implements ITestProject {
 
 	public boolean addStepObject(IStepObject value) {
 		try {
-			sr.put("", projectPath + "/" + baseDir + "/" + value.getFullName(), value.getContent());
+			sr.put("", projectPath + "/" + baseDir + "/" + value.getFullName(), ((StepObjectImpl) value).getContent());
 			return true;
 		} catch (Exception e) {
 			logger.error("Couldn't write step object:", e);
@@ -42,15 +43,19 @@ public class TestProjectImpl implements ITestProject {
 		}
 	}
 
-	@Override
 	public boolean addTestSuite(ITestSuite value) {
 		try {
-			sr.put("", projectPath + "/" + baseDir + "/" + value.getFullName(), value.getContent());
+			sr.put("", projectPath + "/" + baseDir + "/" + value.getFullName(), ((TestSuiteImpl) value).getContent());
 			return true;
 		} catch (Exception e) {
 			logger.error("Couldn't write test suite:", e);
 			return false;
 		}
+	}
+
+	@Override
+	public void setFileExtension(String value) {
+		// file extension is fixed for this implementation
 	}
 
 	@Override
@@ -63,12 +68,6 @@ public class TestProjectImpl implements ITestProject {
 		return projectPath;
 	}
 
-	@Override
-	public ITestDocument getTestDocument(int index) {
-		throw new UnsupportedOperationException("getTestDocument(int index) is not implemented");
-	}
-
-	@Override
 	public ITestDocument getTestDocument(String fullName) {
 		try {
 			if (fullName.startsWith("stepdefs/")) {
@@ -78,7 +77,7 @@ public class TestProjectImpl implements ITestProject {
 					if (text.isEmpty()) {
 						logger.error("Couldn't load TestDocument for, file is empty: " + fullName);
 					} else {
-						IStepObject stepObject = SheepDogFactory.instance.createStepObject();
+						StepObjectImpl stepObject = (StepObjectImpl) SheepDogFactory.instance.createStepObject();
 						stepObject.setFullName(fullName);
 						stepObject.setContent(text);
 						return stepObject;
@@ -91,7 +90,7 @@ public class TestProjectImpl implements ITestProject {
 					if (text.isEmpty()) {
 						logger.error("Couldn't load TestDocument for, file is empty: " + fullName);
 					} else {
-						ITestSuite testSuite = SheepDogFactory.instance.createTestSuite();
+						TestSuiteImpl testSuite = (TestSuiteImpl) SheepDogFactory.instance.createTestSuite();
 						testSuite.setFullName(fullName);
 						testSuite.setContent(text);
 						return testSuite;
@@ -105,8 +104,8 @@ public class TestProjectImpl implements ITestProject {
 	}
 
 	@Override
-	public ArrayList<ITestDocument> getTestDocumentList() {
-		ArrayList<ITestDocument> objects = new ArrayList<ITestDocument>();
+	public EList<ITestDocument> getTestDocumentList() {
+		EList<ITestDocument> objects = new BasicEList<ITestDocument>();
 		try {
 			// TODO instead of empty tags, append it to the prefix?
 			for (String stepObjectFileName : sr.list("", projectPath + "/" + layer2dir, getFileExtension())) {

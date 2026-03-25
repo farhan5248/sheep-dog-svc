@@ -1,55 +1,29 @@
 package org.farhan.dsl.asciidoc.impl;
 
-import java.util.ArrayList;
-
+import org.eclipse.emf.common.util.BasicEList;
+import org.eclipse.emf.common.util.EList;
 import org.farhan.dsl.grammar.IRow;
 import org.farhan.dsl.grammar.ITable;
 import org.farhan.dsl.asciidoc.asciiDoc.Row;
-import org.farhan.dsl.asciidoc.asciiDoc.StepParameters;
 import org.farhan.dsl.asciidoc.asciiDoc.Table;
-import org.farhan.dsl.asciidoc.asciiDoc.TestStep;
 
 public class TableImpl implements ITable {
 
 	Table eObject;
-	private ArrayList<IRow> rowList;
-	private Object parent;
-
-	@Override
-	public Object getParent() {
-		if (parent == null && eObject != null) {
-			if (eObject.eContainer() instanceof TestStep) {
-				parent = new TestStepImpl((TestStep) eObject.eContainer());
-			} else if (eObject.eContainer() instanceof StepParameters) {
-				parent = new StepParametersImpl((StepParameters) eObject.eContainer());
-			}
-		}
-		return parent;
-	}
+	private EList<IRow> rowList;
 
 	public TableImpl(Table table) {
 		this.eObject = table;
-		rowList = new ArrayList<IRow>();
+		rowList = new BasicEList<IRow>();
 	}
 
 	@Override
-	public ArrayList<IRow> getRowList() {
+	public EList<IRow> getRowList() {
 		rowList.clear();
 		for (Row row : eObject.getRowList()) {
 			rowList.add(new RowImpl(row));
 		}
 		return rowList;
-	}
-
-	@Override
-	public IRow getRow(int index) {
-		return new RowImpl(eObject.getRowList().get(index));
-	}
-
-	@Override
-	public boolean addRow(IRow value) {
-		eObject.getRowList().add(((RowImpl) value).eObject);
-		return true;
 	}
 
 }

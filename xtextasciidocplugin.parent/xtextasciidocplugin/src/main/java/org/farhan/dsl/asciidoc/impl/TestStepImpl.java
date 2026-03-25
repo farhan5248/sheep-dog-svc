@@ -2,21 +2,16 @@ package org.farhan.dsl.asciidoc.impl;
 
 import org.farhan.dsl.grammar.ITable;
 import org.farhan.dsl.grammar.ITestStep;
-import org.farhan.dsl.grammar.ITestStepContainer;
 import org.farhan.dsl.grammar.IText;
 import org.farhan.dsl.grammar.SheepDogUtility;
-import org.farhan.dsl.asciidoc.asciiDoc.TestCase;
-import org.farhan.dsl.asciidoc.asciiDoc.TestSetup;
 import org.farhan.dsl.asciidoc.asciiDoc.TestStep;
 
 public class TestStepImpl implements ITestStep {
 
     TestStep eObject;
-    private TestStepContainerImpl parent;
 
     public TestStepImpl(TestStep testStep) {
         this.eObject = testStep;
-        parent = null;
     }
 
     @Override
@@ -27,19 +22,6 @@ public class TestStepImpl implements ITestStep {
     @Override
     public void setFullName(String value) {
         throw new UnsupportedOperationException("setFullName(String value) is not implemented");
-    }
-
-    @Override
-    public ITestStepContainer getParent() {
-        if (parent == null) {
-            if (eObject.eContainer() instanceof TestCase) {
-                parent = new TestCaseImpl((TestCase) eObject.eContainer());
-            } else {
-                parent = new TestSetupImpl((TestSetup) eObject.eContainer());
-            }
-        }
-        return parent;
-
     }
 
     @Override

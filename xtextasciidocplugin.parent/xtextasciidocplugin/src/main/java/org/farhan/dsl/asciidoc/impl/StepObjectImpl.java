@@ -4,27 +4,23 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.TreeMap;
 
+import org.eclipse.emf.common.util.BasicEList;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.eclipse.xtext.resource.SaveOptions;
 import org.farhan.dsl.grammar.IDescription;
-import org.farhan.dsl.grammar.ILine;
 import org.farhan.dsl.grammar.IStepDefinition;
 import org.farhan.dsl.grammar.IStepObject;
-import org.farhan.dsl.grammar.ITestProject;
 import org.farhan.dsl.grammar.SheepDogFactory;
 import org.farhan.dsl.asciidoc.asciiDoc.StepDefinition;
 import org.farhan.dsl.asciidoc.asciiDoc.StepObject;
 
 public class StepObjectImpl implements IStepObject {
 
-	private ITestProject parent;
 	StepObject eObject;
 	private String qualifiedName;
 
@@ -35,14 +31,6 @@ public class StepObjectImpl implements IStepObject {
 	@Override
 	public String getName() {
 		return eObject.getName();
-	}
-
-	@Override
-	public ITestProject getParent() {
-		if (parent == null) {
-			parent = SheepDogFactory.instance.createTestProject();
-		}
-		return parent;
 	}
 
 	@Override
@@ -59,19 +47,8 @@ public class StepObjectImpl implements IStepObject {
 	}
 
 	@Override
-	public IStepDefinition getStepDefinition(String stepDefinitionName) {
-		for (StepDefinition sd : eObject.getStepDefinitionList()) {
-			if (sd.getName().contentEquals(stepDefinitionName)) {
-				StepDefinitionImpl stepDefinition = new StepDefinitionImpl((StepDefinition) sd);
-				return stepDefinition;
-			}
-		}
-		return null;
-	}
-
-	@Override
-	public ArrayList<IStepDefinition> getStepDefinitionList() {
-		ArrayList<IStepDefinition> list = new ArrayList<IStepDefinition>();
+	public EList<IStepDefinition> getStepDefinitionList() {
+		EList<IStepDefinition> list = new BasicEList<IStepDefinition>();
 		for (StepDefinition t : eObject.getStepDefinitionList()) {
 			StepDefinitionImpl stepDefinition = new StepDefinitionImpl((StepDefinition) t);
 			list.add(stepDefinition);
@@ -91,12 +68,6 @@ public class StepObjectImpl implements IStepObject {
 		eObject.setName((new File(qualifiedName)).getName().replaceFirst(extension + "$", ""));
 	}
 
-	@Override
-	public IStepDefinition getStepDefinition(int index) {
-		throw new UnsupportedOperationException("getStepDefinition(int index) is not implemented");
-	}
-
-	@Override
 	public String getContent() throws Exception {
 		Resource theResource = new ResourceSetImpl().createResource(URI.createFileURI("tmpFile.asciidoc"));
 		theResource.getContents().add(eObject);
@@ -105,7 +76,6 @@ public class StepObjectImpl implements IStepObject {
 		return os.toString();
 	}
 
-	@Override
 	public void setContent(String text) throws Exception {
 		if (!text.isEmpty()) {
 			Resource theResource = new ResourceSetImpl().createResource(URI.createFileURI("tmpFile.asciidoc"));
@@ -117,33 +87,6 @@ public class StepObjectImpl implements IStepObject {
 	@Override
 	public void setDescription(IDescription value) {
 		eObject.setDescription(((DescriptionImpl) value).eObject);
-	}
-
-	@Override
-	public boolean addLine(ILine value) {
-		org.farhan.dsl.asciidoc.asciiDoc.Description list = eObject.getDescription();
-		if (list == null) {
-			list = org.farhan.dsl.asciidoc.asciiDoc.AsciiDocFactory.eINSTANCE.createDescription();
-			eObject.setDescription(list);
-		}
-		list.getLineList().add(((LineImpl) value).eObject);
-		return true;
-	}
-
-	@Override
-	public boolean addStepDefinition(IStepDefinition value) {
-		EList<StepDefinition> unsortedList = eObject.getStepDefinitionList();
-		TreeMap<String, StepDefinition> sortedMap = new TreeMap<String, StepDefinition>();
-		StepDefinition aStepDefinition = ((StepDefinitionImpl) value).eObject;
-		sortedMap.put(aStepDefinition.getName(), aStepDefinition);
-		for (StepDefinition sd : unsortedList) {
-			sortedMap.put(sd.getName(), sd);
-		}
-		unsortedList.clear();
-		for (String key : sortedMap.keySet()) {
-			unsortedList.add(sortedMap.get(key));
-		}
-		return true;
 	}
 
 }

@@ -5,28 +5,19 @@ import org.farhan.dsl.grammar.IDescription;
 import org.farhan.dsl.grammar.ILine;
 import org.farhan.dsl.grammar.IResourceRepository;
 import org.farhan.dsl.grammar.IRow;
-import org.farhan.dsl.grammar.ISheepDogFactory;
 import org.farhan.dsl.grammar.IStepDefinition;
 import org.farhan.dsl.grammar.IStepObject;
 import org.farhan.dsl.grammar.IStepParameters;
 import org.farhan.dsl.grammar.ITable;
 import org.farhan.dsl.grammar.ITestCase;
-import org.farhan.dsl.grammar.ITestData;
 import org.farhan.dsl.grammar.ITestProject;
 import org.farhan.dsl.grammar.ITestSetup;
 import org.farhan.dsl.grammar.ITestStep;
 import org.farhan.dsl.grammar.ITestSuite;
-import org.farhan.dsl.asciidoc.asciiDoc.AsciiDocFactory;
-import org.farhan.dsl.asciidoc.asciiDoc.Cell;
-import org.farhan.dsl.asciidoc.asciiDoc.Description;
-import org.farhan.dsl.asciidoc.asciiDoc.Row;
-import org.farhan.dsl.asciidoc.asciiDoc.StepDefinition;
-import org.farhan.dsl.asciidoc.asciiDoc.StepObject;
-import org.farhan.dsl.asciidoc.asciiDoc.StepParameters;
-import org.farhan.dsl.asciidoc.asciiDoc.Text;
 import org.farhan.dsl.grammar.IText;
+import org.farhan.dsl.asciidoc.asciiDoc.AsciiDocFactory;
 
-public class AsciiDocFactoryImpl implements ISheepDogFactory {
+public class AsciiDocFactoryImpl extends org.farhan.dsl.grammar.impl.SheepDogFactoryImpl {
 
 	private TestProjectImpl testProject;
 	private IResourceRepository sr;
@@ -37,31 +28,42 @@ public class AsciiDocFactoryImpl implements ISheepDogFactory {
 
 	@Override
 	public IDescription createDescription() {
-		Description description = AsciiDocFactory.eINSTANCE.createDescription();
-		return new DescriptionImpl(description);
+		return new DescriptionImpl(AsciiDocFactory.eINSTANCE.createDescription());
 	}
 
 	@Override
 	public IStepDefinition createStepDefinition() {
-		StepDefinition stepDefinition = AsciiDocFactory.eINSTANCE.createStepDefinition();
-		return new StepDefinitionImpl(stepDefinition);
+		return new StepDefinitionImpl(AsciiDocFactory.eINSTANCE.createStepDefinition());
 	}
 
 	@Override
 	public IStepObject createStepObject() {
-		StepObject eObject = AsciiDocFactory.eINSTANCE.createStepObject();
-		return new StepObjectImpl(eObject);
+		return new StepObjectImpl(AsciiDocFactory.eINSTANCE.createStepObject());
 	}
 
 	@Override
 	public IStepParameters createStepParameters() {
-		StepParameters parameters = AsciiDocFactory.eINSTANCE.createStepParameters();
-		return new StepParametersImpl(parameters);
+		return new StepParametersImpl(AsciiDocFactory.eINSTANCE.createStepParameters());
 	}
 
 	@Override
 	public ITestCase createTestCase() {
-		throw new UnsupportedOperationException("createTestCase(String value) is not implemented");
+		return new TestCaseImpl(AsciiDocFactory.eINSTANCE.createTestCase());
+	}
+
+	@Override
+	public ITestSetup createTestSetup() {
+		return new TestSetupImpl(AsciiDocFactory.eINSTANCE.createTestSetup());
+	}
+
+	@Override
+	public ITestStep createTestStep() {
+		return new TestStepImpl(AsciiDocFactory.eINSTANCE.createTestStep());
+	}
+
+	@Override
+	public ITestSuite createTestSuite() {
+		return new TestSuiteImpl(AsciiDocFactory.eINSTANCE.createTestSuite());
 	}
 
 	@Override
@@ -73,52 +75,28 @@ public class AsciiDocFactoryImpl implements ISheepDogFactory {
 	}
 
 	@Override
-	public ITestSetup createTestSetup() {
-		throw new UnsupportedOperationException("createTestSetup(String name) is not implemented");
-	}
-
-	@Override
-	public ITestStep createTestStep() {
-		throw new UnsupportedOperationException("createTestStep(String value) is not implemented");
-	}
-
-	@Override
-	public ITestSuite createTestSuite() {
-		throw new UnsupportedOperationException("createTestSuite(String qualifiedName) is not implemented");
-	}
-
-	@Override
 	public ILine createLine() {
 		return new LineImpl(AsciiDocFactory.eINSTANCE.createLine());
 	}
 
 	@Override
 	public ITable createTable() {
-		org.farhan.dsl.asciidoc.asciiDoc.Table table = AsciiDocFactory.eINSTANCE.createTable();
-		return new TableImpl(table);
+		return new TableImpl(AsciiDocFactory.eINSTANCE.createTable());
 	}
 
 	@Override
 	public IRow createRow() {
-		Row row = AsciiDocFactory.eINSTANCE.createRow();
-		return new RowImpl(row);
+		return new RowImpl(AsciiDocFactory.eINSTANCE.createRow());
 	}
 
 	@Override
 	public ICell createCell() {
-		Cell cell = AsciiDocFactory.eINSTANCE.createCell();
-		return new CellImpl(cell);
+		return new CellImpl(AsciiDocFactory.eINSTANCE.createCell());
 	}
 
 	@Override
 	public IText createText() {
-		Text text = AsciiDocFactory.eINSTANCE.createText();
-		return new TextImpl(text);
-	}
-
-	@Override
-	public ITestData createTestData() {
-		throw new UnsupportedOperationException("createTestData() is not implemented");
+		return new TextImpl(AsciiDocFactory.eINSTANCE.createText());
 	}
 
 }

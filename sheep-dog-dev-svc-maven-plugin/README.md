@@ -19,5 +19,5 @@ This plugin allows developers to run specification-to-UML transformations as par
 
 - Maven Plugin API
 - REST client (Spring RestTemplate)
-- Depends on sheep-dog-test library
+- Depends on sheep-dog-grammar library
 - Java 21

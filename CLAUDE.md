@@ -178,7 +178,7 @@ mvn test -Dspring.profiles.active=surefire
 # Transform via REST API
 curl -X POST http://localhost:8080/api/asciidoctor/to-uml \
   -H "Content-Type: application/json" \
-  -d '{"content": "...", "tags": ["sheep-dog-test"]}'
+  -d '{"content": "...", "tags": ["sheep-dog-grammar"]}'
 ```
 
 ### Message Queue Integration

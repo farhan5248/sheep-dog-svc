@@ -1,22 +1,16 @@
 package org.farhan.dsl.asciidoc.impl;
 
-import java.util.ArrayList;
-
+import org.eclipse.emf.common.util.BasicEList;
+import org.eclipse.emf.common.util.EList;
 import org.farhan.dsl.grammar.IDescription;
-import org.farhan.dsl.grammar.ILine;
 import org.farhan.dsl.grammar.ITestStep;
 import org.farhan.dsl.grammar.ITestStepContainer;
-import org.farhan.dsl.grammar.ITestSuite;
-import org.farhan.dsl.asciidoc.asciiDoc.AsciiDocFactory;
-import org.farhan.dsl.asciidoc.asciiDoc.Description;
 import org.farhan.dsl.asciidoc.asciiDoc.TestStep;
 import org.farhan.dsl.asciidoc.asciiDoc.TestStepContainer;
-import org.farhan.dsl.asciidoc.asciiDoc.TestSuite;
 
 public class TestStepContainerImpl implements ITestStepContainer {
 
     TestStepContainer eObject;
-    private TestSuiteImpl parent;
 
     public TestStepContainerImpl(TestStepContainer testCase) {
         this.eObject = testCase;
@@ -28,14 +22,6 @@ public class TestStepContainerImpl implements ITestStepContainer {
     }
 
     @Override
-    public ITestSuite getParent() {
-        if (parent == null) {
-            parent = new TestSuiteImpl((TestSuite) eObject.eContainer());
-        }
-        return parent;
-    }
-
-    @Override
     public IDescription getDescription() {
         if (eObject.getDescription() != null) {
             return new DescriptionImpl(eObject.getDescription());
@@ -44,8 +30,8 @@ public class TestStepContainerImpl implements ITestStepContainer {
     }
 
     @Override
-    public ArrayList<ITestStep> getTestStepList() {
-        ArrayList<ITestStep> testStepList = new ArrayList<ITestStep>();
+    public EList<ITestStep> getTestStepList() {
+        EList<ITestStep> testStepList = new BasicEList<ITestStep>();
         for (TestStep s : eObject.getTestStepList()) {
             TestStepImpl testStep = new TestStepImpl(s);
             testStepList.add(testStep);
@@ -59,35 +45,8 @@ public class TestStepContainerImpl implements ITestStepContainer {
     }
 
     @Override
-    public ITestStep getTestStep(int index) {
-        return new TestStepImpl(eObject.getTestStepList().get(index));
-    }
-
-    @Override
-    public ITestStep getTestStep(String name) {
-        throw new UnsupportedOperationException("getTestStep(String name) is not implemented");
-    }
-
-    @Override
-    public boolean addLine(ILine value) {
-        Description list = eObject.getDescription();
-        if (list == null) {
-            list = AsciiDocFactory.eINSTANCE.createDescription();
-            eObject.setDescription(list);
-        }
-        list.getLineList().add(((LineImpl) value).eObject);
-        return true;
-    }
-
-    @Override
     public void setDescription(IDescription value) {
         throw new UnsupportedOperationException("setDescription(IDescription value) is not implemented");
-    }
-
-    @Override
-    public boolean addTestStep(ITestStep value) {
-        eObject.getTestStepList().add(((TestStepImpl) value).eObject);
-        return true;
     }
 
 }

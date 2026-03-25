@@ -14,6 +14,7 @@ import org.eclipse.xtext.generator.IGeneratorContext;
 import org.farhan.dsl.asciidoc.asciiDoc.TestStepContainer;
 import org.farhan.dsl.asciidoc.asciiDoc.TestSuite;
 import org.farhan.dsl.asciidoc.impl.RowImpl;
+import org.farhan.dsl.asciidoc.impl.TestProjectImpl;
 import org.farhan.dsl.asciidoc.impl.TestStepImpl;
 import org.farhan.dsl.asciidoc.impl.TextImpl;
 import org.farhan.dsl.issues.RowIssueDetector;
@@ -107,7 +108,7 @@ public class AsciiDocGenerator extends AbstractGenerator {
 	private static void applyProposal(ArrayList<SheepDogIssueProposal> proposals) throws Exception {
 		for (SheepDogIssueProposal p : proposals) {
 			if (p.getValue() instanceof IStepObject) {
-				testProject.addStepObject((IStepObject) p.getValue());
+				((TestProjectImpl) testProject).addStepObject((IStepObject) p.getValue());
 			}
 		}
 	}

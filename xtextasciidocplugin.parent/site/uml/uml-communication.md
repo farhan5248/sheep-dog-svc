@@ -1,6 +1,6 @@
 # UML Communication Patterns
 
-Collaboration patterns for xtextasciidocplugin IDE integration via Language Server Protocol. Business logic patterns are documented in sheep-dog-test/site/uml/uml-communication.md.
+Collaboration patterns for xtextasciidocplugin IDE integration via Language Server Protocol. Business logic patterns are documented in sheep-dog-grammar/site/uml/uml-communication.md.
 
 ## Suggest
 
@@ -26,21 +26,21 @@ Wrapper class that adapts EMF objects to business logic interfaces by delegating
 
 ### {Type}IssueResolver
 
-Business logic class from sheep-dog-test (not in xtextasciidocplugin) that suggests alternatives for absent grammar elements.
+Business logic class from sheep-dog-grammar (not in xtextasciidocplugin) that suggests alternatives for absent grammar elements.
 
 **Methods**
 - `suggest{Assignment}(I{Type} type)`
 
 ### {Language}Factory
 
-Singleton from sheep-dog-test (not in xtextasciidocplugin) that creates and manages project instances.
+Singleton from sheep-dog-grammar (not in xtextasciidocplugin) that creates and manages project instances.
 
 **Methods**
 - `createTestProject()`
 
 ### {Language}IssueProposal
 
-Data container from sheep-dog-test (not in xtextasciidocplugin) that holds proposal information for content assist.
+Data container from sheep-dog-grammar (not in xtextasciidocplugin) that holds proposal information for content assist.
 
 **Properties:** id, description, value, qualifiedName
 
@@ -68,14 +68,14 @@ Wrapper class that adapts EMF objects to business logic interfaces by delegating
 
 ### {Type}IssueDetector
 
-Business logic class from sheep-dog-test (not in xtextasciidocplugin) that provides pure validation logic for grammar elements.
+Business logic class from sheep-dog-grammar (not in xtextasciidocplugin) that provides pure validation logic for grammar elements.
 
 **Methods**
 - `validate{Aspect}(I{Type} type)`
 
 ### {Language}Factory
 
-Singleton from sheep-dog-test (not in xtextasciidocplugin) that creates and manages project instances.
+Singleton from sheep-dog-grammar (not in xtextasciidocplugin) that creates and manages project instances.
 
 **Methods**
 - `createTestProject()`
@@ -120,20 +120,20 @@ Wrapper class that adapts EMF objects to business logic interfaces by delegating
 
 ### {Type}IssueResolver
 
-Business logic class from sheep-dog-test (not in xtextasciidocplugin) that generates corrections for invalid grammar elements.
+Business logic class from sheep-dog-grammar (not in xtextasciidocplugin) that generates corrections for invalid grammar elements.
 
 **Methods**
 - `correct{Aspect}(I{Type} type)`
 
 ### {Language}Factory
 
-Singleton from sheep-dog-test (not in xtextasciidocplugin) that creates and manages project instances.
+Singleton from sheep-dog-grammar (not in xtextasciidocplugin) that creates and manages project instances.
 
 **Methods**
 - `createTestProject()`
 
 ### {Language}IssueProposal
 
-Data container from sheep-dog-test (not in xtextasciidocplugin) that holds proposal information for quick fixes.
+Data container from sheep-dog-grammar (not in xtextasciidocplugin) that holds proposal information for quick fixes.
 
 **Properties:** id, description, value, qualifiedName
