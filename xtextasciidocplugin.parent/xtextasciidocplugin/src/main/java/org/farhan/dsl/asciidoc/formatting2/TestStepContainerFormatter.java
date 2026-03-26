@@ -42,13 +42,13 @@ public abstract class TestStepContainerFormatter extends Formatter {
 
 	protected abstract RuleCall getEOLRuleCall(AbstractParserRuleElementFinder a);
 
-	protected abstract RuleCall getTitleRuleCall(AbstractParserRuleElementFinder a);
+	protected abstract RuleCall getPhraseRuleCall(AbstractParserRuleElementFinder a);
 
 	public void format(IFormattableDocument doc, AsciiDocGrammarAccess ga, AsciiDocFormatter df) {
 		AbstractParserRuleElementFinder a = getAccess(ga);
 		formatKeywordTrailingSpace(df.getRegion(theAbstractScenario, getEqualsKeyword(a)), doc);
 		formatKeywordTrailingSpace(df.getRegion(theAbstractScenario, getKeyword(a)), doc);
-		formatTitle(df.getRegion(theAbstractScenario, getTitleRuleCall(a)), doc);
+		formatPhrase(df.getRegion(theAbstractScenario, getPhraseRuleCall(a)), doc);
 		formatEOL2RuleCall(df.getRegion(theAbstractScenario, getEOLRuleCall(a)), doc);
 		if (theAbstractScenario.getDescription() != null) {
 			for (Line s : theAbstractScenario.getDescription().getLineList()) {

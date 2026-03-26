@@ -30,7 +30,7 @@ public class TestSuiteFormatter extends Formatter {
 
 		formatKeywordTrailingSpace(df.getRegion(theFeature, a.getEqualsSignKeyword_0()), doc);
 		formatKeywordTrailingSpace(df.getRegion(theFeature, a.getTestSuiteKeyword_1()), doc);
-		formatTitle(df.getRegion(theFeature, a.getNameTitleParserRuleCall_2_0()), doc);
+		formatPhrase(df.getRegion(theFeature, a.getNamePhraseParserRuleCall_2_0()), doc);
 		formatEOL2RuleCall(df.getRegion(theFeature, a.getEOLTerminalRuleCall_3()), doc);
 		if (theFeature.getDescription() != null) {
 			for (Line s : theFeature.getDescription().getLineList()) {

@@ -39,8 +39,8 @@ public class TestCaseFormatter extends TestStepContainerFormatter {
 	}
 
 	@Override
-	protected RuleCall getTitleRuleCall(AbstractParserRuleElementFinder a) {
-		return ((TestCaseElements) a).getNameTitleParserRuleCall_2_0();
+	protected RuleCall getPhraseRuleCall(AbstractParserRuleElementFinder a) {
+		return ((TestCaseElements) a).getNamePhraseParserRuleCall_2_0();
 	}
 
 	@Override

@@ -15,7 +15,7 @@ public class TextFormatter extends Formatter {
 
 	public void format(IFormattableDocument doc, AsciiDocGrammarAccess ga, AsciiDocFormatter df) {
 		TextElements a = ga.getTextAccess();
-		formatTitleNoSpace(df.getRegion(theDocString, a.getContentTEXT_BLOCKTerminalRuleCall_0_0()), doc);
+		formatPhraseNoSpace(df.getRegion(theDocString, a.getContentTEXT_BLOCKTerminalRuleCall_0_0()), doc);
 		formatEOL2RuleCall(df.getRegion(theDocString, a.getEOLTerminalRuleCall_1()), doc);
 	}
 

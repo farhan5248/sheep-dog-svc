@@ -65,15 +65,15 @@ public class Formatter {
 		replace(doc, iSR, getIndent() + iSR.getText());
 	}
 
-	protected void formatTitleTrailingSpace(ISemanticRegion iSR, IFormattableDocument doc) {
+	protected void formatPhraseTrailingSpace(ISemanticRegion iSR, IFormattableDocument doc) {
 		doc.append(iSR, it -> it.oneSpace());
 	}
 
-	protected void formatTitle(ISemanticRegion iSR, IFormattableDocument doc) {
+	protected void formatPhrase(ISemanticRegion iSR, IFormattableDocument doc) {
 		doc.append(iSR, it -> it.noSpace());
 	}
 
-	protected void formatTitleNoSpace(ISemanticRegion iSR, IFormattableDocument doc) {
+	protected void formatPhraseNoSpace(ISemanticRegion iSR, IFormattableDocument doc) {
 		doc.prepend(iSR, it -> it.noSpace());
 		doc.append(iSR, it -> it.noSpace());
 	}

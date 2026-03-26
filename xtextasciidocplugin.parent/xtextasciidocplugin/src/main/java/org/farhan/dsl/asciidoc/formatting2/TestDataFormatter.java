@@ -17,7 +17,7 @@ public class TestDataFormatter extends Formatter {
 		TestDataElements a = ga.getTestDataAccess();
 		formatKeywordTrailingSpace(df.getRegion(theTestData, a.getEqualsSignEqualsSignEqualsSignKeyword_0()), doc);
 		formatKeywordTrailingSpace(df.getRegion(theTestData, a.getTestDataKeyword_1()), doc);
-		formatTitle(df.getRegion(theTestData, a.getNameTitleParserRuleCall_2_0()), doc);
+		formatPhrase(df.getRegion(theTestData, a.getNamePhraseParserRuleCall_2_0()), doc);
 
 		if (theTestData.getTable() != null || theTestData.getDescription() != null) {
 			formatEOL1RuleCall(df.getRegion(theTestData, a.getEOLTerminalRuleCall_3()), doc);

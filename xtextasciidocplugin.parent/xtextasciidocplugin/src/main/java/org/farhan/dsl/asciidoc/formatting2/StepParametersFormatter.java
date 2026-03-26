@@ -18,7 +18,7 @@ public class StepParametersFormatter extends Formatter {
 
 		formatKeywordTrailingSpace(df.getRegion(theStepParameters, a.getEqualsSignEqualsSignEqualsSignKeyword_0()), doc);
 		formatKeywordTrailingSpace(df.getRegion(theStepParameters, a.getStepParametersKeyword_1()), doc);
-		formatTitle(df.getRegion(theStepParameters, a.getNameTitleParserRuleCall_2_0()), doc);
+		formatPhrase(df.getRegion(theStepParameters, a.getNamePhraseParserRuleCall_2_0()), doc);
 
 		if (theStepParameters.getTable() != null || theStepParameters.getDescription() != null) {
 			formatEOL1RuleCall(df.getRegion(theStepParameters, a.getEOLTerminalRuleCall_3()), doc);

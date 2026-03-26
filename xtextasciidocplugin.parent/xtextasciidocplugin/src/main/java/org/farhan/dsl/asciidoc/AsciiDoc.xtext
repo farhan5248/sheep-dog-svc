@@ -8,22 +8,22 @@ Model:
 	StepObject | TestSuite;
 
 StepObject:
-	'=' 'Step-Object:' name=Title EOL
+	'=' 'Step-Object:' name=Phrase EOL
 	description=Description?
 	stepDefinitionList+=StepDefinition*;
 
 StepDefinition:
-	'==' 'Step-Definition:' name=Title EOL
+	'==' 'Step-Definition:' name=Phrase EOL
 	description=Description?
 	stepParameterList+=StepParameters*;
 
 StepParameters:
-	'===' 'Step-Parameters:' name=Title EOL
+	'===' 'Step-Parameters:' name=Phrase EOL
 	description=Description?
-	table=Table;
+	table=Table?;
 
 TestSuite:
-	'=' 'Test-Suite:' name=Title EOL
+	'=' 'Test-Suite:' name=Phrase EOL
 	description=Description?
 	testStepContainerList+=TestStepContainer*;
 
@@ -31,39 +31,43 @@ TestStepContainer:
 	TestSetup | TestCase;
 
 TestSetup:
-	'==' 'Test-Setup:' name=Title EOL
+	'==' 'Test-Setup:' name=Phrase EOL
 	description=Description?
 	testStepList+=TestStep*;
 
 TestCase:
-	'==' 'Test-Case:' name=Title EOL
+	'==' 'Test-Case:' name=Phrase EOL
 	description=Description?
 	testStepList+=TestStep*
 	testDataList+=TestData*;
 
 TestData:
-	'===' 'Test-Data:' name=Title EOL
+	'===' 'Test-Data:' name=Phrase EOL
 	description=Description?
-	table=Table;
+	table=Table?;
 
 TestStep:
 	Given | When | Then | And;
 
 Given:
 	'===' 'Given:' stepObjectName=StepObjectRef stepDefinitionName=StepDefinitionRef EOL
-	(table=Table | text=Text)?;
+	table=Table?
+	text=Text?;
 
 When:
 	'===' 'When:' stepObjectName=StepObjectRef stepDefinitionName=StepDefinitionRef EOL
-	(table=Table | text=Text)?;
+	table=Table?
+	text=Text?;
 
 Then:
 	'===' 'Then:' stepObjectName=StepObjectRef stepDefinitionName=StepDefinitionRef EOL
-	(table=Table | text=Text)?;
+	table=Table?
+	text=Text?;
 
 And:
 	'===' 'And:' stepObjectName=StepObjectRef stepDefinitionName=StepDefinitionRef EOL
-	(table=Table | text=Text)?;
+	table=Table?
+	text=Text?;
 
 Text:
 	content=TEXT_BLOCK EOL;
@@ -80,12 +84,12 @@ Row:
 	cellList+=Cell+ EOL;
 
 Cell:
-	'|' name=Title;
+	'|' name=Phrase;
 
 Line:
-	content=Title EOL;
+	content=Phrase EOL;
 
-Title:
+Phrase:
 	WORD+;
 
 // TODO the regular expression here is a partial duplication of what's in sheep-dog-test

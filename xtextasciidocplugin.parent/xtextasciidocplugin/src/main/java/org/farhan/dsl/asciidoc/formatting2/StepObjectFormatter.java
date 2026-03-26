@@ -20,7 +20,7 @@ public class StepObjectFormatter extends Formatter {
 
 		formatKeywordTrailingSpace(df.getRegion(theStepObject, a.getEqualsSignKeyword_0()), doc);
 		formatKeywordTrailingSpace(df.getRegion(theStepObject, a.getStepObjectKeyword_1()), doc);
-		formatTitle(df.getRegion(theStepObject, a.getNameTitleParserRuleCall_2_0()), doc);
+		formatPhrase(df.getRegion(theStepObject, a.getNamePhraseParserRuleCall_2_0()), doc);
 		formatEOL2RuleCall(df.getRegion(theStepObject, a.getEOLTerminalRuleCall_3()), doc);
 		if (theStepObject.getDescription() != null) {
 			for (Line s : theStepObject.getDescription().getLineList()) {

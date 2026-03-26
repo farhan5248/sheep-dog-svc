@@ -673,10 +673,10 @@ public class InternalAsciiDocLexer extends Lexer {
         try {
             int _type = RULE_WS;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // InternalAsciiDoc.g:1680:9: ( ( ' ' | '\\t' | '\\r' )+ )
-            // InternalAsciiDoc.g:1680:11: ( ' ' | '\\t' | '\\r' )+
+            // InternalAsciiDoc.g:1668:9: ( ( ' ' | '\\t' | '\\r' )+ )
+            // InternalAsciiDoc.g:1668:11: ( ' ' | '\\t' | '\\r' )+
             {
-            // InternalAsciiDoc.g:1680:11: ( ' ' | '\\t' | '\\r' )+
+            // InternalAsciiDoc.g:1668:11: ( ' ' | '\\t' | '\\r' )+
             int cnt1=0;
             loop1:
             do {
@@ -730,11 +730,11 @@ public class InternalAsciiDocLexer extends Lexer {
         try {
             int _type = RULE_SL_COMMENT;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // InternalAsciiDoc.g:1682:17: ( '#' (~ ( '\\n' ) )* RULE_EOL )
-            // InternalAsciiDoc.g:1682:19: '#' (~ ( '\\n' ) )* RULE_EOL
+            // InternalAsciiDoc.g:1670:17: ( '#' (~ ( '\\n' ) )* RULE_EOL )
+            // InternalAsciiDoc.g:1670:19: '#' (~ ( '\\n' ) )* RULE_EOL
             {
             match('#'); 
-            // InternalAsciiDoc.g:1682:23: (~ ( '\\n' ) )*
+            // InternalAsciiDoc.g:1670:23: (~ ( '\\n' ) )*
             loop2:
             do {
                 int alt2=2;
@@ -747,7 +747,7 @@ public class InternalAsciiDocLexer extends Lexer {
 
                 switch (alt2) {
             	case 1 :
-            	    // InternalAsciiDoc.g:1682:23: ~ ( '\\n' )
+            	    // InternalAsciiDoc.g:1670:23: ~ ( '\\n' )
             	    {
             	    if ( (input.LA(1)>='\u0000' && input.LA(1)<='\t')||(input.LA(1)>='\u000B' && input.LA(1)<='\uFFFF') ) {
             	        input.consume();
@@ -784,10 +784,10 @@ public class InternalAsciiDocLexer extends Lexer {
         try {
             int _type = RULE_EOL;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // InternalAsciiDoc.g:1684:10: ( ( '\\n' )+ )
-            // InternalAsciiDoc.g:1684:12: ( '\\n' )+
+            // InternalAsciiDoc.g:1672:10: ( ( '\\n' )+ )
+            // InternalAsciiDoc.g:1672:12: ( '\\n' )+
             {
-            // InternalAsciiDoc.g:1684:12: ( '\\n' )+
+            // InternalAsciiDoc.g:1672:12: ( '\\n' )+
             int cnt3=0;
             loop3:
             do {
@@ -801,7 +801,7 @@ public class InternalAsciiDocLexer extends Lexer {
 
                 switch (alt3) {
             	case 1 :
-            	    // InternalAsciiDoc.g:1684:12: '\\n'
+            	    // InternalAsciiDoc.g:1672:12: '\\n'
             	    {
             	    match('\n'); 
 
@@ -833,13 +833,13 @@ public class InternalAsciiDocLexer extends Lexer {
         try {
             int _type = RULE_TEXT_BLOCK;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // InternalAsciiDoc.g:1686:17: ( '----' '\\n' ( . )+ '\\n' '----' )
-            // InternalAsciiDoc.g:1686:19: '----' '\\n' ( . )+ '\\n' '----'
+            // InternalAsciiDoc.g:1674:17: ( '----' '\\n' ( . )+ '\\n' '----' )
+            // InternalAsciiDoc.g:1674:19: '----' '\\n' ( . )+ '\\n' '----'
             {
             match("----"); 
 
             match('\n'); 
-            // InternalAsciiDoc.g:1686:31: ( . )+
+            // InternalAsciiDoc.g:1674:31: ( . )+
             int cnt4=0;
             loop4:
             do {
@@ -892,7 +892,7 @@ public class InternalAsciiDocLexer extends Lexer {
 
                 switch (alt4) {
             	case 1 :
-            	    // InternalAsciiDoc.g:1686:31: .
+            	    // InternalAsciiDoc.g:1674:31: .
             	    {
             	    matchAny(); 
 
@@ -927,10 +927,10 @@ public class InternalAsciiDocLexer extends Lexer {
         try {
             int _type = RULE_WORD;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // InternalAsciiDoc.g:1688:11: ( (~ ( ( ' ' | '\\t' | '\\r' | '\\n' ) ) )+ )
-            // InternalAsciiDoc.g:1688:13: (~ ( ( ' ' | '\\t' | '\\r' | '\\n' ) ) )+
+            // InternalAsciiDoc.g:1676:11: ( (~ ( ( ' ' | '\\t' | '\\r' | '\\n' ) ) )+ )
+            // InternalAsciiDoc.g:1676:13: (~ ( ( ' ' | '\\t' | '\\r' | '\\n' ) ) )+
             {
-            // InternalAsciiDoc.g:1688:13: (~ ( ( ' ' | '\\t' | '\\r' | '\\n' ) ) )+
+            // InternalAsciiDoc.g:1676:13: (~ ( ( ' ' | '\\t' | '\\r' | '\\n' ) ) )+
             int cnt5=0;
             loop5:
             do {
@@ -944,7 +944,7 @@ public class InternalAsciiDocLexer extends Lexer {
 
                 switch (alt5) {
             	case 1 :
-            	    // InternalAsciiDoc.g:1688:13: ~ ( ( ' ' | '\\t' | '\\r' | '\\n' ) )
+            	    // InternalAsciiDoc.g:1676:13: ~ ( ( ' ' | '\\t' | '\\r' | '\\n' ) )
             	    {
             	    if ( (input.LA(1)>='\u0000' && input.LA(1)<='\b')||(input.LA(1)>='\u000B' && input.LA(1)<='\f')||(input.LA(1)>='\u000E' && input.LA(1)<='\u001F')||(input.LA(1)>='!' && input.LA(1)<='\uFFFF') ) {
             	        input.consume();

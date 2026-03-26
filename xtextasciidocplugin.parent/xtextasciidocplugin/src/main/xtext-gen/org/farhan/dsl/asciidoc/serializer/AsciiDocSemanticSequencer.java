@@ -111,7 +111,7 @@ public class AsciiDocSemanticSequencer extends AbstractDelegatingSemanticSequenc
 	 *     And returns And
 	 *
 	 * Constraint:
-	 *     (stepObjectName=StepObjectRef stepDefinitionName=StepDefinitionRef (table=Table | text=Text)?)
+	 *     (stepObjectName=StepObjectRef stepDefinitionName=StepDefinitionRef table=Table? text=Text?)
 	 * </pre>
 	 */
 	protected void sequence_And(ISerializationContext context, And semanticObject) {
@@ -125,7 +125,7 @@ public class AsciiDocSemanticSequencer extends AbstractDelegatingSemanticSequenc
 	 *     Cell returns Cell
 	 *
 	 * Constraint:
-	 *     name=Title
+	 *     name=Phrase
 	 * </pre>
 	 */
 	protected void sequence_Cell(ISerializationContext context, Cell semanticObject) {
@@ -134,7 +134,7 @@ public class AsciiDocSemanticSequencer extends AbstractDelegatingSemanticSequenc
 				errorAcceptor.accept(diagnosticProvider.createFeatureValueMissing(semanticObject, AsciiDocPackage.Literals.CELL__NAME));
 		}
 		SequenceFeeder feeder = createSequencerFeeder(context, semanticObject);
-		feeder.accept(grammarAccess.getCellAccess().getNameTitleParserRuleCall_1_0(), semanticObject.getName());
+		feeder.accept(grammarAccess.getCellAccess().getNamePhraseParserRuleCall_1_0(), semanticObject.getName());
 		feeder.finish();
 	}
 	
@@ -160,7 +160,7 @@ public class AsciiDocSemanticSequencer extends AbstractDelegatingSemanticSequenc
 	 *     Given returns Given
 	 *
 	 * Constraint:
-	 *     (stepObjectName=StepObjectRef stepDefinitionName=StepDefinitionRef (table=Table | text=Text)?)
+	 *     (stepObjectName=StepObjectRef stepDefinitionName=StepDefinitionRef table=Table? text=Text?)
 	 * </pre>
 	 */
 	protected void sequence_Given(ISerializationContext context, Given semanticObject) {
@@ -174,7 +174,7 @@ public class AsciiDocSemanticSequencer extends AbstractDelegatingSemanticSequenc
 	 *     Line returns Line
 	 *
 	 * Constraint:
-	 *     content=Title
+	 *     content=Phrase
 	 * </pre>
 	 */
 	protected void sequence_Line(ISerializationContext context, Line semanticObject) {
@@ -183,7 +183,7 @@ public class AsciiDocSemanticSequencer extends AbstractDelegatingSemanticSequenc
 				errorAcceptor.accept(diagnosticProvider.createFeatureValueMissing(semanticObject, AsciiDocPackage.Literals.LINE__CONTENT));
 		}
 		SequenceFeeder feeder = createSequencerFeeder(context, semanticObject);
-		feeder.accept(grammarAccess.getLineAccess().getContentTitleParserRuleCall_0_0(), semanticObject.getContent());
+		feeder.accept(grammarAccess.getLineAccess().getContentPhraseParserRuleCall_0_0(), semanticObject.getContent());
 		feeder.finish();
 	}
 	
@@ -208,7 +208,7 @@ public class AsciiDocSemanticSequencer extends AbstractDelegatingSemanticSequenc
 	 *     StepDefinition returns StepDefinition
 	 *
 	 * Constraint:
-	 *     (name=Title description=Description? stepParameterList+=StepParameters*)
+	 *     (name=Phrase description=Description? stepParameterList+=StepParameters*)
 	 * </pre>
 	 */
 	protected void sequence_StepDefinition(ISerializationContext context, StepDefinition semanticObject) {
@@ -223,7 +223,7 @@ public class AsciiDocSemanticSequencer extends AbstractDelegatingSemanticSequenc
 	 *     StepObject returns StepObject
 	 *
 	 * Constraint:
-	 *     (name=Title description=Description? stepDefinitionList+=StepDefinition*)
+	 *     (name=Phrase description=Description? stepDefinitionList+=StepDefinition*)
 	 * </pre>
 	 */
 	protected void sequence_StepObject(ISerializationContext context, StepObject semanticObject) {
@@ -237,7 +237,7 @@ public class AsciiDocSemanticSequencer extends AbstractDelegatingSemanticSequenc
 	 *     StepParameters returns StepParameters
 	 *
 	 * Constraint:
-	 *     (name=Title description=Description? table=Table)
+	 *     (name=Phrase description=Description? table=Table?)
 	 * </pre>
 	 */
 	protected void sequence_StepParameters(ISerializationContext context, StepParameters semanticObject) {
@@ -266,7 +266,7 @@ public class AsciiDocSemanticSequencer extends AbstractDelegatingSemanticSequenc
 	 *     TestCase returns TestCase
 	 *
 	 * Constraint:
-	 *     (name=Title description=Description? testStepList+=TestStep* testDataList+=TestData*)
+	 *     (name=Phrase description=Description? testStepList+=TestStep* testDataList+=TestData*)
 	 * </pre>
 	 */
 	protected void sequence_TestCase(ISerializationContext context, TestCase semanticObject) {
@@ -280,7 +280,7 @@ public class AsciiDocSemanticSequencer extends AbstractDelegatingSemanticSequenc
 	 *     TestData returns TestData
 	 *
 	 * Constraint:
-	 *     (name=Title description=Description? table=Table)
+	 *     (name=Phrase description=Description? table=Table?)
 	 * </pre>
 	 */
 	protected void sequence_TestData(ISerializationContext context, TestData semanticObject) {
@@ -295,7 +295,7 @@ public class AsciiDocSemanticSequencer extends AbstractDelegatingSemanticSequenc
 	 *     TestSetup returns TestSetup
 	 *
 	 * Constraint:
-	 *     (name=Title description=Description? testStepList+=TestStep*)
+	 *     (name=Phrase description=Description? testStepList+=TestStep*)
 	 * </pre>
 	 */
 	protected void sequence_TestSetup(ISerializationContext context, TestSetup semanticObject) {
@@ -310,7 +310,7 @@ public class AsciiDocSemanticSequencer extends AbstractDelegatingSemanticSequenc
 	 *     TestSuite returns TestSuite
 	 *
 	 * Constraint:
-	 *     (name=Title description=Description? testStepContainerList+=TestStepContainer*)
+	 *     (name=Phrase description=Description? testStepContainerList+=TestStepContainer*)
 	 * </pre>
 	 */
 	protected void sequence_TestSuite(ISerializationContext context, TestSuite semanticObject) {
@@ -345,7 +345,7 @@ public class AsciiDocSemanticSequencer extends AbstractDelegatingSemanticSequenc
 	 *     Then returns Then
 	 *
 	 * Constraint:
-	 *     (stepObjectName=StepObjectRef stepDefinitionName=StepDefinitionRef (table=Table | text=Text)?)
+	 *     (stepObjectName=StepObjectRef stepDefinitionName=StepDefinitionRef table=Table? text=Text?)
 	 * </pre>
 	 */
 	protected void sequence_Then(ISerializationContext context, Then semanticObject) {
@@ -360,7 +360,7 @@ public class AsciiDocSemanticSequencer extends AbstractDelegatingSemanticSequenc
 	 *     When returns When
 	 *
 	 * Constraint:
-	 *     (stepObjectName=StepObjectRef stepDefinitionName=StepDefinitionRef (table=Table | text=Text)?)
+	 *     (stepObjectName=StepObjectRef stepDefinitionName=StepDefinitionRef table=Table? text=Text?)
 	 * </pre>
 	 */
 	protected void sequence_When(ISerializationContext context, When semanticObject) {

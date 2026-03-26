@@ -46,7 +46,7 @@ public class AsciiDocGrammarAccess extends AbstractElementFinder.AbstractGrammar
 		private final Keyword cEqualsSignKeyword_0 = (Keyword)cGroup.eContents().get(0);
 		private final Keyword cStepObjectKeyword_1 = (Keyword)cGroup.eContents().get(1);
 		private final Assignment cNameAssignment_2 = (Assignment)cGroup.eContents().get(2);
-		private final RuleCall cNameTitleParserRuleCall_2_0 = (RuleCall)cNameAssignment_2.eContents().get(0);
+		private final RuleCall cNamePhraseParserRuleCall_2_0 = (RuleCall)cNameAssignment_2.eContents().get(0);
 		private final RuleCall cEOLTerminalRuleCall_3 = (RuleCall)cGroup.eContents().get(3);
 		private final Assignment cDescriptionAssignment_4 = (Assignment)cGroup.eContents().get(4);
 		private final RuleCall cDescriptionDescriptionParserRuleCall_4_0 = (RuleCall)cDescriptionAssignment_4.eContents().get(0);
@@ -54,12 +54,12 @@ public class AsciiDocGrammarAccess extends AbstractElementFinder.AbstractGrammar
 		private final RuleCall cStepDefinitionListStepDefinitionParserRuleCall_5_0 = (RuleCall)cStepDefinitionListAssignment_5.eContents().get(0);
 		
 		//StepObject:
-		//    '=' 'Step-Object:' name=Title EOL
+		//    '=' 'Step-Object:' name=Phrase EOL
 		//    description=Description?
 		//    stepDefinitionList+=StepDefinition*;
 		@Override public ParserRule getRule() { return rule; }
 		
-		//'=' 'Step-Object:' name=Title EOL
+		//'=' 'Step-Object:' name=Phrase EOL
 		//description=Description?
 		//stepDefinitionList+=StepDefinition*
 		public Group getGroup() { return cGroup; }
@@ -70,11 +70,11 @@ public class AsciiDocGrammarAccess extends AbstractElementFinder.AbstractGrammar
 		//'Step-Object:'
 		public Keyword getStepObjectKeyword_1() { return cStepObjectKeyword_1; }
 		
-		//name=Title
+		//name=Phrase
 		public Assignment getNameAssignment_2() { return cNameAssignment_2; }
 		
-		//Title
-		public RuleCall getNameTitleParserRuleCall_2_0() { return cNameTitleParserRuleCall_2_0; }
+		//Phrase
+		public RuleCall getNamePhraseParserRuleCall_2_0() { return cNamePhraseParserRuleCall_2_0; }
 		
 		//EOL
 		public RuleCall getEOLTerminalRuleCall_3() { return cEOLTerminalRuleCall_3; }
@@ -97,7 +97,7 @@ public class AsciiDocGrammarAccess extends AbstractElementFinder.AbstractGrammar
 		private final Keyword cEqualsSignEqualsSignKeyword_0 = (Keyword)cGroup.eContents().get(0);
 		private final Keyword cStepDefinitionKeyword_1 = (Keyword)cGroup.eContents().get(1);
 		private final Assignment cNameAssignment_2 = (Assignment)cGroup.eContents().get(2);
-		private final RuleCall cNameTitleParserRuleCall_2_0 = (RuleCall)cNameAssignment_2.eContents().get(0);
+		private final RuleCall cNamePhraseParserRuleCall_2_0 = (RuleCall)cNameAssignment_2.eContents().get(0);
 		private final RuleCall cEOLTerminalRuleCall_3 = (RuleCall)cGroup.eContents().get(3);
 		private final Assignment cDescriptionAssignment_4 = (Assignment)cGroup.eContents().get(4);
 		private final RuleCall cDescriptionDescriptionParserRuleCall_4_0 = (RuleCall)cDescriptionAssignment_4.eContents().get(0);
@@ -105,12 +105,12 @@ public class AsciiDocGrammarAccess extends AbstractElementFinder.AbstractGrammar
 		private final RuleCall cStepParameterListStepParametersParserRuleCall_5_0 = (RuleCall)cStepParameterListAssignment_5.eContents().get(0);
 		
 		//StepDefinition:
-		//    '==' 'Step-Definition:' name=Title EOL
+		//    '==' 'Step-Definition:' name=Phrase EOL
 		//    description=Description?
 		//    stepParameterList+=StepParameters*;
 		@Override public ParserRule getRule() { return rule; }
 		
-		//'==' 'Step-Definition:' name=Title EOL
+		//'==' 'Step-Definition:' name=Phrase EOL
 		//description=Description?
 		//stepParameterList+=StepParameters*
 		public Group getGroup() { return cGroup; }
@@ -121,11 +121,11 @@ public class AsciiDocGrammarAccess extends AbstractElementFinder.AbstractGrammar
 		//'Step-Definition:'
 		public Keyword getStepDefinitionKeyword_1() { return cStepDefinitionKeyword_1; }
 		
-		//name=Title
+		//name=Phrase
 		public Assignment getNameAssignment_2() { return cNameAssignment_2; }
 		
-		//Title
-		public RuleCall getNameTitleParserRuleCall_2_0() { return cNameTitleParserRuleCall_2_0; }
+		//Phrase
+		public RuleCall getNamePhraseParserRuleCall_2_0() { return cNamePhraseParserRuleCall_2_0; }
 		
 		//EOL
 		public RuleCall getEOLTerminalRuleCall_3() { return cEOLTerminalRuleCall_3; }
@@ -148,7 +148,7 @@ public class AsciiDocGrammarAccess extends AbstractElementFinder.AbstractGrammar
 		private final Keyword cEqualsSignEqualsSignEqualsSignKeyword_0 = (Keyword)cGroup.eContents().get(0);
 		private final Keyword cStepParametersKeyword_1 = (Keyword)cGroup.eContents().get(1);
 		private final Assignment cNameAssignment_2 = (Assignment)cGroup.eContents().get(2);
-		private final RuleCall cNameTitleParserRuleCall_2_0 = (RuleCall)cNameAssignment_2.eContents().get(0);
+		private final RuleCall cNamePhraseParserRuleCall_2_0 = (RuleCall)cNameAssignment_2.eContents().get(0);
 		private final RuleCall cEOLTerminalRuleCall_3 = (RuleCall)cGroup.eContents().get(3);
 		private final Assignment cDescriptionAssignment_4 = (Assignment)cGroup.eContents().get(4);
 		private final RuleCall cDescriptionDescriptionParserRuleCall_4_0 = (RuleCall)cDescriptionAssignment_4.eContents().get(0);
@@ -156,14 +156,14 @@ public class AsciiDocGrammarAccess extends AbstractElementFinder.AbstractGrammar
 		private final RuleCall cTableTableParserRuleCall_5_0 = (RuleCall)cTableAssignment_5.eContents().get(0);
 		
 		//StepParameters:
-		//    '===' 'Step-Parameters:' name=Title EOL
+		//    '===' 'Step-Parameters:' name=Phrase EOL
 		//    description=Description?
-		//    table=Table;
+		//    table=Table?;
 		@Override public ParserRule getRule() { return rule; }
 		
-		//'===' 'Step-Parameters:' name=Title EOL
+		//'===' 'Step-Parameters:' name=Phrase EOL
 		//description=Description?
-		//table=Table
+		//table=Table?
 		public Group getGroup() { return cGroup; }
 		
 		//'==='
@@ -172,11 +172,11 @@ public class AsciiDocGrammarAccess extends AbstractElementFinder.AbstractGrammar
 		//'Step-Parameters:'
 		public Keyword getStepParametersKeyword_1() { return cStepParametersKeyword_1; }
 		
-		//name=Title
+		//name=Phrase
 		public Assignment getNameAssignment_2() { return cNameAssignment_2; }
 		
-		//Title
-		public RuleCall getNameTitleParserRuleCall_2_0() { return cNameTitleParserRuleCall_2_0; }
+		//Phrase
+		public RuleCall getNamePhraseParserRuleCall_2_0() { return cNamePhraseParserRuleCall_2_0; }
 		
 		//EOL
 		public RuleCall getEOLTerminalRuleCall_3() { return cEOLTerminalRuleCall_3; }
@@ -187,7 +187,7 @@ public class AsciiDocGrammarAccess extends AbstractElementFinder.AbstractGrammar
 		//Description
 		public RuleCall getDescriptionDescriptionParserRuleCall_4_0() { return cDescriptionDescriptionParserRuleCall_4_0; }
 		
-		//table=Table
+		//table=Table?
 		public Assignment getTableAssignment_5() { return cTableAssignment_5; }
 		
 		//Table
@@ -199,7 +199,7 @@ public class AsciiDocGrammarAccess extends AbstractElementFinder.AbstractGrammar
 		private final Keyword cEqualsSignKeyword_0 = (Keyword)cGroup.eContents().get(0);
 		private final Keyword cTestSuiteKeyword_1 = (Keyword)cGroup.eContents().get(1);
 		private final Assignment cNameAssignment_2 = (Assignment)cGroup.eContents().get(2);
-		private final RuleCall cNameTitleParserRuleCall_2_0 = (RuleCall)cNameAssignment_2.eContents().get(0);
+		private final RuleCall cNamePhraseParserRuleCall_2_0 = (RuleCall)cNameAssignment_2.eContents().get(0);
 		private final RuleCall cEOLTerminalRuleCall_3 = (RuleCall)cGroup.eContents().get(3);
 		private final Assignment cDescriptionAssignment_4 = (Assignment)cGroup.eContents().get(4);
 		private final RuleCall cDescriptionDescriptionParserRuleCall_4_0 = (RuleCall)cDescriptionAssignment_4.eContents().get(0);
@@ -207,12 +207,12 @@ public class AsciiDocGrammarAccess extends AbstractElementFinder.AbstractGrammar
 		private final RuleCall cTestStepContainerListTestStepContainerParserRuleCall_5_0 = (RuleCall)cTestStepContainerListAssignment_5.eContents().get(0);
 		
 		//TestSuite:
-		//    '=' 'Test-Suite:' name=Title EOL
+		//    '=' 'Test-Suite:' name=Phrase EOL
 		//    description=Description?
 		//    testStepContainerList+=TestStepContainer*;
 		@Override public ParserRule getRule() { return rule; }
 		
-		//'=' 'Test-Suite:' name=Title EOL
+		//'=' 'Test-Suite:' name=Phrase EOL
 		//description=Description?
 		//testStepContainerList+=TestStepContainer*
 		public Group getGroup() { return cGroup; }
@@ -223,11 +223,11 @@ public class AsciiDocGrammarAccess extends AbstractElementFinder.AbstractGrammar
 		//'Test-Suite:'
 		public Keyword getTestSuiteKeyword_1() { return cTestSuiteKeyword_1; }
 		
-		//name=Title
+		//name=Phrase
 		public Assignment getNameAssignment_2() { return cNameAssignment_2; }
 		
-		//Title
-		public RuleCall getNameTitleParserRuleCall_2_0() { return cNameTitleParserRuleCall_2_0; }
+		//Phrase
+		public RuleCall getNamePhraseParserRuleCall_2_0() { return cNamePhraseParserRuleCall_2_0; }
 		
 		//EOL
 		public RuleCall getEOLTerminalRuleCall_3() { return cEOLTerminalRuleCall_3; }
@@ -269,7 +269,7 @@ public class AsciiDocGrammarAccess extends AbstractElementFinder.AbstractGrammar
 		private final Keyword cEqualsSignEqualsSignKeyword_0 = (Keyword)cGroup.eContents().get(0);
 		private final Keyword cTestSetupKeyword_1 = (Keyword)cGroup.eContents().get(1);
 		private final Assignment cNameAssignment_2 = (Assignment)cGroup.eContents().get(2);
-		private final RuleCall cNameTitleParserRuleCall_2_0 = (RuleCall)cNameAssignment_2.eContents().get(0);
+		private final RuleCall cNamePhraseParserRuleCall_2_0 = (RuleCall)cNameAssignment_2.eContents().get(0);
 		private final RuleCall cEOLTerminalRuleCall_3 = (RuleCall)cGroup.eContents().get(3);
 		private final Assignment cDescriptionAssignment_4 = (Assignment)cGroup.eContents().get(4);
 		private final RuleCall cDescriptionDescriptionParserRuleCall_4_0 = (RuleCall)cDescriptionAssignment_4.eContents().get(0);
@@ -277,12 +277,12 @@ public class AsciiDocGrammarAccess extends AbstractElementFinder.AbstractGrammar
 		private final RuleCall cTestStepListTestStepParserRuleCall_5_0 = (RuleCall)cTestStepListAssignment_5.eContents().get(0);
 		
 		//TestSetup:
-		//    '==' 'Test-Setup:' name=Title EOL
+		//    '==' 'Test-Setup:' name=Phrase EOL
 		//    description=Description?
 		//    testStepList+=TestStep*;
 		@Override public ParserRule getRule() { return rule; }
 		
-		//'==' 'Test-Setup:' name=Title EOL
+		//'==' 'Test-Setup:' name=Phrase EOL
 		//description=Description?
 		//testStepList+=TestStep*
 		public Group getGroup() { return cGroup; }
@@ -293,11 +293,11 @@ public class AsciiDocGrammarAccess extends AbstractElementFinder.AbstractGrammar
 		//'Test-Setup:'
 		public Keyword getTestSetupKeyword_1() { return cTestSetupKeyword_1; }
 		
-		//name=Title
+		//name=Phrase
 		public Assignment getNameAssignment_2() { return cNameAssignment_2; }
 		
-		//Title
-		public RuleCall getNameTitleParserRuleCall_2_0() { return cNameTitleParserRuleCall_2_0; }
+		//Phrase
+		public RuleCall getNamePhraseParserRuleCall_2_0() { return cNamePhraseParserRuleCall_2_0; }
 		
 		//EOL
 		public RuleCall getEOLTerminalRuleCall_3() { return cEOLTerminalRuleCall_3; }
@@ -320,7 +320,7 @@ public class AsciiDocGrammarAccess extends AbstractElementFinder.AbstractGrammar
 		private final Keyword cEqualsSignEqualsSignKeyword_0 = (Keyword)cGroup.eContents().get(0);
 		private final Keyword cTestCaseKeyword_1 = (Keyword)cGroup.eContents().get(1);
 		private final Assignment cNameAssignment_2 = (Assignment)cGroup.eContents().get(2);
-		private final RuleCall cNameTitleParserRuleCall_2_0 = (RuleCall)cNameAssignment_2.eContents().get(0);
+		private final RuleCall cNamePhraseParserRuleCall_2_0 = (RuleCall)cNameAssignment_2.eContents().get(0);
 		private final RuleCall cEOLTerminalRuleCall_3 = (RuleCall)cGroup.eContents().get(3);
 		private final Assignment cDescriptionAssignment_4 = (Assignment)cGroup.eContents().get(4);
 		private final RuleCall cDescriptionDescriptionParserRuleCall_4_0 = (RuleCall)cDescriptionAssignment_4.eContents().get(0);
@@ -330,13 +330,13 @@ public class AsciiDocGrammarAccess extends AbstractElementFinder.AbstractGrammar
 		private final RuleCall cTestDataListTestDataParserRuleCall_6_0 = (RuleCall)cTestDataListAssignment_6.eContents().get(0);
 		
 		//TestCase:
-		//    '==' 'Test-Case:' name=Title EOL
+		//    '==' 'Test-Case:' name=Phrase EOL
 		//    description=Description?
 		//    testStepList+=TestStep*
 		//    testDataList+=TestData*;
 		@Override public ParserRule getRule() { return rule; }
 		
-		//'==' 'Test-Case:' name=Title EOL
+		//'==' 'Test-Case:' name=Phrase EOL
 		//description=Description?
 		//testStepList+=TestStep*
 		//testDataList+=TestData*
@@ -348,11 +348,11 @@ public class AsciiDocGrammarAccess extends AbstractElementFinder.AbstractGrammar
 		//'Test-Case:'
 		public Keyword getTestCaseKeyword_1() { return cTestCaseKeyword_1; }
 		
-		//name=Title
+		//name=Phrase
 		public Assignment getNameAssignment_2() { return cNameAssignment_2; }
 		
-		//Title
-		public RuleCall getNameTitleParserRuleCall_2_0() { return cNameTitleParserRuleCall_2_0; }
+		//Phrase
+		public RuleCall getNamePhraseParserRuleCall_2_0() { return cNamePhraseParserRuleCall_2_0; }
 		
 		//EOL
 		public RuleCall getEOLTerminalRuleCall_3() { return cEOLTerminalRuleCall_3; }
@@ -381,7 +381,7 @@ public class AsciiDocGrammarAccess extends AbstractElementFinder.AbstractGrammar
 		private final Keyword cEqualsSignEqualsSignEqualsSignKeyword_0 = (Keyword)cGroup.eContents().get(0);
 		private final Keyword cTestDataKeyword_1 = (Keyword)cGroup.eContents().get(1);
 		private final Assignment cNameAssignment_2 = (Assignment)cGroup.eContents().get(2);
-		private final RuleCall cNameTitleParserRuleCall_2_0 = (RuleCall)cNameAssignment_2.eContents().get(0);
+		private final RuleCall cNamePhraseParserRuleCall_2_0 = (RuleCall)cNameAssignment_2.eContents().get(0);
 		private final RuleCall cEOLTerminalRuleCall_3 = (RuleCall)cGroup.eContents().get(3);
 		private final Assignment cDescriptionAssignment_4 = (Assignment)cGroup.eContents().get(4);
 		private final RuleCall cDescriptionDescriptionParserRuleCall_4_0 = (RuleCall)cDescriptionAssignment_4.eContents().get(0);
@@ -389,14 +389,14 @@ public class AsciiDocGrammarAccess extends AbstractElementFinder.AbstractGrammar
 		private final RuleCall cTableTableParserRuleCall_5_0 = (RuleCall)cTableAssignment_5.eContents().get(0);
 		
 		//TestData:
-		//    '===' 'Test-Data:' name=Title EOL
+		//    '===' 'Test-Data:' name=Phrase EOL
 		//    description=Description?
-		//    table=Table;
+		//    table=Table?;
 		@Override public ParserRule getRule() { return rule; }
 		
-		//'===' 'Test-Data:' name=Title EOL
+		//'===' 'Test-Data:' name=Phrase EOL
 		//description=Description?
-		//table=Table
+		//table=Table?
 		public Group getGroup() { return cGroup; }
 		
 		//'==='
@@ -405,11 +405,11 @@ public class AsciiDocGrammarAccess extends AbstractElementFinder.AbstractGrammar
 		//'Test-Data:'
 		public Keyword getTestDataKeyword_1() { return cTestDataKeyword_1; }
 		
-		//name=Title
+		//name=Phrase
 		public Assignment getNameAssignment_2() { return cNameAssignment_2; }
 		
-		//Title
-		public RuleCall getNameTitleParserRuleCall_2_0() { return cNameTitleParserRuleCall_2_0; }
+		//Phrase
+		public RuleCall getNamePhraseParserRuleCall_2_0() { return cNamePhraseParserRuleCall_2_0; }
 		
 		//EOL
 		public RuleCall getEOLTerminalRuleCall_3() { return cEOLTerminalRuleCall_3; }
@@ -420,7 +420,7 @@ public class AsciiDocGrammarAccess extends AbstractElementFinder.AbstractGrammar
 		//Description
 		public RuleCall getDescriptionDescriptionParserRuleCall_4_0() { return cDescriptionDescriptionParserRuleCall_4_0; }
 		
-		//table=Table
+		//table=Table?
 		public Assignment getTableAssignment_5() { return cTableAssignment_5; }
 		
 		//Table
@@ -463,19 +463,20 @@ public class AsciiDocGrammarAccess extends AbstractElementFinder.AbstractGrammar
 		private final Assignment cStepDefinitionNameAssignment_3 = (Assignment)cGroup.eContents().get(3);
 		private final RuleCall cStepDefinitionNameStepDefinitionRefParserRuleCall_3_0 = (RuleCall)cStepDefinitionNameAssignment_3.eContents().get(0);
 		private final RuleCall cEOLTerminalRuleCall_4 = (RuleCall)cGroup.eContents().get(4);
-		private final Alternatives cAlternatives_5 = (Alternatives)cGroup.eContents().get(5);
-		private final Assignment cTableAssignment_5_0 = (Assignment)cAlternatives_5.eContents().get(0);
-		private final RuleCall cTableTableParserRuleCall_5_0_0 = (RuleCall)cTableAssignment_5_0.eContents().get(0);
-		private final Assignment cTextAssignment_5_1 = (Assignment)cAlternatives_5.eContents().get(1);
-		private final RuleCall cTextTextParserRuleCall_5_1_0 = (RuleCall)cTextAssignment_5_1.eContents().get(0);
+		private final Assignment cTableAssignment_5 = (Assignment)cGroup.eContents().get(5);
+		private final RuleCall cTableTableParserRuleCall_5_0 = (RuleCall)cTableAssignment_5.eContents().get(0);
+		private final Assignment cTextAssignment_6 = (Assignment)cGroup.eContents().get(6);
+		private final RuleCall cTextTextParserRuleCall_6_0 = (RuleCall)cTextAssignment_6.eContents().get(0);
 		
 		//Given:
 		//    '===' 'Given:' stepObjectName=StepObjectRef stepDefinitionName=StepDefinitionRef EOL
-		//    (table=Table | text=Text)?;
+		//    table=Table?
+		//    text=Text?;
 		@Override public ParserRule getRule() { return rule; }
 		
 		//'===' 'Given:' stepObjectName=StepObjectRef stepDefinitionName=StepDefinitionRef EOL
-		//(table=Table | text=Text)?
+		//table=Table?
+		//text=Text?
 		public Group getGroup() { return cGroup; }
 		
 		//'==='
@@ -499,20 +500,17 @@ public class AsciiDocGrammarAccess extends AbstractElementFinder.AbstractGrammar
 		//EOL
 		public RuleCall getEOLTerminalRuleCall_4() { return cEOLTerminalRuleCall_4; }
 		
-		//(table=Table | text=Text)?
-		public Alternatives getAlternatives_5() { return cAlternatives_5; }
-		
-		//table=Table
-		public Assignment getTableAssignment_5_0() { return cTableAssignment_5_0; }
+		//table=Table?
+		public Assignment getTableAssignment_5() { return cTableAssignment_5; }
 		
 		//Table
-		public RuleCall getTableTableParserRuleCall_5_0_0() { return cTableTableParserRuleCall_5_0_0; }
+		public RuleCall getTableTableParserRuleCall_5_0() { return cTableTableParserRuleCall_5_0; }
 		
-		//text=Text
-		public Assignment getTextAssignment_5_1() { return cTextAssignment_5_1; }
+		//text=Text?
+		public Assignment getTextAssignment_6() { return cTextAssignment_6; }
 		
 		//Text
-		public RuleCall getTextTextParserRuleCall_5_1_0() { return cTextTextParserRuleCall_5_1_0; }
+		public RuleCall getTextTextParserRuleCall_6_0() { return cTextTextParserRuleCall_6_0; }
 	}
 	public class WhenElements extends AbstractParserRuleElementFinder {
 		private final ParserRule rule = (ParserRule) GrammarUtil.findRuleForName(getGrammar(), "org.farhan.dsl.asciidoc.AsciiDoc.When");
@@ -524,19 +522,20 @@ public class AsciiDocGrammarAccess extends AbstractElementFinder.AbstractGrammar
 		private final Assignment cStepDefinitionNameAssignment_3 = (Assignment)cGroup.eContents().get(3);
 		private final RuleCall cStepDefinitionNameStepDefinitionRefParserRuleCall_3_0 = (RuleCall)cStepDefinitionNameAssignment_3.eContents().get(0);
 		private final RuleCall cEOLTerminalRuleCall_4 = (RuleCall)cGroup.eContents().get(4);
-		private final Alternatives cAlternatives_5 = (Alternatives)cGroup.eContents().get(5);
-		private final Assignment cTableAssignment_5_0 = (Assignment)cAlternatives_5.eContents().get(0);
-		private final RuleCall cTableTableParserRuleCall_5_0_0 = (RuleCall)cTableAssignment_5_0.eContents().get(0);
-		private final Assignment cTextAssignment_5_1 = (Assignment)cAlternatives_5.eContents().get(1);
-		private final RuleCall cTextTextParserRuleCall_5_1_0 = (RuleCall)cTextAssignment_5_1.eContents().get(0);
+		private final Assignment cTableAssignment_5 = (Assignment)cGroup.eContents().get(5);
+		private final RuleCall cTableTableParserRuleCall_5_0 = (RuleCall)cTableAssignment_5.eContents().get(0);
+		private final Assignment cTextAssignment_6 = (Assignment)cGroup.eContents().get(6);
+		private final RuleCall cTextTextParserRuleCall_6_0 = (RuleCall)cTextAssignment_6.eContents().get(0);
 		
 		//When:
 		//    '===' 'When:' stepObjectName=StepObjectRef stepDefinitionName=StepDefinitionRef EOL
-		//    (table=Table | text=Text)?;
+		//    table=Table?
+		//    text=Text?;
 		@Override public ParserRule getRule() { return rule; }
 		
 		//'===' 'When:' stepObjectName=StepObjectRef stepDefinitionName=StepDefinitionRef EOL
-		//(table=Table | text=Text)?
+		//table=Table?
+		//text=Text?
 		public Group getGroup() { return cGroup; }
 		
 		//'==='
@@ -560,20 +559,17 @@ public class AsciiDocGrammarAccess extends AbstractElementFinder.AbstractGrammar
 		//EOL
 		public RuleCall getEOLTerminalRuleCall_4() { return cEOLTerminalRuleCall_4; }
 		
-		//(table=Table | text=Text)?
-		public Alternatives getAlternatives_5() { return cAlternatives_5; }
-		
-		//table=Table
-		public Assignment getTableAssignment_5_0() { return cTableAssignment_5_0; }
+		//table=Table?
+		public Assignment getTableAssignment_5() { return cTableAssignment_5; }
 		
 		//Table
-		public RuleCall getTableTableParserRuleCall_5_0_0() { return cTableTableParserRuleCall_5_0_0; }
+		public RuleCall getTableTableParserRuleCall_5_0() { return cTableTableParserRuleCall_5_0; }
 		
-		//text=Text
-		public Assignment getTextAssignment_5_1() { return cTextAssignment_5_1; }
+		//text=Text?
+		public Assignment getTextAssignment_6() { return cTextAssignment_6; }
 		
 		//Text
-		public RuleCall getTextTextParserRuleCall_5_1_0() { return cTextTextParserRuleCall_5_1_0; }
+		public RuleCall getTextTextParserRuleCall_6_0() { return cTextTextParserRuleCall_6_0; }
 	}
 	public class ThenElements extends AbstractParserRuleElementFinder {
 		private final ParserRule rule = (ParserRule) GrammarUtil.findRuleForName(getGrammar(), "org.farhan.dsl.asciidoc.AsciiDoc.Then");
@@ -585,19 +581,20 @@ public class AsciiDocGrammarAccess extends AbstractElementFinder.AbstractGrammar
 		private final Assignment cStepDefinitionNameAssignment_3 = (Assignment)cGroup.eContents().get(3);
 		private final RuleCall cStepDefinitionNameStepDefinitionRefParserRuleCall_3_0 = (RuleCall)cStepDefinitionNameAssignment_3.eContents().get(0);
 		private final RuleCall cEOLTerminalRuleCall_4 = (RuleCall)cGroup.eContents().get(4);
-		private final Alternatives cAlternatives_5 = (Alternatives)cGroup.eContents().get(5);
-		private final Assignment cTableAssignment_5_0 = (Assignment)cAlternatives_5.eContents().get(0);
-		private final RuleCall cTableTableParserRuleCall_5_0_0 = (RuleCall)cTableAssignment_5_0.eContents().get(0);
-		private final Assignment cTextAssignment_5_1 = (Assignment)cAlternatives_5.eContents().get(1);
-		private final RuleCall cTextTextParserRuleCall_5_1_0 = (RuleCall)cTextAssignment_5_1.eContents().get(0);
+		private final Assignment cTableAssignment_5 = (Assignment)cGroup.eContents().get(5);
+		private final RuleCall cTableTableParserRuleCall_5_0 = (RuleCall)cTableAssignment_5.eContents().get(0);
+		private final Assignment cTextAssignment_6 = (Assignment)cGroup.eContents().get(6);
+		private final RuleCall cTextTextParserRuleCall_6_0 = (RuleCall)cTextAssignment_6.eContents().get(0);
 		
 		//Then:
 		//    '===' 'Then:' stepObjectName=StepObjectRef stepDefinitionName=StepDefinitionRef EOL
-		//    (table=Table | text=Text)?;
+		//    table=Table?
+		//    text=Text?;
 		@Override public ParserRule getRule() { return rule; }
 		
 		//'===' 'Then:' stepObjectName=StepObjectRef stepDefinitionName=StepDefinitionRef EOL
-		//(table=Table | text=Text)?
+		//table=Table?
+		//text=Text?
 		public Group getGroup() { return cGroup; }
 		
 		//'==='
@@ -621,20 +618,17 @@ public class AsciiDocGrammarAccess extends AbstractElementFinder.AbstractGrammar
 		//EOL
 		public RuleCall getEOLTerminalRuleCall_4() { return cEOLTerminalRuleCall_4; }
 		
-		//(table=Table | text=Text)?
-		public Alternatives getAlternatives_5() { return cAlternatives_5; }
-		
-		//table=Table
-		public Assignment getTableAssignment_5_0() { return cTableAssignment_5_0; }
+		//table=Table?
+		public Assignment getTableAssignment_5() { return cTableAssignment_5; }
 		
 		//Table
-		public RuleCall getTableTableParserRuleCall_5_0_0() { return cTableTableParserRuleCall_5_0_0; }
+		public RuleCall getTableTableParserRuleCall_5_0() { return cTableTableParserRuleCall_5_0; }
 		
-		//text=Text
-		public Assignment getTextAssignment_5_1() { return cTextAssignment_5_1; }
+		//text=Text?
+		public Assignment getTextAssignment_6() { return cTextAssignment_6; }
 		
 		//Text
-		public RuleCall getTextTextParserRuleCall_5_1_0() { return cTextTextParserRuleCall_5_1_0; }
+		public RuleCall getTextTextParserRuleCall_6_0() { return cTextTextParserRuleCall_6_0; }
 	}
 	public class AndElements extends AbstractParserRuleElementFinder {
 		private final ParserRule rule = (ParserRule) GrammarUtil.findRuleForName(getGrammar(), "org.farhan.dsl.asciidoc.AsciiDoc.And");
@@ -646,19 +640,20 @@ public class AsciiDocGrammarAccess extends AbstractElementFinder.AbstractGrammar
 		private final Assignment cStepDefinitionNameAssignment_3 = (Assignment)cGroup.eContents().get(3);
 		private final RuleCall cStepDefinitionNameStepDefinitionRefParserRuleCall_3_0 = (RuleCall)cStepDefinitionNameAssignment_3.eContents().get(0);
 		private final RuleCall cEOLTerminalRuleCall_4 = (RuleCall)cGroup.eContents().get(4);
-		private final Alternatives cAlternatives_5 = (Alternatives)cGroup.eContents().get(5);
-		private final Assignment cTableAssignment_5_0 = (Assignment)cAlternatives_5.eContents().get(0);
-		private final RuleCall cTableTableParserRuleCall_5_0_0 = (RuleCall)cTableAssignment_5_0.eContents().get(0);
-		private final Assignment cTextAssignment_5_1 = (Assignment)cAlternatives_5.eContents().get(1);
-		private final RuleCall cTextTextParserRuleCall_5_1_0 = (RuleCall)cTextAssignment_5_1.eContents().get(0);
+		private final Assignment cTableAssignment_5 = (Assignment)cGroup.eContents().get(5);
+		private final RuleCall cTableTableParserRuleCall_5_0 = (RuleCall)cTableAssignment_5.eContents().get(0);
+		private final Assignment cTextAssignment_6 = (Assignment)cGroup.eContents().get(6);
+		private final RuleCall cTextTextParserRuleCall_6_0 = (RuleCall)cTextAssignment_6.eContents().get(0);
 		
 		//And:
 		//    '===' 'And:' stepObjectName=StepObjectRef stepDefinitionName=StepDefinitionRef EOL
-		//    (table=Table | text=Text)?;
+		//    table=Table?
+		//    text=Text?;
 		@Override public ParserRule getRule() { return rule; }
 		
 		//'===' 'And:' stepObjectName=StepObjectRef stepDefinitionName=StepDefinitionRef EOL
-		//(table=Table | text=Text)?
+		//table=Table?
+		//text=Text?
 		public Group getGroup() { return cGroup; }
 		
 		//'==='
@@ -682,20 +677,17 @@ public class AsciiDocGrammarAccess extends AbstractElementFinder.AbstractGrammar
 		//EOL
 		public RuleCall getEOLTerminalRuleCall_4() { return cEOLTerminalRuleCall_4; }
 		
-		//(table=Table | text=Text)?
-		public Alternatives getAlternatives_5() { return cAlternatives_5; }
-		
-		//table=Table
-		public Assignment getTableAssignment_5_0() { return cTableAssignment_5_0; }
+		//table=Table?
+		public Assignment getTableAssignment_5() { return cTableAssignment_5; }
 		
 		//Table
-		public RuleCall getTableTableParserRuleCall_5_0_0() { return cTableTableParserRuleCall_5_0_0; }
+		public RuleCall getTableTableParserRuleCall_5_0() { return cTableTableParserRuleCall_5_0; }
 		
-		//text=Text
-		public Assignment getTextAssignment_5_1() { return cTextAssignment_5_1; }
+		//text=Text?
+		public Assignment getTextAssignment_6() { return cTextAssignment_6; }
 		
 		//Text
-		public RuleCall getTextTextParserRuleCall_5_1_0() { return cTextTextParserRuleCall_5_1_0; }
+		public RuleCall getTextTextParserRuleCall_6_0() { return cTextTextParserRuleCall_6_0; }
 	}
 	public class TextElements extends AbstractParserRuleElementFinder {
 		private final ParserRule rule = (ParserRule) GrammarUtil.findRuleForName(getGrammar(), "org.farhan.dsl.asciidoc.AsciiDoc.Text");
@@ -802,52 +794,52 @@ public class AsciiDocGrammarAccess extends AbstractElementFinder.AbstractGrammar
 		private final Group cGroup = (Group)rule.eContents().get(1);
 		private final Keyword cVerticalLineKeyword_0 = (Keyword)cGroup.eContents().get(0);
 		private final Assignment cNameAssignment_1 = (Assignment)cGroup.eContents().get(1);
-		private final RuleCall cNameTitleParserRuleCall_1_0 = (RuleCall)cNameAssignment_1.eContents().get(0);
+		private final RuleCall cNamePhraseParserRuleCall_1_0 = (RuleCall)cNameAssignment_1.eContents().get(0);
 		
 		//Cell:
-		//    '|' name=Title;
+		//    '|' name=Phrase;
 		@Override public ParserRule getRule() { return rule; }
 		
-		//'|' name=Title
+		//'|' name=Phrase
 		public Group getGroup() { return cGroup; }
 		
 		//'|'
 		public Keyword getVerticalLineKeyword_0() { return cVerticalLineKeyword_0; }
 		
-		//name=Title
+		//name=Phrase
 		public Assignment getNameAssignment_1() { return cNameAssignment_1; }
 		
-		//Title
-		public RuleCall getNameTitleParserRuleCall_1_0() { return cNameTitleParserRuleCall_1_0; }
+		//Phrase
+		public RuleCall getNamePhraseParserRuleCall_1_0() { return cNamePhraseParserRuleCall_1_0; }
 	}
 	public class LineElements extends AbstractParserRuleElementFinder {
 		private final ParserRule rule = (ParserRule) GrammarUtil.findRuleForName(getGrammar(), "org.farhan.dsl.asciidoc.AsciiDoc.Line");
 		private final Group cGroup = (Group)rule.eContents().get(1);
 		private final Assignment cContentAssignment_0 = (Assignment)cGroup.eContents().get(0);
-		private final RuleCall cContentTitleParserRuleCall_0_0 = (RuleCall)cContentAssignment_0.eContents().get(0);
+		private final RuleCall cContentPhraseParserRuleCall_0_0 = (RuleCall)cContentAssignment_0.eContents().get(0);
 		private final RuleCall cEOLTerminalRuleCall_1 = (RuleCall)cGroup.eContents().get(1);
 		
 		//Line:
-		//    content=Title EOL;
+		//    content=Phrase EOL;
 		@Override public ParserRule getRule() { return rule; }
 		
-		//content=Title EOL
+		//content=Phrase EOL
 		public Group getGroup() { return cGroup; }
 		
-		//content=Title
+		//content=Phrase
 		public Assignment getContentAssignment_0() { return cContentAssignment_0; }
 		
-		//Title
-		public RuleCall getContentTitleParserRuleCall_0_0() { return cContentTitleParserRuleCall_0_0; }
+		//Phrase
+		public RuleCall getContentPhraseParserRuleCall_0_0() { return cContentPhraseParserRuleCall_0_0; }
 		
 		//EOL
 		public RuleCall getEOLTerminalRuleCall_1() { return cEOLTerminalRuleCall_1; }
 	}
-	public class TitleElements extends AbstractParserRuleElementFinder {
-		private final ParserRule rule = (ParserRule) GrammarUtil.findRuleForName(getGrammar(), "org.farhan.dsl.asciidoc.AsciiDoc.Title");
+	public class PhraseElements extends AbstractParserRuleElementFinder {
+		private final ParserRule rule = (ParserRule) GrammarUtil.findRuleForName(getGrammar(), "org.farhan.dsl.asciidoc.AsciiDoc.Phrase");
 		private final RuleCall cWORDTerminalRuleCall = (RuleCall)rule.eContents().get(1);
 		
-		//Title:
+		//Phrase:
 		//    WORD+;
 		@Override public ParserRule getRule() { return rule; }
 		
@@ -969,7 +961,7 @@ public class AsciiDocGrammarAccess extends AbstractElementFinder.AbstractGrammar
 	private final RowElements pRow;
 	private final CellElements pCell;
 	private final LineElements pLine;
-	private final TitleElements pTitle;
+	private final PhraseElements pPhrase;
 	private final StepObjectRefElements pStepObjectRef;
 	private final StepDefinitionRefElements pStepDefinitionRef;
 	private final TerminalRule tWS;
@@ -1003,7 +995,7 @@ public class AsciiDocGrammarAccess extends AbstractElementFinder.AbstractGrammar
 		this.pRow = new RowElements();
 		this.pCell = new CellElements();
 		this.pLine = new LineElements();
-		this.pTitle = new TitleElements();
+		this.pPhrase = new PhraseElements();
 		this.pStepObjectRef = new StepObjectRefElements();
 		this.pStepDefinitionRef = new StepDefinitionRefElements();
 		this.tWS = (TerminalRule) GrammarUtil.findRuleForName(getGrammar(), "org.farhan.dsl.asciidoc.AsciiDoc.WS");
@@ -1047,7 +1039,7 @@ public class AsciiDocGrammarAccess extends AbstractElementFinder.AbstractGrammar
 	}
 	
 	//StepObject:
-	//    '=' 'Step-Object:' name=Title EOL
+	//    '=' 'Step-Object:' name=Phrase EOL
 	//    description=Description?
 	//    stepDefinitionList+=StepDefinition*;
 	public StepObjectElements getStepObjectAccess() {
@@ -1059,7 +1051,7 @@ public class AsciiDocGrammarAccess extends AbstractElementFinder.AbstractGrammar
 	}
 	
 	//StepDefinition:
-	//    '==' 'Step-Definition:' name=Title EOL
+	//    '==' 'Step-Definition:' name=Phrase EOL
 	//    description=Description?
 	//    stepParameterList+=StepParameters*;
 	public StepDefinitionElements getStepDefinitionAccess() {
@@ -1071,9 +1063,9 @@ public class AsciiDocGrammarAccess extends AbstractElementFinder.AbstractGrammar
 	}
 	
 	//StepParameters:
-	//    '===' 'Step-Parameters:' name=Title EOL
+	//    '===' 'Step-Parameters:' name=Phrase EOL
 	//    description=Description?
-	//    table=Table;
+	//    table=Table?;
 	public StepParametersElements getStepParametersAccess() {
 		return pStepParameters;
 	}
@@ -1083,7 +1075,7 @@ public class AsciiDocGrammarAccess extends AbstractElementFinder.AbstractGrammar
 	}
 	
 	//TestSuite:
-	//    '=' 'Test-Suite:' name=Title EOL
+	//    '=' 'Test-Suite:' name=Phrase EOL
 	//    description=Description?
 	//    testStepContainerList+=TestStepContainer*;
 	public TestSuiteElements getTestSuiteAccess() {
@@ -1105,7 +1097,7 @@ public class AsciiDocGrammarAccess extends AbstractElementFinder.AbstractGrammar
 	}
 	
 	//TestSetup:
-	//    '==' 'Test-Setup:' name=Title EOL
+	//    '==' 'Test-Setup:' name=Phrase EOL
 	//    description=Description?
 	//    testStepList+=TestStep*;
 	public TestSetupElements getTestSetupAccess() {
@@ -1117,7 +1109,7 @@ public class AsciiDocGrammarAccess extends AbstractElementFinder.AbstractGrammar
 	}
 	
 	//TestCase:
-	//    '==' 'Test-Case:' name=Title EOL
+	//    '==' 'Test-Case:' name=Phrase EOL
 	//    description=Description?
 	//    testStepList+=TestStep*
 	//    testDataList+=TestData*;
@@ -1130,9 +1122,9 @@ public class AsciiDocGrammarAccess extends AbstractElementFinder.AbstractGrammar
 	}
 	
 	//TestData:
-	//    '===' 'Test-Data:' name=Title EOL
+	//    '===' 'Test-Data:' name=Phrase EOL
 	//    description=Description?
-	//    table=Table;
+	//    table=Table?;
 	public TestDataElements getTestDataAccess() {
 		return pTestData;
 	}
@@ -1153,7 +1145,8 @@ public class AsciiDocGrammarAccess extends AbstractElementFinder.AbstractGrammar
 	
 	//Given:
 	//    '===' 'Given:' stepObjectName=StepObjectRef stepDefinitionName=StepDefinitionRef EOL
-	//    (table=Table | text=Text)?;
+	//    table=Table?
+	//    text=Text?;
 	public GivenElements getGivenAccess() {
 		return pGiven;
 	}
@@ -1164,7 +1157,8 @@ public class AsciiDocGrammarAccess extends AbstractElementFinder.AbstractGrammar
 	
 	//When:
 	//    '===' 'When:' stepObjectName=StepObjectRef stepDefinitionName=StepDefinitionRef EOL
-	//    (table=Table | text=Text)?;
+	//    table=Table?
+	//    text=Text?;
 	public WhenElements getWhenAccess() {
 		return pWhen;
 	}
@@ -1175,7 +1169,8 @@ public class AsciiDocGrammarAccess extends AbstractElementFinder.AbstractGrammar
 	
 	//Then:
 	//    '===' 'Then:' stepObjectName=StepObjectRef stepDefinitionName=StepDefinitionRef EOL
-	//    (table=Table | text=Text)?;
+	//    table=Table?
+	//    text=Text?;
 	public ThenElements getThenAccess() {
 		return pThen;
 	}
@@ -1186,7 +1181,8 @@ public class AsciiDocGrammarAccess extends AbstractElementFinder.AbstractGrammar
 	
 	//And:
 	//    '===' 'And:' stepObjectName=StepObjectRef stepDefinitionName=StepDefinitionRef EOL
-	//    (table=Table | text=Text)?;
+	//    table=Table?
+	//    text=Text?;
 	public AndElements getAndAccess() {
 		return pAnd;
 	}
@@ -1238,7 +1234,7 @@ public class AsciiDocGrammarAccess extends AbstractElementFinder.AbstractGrammar
 	}
 	
 	//Cell:
-	//    '|' name=Title;
+	//    '|' name=Phrase;
 	public CellElements getCellAccess() {
 		return pCell;
 	}
@@ -1248,7 +1244,7 @@ public class AsciiDocGrammarAccess extends AbstractElementFinder.AbstractGrammar
 	}
 	
 	//Line:
-	//    content=Title EOL;
+	//    content=Phrase EOL;
 	public LineElements getLineAccess() {
 		return pLine;
 	}
@@ -1257,14 +1253,14 @@ public class AsciiDocGrammarAccess extends AbstractElementFinder.AbstractGrammar
 		return getLineAccess().getRule();
 	}
 	
-	//Title:
+	//Phrase:
 	//    WORD+;
-	public TitleElements getTitleAccess() {
-		return pTitle;
+	public PhraseElements getPhraseAccess() {
+		return pPhrase;
 	}
 	
-	public ParserRule getTitleRule() {
-		return getTitleAccess().getRule();
+	public ParserRule getPhraseRule() {
+		return getPhraseAccess().getRule();
 	}
 	
 	//// TODO the regular expression here is a partial duplication of what's in sheep-dog-test
