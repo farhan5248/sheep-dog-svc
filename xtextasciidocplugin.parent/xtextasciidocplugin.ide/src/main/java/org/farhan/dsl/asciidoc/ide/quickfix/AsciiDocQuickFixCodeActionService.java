@@ -201,8 +201,8 @@ public class AsciiDocQuickFixCodeActionService extends QuickFixCodeActionService
 			VersionedTextDocumentIdentifier textDocId) throws Exception {
 		TextEdit textEdit = new TextEdit();
 		textEdit.setRange(range);
-		if (p.getValue() instanceof org.farhan.dsl.grammar.IStepObject) {
-			org.farhan.dsl.grammar.IStepObject stepObject = (org.farhan.dsl.grammar.IStepObject) p.getValue();
+		if (p.getValue() instanceof org.farhan.dsl.asciidoc.impl.StepObjectImpl) {
+			org.farhan.dsl.asciidoc.impl.StepObjectImpl stepObject = (org.farhan.dsl.asciidoc.impl.StepObjectImpl) p.getValue();
 			textEdit.setNewText(stepObject.getContent());
 		} else {
 			textEdit.setNewText(p.getValue().toString());
