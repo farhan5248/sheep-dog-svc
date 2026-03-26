@@ -23,6 +23,7 @@ public class StepObjectImpl implements IStepObject {
 
 	StepObject eObject;
 	private String qualifiedName;
+	private Object container;
 
 	public StepObjectImpl(StepObject eObject) {
 		this.eObject = eObject;
@@ -87,6 +88,17 @@ public class StepObjectImpl implements IStepObject {
 	@Override
 	public void setDescription(IDescription value) {
 		eObject.setDescription(((DescriptionImpl) value).eObject);
+	}
+
+	@Override
+	public Object getContainer() {
+		if (container != null) return container;
+		return org.farhan.dsl.grammar.SheepDogFactory.instance.createTestProject();
+	}
+
+	@Override
+	public void setContainer(Object value) {
+		this.container = value;
 	}
 
 }

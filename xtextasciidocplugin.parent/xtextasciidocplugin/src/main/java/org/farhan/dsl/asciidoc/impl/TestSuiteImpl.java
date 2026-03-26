@@ -11,6 +11,7 @@ import org.farhan.dsl.asciidoc.asciiDoc.TestSuite;
 public class TestSuiteImpl implements ITestSuite {
 
 	TestSuite eObject;
+	private Object container;
 
 	public TestSuiteImpl(TestSuite testSuite) {
 		this.eObject = testSuite;
@@ -65,6 +66,17 @@ public class TestSuiteImpl implements ITestSuite {
 
 	public void setContent(String text) {
 		throw new UnsupportedOperationException("setContent(String text) is not implemented");
+	}
+
+	@Override
+	public Object getContainer() {
+		if (container != null) return container;
+		return org.farhan.dsl.grammar.SheepDogFactory.instance.createTestProject();
+	}
+
+	@Override
+	public void setContainer(Object value) {
+		this.container = value;
 	}
 
 }

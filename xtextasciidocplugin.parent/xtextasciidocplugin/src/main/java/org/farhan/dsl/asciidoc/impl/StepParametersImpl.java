@@ -7,6 +7,7 @@ import org.farhan.dsl.asciidoc.asciiDoc.StepParameters;
 
 public class StepParametersImpl implements IStepParameters {
     StepParameters eObject;
+    private Object container;
 
     public StepParametersImpl(StepParameters stepParameters) {
         eObject = stepParameters;
@@ -43,6 +44,17 @@ public class StepParametersImpl implements IStepParameters {
     @Override
     public void setDescription(IDescription value) {
         eObject.setDescription(((DescriptionImpl) value).eObject);
+    }
+
+    @Override
+    public Object getContainer() {
+        if (container != null) return container;
+        return new StepDefinitionImpl((org.farhan.dsl.asciidoc.asciiDoc.StepDefinition) eObject.eContainer());
+    }
+
+    @Override
+    public void setContainer(Object value) {
+        this.container = value;
     }
 
 }

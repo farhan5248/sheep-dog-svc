@@ -9,6 +9,7 @@ import org.farhan.dsl.asciidoc.asciiDoc.TestStep;
 public class TestStepImpl implements ITestStep {
 
     TestStep eObject;
+    private Object container;
 
     public TestStepImpl(TestStep testStep) {
         this.eObject = testStep;
@@ -75,5 +76,20 @@ public class TestStepImpl implements ITestStep {
     @Override
     public void setStepDefinitionName(String value) {
         eObject.setStepDefinitionName(value);
+    }
+
+    @Override
+    public Object getContainer() {
+        if (container != null) return container;
+        if (eObject.eContainer() instanceof org.farhan.dsl.asciidoc.asciiDoc.TestCase) {
+            return new TestCaseImpl((org.farhan.dsl.asciidoc.asciiDoc.TestCase) eObject.eContainer());
+        } else {
+            return new TestSetupImpl((org.farhan.dsl.asciidoc.asciiDoc.TestSetup) eObject.eContainer());
+        }
+    }
+
+    @Override
+    public void setContainer(Object value) {
+        this.container = value;
     }
 }

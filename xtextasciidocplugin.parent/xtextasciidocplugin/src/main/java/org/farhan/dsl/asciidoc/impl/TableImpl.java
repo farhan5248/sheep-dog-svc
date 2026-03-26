@@ -11,6 +11,7 @@ public class TableImpl implements ITable {
 
 	Table eObject;
 	private EList<IRow> rowList;
+	private Object container;
 
 	public TableImpl(Table table) {
 		this.eObject = table;
@@ -24,6 +25,17 @@ public class TableImpl implements ITable {
 			rowList.add(new RowImpl(row));
 		}
 		return rowList;
+	}
+
+	@Override
+	public Object getContainer() {
+		if (container != null) return container;
+		return eObject.eContainer();
+	}
+
+	@Override
+	public void setContainer(Object value) {
+		this.container = value;
 	}
 
 }

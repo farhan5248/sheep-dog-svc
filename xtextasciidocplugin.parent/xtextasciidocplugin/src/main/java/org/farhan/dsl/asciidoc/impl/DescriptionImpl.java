@@ -10,6 +10,7 @@ import org.farhan.dsl.asciidoc.asciiDoc.Line;
 public class DescriptionImpl implements IDescription {
 
 	Description eObject;
+	private Object container;
 
 	public DescriptionImpl(Description description) {
 		this.eObject = description;
@@ -22,6 +23,17 @@ public class DescriptionImpl implements IDescription {
 			lineList.add(new LineImpl(l));
 		}
 		return lineList;
+	}
+
+	@Override
+	public Object getContainer() {
+		if (container != null) return container;
+		return eObject.eContainer();
+	}
+
+	@Override
+	public void setContainer(Object value) {
+		this.container = value;
 	}
 
 }

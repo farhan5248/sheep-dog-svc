@@ -11,6 +11,7 @@ import org.farhan.dsl.asciidoc.asciiDoc.TestStepContainer;
 public class TestStepContainerImpl implements ITestStepContainer {
 
     TestStepContainer eObject;
+    private Object container;
 
     public TestStepContainerImpl(TestStepContainer testCase) {
         this.eObject = testCase;
@@ -47,6 +48,17 @@ public class TestStepContainerImpl implements ITestStepContainer {
     @Override
     public void setDescription(IDescription value) {
         throw new UnsupportedOperationException("setDescription(IDescription value) is not implemented");
+    }
+
+    @Override
+    public Object getContainer() {
+        if (container != null) return container;
+        return new TestSuiteImpl((org.farhan.dsl.asciidoc.asciiDoc.TestSuite) eObject.eContainer());
+    }
+
+    @Override
+    public void setContainer(Object value) {
+        this.container = value;
     }
 
 }

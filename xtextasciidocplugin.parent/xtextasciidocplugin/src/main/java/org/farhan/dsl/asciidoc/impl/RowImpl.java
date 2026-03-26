@@ -10,6 +10,7 @@ import org.farhan.dsl.asciidoc.asciiDoc.Row;
 public class RowImpl implements IRow {
 
 	Row eObject;
+	private Object container;
 
 	public RowImpl(Row row) {
 		this.eObject = row;
@@ -27,6 +28,17 @@ public class RowImpl implements IRow {
 	@Override
 	public boolean equals(Object object) {
 		return eObject.equals(((RowImpl) object).eObject);
+	}
+
+	@Override
+	public Object getContainer() {
+		if (container != null) return container;
+		return new TableImpl((org.farhan.dsl.asciidoc.asciiDoc.Table) eObject.eContainer());
+	}
+
+	@Override
+	public void setContainer(Object value) {
+		this.container = value;
 	}
 
 }
