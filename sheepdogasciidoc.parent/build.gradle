@@ -1,0 +1,119 @@
+buildscript {
+	repositories {
+		mavenCentral()
+		maven {
+			url = "https://plugins.gradle.org/m2/"
+		}
+	}
+	dependencies {
+		classpath 'org.xtext:xtext-gradle-plugin:4.0.0'
+		classpath 'net.researchgate:gradle-release:3.1.0'
+	}
+}
+
+apply plugin: 'net.researchgate.release'
+
+// Root project version is set in gradle.properties
+
+// Configuration for Xtext projects
+configure(subprojects.findAll { it.name.startsWith('xtextasciidocplugin') && !it.name.contains('.vscode') }) {
+	ext.xtextVersion = '2.40.0'
+	ext.sheepDogTestVersion = '1.41-SNAPSHOT'
+	ext.slf4jVersion = '2.0.16'
+	ext.logbackVersion = '1.5.12'
+	repositories {
+		mavenLocal()
+		mavenCentral()
+		maven {
+			url = "https://maven.pkg.github.com/farhan5248/sheep-dog-local"
+			credentials {
+				username = project.findProperty("gpr.user") ?: 'farhan5248'
+				password = project.findProperty("gpr.key") ?: System.getenv("GITHUB_TOKEN")
+			}
+		}
+		maven {
+			url = "https://repo.eclipse.org/content/groups/releases/"
+		}
+	}
+	
+	apply plugin: 'java-library'
+	apply plugin: 'maven-publish'
+	apply plugin: 'jacoco'
+	dependencies {
+		api platform("org.eclipse.xtext:xtext-dev-bom:${xtextVersion}")
+	}
+	apply plugin: 'org.xtext.xtend'
+	apply from: "${rootDir}/gradle/source-layout.gradle"
+	apply plugin: 'eclipse'
+	apply plugin: 'idea'
+
+	jacoco {
+		toolVersion = '0.8.14'
+	}
+
+	test {
+		useJUnitPlatform()
+		finalizedBy jacocoTestReport
+	}
+
+	jacocoTestReport {
+		dependsOn test
+		reports {
+			xml.required = true
+			html.required = true
+		}
+	}
+	
+	group = 'org.farhan'
+	version = rootProject.version
+	
+	java {
+		sourceCompatibility = JavaVersion.VERSION_21
+		targetCompatibility = JavaVersion.VERSION_21
+	}
+	
+	configurations.all {
+		exclude group: 'asm'
+	}
+
+	publishing {
+		publications {
+			maven(MavenPublication) {
+				from components.java
+
+				groupId = 'org.farhan'
+				artifactId = project.name
+				version = project.version
+			}
+		}
+		repositories {
+			maven {
+				name = "GitHub"
+				url = uri("https://maven.pkg.github.com/farhan5248/sheep-dog-cloud")
+				credentials {
+					username = project.findProperty("gpr.user") ?: 'farhan5248'
+					password = project.findProperty("gpr.key") ?: System.getenv("GITHUB_TOKEN")
+				}
+			}
+		}
+	}
+	
+	// Make publish behave like Maven's deploy (install + deploy)
+	publish.dependsOn publishToMavenLocal
+
+}
+
+tasks.register('stripSnapshotDeps', StripSnapshotTask)
+tasks.register('restoreSnapshotDeps', RestoreSnapshotTask)
+
+beforeReleaseBuild.dependsOn stripSnapshotDeps
+updateVersion.finalizedBy restoreSnapshotDeps
+
+release {
+    tagTemplate = 'v${version}'
+	preTagCommitMessage = '[release] pre tag commit: '
+    tagCommitMessage = '[release] creating tag: '
+    newVersionCommitMessage = '[release] new version commit: '
+    failOnSnapshotDependencies = false
+    buildTasks = [':xtextasciidocplugin:publish', ':xtextasciidocplugin.ide:publish']
+}

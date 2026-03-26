@@ -1,0 +1,35 @@
+{
+  "languageServer": {
+    "port": 5009,
+    "timeout": 45000,
+    "maxRetries": 5
+  },
+  "debug": {
+    "enabled": false,
+    "verboseLogging": true
+  },
+  "features": {
+    "validation": {
+      "strictMode": true
+    },
+    "completion": {
+      "maxSuggestions": 75
+    },
+    "formatting": {
+      "preserveWhitespace": true,
+      "indentSize": 4
+    },
+    "outline": {
+      "showImages": true
+    }
+  },
+  "ui": {
+    "notifications": {
+      "info": true
+    }
+  },
+  "performance": {
+    "maxFileSize": 15728640,
+    "enableBackgroundProcessing": true
+  }
+}

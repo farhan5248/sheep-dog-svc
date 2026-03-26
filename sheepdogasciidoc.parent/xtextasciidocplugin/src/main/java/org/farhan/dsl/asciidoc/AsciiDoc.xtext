@@ -1,0 +1,125 @@
+// TODO try using the built in terminals instead and override them
+grammar org.farhan.dsl.asciidoc.AsciiDoc hidden(WS, SL_COMMENT)
+
+import "http://www.eclipse.org/emf/2002/Ecore" as ecore
+generate asciiDoc "http://www.farhan.org/dsl/asciidoc/AsciiDoc"
+
+Model:
+	StepObject | TestSuite;
+
+StepObject:
+	'=' 'Step-Object:' name=Phrase EOL
+	description=Description?
+	stepDefinitionList+=StepDefinition*;
+
+StepDefinition:
+	'==' 'Step-Definition:' name=Phrase EOL
+	description=Description?
+	stepParameterList+=StepParameters*;
+
+StepParameters:
+	'===' 'Step-Parameters:' name=Phrase EOL
+	description=Description?
+	table=Table?;
+
+TestSuite:
+	'=' 'Test-Suite:' name=Phrase EOL
+	description=Description?
+	testStepContainerList+=TestStepContainer*;
+
+TestStepContainer:
+	TestSetup | TestCase;
+
+TestSetup:
+	'==' 'Test-Setup:' name=Phrase EOL
+	description=Description?
+	testStepList+=TestStep*;
+
+TestCase:
+	'==' 'Test-Case:' name=Phrase EOL
+	description=Description?
+	testStepList+=TestStep*
+	testDataList+=TestData*;
+
+TestData:
+	'===' 'Test-Data:' name=Phrase EOL
+	description=Description?
+	table=Table?;
+
+TestStep:
+	Given | When | Then | And;
+
+Given:
+	'===' 'Given:' stepObjectName=StepObjectRef stepDefinitionName=StepDefinitionRef EOL
+	table=Table?
+	text=Text?;
+
+When:
+	'===' 'When:' stepObjectName=StepObjectRef stepDefinitionName=StepDefinitionRef EOL
+	table=Table?
+	text=Text?;
+
+Then:
+	'===' 'Then:' stepObjectName=StepObjectRef stepDefinitionName=StepDefinitionRef EOL
+	table=Table?
+	text=Text?;
+
+And:
+	'===' 'And:' stepObjectName=StepObjectRef stepDefinitionName=StepDefinitionRef EOL
+	table=Table?
+	text=Text?;
+
+Text:
+	content=TEXT_BLOCK EOL;
+
+Description:
+	lineList+=Line+;
+
+Table:
+	'|===' EOL
+	rowList+=Row+
+	'|===' EOL;
+
+Row:
+	cellList+=Cell+ EOL;
+
+Cell:
+	'|' name=Phrase;
+
+Line:
+	content=Phrase EOL;
+
+Phrase:
+	WORD+;
+
+// TODO the regular expression here is a partial duplication of what's in sheep-dog-test
+// It should only be defined here but that is more work than I want to do right now
+// When testing sheep-dog-test, it doesn't need a regex.
+// It's enough that the Impl classes return what parts it needs.
+// If all the parts accessible from the utility are defined here, 
+// then the TestStepImpl class + its utility can extract that information
+// Also any tests in sheep-dog-test must be implemented in the xtext project
+// to make sure the Impl classes have implemented this correctly
+// For now I'm putting the whole regex to make it possible to distinguish between STEP_OBJECT and STEP_DEFINITION
+// without breaking it up into its parts
+// TODO do I need to define single spaces?
+StepObjectRef:
+	WORD+ ('file' | 'page' | 'response' | 'dialog' | 'directory' | 'request' | 'goal' | 'job' | 'action' | 'popup' | 'annotation' | 'hover' | 'tooltip');
+
+StepDefinitionRef:
+	WORD+;
+
+terminal WS:
+	(' ' | '\t' | '\r')+;
+
+terminal SL_COMMENT:
+	'#' !('\n')* EOL;
+
+terminal EOL:
+	('\n')+;
+
+terminal TEXT_BLOCK:
+	'----' '\n' (.)+ '\n' '----';
+
+terminal WORD:
+	!(' ' | '\t' | '\r' | '\n')+;

@@ -42,7 +42,14 @@ jobs:
       project: 'darmok-maven-plugin'
     secrets: inherit
 
+  sheepdog-asciidoc:
+    uses: farhan5248/sheep-dog-ops/.github/workflows/gradle-snapshot.yml@main
+    with:
+      project: 'sheepdogasciidoc.parent'
+    secrets: inherit
+
   xtext-asciidoc-plugin:
+    needs: [sheepdog-asciidoc]
     uses: farhan5248/sheep-dog-ops/.github/workflows/gradle-snapshot.yml@main
     with:
       project: 'xtextasciidocplugin.parent'

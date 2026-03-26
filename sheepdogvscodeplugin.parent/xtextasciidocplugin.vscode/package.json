@@ -1,0 +1,484 @@
+{
+    "name": "xtext-asciidoc-plugin",
+    "displayName": "Xtext AsciiDoc Plugin",
+    "description": "Xtext AsciiDoc Plugin for VS Code",
+    "version": "1.0.0-SNAPSHOT",
+    "publisher": "sheep-dog-tools",
+    "icon": "images/xtext.png",
+    "license": "EPL-1.0",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/xtext/xtext-languageserver-example.git"
+    },
+    "bugs": {
+        "url": "https://github.com/xtext/xtext-languageserver-example/issues"
+    },
+    "engines": {
+        "vscode": "^1.103.0"
+    },
+    "categories": [
+        "Programming Languages"
+    ],
+    "activationEvents": [],
+    "main": "out/extension",
+    "contributes": {
+        "languages": [
+            {
+                "id": "asciidoc",
+                "aliases": [
+                    "asciidoc"
+                ],
+                "extensions": [
+                    ".asciidoc"
+                ],
+                "configuration": "./asciidoc.configuration.json"
+            }
+        ],
+        "grammars": [
+            {
+                "language": "asciidoc",
+                "scopeName": "source.asciidoc.sheepdog",
+                "path": "./syntaxes/asciidoc.tmLanguage.json"
+            }
+        ],
+        "commands": [
+            {
+                "command": "asciidoc.server.restart",
+                "title": "Restart Language Server",
+                "category": "AsciiDoc Server"
+            },
+            {
+                "command": "asciidoc.server.start",
+                "title": "Start Language Server",
+                "category": "AsciiDoc Server"
+            },
+            {
+                "command": "asciidoc.server.stop",
+                "title": "Stop Language Server",
+                "category": "AsciiDoc Server"
+            },
+            {
+                "command": "asciidoc.server.showHealth",
+                "title": "Show Server Health",
+                "category": "AsciiDoc Server"
+            },
+            {
+                "command": "asciidoc.server.showCapabilities",
+                "title": "Show Server Capabilities",
+                "category": "AsciiDoc Server"
+            },
+            {
+                "command": "asciidoc.server.generateCode",
+                "title": "Generate Code",
+                "category": "AsciiDoc Server"
+            },
+            {
+                "command": "asciidoc.logging.setLevel",
+                "title": "Set Logging Level",
+                "category": "AsciiDoc Logging"
+            },
+            {
+                "command": "asciidoc.logging.showOutput",
+                "title": "Show Extension Logs",
+                "category": "AsciiDoc Logging"
+            },
+            {
+                "command": "asciidoc.logging.showServerOutput",
+                "title": "Show Language Server Logs",
+                "category": "AsciiDoc Logging"
+            },
+            {
+                "command": "asciidoc.logging.clearLogs",
+                "title": "Clear All Logs",
+                "category": "AsciiDoc Logging"
+            },
+            {
+                "command": "asciidoc.logging.exportLogs",
+                "title": "Export Logs to File",
+                "category": "AsciiDoc Logging"
+            },
+            {
+                "command": "asciidoc.server.validateWorkspace",
+                "title": "Validate All Workspace Files",
+                "category": "AsciiDoc Server"
+            }
+        ],
+        "menus": {
+            "commandPalette": [
+                {
+                    "command": "asciidoc.server.generateCode",
+                    "when": "editorLangId == asciidoc"
+                },
+                {
+                    "command": "asciidoc.server.validateWorkspace"
+                }
+            ]
+        },
+        "keybindings": [
+            {
+                "command": "asciidoc.server.generateCode",
+                "key": "ctrl+shift+g",
+                "mac": "cmd+shift+g",
+                "when": "editorLangId == asciidoc"
+            },
+            {
+                "command": "asciidoc.server.validateWorkspace",
+                "key": "ctrl+shift+r",
+                "mac": "cmd+shift+r"
+            }
+        ],
+        "configuration": {
+            "type": "object",
+            "title": "Xtext AsciiDoc Configuration",
+            "properties": {
+                "asciidoc.languageServer.enabled": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Enable/disable the Xtext AsciiDoc language server"
+                },
+                "asciidoc.languageServer.port": {
+                    "type": "number",
+                    "default": 5008,
+                    "minimum": 1024,
+                    "maximum": 65535,
+                    "description": "Port for the AsciiDoc language server to bind to"
+                },
+                "asciidoc.languageServer.timeout": {
+                    "type": "number",
+                    "default": 30000,
+                    "minimum": 1000,
+                    "maximum": 120000,
+                    "description": "Timeout in milliseconds for language server operations"
+                },
+                "asciidoc.languageServer.maxRetries": {
+                    "type": "number",
+                    "default": 3,
+                    "minimum": 0,
+                    "maximum": 10,
+                    "description": "Maximum number of retry attempts when starting the language server"
+                },
+                "asciidoc.languageServer.restartOnConfigChange": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Automatically restart the language server when configuration changes"
+                },
+                "asciidoc.logDirectory": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Directory for language server logs (defaults to system temp directory)"
+                },
+                "asciidoc.debug.enabled": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Enable debug mode for the language server"
+                },
+                "asciidoc.debug.port": {
+                    "type": "number",
+                    "default": 8000,
+                    "minimum": 1024,
+                    "maximum": 65535,
+                    "description": "Debug port for Java debugging (when debug mode is enabled)"
+                },
+                "asciidoc.debug.verboseLogging": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Enable verbose debug logging for troubleshooting"
+                },
+                "asciidoc.logging.level": {
+                    "type": "string",
+                    "enum": [
+                        "OFF",
+                        "ERROR",
+                        "WARN",
+                        "INFO",
+                        "DEBUG",
+                        "TRACE"
+                    ],
+                    "default": "INFO",
+                    "description": "Set the logging level for the extension and language server",
+                    "enumDescriptions": [
+                        "Turn off all logging",
+                        "Only log errors and critical issues",
+                        "Log warnings and errors",
+                        "Log general information, warnings, and errors",
+                        "Log detailed debugging information",
+                        "Log all activity including LSP communication traces"
+                    ]
+                },
+                "asciidoc.logging.logRequests": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Log all LSP requests sent to the language server"
+                },
+                "asciidoc.logging.logResponses": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Log all LSP responses received from the language server"
+                },
+                "asciidoc.logging.logNotifications": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Log all LSP notifications (both sent and received)"
+                },
+                "asciidoc.logging.logLifecycleEvents": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Log language server lifecycle events (start, stop, restart)"
+                },
+                "asciidoc.logging.logServerOutput": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Log raw output from the language server process"
+                },
+                "asciidoc.logging.maxLogEntries": {
+                    "type": "number",
+                    "default": 1000,
+                    "minimum": 100,
+                    "maximum": 10000,
+                    "description": "Maximum number of log entries to keep in memory"
+                },
+                "asciidoc.trace.server": {
+                    "type": "string",
+                    "enum": [
+                        "off",
+                        "messages",
+                        "verbose"
+                    ],
+                    "default": "off",
+                    "description": "Trace level for language server protocol communication"
+                },
+                "asciidoc.trace.level": {
+                    "type": "string",
+                    "enum": [
+                        "Off",
+                        "Messages",
+                        "Verbose"
+                    ],
+                    "default": "Messages",
+                    "description": "Legacy trace level setting (kept for backward compatibility)"
+                },
+                "asciidoc.features.validation.enabled": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Enable real-time validation of AsciiDoc content"
+                },
+                "asciidoc.features.validation.strictMode": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Enable strict validation mode with additional checks"
+                },
+                "asciidoc.features.completion.enabled": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Enable code completion and content assist"
+                },
+                "asciidoc.features.completion.snippets": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Include snippets in code completion suggestions"
+                },
+                "asciidoc.features.completion.maxSuggestions": {
+                    "type": "number",
+                    "default": 50,
+                    "minimum": 10,
+                    "maximum": 200,
+                    "description": "Maximum number of completion suggestions to show"
+                },
+                "asciidoc.features.formatting.enabled": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Enable document formatting support"
+                },
+                "asciidoc.features.formatting.preserveWhitespace": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Preserve original whitespace when formatting documents"
+                },
+                "asciidoc.features.formatting.indentSize": {
+                    "type": "number",
+                    "default": 2,
+                    "minimum": 1,
+                    "maximum": 8,
+                    "description": "Number of spaces to use for indentation"
+                },
+                "asciidoc.features.hover.enabled": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Enable hover information and documentation"
+                },
+                "asciidoc.features.references.enabled": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Enable find references and goto definition"
+                },
+                "asciidoc.features.outline.enabled": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Enable document outline and symbol navigation"
+                },
+                "asciidoc.features.outline.showSections": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Show section headers in the document outline"
+                },
+                "asciidoc.features.outline.showTables": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Show tables in the document outline"
+                },
+                "asciidoc.features.outline.showImages": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Show image references in the document outline"
+                },
+                "asciidoc.ui.statusBar.enabled": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Show language server status in the status bar"
+                },
+                "asciidoc.ui.notifications.errors": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Show error notifications for language server issues"
+                },
+                "asciidoc.ui.notifications.warnings": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Show warning notifications for potential issues"
+                },
+                "asciidoc.ui.notifications.info": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Show informational notifications"
+                },
+                "asciidoc.workspace.enableGlobalSettings": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Enable workspace-level configuration override"
+                },
+                "asciidoc.workspace.configurationFiles": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "default": [
+                        ".asciidoc.json",
+                        "asciidoc.config.json"
+                    ],
+                    "description": "Configuration file names to search for in workspace"
+                },
+                "asciidoc.performance.maxFileSize": {
+                    "type": "number",
+                    "default": 10485760,
+                    "minimum": 1048576,
+                    "maximum": 104857600,
+                    "description": "Maximum file size in bytes for language server processing (10MB default)"
+                },
+                "asciidoc.performance.enableBackgroundProcessing": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Enable background processing for large documents"
+                }
+            }
+        },
+        "configurationDefaults": {
+            "editor.tokenColorCustomizations": {
+                "textMateRules": [
+                    {
+                        "scope": "keyword.control.level1.sheepdog-asciidoc",
+                        "settings": {
+                            "foreground": "#400040",
+                            "fontStyle": "bold"
+                        }
+                    },
+                    {
+                        "scope": "keyword.control.level2.sheepdog-asciidoc",
+                        "settings": {
+                            "foreground": "#800080",
+                            "fontStyle": "bold"
+                        }
+                    },
+                    {
+                        "scope": "keyword.control.level3.sheepdog-asciidoc",
+                        "settings": {
+                            "foreground": "#800040",
+                            "fontStyle": "bold"
+                        }
+                    },
+                    {
+                        "scope": "comment.line.number-sign.sheepdog-asciidoc",
+                        "settings": {
+                            "foreground": "#FF8000",
+                            "fontStyle": "italic"
+                        }
+                    },
+                    {
+                        "scope": "entity.name.tag.sheepdog-asciidoc",
+                        "settings": {
+                            "foreground": "#FFC90E",
+                            "fontStyle": "bold"
+                        }
+                    },
+                    {
+                        "scope": "keyword.other.todo.sheepdog-asciidoc",
+                        "settings": {
+                            "foreground": "#00C0C0",
+                            "fontStyle": "bold italic"
+                        }
+                    },
+                    {
+                        "scope": "string.unquoted.statement.sheepdog-asciidoc",
+                        "settings": {
+                            "foreground": "#404040"
+                        }
+                    },
+                    {
+                        "scope": "string.unquoted.raw.text.sheepdog-asciidoc",
+                        "settings": {
+                            "foreground": "#804000"
+                        }
+                    },
+                    {
+                        "scope": [
+                            "string.unquoted.table.cell.sheepdog-asciidoc",
+                            "punctuation.definition.table.delimiter.sheepdog-asciidoc",
+                            "punctuation.definition.table.cell.sheepdog-asciidoc"
+                        ],
+                        "settings": {
+                            "foreground": "#A349A4",
+                            "fontStyle": "bold"
+                        }
+                    },
+                    {
+                        "scope": "variable.parameter.sheepdog-asciidoc",
+                        "settings": {
+                            "foreground": "#00C0C0"
+                        }
+                    },
+                    {
+                        "scope": "entity.name.section.sheepdog-asciidoc",
+                        "settings": {
+                            "foreground": "#404040"
+                        }
+                    }
+                ]
+            }
+        }
+    },
+    "devDependencies": {
+        "@types/node": "^20.19.11",
+        "@types/vscode": "^1.103.0",
+        "typescript": "^5.9.2",
+        "@vscode/test-electron": "^2.5.2",
+        "@vscode/vsce": "^3.6.0"
+    },
+    "dependencies": {
+        "vscode-languageclient": "^9.0.1"
+    },
+    "scripts": {
+        "prepublish": "tsc -p ./src",
+        "compile": "tsc -p ./src",
+        "watch": "tsc -w -p ./src",
+        "update-vscode": "node ./node_modules/vscode/bin/install"
+    }
+}

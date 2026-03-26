@@ -1,0 +1,55 @@
+task copyApplication(type: Sync) {
+    dependsOn ':xtextasciidocplugin.ide:installDist'
+    from { project(':xtextasciidocplugin.ide').tasks.installDist.outputs }
+    into 'src/asciidoc'
+}
+
+task cleanCopyApplication(type: Delete) {
+    delete copyApplication.outputs
+}
+
+// Hook the clean task from the root configuration
+afterEvaluate {
+    if (tasks.findByName('clean')) {
+        clean.dependsOn cleanCopyApplication
+    }
+}
+
+npmInstall.dependsOn copyApplication
+
+task uninstallExtension(type: Exec) {
+    ignoreExitValue = true
+    if (System.properties['os.name'].toLowerCase().contains('windows')) {
+        commandLine 'code.cmd'
+    } else {
+        commandLine 'code'
+    }
+    args '--uninstall-extension', 'sheep-dog-tools.xtext-asciidoc-plugin'
+}
+
+task installExtension(type: Exec, dependsOn: [packageExtension, uninstallExtension]) {
+    mustRunAfter uninstallExtension
+    if (System.properties['os.name'].toLowerCase().contains('windows')) {
+        commandLine 'code.cmd'
+    } else {
+        commandLine 'code'
+    }
+    args '--install-extension', packageExtension.destPath
+}
+
+task startCode(type:Exec, dependsOn: installExtension) {
+    if (System.properties['os.name'].toLowerCase().contains('windows')) {
+        commandLine 'code.cmd'
+    } else {
+        commandLine 'code'
+    }
+    args "$rootProject.projectDir/demo/", '--new-window'
+}
+
+task publishExtension(dependsOn: packageExtension, type: NodeTask) {
+    script = file("$rootProject.projectDir/node_modules/vsce/out/vsce")
+    args = [ 'publish', '-p', System.getenv('ACCESS_TOKEN'), "--packagePath", "${project.buildDir}/vscode/xtextasciidocplugin.vscode-${project.version}.vsix"]
+    execOverrides {
+        workingDir = projectDir
+    }
+}

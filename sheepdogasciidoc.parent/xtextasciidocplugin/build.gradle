@@ -1,0 +1,44 @@
+dependencies {
+	testImplementation 'org.junit.jupiter:junit-jupiter-api'
+	testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	testImplementation "org.eclipse.xtext:org.eclipse.xtext.testing:${xtextVersion}"
+	testImplementation "org.eclipse.xtext:org.eclipse.xtext.xbase.testing:${xtextVersion}"
+	api "org.eclipse.xtext:org.eclipse.xtext:${xtextVersion}"
+	api "org.eclipse.xtext:org.eclipse.xtext.xbase:${xtextVersion}"
+	api "org.farhan:sheep-dog-grammar:${sheepDogTestVersion}"
+	implementation 'org.eclipse.platform:org.eclipse.core.resources:3.18.0'
+	implementation 'org.eclipse.platform:org.eclipse.core.runtime:3.29.0'
+	implementation 'org.eclipse.platform:org.eclipse.equinox.common:3.19.0'
+	implementation "org.slf4j:slf4j-api:${slf4jVersion}"
+	runtimeOnly "org.slf4j:slf4j-simple:${slf4jVersion}"
+}
+configurations {
+	mwe2 {
+		extendsFrom compileClasspath
+	}
+}
+
+dependencies {
+	mwe2 'org.eclipse.emf:org.eclipse.emf.mwe2.launch'
+	mwe2 "org.eclipse.xtext:org.eclipse.xtext.common.types:${xtextVersion}"
+	mwe2 "org.eclipse.xtext:org.eclipse.xtext.xtext.generator:${xtextVersion}"
+	mwe2 'org.eclipse.xtext:xtext-antlr-generator'
+	mwe2 "org.slf4j:slf4j-simple:${slf4jVersion}"
+}
+
+task generateXtextLanguage(type: JavaExec) {
+	mainClass = 'org.eclipse.emf.mwe2.launch.runtime.Mwe2Launcher'
+	classpath = configurations.mwe2
+	inputs.file "src/main/java/org/farhan/dsl/asciidoc/GenerateAsciiDoc.mwe2"
+	inputs.file "src/main/java/org/farhan/dsl/asciidoc/AsciiDoc.xtext"
+	outputs.dir "src/main/xtext-gen"
+	args += "src/main/java/org/farhan/dsl/asciidoc/GenerateAsciiDoc.mwe2"
+	args += "-p"
+	args += "rootPath=/${projectDir}/.."
+}
+
+processResources.dependsOn(generateXtextLanguage)
+generateXtext.dependsOn(generateXtextLanguage)
+clean.dependsOn(cleanGenerateXtextLanguage)
+eclipse.classpath.plusConfigurations += [configurations.mwe2]
