@@ -97,7 +97,31 @@
 			</plugins>
 		</pluginManagement>
 	</build>
+	<scm>
+		<connection>scm:git:https://github.com/farhan5248/sheep-dog-cloud</connection>
+		<tag>HEAD</tag>
+	</scm>
+	<distributionManagement>
+		<repository>
+			<id>github</id>
+			<url>https://maven.pkg.github.com/farhan5248/sheep-dog-cloud</url>
+			<releases><enabled>true</enabled></releases>
+			<snapshots><enabled>true</enabled></snapshots>
+		</repository>
+	</distributionManagement>
 	<repositories>
+		<repository>
+			<id>github</id>
+			<url>https://maven.pkg.github.com/farhan5248/sheep-dog-cloud</url>
+			<releases><enabled>true</enabled></releases>
+			<snapshots><enabled>true</enabled></snapshots>
+		</repository>
+		<repository>
+			<id>github-local</id>
+			<url>https://maven.pkg.github.com/farhan5248/sheep-dog-local</url>
+			<releases><enabled>true</enabled></releases>
+			<snapshots><enabled>true</enabled></snapshots>
+		</repository>
 		<repository>
 			<id>codehaus-snapshots</id>
 			<name>disable dead 'Codehaus Snapshots' repository</name>
