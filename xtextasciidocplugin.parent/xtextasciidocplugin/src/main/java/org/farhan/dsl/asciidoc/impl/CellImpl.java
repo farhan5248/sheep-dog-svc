@@ -31,6 +31,12 @@ public class CellImpl implements ICell {
 	@Override
 	public void setContainer(Object value) {
 		this.container = value;
+		if (value instanceof RowImpl) {
+			RowImpl parent = (RowImpl) value;
+			if (!parent.eObject.getCellList().contains(this.eObject)) {
+				parent.eObject.getCellList().add(this.eObject);
+			}
+		}
 	}
 
 }

@@ -37,7 +37,13 @@ public class StepDefinitionImpl implements IStepDefinition {
 
     @Override
     public EList<IStepParameters> getStepParameterList() {
-        EList<IStepParameters> list = new BasicEList<IStepParameters>();
+        EList<IStepParameters> list = new BasicEList<IStepParameters>() {
+			@Override
+			public boolean add(IStepParameters element) {
+				eObject.getStepParameterList().add(((StepParametersImpl) element).eObject);
+				return super.add(element);
+			}
+		};
         for (StepParameters t : eObject.getStepParameterList()) {
             StepParametersImpl stepParameters = new StepParametersImpl((StepParameters) t);
             list.add(stepParameters);
@@ -59,6 +65,24 @@ public class StepDefinitionImpl implements IStepDefinition {
     @Override
     public void setContainer(Object value) {
         this.container = value;
+        if (value instanceof StepObjectImpl) {
+            StepObjectImpl parent = (StepObjectImpl) value;
+            if (!parent.eObject.getStepDefinitionList().contains(this.eObject)) {
+                addSorted(parent.eObject.getStepDefinitionList(), this.eObject,
+                        org.farhan.dsl.asciidoc.asciiDoc.StepDefinition::getName);
+            }
+        }
+    }
+
+    private static <T> void addSorted(java.util.List<T> list, T element,
+            java.util.function.Function<T, String> nameExtractor) {
+        String name = nameExtractor.apply(element);
+        int insertIndex = java.util.Collections.binarySearch(
+                list.stream().map(nameExtractor).toList(), name);
+        if (insertIndex < 0) {
+            insertIndex = -(insertIndex + 1);
+        }
+        list.add(insertIndex, element);
     }
 
 }

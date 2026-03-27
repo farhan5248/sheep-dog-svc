@@ -32,7 +32,13 @@ public class TestStepContainerImpl implements ITestStepContainer {
 
     @Override
     public EList<ITestStep> getTestStepList() {
-        EList<ITestStep> testStepList = new BasicEList<ITestStep>();
+        EList<ITestStep> testStepList = new BasicEList<ITestStep>() {
+			@Override
+			public boolean add(ITestStep element) {
+				eObject.getTestStepList().add(((TestStepImpl) element).eObject);
+				return super.add(element);
+			}
+		};
         for (TestStep s : eObject.getTestStepList()) {
             TestStepImpl testStep = new TestStepImpl(s);
             testStepList.add(testStep);
@@ -59,6 +65,12 @@ public class TestStepContainerImpl implements ITestStepContainer {
     @Override
     public void setContainer(Object value) {
         this.container = value;
+        if (value instanceof TestSuiteImpl) {
+            TestSuiteImpl parent = (TestSuiteImpl) value;
+            if (!parent.eObject.getTestStepContainerList().contains(this.eObject)) {
+                parent.eObject.getTestStepContainerList().add(this.eObject);
+            }
+        }
     }
 
 }

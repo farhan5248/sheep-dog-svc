@@ -31,6 +31,12 @@ public class LineImpl implements ILine {
 	@Override
 	public void setContainer(Object value) {
 		this.container = value;
+		if (value instanceof DescriptionImpl) {
+			DescriptionImpl parent = (DescriptionImpl) value;
+			if (!parent.eObject.getLineList().contains(this.eObject)) {
+				parent.eObject.getLineList().add(this.eObject);
+			}
+		}
 	}
 
 }

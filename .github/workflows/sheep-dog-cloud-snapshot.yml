@@ -49,7 +49,7 @@ jobs:
     secrets: inherit
 
   sheep-dog-vscode-plugin:
-    uses: farhan5248/sheep-dog-ops/.github/workflows/snapshot-npm.yml@main
+    uses: farhan5248/sheep-dog-ops/.github/workflows/snapshot-gradle.yml@main
     with:
       project: 'sheep-dog-vscode-plugin'
     secrets: inherit

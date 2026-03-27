@@ -91,5 +91,11 @@ public class TestStepImpl implements ITestStep {
     @Override
     public void setContainer(Object value) {
         this.container = value;
+        if (value instanceof TestStepContainerImpl) {
+            TestStepContainerImpl parent = (TestStepContainerImpl) value;
+            if (!parent.eObject.getTestStepList().contains(this.eObject)) {
+                parent.eObject.getTestStepList().add(this.eObject);
+            }
+        }
     }
 }

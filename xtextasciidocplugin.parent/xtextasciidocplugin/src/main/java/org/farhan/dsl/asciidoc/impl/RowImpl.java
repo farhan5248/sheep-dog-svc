@@ -18,7 +18,13 @@ public class RowImpl implements IRow {
 
 	@Override
 	public EList<ICell> getCellList() {
-		EList<ICell> cells = new BasicEList<ICell>();
+		EList<ICell> cells = new BasicEList<ICell>() {
+			@Override
+			public boolean add(ICell element) {
+				eObject.getCellList().add(((CellImpl) element).eObject);
+				return super.add(element);
+			}
+		};
 		for (Cell c : eObject.getCellList()) {
 			cells.add(new CellImpl(c));
 		}
@@ -39,6 +45,12 @@ public class RowImpl implements IRow {
 	@Override
 	public void setContainer(Object value) {
 		this.container = value;
+		if (value instanceof TableImpl) {
+			TableImpl parent = (TableImpl) value;
+			if (!parent.eObject.getRowList().contains(this.eObject)) {
+				parent.eObject.getRowList().add(this.eObject);
+			}
+		}
 	}
 
 }

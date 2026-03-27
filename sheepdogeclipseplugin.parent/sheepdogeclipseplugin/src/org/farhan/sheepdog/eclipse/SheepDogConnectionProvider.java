@@ -13,6 +13,8 @@ import org.eclipse.lsp4j.services.LanguageClient;
 import org.eclipse.xtext.ide.server.LanguageServerImpl;
 import org.eclipse.xtext.ide.server.ServerModule;
 
+import org.farhan.dsl.asciidoc.ide.AsciiDocIdeSetup;
+
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
@@ -35,6 +37,9 @@ public class SheepDogConnectionProvider implements StreamConnectionProvider {
 
 		in.connect(out2);
 		out.connect(in2);
+
+		// Register the AsciiDoc language with Xtext before starting the server
+		new AsciiDocIdeSetup().createInjectorAndDoEMFRegistration();
 
 		Injector injector = Guice.createInjector(new ServerModule());
 		LanguageServerImpl languageServer = injector.getInstance(LanguageServerImpl.class);

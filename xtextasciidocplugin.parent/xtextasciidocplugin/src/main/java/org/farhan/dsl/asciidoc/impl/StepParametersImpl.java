@@ -55,6 +55,24 @@ public class StepParametersImpl implements IStepParameters {
     @Override
     public void setContainer(Object value) {
         this.container = value;
+        if (value instanceof StepDefinitionImpl) {
+            StepDefinitionImpl parent = (StepDefinitionImpl) value;
+            if (!parent.eObject.getStepParameterList().contains(this.eObject)) {
+                addSorted(parent.eObject.getStepParameterList(), this.eObject,
+                        org.farhan.dsl.asciidoc.asciiDoc.StepParameters::getName);
+            }
+        }
+    }
+
+    private static <T> void addSorted(java.util.List<T> list, T element,
+            java.util.function.Function<T, String> nameExtractor) {
+        String name = nameExtractor.apply(element);
+        int insertIndex = java.util.Collections.binarySearch(
+                list.stream().map(nameExtractor).toList(), name);
+        if (insertIndex < 0) {
+            insertIndex = -(insertIndex + 1);
+        }
+        list.add(insertIndex, element);
     }
 
 }

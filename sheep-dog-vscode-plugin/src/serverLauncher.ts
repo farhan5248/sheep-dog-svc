@@ -279,7 +279,7 @@ export class ServerLauncher {
      * Get the path to the server JAR file
      */
     private getServerJarPath(): string {
-        const jarName = 'xtextasciidocplugin.ide-1.0.0-SNAPSHOT.jar';
+        const jarName = 'sheepdogasciidoc.ide-1.0.0-SNAPSHOT.jar';
         return this.extensionContext.asAbsolutePath(path.join('src', 'asciidoc', 'lib', jarName));
     }
 

@@ -1,55 +1,162 @@
-task copyApplication(type: Sync) {
-    dependsOn ':xtextasciidocplugin.ide:installDist'
-    from { project(':xtextasciidocplugin.ide').tasks.installDist.outputs }
-    into 'src/asciidoc'
+buildscript {
+	repositories {
+		mavenCentral()
+		maven { url = "https://plugins.gradle.org/m2/" }
+	}
+	dependencies {
+		classpath 'com.github.node-gradle:gradle-node-plugin:7.1.0'
+		classpath 'net.researchgate:gradle-release:3.1.0'
+	}
+}
+
+apply plugin: 'base'
+apply plugin: 'com.github.node-gradle.node'
+apply plugin: 'net.researchgate.release'
+
+group = 'org.farhan'
+
+repositories {
+	mavenLocal()
+	mavenCentral()
+	maven {
+		url = "https://maven.pkg.github.com/farhan5248/sheep-dog-local"
+		credentials {
+			username = project.findProperty("gpr.user") ?: 'farhan5248'
+			password = project.findProperty("gpr.key") ?: System.getenv("GITHUB_TOKEN")
+		}
+	}
+	maven {
+		url = "https://repo.eclipse.org/content/groups/releases/"
+	}
+}
+
+// Configuration to resolve the LSP server and its dependencies
+configurations {
+	lspServer
+}
+
+dependencies {
+	lspServer 'org.farhan:sheepdogasciidoc.ide:1.0.0-SNAPSHOT'
+}
+
+// Copy LSP server JARs from Maven dependency
+task copyApplication(type: Copy) {
+	from configurations.lspServer
+	into 'src/asciidoc/lib'
 }
 
 task cleanCopyApplication(type: Delete) {
-    delete copyApplication.outputs
+	delete 'src/asciidoc'
 }
 
-// Hook the clean task from the root configuration
-afterEvaluate {
-    if (tasks.findByName('clean')) {
-        clean.dependsOn cleanCopyApplication
-    }
+node {
+	version = '20.18.2'
+	npmVersion = '10.8.2'
+	download = true
 }
 
-npmInstall.dependsOn copyApplication
+def inputFiles = fileTree(
+	dir: projectDir,
+	excludes: ['out/**', '.gitignore', '.gradle/**', 'build/**', 'buildSrc/**', '*.gradle', 'node_modules/**']
+)
+
+npmInstall {
+	dependsOn copyApplication
+	inputs.files(inputFiles)
+	outputs.dir('out')
+}
+
+tasks.register('packageExtension', Exec) {
+	dependsOn npmInstall
+	ext.destDir = new File(buildDir, 'vscode')
+	ext.archiveName = "${rootProject.name}-${rootProject.version}.vsix"
+	ext.destPath = "$destDir/$archiveName"
+	outputs.dir destDir
+	doFirst {
+		destDir.mkdirs()
+	}
+	workingDir = projectDir
+	if (System.properties['os.name'].toLowerCase().contains('windows')) {
+		commandLine 'cmd', '/c', 'node_modules\\.bin\\vsce.cmd', 'package', '--out', destPath
+	} else {
+		commandLine 'node_modules/.bin/vsce', 'package', '--out', destPath
+	}
+}
+
+task cleanVscodeOutput {
+	doLast {
+		delete packageExtension.destDir
+		delete 'out'
+	}
+}
+
+clean.dependsOn cleanVscodeOutput
+clean.dependsOn cleanCopyApplication
 
 task uninstallExtension(type: Exec) {
-    ignoreExitValue = true
-    if (System.properties['os.name'].toLowerCase().contains('windows')) {
-        commandLine 'code.cmd'
-    } else {
-        commandLine 'code'
-    }
-    args '--uninstall-extension', 'sheep-dog-tools.xtext-asciidoc-plugin'
+	ignoreExitValue = true
+	if (System.properties['os.name'].toLowerCase().contains('windows')) {
+		commandLine 'code.cmd'
+	} else {
+		commandLine 'code'
+	}
+	args '--uninstall-extension', 'sheep-dog-tools.xtext-asciidoc-plugin'
 }
 
 task installExtension(type: Exec, dependsOn: [packageExtension, uninstallExtension]) {
-    mustRunAfter uninstallExtension
-    if (System.properties['os.name'].toLowerCase().contains('windows')) {
-        commandLine 'code.cmd'
-    } else {
-        commandLine 'code'
-    }
-    args '--install-extension', packageExtension.destPath
+	mustRunAfter uninstallExtension
+	if (System.properties['os.name'].toLowerCase().contains('windows')) {
+		commandLine 'code.cmd'
+	} else {
+		commandLine 'code'
+	}
+	args '--install-extension', packageExtension.destPath
 }
 
-task startCode(type:Exec, dependsOn: installExtension) {
-    if (System.properties['os.name'].toLowerCase().contains('windows')) {
-        commandLine 'code.cmd'
-    } else {
-        commandLine 'code'
-    }
-    args "$rootProject.projectDir/demo/", '--new-window'
+apply plugin: 'maven-publish'
+
+publishing {
+	publications {
+		vsix(MavenPublication) {
+			groupId = 'org.farhan'
+			artifactId = project.name
+			version = project.version
+
+			artifact(packageExtension.destPath) {
+				extension = 'vsix'
+				builtBy packageExtension
+			}
+		}
+	}
+	repositories {
+		maven {
+			name = "GitHub"
+			url = uri("https://maven.pkg.github.com/farhan5248/sheep-dog-cloud")
+			credentials {
+				username = project.findProperty("gpr.user") ?: 'farhan5248'
+				password = project.findProperty("gpr.key") ?: System.getenv("GITHUB_TOKEN")
+			}
+		}
+	}
 }
 
-task publishExtension(dependsOn: packageExtension, type: NodeTask) {
-    script = file("$rootProject.projectDir/node_modules/vsce/out/vsce")
-    args = [ 'publish', '-p', System.getenv('ACCESS_TOKEN'), "--packagePath", "${project.buildDir}/vscode/xtextasciidocplugin.vscode-${project.version}.vsix"]
-    execOverrides {
-        workingDir = projectDir
-    }
+plugins.withType(com.github.gradle.node.NodePlugin) {
+	node {
+		workDir = file("$rootProject.buildDir/nodejs")
+	}
+}
+
+tasks.register('stripSnapshotDeps', StripSnapshotTask)
+tasks.register('restoreSnapshotDeps', RestoreSnapshotTask)
+
+beforeReleaseBuild.dependsOn stripSnapshotDeps
+updateVersion.finalizedBy restoreSnapshotDeps
+
+release {
+	tagTemplate = 'v${version}'
+	preTagCommitMessage = '[release] pre tag commit: '
+	tagCommitMessage = '[release] creating tag: '
+	newVersionCommitMessage = '[release] new version commit: '
+	failOnSnapshotDependencies = false
+	buildTasks = ['publish']
 }

@@ -18,7 +18,13 @@ public class DescriptionImpl implements IDescription {
 
 	@Override
 	public EList<ILine> getLineList() {
-		EList<ILine> lineList = new BasicEList<ILine>();
+		EList<ILine> lineList = new BasicEList<ILine>() {
+			@Override
+			public boolean add(ILine element) {
+				eObject.getLineList().add(((LineImpl) element).eObject);
+				return super.add(element);
+			}
+		};
 		for (Line l : eObject.getLineList()) {
 			lineList.add(new LineImpl(l));
 		}
