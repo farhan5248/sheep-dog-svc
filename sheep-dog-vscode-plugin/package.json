@@ -112,13 +112,20 @@
                 {
                     "command": "asciidoc.server.validateWorkspace"
                 }
+            ],
+            "editor/context": [
+                {
+                    "command": "asciidoc.server.generateCode",
+                    "when": "editorLangId == asciidoc",
+                    "group": "1_modification"
+                }
             ]
         },
         "keybindings": [
             {
                 "command": "asciidoc.server.generateCode",
-                "key": "ctrl+shift+g",
-                "mac": "cmd+shift+g",
+                "key": "ctrl+shift+alt+g",
+                "mac": "cmd+shift+alt+g",
                 "when": "editorLangId == asciidoc"
             },
             {

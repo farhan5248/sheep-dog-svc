@@ -117,12 +117,6 @@
 			<snapshots><enabled>true</enabled></snapshots>
 		</repository>
 		<repository>
-			<id>github-local</id>
-			<url>https://maven.pkg.github.com/farhan5248/sheep-dog-local</url>
-			<releases><enabled>true</enabled></releases>
-			<snapshots><enabled>true</enabled></snapshots>
-		</repository>
-		<repository>
 			<id>codehaus-snapshots</id>
 			<name>disable dead 'Codehaus Snapshots' repository</name>
 			<url>http://nexus.codehaus.org/snapshots/</url>

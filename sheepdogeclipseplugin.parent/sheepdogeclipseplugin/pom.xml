@@ -11,37 +11,13 @@
 
 	<properties>
 		<sheepdogasciidoc.version>1.0.0-SNAPSHOT</sheepdogasciidoc.version>
+		<sheep-dog-grammar.version>1.41-SNAPSHOT</sheep-dog-grammar.version>
+		<slf4j.version>2.0.16</slf4j.version>
+		<logback.version>1.5.12</logback.version>
 	</properties>
 
-	<dependencies>
-		<dependency>
-			<groupId>org.farhan</groupId>
-			<artifactId>sheepdogasciidoc</artifactId>
-			<version>${sheepdogasciidoc.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.farhan</groupId>
-			<artifactId>sheepdogasciidoc.ide</artifactId>
-			<version>${sheepdogasciidoc.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-			<version>2.0.16</version>
-		</dependency>
-		<dependency>
-			<groupId>ch.qos.logback</groupId>
-			<artifactId>logback-classic</artifactId>
-			<version>1.5.12</version>
-		</dependency>
-		<dependency>
-			<groupId>ch.qos.logback</groupId>
-			<artifactId>logback-core</artifactId>
-			<version>1.5.12</version>
-		</dependency>
-	</dependencies>
 
-	<build>
+<build>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -51,11 +27,42 @@
 					<execution>
 						<id>copy-jar</id>
 						<phase>initialize</phase>
-						<goals><goal>copy-dependencies</goal></goals>
+						<goals><goal>copy</goal></goals>
 						<configuration>
 							<stripVersion>true</stripVersion>
-							<includeGroupIds>org.farhan,org.slf4j,ch.qos.logback</includeGroupIds>
 							<outputDirectory>${basedir}/lib/</outputDirectory>
+							<artifactItems>
+								<artifactItem>
+									<groupId>org.farhan</groupId>
+									<artifactId>sheepdogasciidoc</artifactId>
+									<version>${sheepdogasciidoc.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.farhan</groupId>
+									<artifactId>sheepdogasciidoc.ide</artifactId>
+									<version>${sheepdogasciidoc.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.farhan</groupId>
+									<artifactId>sheep-dog-grammar</artifactId>
+									<version>${sheep-dog-grammar.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.slf4j</groupId>
+									<artifactId>slf4j-api</artifactId>
+									<version>${slf4j.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>ch.qos.logback</groupId>
+									<artifactId>logback-classic</artifactId>
+									<version>${logback.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>ch.qos.logback</groupId>
+									<artifactId>logback-core</artifactId>
+									<version>${logback.version}</version>
+								</artifactItem>
+							</artifactItems>
 						</configuration>
 					</execution>
 				</executions>
