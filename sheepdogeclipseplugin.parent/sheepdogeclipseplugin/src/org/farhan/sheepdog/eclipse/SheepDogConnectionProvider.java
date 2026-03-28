@@ -12,11 +12,15 @@ import org.eclipse.lsp4j.jsonrpc.Launcher;
 import org.eclipse.lsp4j.services.LanguageClient;
 import org.eclipse.xtext.ide.server.LanguageServerImpl;
 import org.eclipse.xtext.ide.server.ServerModule;
+import org.eclipse.xtext.resource.FileExtensionProvider;
+import org.eclipse.xtext.resource.IResourceServiceProvider;
 
 import org.farhan.dsl.asciidoc.ide.AsciiDocIdeSetup;
 
+import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.google.inject.util.Modules;
 
 /**
  * Launches the Xtext-based SheepDog AsciiDoc language server in-process
@@ -30,27 +34,51 @@ public class SheepDogConnectionProvider implements StreamConnectionProvider {
 
 	@Override
 	public void start() throws IOException {
-		PipedInputStream in = new PipedInputStream();
-		PipedOutputStream out = new PipedOutputStream();
-		PipedInputStream in2 = new PipedInputStream();
-		PipedOutputStream out2 = new PipedOutputStream();
+		try {
+			int bufferSize = 1024 * 1024; // 1MB buffer for large LSP messages
+			PipedInputStream in = new PipedInputStream(bufferSize);
+			PipedOutputStream out = new PipedOutputStream();
+			PipedInputStream in2 = new PipedInputStream(bufferSize);
+			PipedOutputStream out2 = new PipedOutputStream();
 
-		in.connect(out2);
-		out.connect(in2);
+			in.connect(out2);
+			out.connect(in2);
 
-		// Register the AsciiDoc language with Xtext before starting the server
-		new AsciiDocIdeSetup().createInjectorAndDoEMFRegistration();
+			// Register the AsciiDoc language with Xtext before starting the server
+			System.err.println("SheepDog: Registering AsciiDoc language...");
+			Injector langInjector = new AsciiDocIdeSetup().createInjectorAndDoEMFRegistration();
 
-		Injector injector = Guice.createInjector(new ServerModule());
-		LanguageServerImpl languageServer = injector.getInstance(LanguageServerImpl.class);
+			// Manually register the language in the global registry since
+			// ServiceLoader doesn't work across OSGi bundle classloaders
+			IResourceServiceProvider resourceServiceProvider = langInjector.getInstance(IResourceServiceProvider.class);
+			FileExtensionProvider extensionProvider = langInjector.getInstance(FileExtensionProvider.class);
+			for (String ext : extensionProvider.getFileExtensions()) {
+				IResourceServiceProvider.Registry.INSTANCE.getExtensionToFactoryMap().put(ext, resourceServiceProvider);
+			}
+			System.err.println("SheepDog: AsciiDoc language registered.");
 
-		Launcher<LanguageClient> launcher = Launcher.createLauncher(
-				languageServer, LanguageClient.class, in2, out2);
-		languageServer.connect(launcher.getRemoteProxy());
-		future = launcher.startListening();
+			Injector injector = Guice.createInjector(Modules.override(new ServerModule()).with(new AbstractModule() {
+				@Override
+				protected void configure() {
+					bind(IResourceServiceProvider.Registry.class).toInstance(IResourceServiceProvider.Registry.INSTANCE);
+				}
+			}));
+			LanguageServerImpl languageServer = injector.getInstance(LanguageServerImpl.class);
+			System.err.println("SheepDog: Language server created.");
 
-		inputStream = in;
-		outputStream = out;
+			Launcher<LanguageClient> launcher = Launcher.createLauncher(
+					languageServer, LanguageClient.class, in2, out2);
+			languageServer.connect(launcher.getRemoteProxy());
+			future = launcher.startListening();
+
+			inputStream = in;
+			outputStream = out;
+			System.err.println("SheepDog: Server started successfully.");
+		} catch (Exception e) {
+			System.err.println("SheepDog: Server start failed:");
+			e.printStackTrace(System.err);
+			throw new IOException("Failed to start language server", e);
+		}
 	}
 
 	@Override

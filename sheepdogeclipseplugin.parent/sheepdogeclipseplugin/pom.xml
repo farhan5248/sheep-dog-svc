@@ -19,6 +19,26 @@
 			<artifactId>sheepdogasciidoc</artifactId>
 			<version>${sheepdogasciidoc.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>org.farhan</groupId>
+			<artifactId>sheepdogasciidoc.ide</artifactId>
+			<version>${sheepdogasciidoc.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>2.0.16</version>
+		</dependency>
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+			<version>1.5.12</version>
+		</dependency>
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-core</artifactId>
+			<version>1.5.12</version>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -34,7 +54,7 @@
 						<goals><goal>copy-dependencies</goal></goals>
 						<configuration>
 							<stripVersion>true</stripVersion>
-							<includeGroupIds>org.farhan</includeGroupIds>
+							<includeGroupIds>org.farhan,org.slf4j,ch.qos.logback</includeGroupIds>
 							<outputDirectory>${basedir}/lib/</outputDirectory>
 						</configuration>
 					</execution>

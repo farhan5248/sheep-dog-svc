@@ -9,6 +9,9 @@ Bundle-RequiredExecutionEnvironment: JavaSE-21
 Bundle-ClassPath: lib/sheepdogasciidoc.jar,
  lib/sheepdogasciidoc.ide.jar,
  lib/sheep-dog-grammar.jar,
+ lib/logback-classic.jar,
+ lib/logback-core.jar,
+ lib/slf4j-api.jar,
  .
 Require-Bundle: org.eclipse.lsp4e,
  org.eclipse.ui.genericeditor,
@@ -18,6 +21,6 @@ Require-Bundle: org.eclipse.lsp4e,
  org.eclipse.xtext.ide,
  org.eclipse.emf.ecore,
  org.eclipse.emf.common,
- org.eclipse.lsp4j.jsonrpc;bundle-version="[0.21.0,1.0.0)",
- org.eclipse.lsp4j;bundle-version="[0.21.0,1.0.0)"
+ org.eclipse.lsp4j.jsonrpc;bundle-version="[0.21.0,2.0.0)",
+ org.eclipse.lsp4j;bundle-version="[0.21.0,2.0.0)"
 Export-Package: org.farhan.sheepdog.eclipse
