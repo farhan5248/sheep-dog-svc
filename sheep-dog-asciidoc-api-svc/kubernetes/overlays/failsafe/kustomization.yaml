@@ -1,0 +1,10 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: failsafe
+resources:
+  - ../../base
+patches:
+  - path: service-patch-db.yaml
+    target:
+      kind: Service
+      name: sheep-dog-dev-db

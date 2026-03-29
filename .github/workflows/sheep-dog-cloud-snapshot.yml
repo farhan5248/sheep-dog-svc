@@ -15,7 +15,14 @@ permissions:
   packages: write
 
 jobs:
+  sheep-dog-asciidoc-api-svc:
+    uses: farhan5248/sheep-dog-ops/.github/workflows/snapshot-docker.yml@main
+    with:
+      project: 'sheep-dog-asciidoc-api-svc'
+    secrets: inherit
+
   sheep-dog-dev-svc:
+    needs: [sheep-dog-asciidoc-api-svc]
     uses: farhan5248/sheep-dog-ops/.github/workflows/snapshot-docker.yml@main
     with:
       project: 'sheep-dog-dev-svc'
@@ -55,7 +62,7 @@ jobs:
     secrets: inherit
 
   merge-into-main:
-    needs: [sheep-dog-dev-mcp, darmok-maven-plugin, sheep-dog-vscode-plugin, sheep-dog-eclipse-plugin]
+    needs: [sheep-dog-asciidoc-api-svc, sheep-dog-dev-mcp, darmok-maven-plugin, sheep-dog-vscode-plugin, sheep-dog-eclipse-plugin]
     uses: farhan5248/sheep-dog-ops/.github/workflows/merge.yml@main
     with:
       source: 'main'
