@@ -15,7 +15,8 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<java.version>21</java.version>
-		<sheep-dog-dev.version>1.70-SNAPSHOT</sheep-dog-dev.version>
+		<sheep-dog-asciidoc-api.version>1.0.0-SNAPSHOT</sheep-dog-asciidoc-api.version>
+		<sheep-dog-cucumber-gen.version>1.0.0-SNAPSHOT</sheep-dog-cucumber-gen.version>
 		<docker.registry.github>ghcr.io</docker.registry.github>
 		<spring-cloud-contract.version>4.3.0</spring-cloud-contract.version>
 	</properties>
@@ -42,6 +43,16 @@
 		<repository>
 			<id>github</id>
 			<url>https://maven.pkg.github.com/farhan5248/sheep-dog-cloud</url>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
+		<repository>
+			<id>github-local</id>
+			<url>https://maven.pkg.github.com/farhan5248/sheep-dog-local</url>
 			<releases>
 				<enabled>true</enabled>
 			</releases>
@@ -145,8 +156,13 @@
 		</dependency>
 		<dependency>
 			<groupId>org.farhan</groupId>
-			<artifactId>sheep-dog-dev</artifactId>
-			<version>${sheep-dog-dev.version}</version>
+			<artifactId>sheep-dog-asciidoc-api</artifactId>
+			<version>${sheep-dog-asciidoc-api.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.farhan</groupId>
+			<artifactId>sheep-dog-cucumber-gen</artifactId>
+			<version>${sheep-dog-cucumber-gen.version}</version>
 		</dependency>
 		<!-- Cucumber -->
 		<dependency>
