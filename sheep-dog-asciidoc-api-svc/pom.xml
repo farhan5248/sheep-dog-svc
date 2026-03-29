@@ -2,77 +2,23 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<groupId>org.springframework.boot</groupId>
-		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.4.0</version>
-		<relativePath /> <!-- lookup parent from repository -->
+		<groupId>org.farhan</groupId>
+		<artifactId>sheep-dog-svc-base</artifactId>
+		<version>1.0.0-SNAPSHOT</version>
+		<relativePath>../sheep-dog-svc-base/pom.xml</relativePath>
 	</parent>
-	<groupId>org.farhan</groupId>
 	<artifactId>sheep-dog-asciidoc-api-svc</artifactId>
 	<version>1.0.0-SNAPSHOT</version>
 	<name>Sheep Dog AsciiDoc API Service</name>
 
 	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<java.version>21</java.version>
 		<sheep-dog-asciidoc-api.version>1.0.0-SNAPSHOT</sheep-dog-asciidoc-api.version>
-		<docker.registry.github>ghcr.io</docker.registry.github>
-		<sheepdog.host>dev.sheepdog.io</sheepdog.host>
 	</properties>
 
 	<scm>
 		<connection>scm:git:https://github.com/farhan5248/sheep-dog-cloud</connection>
 		<tag>sheep-dog-dev-svc-1.26</tag>
 	</scm>
-
-	<pluginRepositories>
-		<pluginRepository>
-			<id>github</id>
-			<url>https://maven.pkg.github.com/farhan5248/sheep-dog-cloud</url>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-		</pluginRepository>
-	</pluginRepositories>
-
-	<repositories>
-		<repository>
-			<id>github</id>
-			<url>https://maven.pkg.github.com/farhan5248/sheep-dog-cloud</url>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-		</repository>
-		<repository>
-			<id>github-local</id>
-			<url>https://maven.pkg.github.com/farhan5248/sheep-dog-local</url>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-		</repository>
-	</repositories>
-
-	<distributionManagement>
-		<repository>
-			<id>github</id>
-			<url>https://maven.pkg.github.com/farhan5248/sheep-dog-cloud</url>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-		</repository>
-	</distributionManagement>
 
 	<dependencyManagement>
 		<dependencies>
@@ -95,20 +41,9 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-web</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-data-jpa</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-artemis</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-actuator</artifactId>
+			<groupId>org.farhan</groupId>
+			<artifactId>sheep-dog-asciidoc-api</artifactId>
+			<version>${sheep-dog-asciidoc-api.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -122,34 +57,9 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-devtools</artifactId>
-			<scope>runtime</scope>
-			<optional>true</optional>
-		</dependency>
-		<dependency>
-			<groupId>com.mysql</groupId>
-			<artifactId>mysql-connector-j</artifactId>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency>
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>
 			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.activemq</groupId>
-			<artifactId>artemis-jakarta-server</artifactId>
-			<version>2.41.0</version>
-		</dependency>
-		<dependency>
-			<groupId>com.fasterxml.jackson.datatype</groupId>
-			<artifactId>jackson-datatype-jsr310</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.farhan</groupId>
-			<artifactId>sheep-dog-asciidoc-api</artifactId>
-			<version>${sheep-dog-asciidoc-api.version}</version>
 		</dependency>
 		<!-- Cucumber -->
 		<dependency>
@@ -348,16 +258,6 @@
 									<version>${project.version}</version>
 									<type>jar</type>
 									<outputDirectory>${project.build.directory}/dependency</outputDirectory>
-									<excludes>**/sheep*.jar</excludes>
-								</artifactItem>
-								<artifactItem>
-									<groupId>${project.groupId}</groupId>
-									<artifactId>${project.artifactId}</artifactId>
-									<version>${project.version}</version>
-									<type>jar</type>
-									<outputDirectory>
-										${project.build.directory}/dependency-org-farhan</outputDirectory>
-									<includes>**/sheep*.jar</includes>
 								</artifactItem>
 							</artifactItems>
 						</configuration>
@@ -370,16 +270,6 @@
 				<version>1.18.0</version>
 				<configuration>
 					<images>
-						<!-- Dependencies image -->
-						<image>
-							<build>
-								<contextDir>${project.basedir}</contextDir>
-								<dockerFile>docker/dependencies.dockerfile</dockerFile>
-							</build>
-							<alias>${docker.registry.github}/${project.artifactId}-dependencies</alias>
-							<name>${docker.registry.github}/farhan5248/%a-dependencies:%l</name>
-							<registry>${docker.registry.github}</registry>
-						</image>
 						<!-- Application image -->
 						<image>
 							<build>

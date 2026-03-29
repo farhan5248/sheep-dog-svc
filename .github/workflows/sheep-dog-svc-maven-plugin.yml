@@ -1,0 +1,23 @@
+name: Publish Sheep Dog Dev Service Maven Plugin Release
+
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  sheep-dog-svc-maven-plugin:
+    uses: farhan5248/sheep-dog-ops/.github/workflows/release-maven.yml@main
+    with:
+      project: 'sheep-dog-svc-maven-plugin'
+      plugin: 'Maven'
+    secrets: inherit
+    
+  merge-into-develop:
+    needs: [sheep-dog-svc-maven-plugin]
+    uses: farhan5248/sheep-dog-ops/.github/workflows/merge.yml@main
+    with:
+      source: 'main'
+      target: 'develop'
+    secrets: inherit      

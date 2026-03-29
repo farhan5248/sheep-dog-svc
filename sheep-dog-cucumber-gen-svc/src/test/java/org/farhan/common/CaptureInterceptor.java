@@ -2,7 +2,7 @@ package org.farhan.common;
 
 import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
-import org.farhan.runners.surefire.springboot.CucumberTestConfig;
+import org.farhan.runners.failsafe.TestConfig;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.client.ClientHttpResponse;
 
@@ -21,7 +21,7 @@ public class CaptureInterceptor implements ClientHttpRequestInterceptor {
         String responseBody = new String(responseBodyBytes, StandardCharsets.UTF_8);
 
         saveGroovyContract(
-                "src/test/resources/contracts/" + CucumberTestConfig.scenarioId + "." + counter + ".groovy",
+                "src/test/resources/contracts/" + "scenario" + "." + counter + ".groovy",
                 request, requestBody, response, responseBody);
 
         // Return a new response with the buffered body
@@ -62,12 +62,12 @@ public class CaptureInterceptor implements ClientHttpRequestInterceptor {
             groovy.append("        url '" + url + "'\n");
         }
         if (requestBody != null && !requestBody.isBlank()) {
-            groovy.append("        body(file('" + "bodies/" + CucumberTestConfig.scenarioId + "." + counter
+            groovy.append("        body(file('" + "bodies/" + "scenario" + "." + counter
                     + ".req.txt" + "'))\n");
         }
-        if (CucumberTestConfig.scenarioId != null) {
+        if ("scenario" != null) {
             groovy.append("        headers {\n");
-            groovy.append("            header('scenarioId', '" + CucumberTestConfig.scenarioId + "')\n");
+            groovy.append("            header('scenarioId', '" + "scenario" + "')\n");
             groovy.append("        }\n");
         }
         groovy.append("    }\n");
@@ -79,7 +79,7 @@ public class CaptureInterceptor implements ClientHttpRequestInterceptor {
             groovy.append("        }\n");
         }
         if (responseBody != null && !responseBody.isBlank()) {
-            groovy.append("        body(file('" + "bodies/" + CucumberTestConfig.scenarioId + "." + counter
+            groovy.append("        body(file('" + "bodies/" + "scenario" + "." + counter
                     + ".rsp.json" + "'))\n");
         }
         groovy.append("    }\n");
@@ -90,7 +90,7 @@ public class CaptureInterceptor implements ClientHttpRequestInterceptor {
 
         if (requestBody != null && !requestBody.isBlank()) {
             FileWriter fw = new FileWriter(
-                    "src/test/resources/contracts/bodies/" + CucumberTestConfig.scenarioId + "." + counter
+                    "src/test/resources/contracts/bodies/" + "scenario" + "." + counter
                             + ".req.txt",
                     false);
             fw.write(requestBody);
@@ -99,7 +99,7 @@ public class CaptureInterceptor implements ClientHttpRequestInterceptor {
 
         if (responseBody != null && !responseBody.isBlank()) {
             FileWriter fw = new FileWriter(
-                    "src/test/resources/contracts/bodies/" + CucumberTestConfig.scenarioId + "." + counter
+                    "src/test/resources/contracts/bodies/" + "scenario" + "." + counter
                             + ".rsp.json",
                     false);
             fw.write(responseBody.replace("\\\\", "\\\\\\\\"));

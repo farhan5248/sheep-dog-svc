@@ -14,12 +14,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with th
 
 ### Key Components
 - **sheep-dog-dev-svc**: Spring Boot REST service for transformations
-- **sheep-dog-dev-svc-maven-plugin**: Maven plugin for service-oriented transformations
+- **sheep-dog-svc-maven-plugin**: Maven plugin for service-oriented transformations
 - **Docker Integration**: Containerized deployment with multi-stage builds
 - **Kubernetes Manifests**: Cloud orchestration configurations
 
 ### Maven Plugin Used
-- **Plugin**: `sheep-dog-dev-svc-maven-plugin:1.33-SNAPSHOT`
+- **Plugin**: `sheep-dog-svc-maven-plugin:1.33-SNAPSHOT`
 - **Key Feature**: Does NOT require `-DrepoDir` parameter (auto-handles repositories)
 
 ## Development Commands
@@ -36,7 +36,7 @@ scripts/forward-engineer.bat
 
 # Or manually:
 mvn clean
-mvn org.farhan:sheep-dog-dev-svc-maven-plugin:uml-to-cucumber-spring \
+mvn org.farhan:sheep-dog-svc-maven-plugin:uml-to-cucumber-spring \
   -Dtags="round-trip" -Dhost="dev.sheepdog.io"
 ```
 
@@ -47,7 +47,7 @@ scripts/reverse-engineer.bat
 
 # Or manually:
 mvn clean
-mvn org.farhan:sheep-dog-dev-svc-maven-plugin:cucumber-to-uml \
+mvn org.farhan:sheep-dog-svc-maven-plugin:cucumber-to-uml \
   -Dtags="round-trip"
 ```
 

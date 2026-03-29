@@ -1,6 +1,5 @@
 package org.farhan.mbt.service;
 
-import org.farhan.mbt.asciidoctor.ConvertAsciidoctorToUML;
 import org.farhan.mbt.config.JmsConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,14 +41,12 @@ public class MessageConsumer {
         while (retryCount < maxRetries) {
             try {
                 Converter mojo;
-                if (file.getFileName().endsWith(".asciidoc")) {
-                    mojo = new ConvertAsciidoctorToUML(file.getTags(), repository);
-                } else if (file.getFileName().endsWith(".feature")) {
+                if (file.getFileName().endsWith(".feature")) {
                     mojo = new ConvertCucumberToUML(file.getTags(), repository);
                 } else {
                     logger.warn("Unsupported file type: " + file.getFileName());
                     IN_FLIGHT = 0;
-                    return; // Skip unsupported file types
+                    return;
                 }
                 String content = file.getFileContent() == null ? "" : file.getFileContent();
                 mojo.convertFile(file.getFileName(), content);

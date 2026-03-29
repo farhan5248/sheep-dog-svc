@@ -1,8 +1,8 @@
-@api @asciidoc-api-svc @round-trip
+@asciidoc-api @asciidoc-api-svc @svc-maven-plugin
 Feature: Format Asciidoc Files
 
-  \@api \@asciidoc-api-svc
-  \@round-trip
+  \@asciidoc-api \@asciidoc-api-svc
+  \@svc-maven-plugin
   TODO Make more changes to the source file to demonstrate all the formatting changes.
   One of the more important uses of going from asciidoc to uml and back to asciidoc is to update the files after changing the grammar.
   I'd first convert all the asciidoc files to a uml model using the previous version.

@@ -114,7 +114,14 @@ public class AsciiDoctorService {
         try {
             jmsTemplate.convertAndSend(JmsConfig.SOURCE_FILES_QUEUE, mtr);
             MessageConsumer.IN_FLIGHT = 1;
+            // TODO temp hack until separate queues are created (see issue #195)
+            long waitStart = System.currentTimeMillis();
             while (MessageConsumer.IN_FLIGHT == 1) {
+                if (System.currentTimeMillis() - waitStart > 60000) {
+                    logger.warn("Timed out waiting for message processing: {}", mtr.getFileName());
+                    MessageConsumer.IN_FLIGHT = 0;
+                    break;
+                }
                 try {
                     TimeUnit.MILLISECONDS.sleep(100);
                 } catch (InterruptedException e) {

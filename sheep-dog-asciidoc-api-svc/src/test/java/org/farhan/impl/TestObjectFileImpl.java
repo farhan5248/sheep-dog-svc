@@ -27,7 +27,7 @@ public abstract class TestObjectFileImpl extends TestObjectSheepDogImpl {
 	protected String getContent() {
 		try {
 			String contents = sr.get("", object);
-			return contents.replaceAll("\r", "").trim();
+			return contents.replaceAll("\r", "").stripTrailing();
 		} catch (Exception e) {
 			Assertions.fail(e);
 			return null;

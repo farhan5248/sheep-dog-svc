@@ -13,6 +13,6 @@ import static io.cucumber.junit.platform.engine.Constants.GLUE_PROPERTY_NAME;
 @SelectClasspathResource("cucumber/specs/Usage/Create Code From Documentation.feature")
 @ConfigurationParameter(key = PLUGIN_PROPERTY_NAME, value = "pretty")
 @ConfigurationParameter(key = GLUE_PROPERTY_NAME, value = "org.farhan.stepdefs,org.farhan.runners.failsafe")
-@IncludeTags("round-trip")
+@IncludeTags("cucumber-gen-svc")
 public class CreateCodeFromDocumentationIT {
 }
