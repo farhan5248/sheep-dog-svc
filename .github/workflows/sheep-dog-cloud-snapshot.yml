@@ -21,22 +21,22 @@ jobs:
       project: 'sheep-dog-asciidoc-api-svc'
     secrets: inherit
 
-  sheep-dog-dev-svc:
+  sheep-dog-cucumber-gen-svc:
     needs: [sheep-dog-asciidoc-api-svc]
     uses: farhan5248/sheep-dog-ops/.github/workflows/snapshot-docker.yml@main
     with:
-      project: 'sheep-dog-dev-svc'
+      project: 'sheep-dog-cucumber-gen-svc'
     secrets: inherit
 
   sheep-dog-dev-mcp:
-    needs: [sheep-dog-dev-svc]
+    needs: [sheep-dog-cucumber-gen-svc]
     uses: farhan5248/sheep-dog-ops/.github/workflows/snapshot-docker.yml@main
     with:
       project: 'sheep-dog-dev-mcp'
     secrets: inherit
 
   sheep-dog-dev-svc-maven-plugin:
-    needs: [sheep-dog-dev-svc]
+    needs: [sheep-dog-cucumber-gen-svc]
     uses: farhan5248/sheep-dog-ops/.github/workflows/snapshot-docker.yml@main
     with:
       project: 'sheep-dog-dev-svc-maven-plugin'

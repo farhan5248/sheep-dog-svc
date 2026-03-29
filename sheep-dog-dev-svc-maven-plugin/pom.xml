@@ -345,7 +345,7 @@
 								<argument>apply</argument>
 								<argument>-k</argument>
 								<argument>
-									../sheep-dog-dev-svc/kubernetes/overlays/failsafe</argument>
+									../sheep-dog-cucumber-gen-svc/kubernetes/overlays/failsafe</argument>
 							</arguments>
 						</configuration>
 					</execution>
