@@ -18,7 +18,8 @@
 			UTF-8</project.build.sourceEncoding>
 		<java.version>21</java.version>
 		<sheep-dog-grammar.version>1.42-SNAPSHOT</sheep-dog-grammar.version>
-		<sheepdog.host>dev.sheepdog.io</sheepdog.host>
+		<sheepdog.namespace>dev</sheepdog.namespace>
+		<sheepdog.host>${sheepdog.namespace}.sheepdog.io</sheepdog.host>
 	</properties>
 
 	<scm>

@@ -19,7 +19,8 @@
 		<sheep-dog-cucumber-gen.version>1.1-SNAPSHOT</sheep-dog-cucumber-gen.version>
 		<docker.registry.github>ghcr.io</docker.registry.github>
 		<spring-cloud-contract.version>4.3.0</spring-cloud-contract.version>
-		<sheepdog.host>dev.sheepdog.io</sheepdog.host>
+		<sheepdog.namespace>dev</sheepdog.namespace>
+		<sheepdog.host>${sheepdog.namespace}.sheepdog.io</sheepdog.host>
 	</properties>
 
 	<scm>
@@ -218,9 +219,6 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
-				<configuration>
-					<classifier>exec</classifier>
-				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.springframework.cloud</groupId>
@@ -392,7 +390,6 @@
 									<artifactId>${project.artifactId}</artifactId>
 									<version>${project.version}</version>
 									<type>jar</type>
-									<classifier>exec</classifier>
 									<outputDirectory>${project.build.directory}/dependency</outputDirectory>
 									<excludes>**/sheep*.jar</excludes>
 								</artifactItem>
@@ -401,7 +398,6 @@
 									<artifactId>${project.artifactId}</artifactId>
 									<version>${project.version}</version>
 									<type>jar</type>
-									<classifier>exec</classifier>
 									<outputDirectory>
 										${project.build.directory}/dependency-org-farhan</outputDirectory>
 									<includes>**/sheep*.jar</includes>
@@ -475,7 +471,7 @@
 								<argument>-l</argument>
 								<argument>component=sheep-dog-cucumber-gen-svc</argument>
 								<argument>-n</argument>
-								<argument>dev</argument>
+								<argument>${sheepdog.namespace}</argument>
 							</arguments>
 						</configuration>
 					</execution>
@@ -490,7 +486,7 @@
 							<arguments>
 								<argument>apply</argument>
 								<argument>-k</argument>
-								<argument>kubernetes/overlays/dev</argument>
+								<argument>kubernetes/overlays/${sheepdog.namespace}</argument>
 							</arguments>
 						</configuration>
 					</execution>
