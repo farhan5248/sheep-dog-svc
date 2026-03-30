@@ -4,7 +4,7 @@ Maven plugin that integrates the cloud transformation service into the build lif
 
 ## Overview
 
-This plugin allows developers to run specification-to-UML transformations as part of their Maven build. It communicates with the sheep-dog-dev-svc REST service to perform transformations, reading source files from the project and writing generated files back.
+This plugin allows developers to run specification-to-UML transformations as part of their Maven build. It communicates with the sheep-dog-svc REST service to perform transformations, reading source files from the project and writing generated files back.
 
 ## Key Functionality
 

@@ -23,7 +23,7 @@
 
 	<scm>
 		<connection>scm:git:https://github.com/farhan5248/sheep-dog-cloud</connection>
-		<tag>sheep-dog-dev-svc-1.26</tag>
+		<tag>sheep-dog-asciidoc-api-svc-1.26</tag>
 	</scm>
 
 	<pluginRepositories>

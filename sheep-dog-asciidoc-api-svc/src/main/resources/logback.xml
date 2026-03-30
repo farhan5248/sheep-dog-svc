@@ -12,10 +12,10 @@
     </appender>
 
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${LOG_PATH}/sheep-dog-dev-svc.log</file>
+        <file>${LOG_PATH}/sheep-dog-asciidoc-api-svc.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <!-- Daily rollover with compression -->
-            <fileNamePattern>${LOG_PATH}/sheep-dog-dev-svc-%d{yyyy-MM-dd}.log.gz</fileNamePattern>
+            <fileNamePattern>${LOG_PATH}/sheep-dog-asciidoc-api-svc-%d{yyyy-MM-dd}.log.gz</fileNamePattern>
             <!-- Keep 1 days' worth of history -->
             <maxHistory>1</maxHistory>
             <totalSizeCap>1GB</totalSizeCap>
@@ -26,7 +26,7 @@
     </appender>
 
     <appender name="FARHAN_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${LOG_PATH}/sheep-dog-dev-svc.org.farhan.log</file>
+        <file>${LOG_PATH}/sheep-dog-asciidoc-api-svc.org.farhan.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <fileNamePattern>${LOG_PATH}/farhan-%d{yyyy-MM-dd}.log.gz</fileNamePattern>
             <maxHistory>1</maxHistory>

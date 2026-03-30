@@ -368,11 +368,11 @@ public abstract class DarmokMojo extends AbstractMojo {
 
 		// Step 1: AsciiDoctor to UML (maven call from specsDir)
 		String specsDirAbsolute = Path.of(baseDir, specsDir).normalize().toString();
-		maven.run(specsDirAbsolute, "org.farhan:sheep-dog-dev-svc-maven-plugin:asciidoctor-to-uml",
+		maven.run(specsDirAbsolute, "org.farhan:sheep-dog-svc-maven-plugin:asciidoctor-to-uml",
 				"-Dtags=" + pattern, "-Dhost=" + host, "-DonlyChanges=" + onlyChanges);
 
 		// Step 2: UML to Cucumber-Guice (maven call from baseDir)
-		maven.run(baseDir, "org.farhan:sheep-dog-dev-svc-maven-plugin:uml-to-cucumber-guice",
+		maven.run(baseDir, "org.farhan:sheep-dog-svc-maven-plugin:uml-to-cucumber-guice",
 				"-Dtags=" + pattern, "-Dhost=" + host, "-DonlyChanges=" + onlyChanges);
 
 		// Step 3: Generate runner class

@@ -13,7 +13,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with th
 **sheep-dog-cloud** provides **cloud-native microservices** for transformation services in the sheep-dog ecosystem.
 
 ### Key Components
-- **sheep-dog-dev-svc**: Spring Boot REST service for transformations
+- **sheep-dog-asciidoc-api-svc**: AsciiDoc API microservice
+- **sheep-dog-cucumber-gen-svc**: Cucumber code generation microservice
+- **sheep-dog-mcp-svc**: MCP server for AI assistant integration
 - **sheep-dog-svc-maven-plugin**: Maven plugin for service-oriented transformations
 - **Docker Integration**: Containerized deployment with multi-stage builds
 - **Kubernetes Manifests**: Cloud orchestration configurations
@@ -31,7 +33,7 @@ mvn clean install
 
 ### Forward Engineering (Service-Based)
 ```bash
-# In sheep-dog-dev-svc project
+# In sheep-dog-specs project
 scripts/forward-engineer.bat
 
 # Or manually:
@@ -42,7 +44,7 @@ mvn org.farhan:sheep-dog-svc-maven-plugin:uml-to-cucumber-spring \
 
 ### Reverse Engineering (Service-Based)
 ```bash
-# In sheep-dog-dev-svc project  
+# In sheep-dog-specs project
 scripts/reverse-engineer.bat
 
 # Or manually:
@@ -68,12 +70,9 @@ mvn spring-boot:run -Dspring.profiles.active=surefire
 - **Database**: MySQL for persistent UML model storage
 - **Actuator**: Health checks and metrics at `/actuator/`
 
-### API Endpoints (sheep-dog-dev-svc)
-- `POST /api/asciidoctor/to-uml` - Convert AsciiDoc to UML
-- `POST /api/cucumber/to-uml` - Convert Cucumber to UML  
-- `POST /api/uml/to-cucumber` - Generate Cucumber from UML
-- `POST /api/uml/to-cucumber-spring` - Generate Spring Cucumber from UML
-- `POST /api/uml/to-cucumber-guice` - Generate Guice Cucumber from UML
+### API Endpoints
+- **sheep-dog-asciidoc-api-svc**: `POST /api/asciidoctor/to-uml` - Convert AsciiDoc to UML
+- **sheep-dog-cucumber-gen-svc**: `POST /api/cucumber/to-uml`, `POST /api/uml/to-cucumber`, `POST /api/uml/to-cucumber-spring`, `POST /api/uml/to-cucumber-guice`
 
 ## Container Development
 
@@ -81,9 +80,10 @@ mvn spring-boot:run -Dspring.profiles.active=surefire
 ```yaml
 # From docker/compose.yaml
 services:
-  sheep-dog-dev-db:     # MySQL database
-  sheep-dog-dev-mq:     # Apache Artemis message queue  
-  sheep-dog-dev-svc:    # Spring Boot application
+  sheep-dog-db:     # MySQL database
+  sheep-dog-mq:     # Apache Artemis message queue
+  sheep-dog-asciidoc-api-svc:  # AsciiDoc API service
+  sheep-dog-cucumber-gen-svc:  # Cucumber generation service
 ```
 
 ### Docker Images
@@ -134,8 +134,8 @@ kubernetes/
 │   ├── ingress.yaml        # External access
 │   └── pvc.yaml            # Persistent volume claims
 └── overlays/               # Environment-specific configurations
-    ├── failsafe/           # Testing environment  
-    └── prod/               # Production environment
+    ├── dev/                # Development environment
+    └── qa/                 # QA environment
 ```
 
 ### Service Configuration
