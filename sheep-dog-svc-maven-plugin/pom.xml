@@ -8,7 +8,7 @@
 	</parent>
 	<groupId>org.farhan</groupId>
 	<artifactId>sheep-dog-svc-maven-plugin</artifactId>
-	<version>1.0</version>
+	<version>1.1-SNAPSHOT</version>
 	<packaging>maven-plugin</packaging>
 	<name>Sheep Dog Service Maven Plugin</name>
 
@@ -23,7 +23,7 @@
 
 	<scm>
 		<connection>scm:git:https://github.com/farhan5248/sheep-dog-cloud</connection>
-		<tag>sheep-dog-svc-maven-plugin-1.0</tag>
+		<tag>sheep-dog-svc-maven-plugin-1.28</tag>
 	</scm>
 
 	<pluginRepositories>
@@ -173,7 +173,7 @@
 			<plugin>
 				<groupId>org.farhan</groupId>
 				<artifactId>sheep-dog-svc-maven-plugin</artifactId>
-				<version>1.0</version>
+				<version>1.1-SNAPSHOT</version>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
