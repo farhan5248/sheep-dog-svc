@@ -33,11 +33,8 @@ public class AsciiDoctorService {
 	private final RestClient restClient;
 
 	@Autowired
-	public AsciiDoctorService(@Value("${sheepdog.host:sheep-dog-dev-svc}") String host,
-			@Value("${sheepdog.port:80}") int port) {
-		// TODO look into why using @ConfigurationProperties creates issues.
-		// TODO why does this service need a controller?
-
+	public AsciiDoctorService(@Value("${sheepdog.asciidoc.host:sheep-dog-asciidoc-api-svc}") String host,
+			@Value("${sheepdog.asciidoc.port:80}") int port) {
 		BASE_URL = "http://" + host + ":" + port;
 		this.restClient = RestClient.builder()
 				.baseUrl(BASE_URL)

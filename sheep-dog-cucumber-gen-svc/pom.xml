@@ -9,14 +9,14 @@
 	</parent>
 	<groupId>org.farhan</groupId>
 	<artifactId>sheep-dog-cucumber-gen-svc</artifactId>
-	<version>1.0.0-SNAPSHOT</version>
+	<version>1.0-SNAPSHOT</version>
 	<name>Sheep Dog Cucumber Gen Service</name>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<java.version>21</java.version>
-		<sheep-dog-asciidoc-api.version>1.0.0-SNAPSHOT</sheep-dog-asciidoc-api.version>
-		<sheep-dog-cucumber-gen.version>1.0.0-SNAPSHOT</sheep-dog-cucumber-gen.version>
+		<sheep-dog-asciidoc-api.version>1.0-SNAPSHOT</sheep-dog-asciidoc-api.version>
+		<sheep-dog-cucumber-gen.version>1.0-SNAPSHOT</sheep-dog-cucumber-gen.version>
 		<docker.registry.github>ghcr.io</docker.registry.github>
 		<spring-cloud-contract.version>4.3.0</spring-cloud-contract.version>
 		<sheepdog.host>dev.sheepdog.io</sheepdog.host>
@@ -212,8 +212,8 @@
 		<plugins>
 			<plugin>
 				<groupId>org.farhan</groupId>
-				<artifactId>sheep-dog-dev-svc-maven-plugin</artifactId>
-				<version>1.48</version>
+				<artifactId>sheep-dog-svc-maven-plugin</artifactId>
+				<version>1.0-SNAPSHOT</version>
 			</plugin>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>

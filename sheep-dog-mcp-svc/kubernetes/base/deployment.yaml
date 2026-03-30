@@ -24,6 +24,14 @@ spec:
               value: "INFO"
             - name: LOG_PATH
               value: "/logs"
+            - name: SHEEPDOG_ASCIIDOC_HOST
+              value: sheep-dog-asciidoc-api-svc
+            - name: SHEEPDOG_ASCIIDOC_PORT
+              value: "80"
+            - name: SHEEPDOG_CUCUMBER_HOST
+              value: sheep-dog-cucumber-gen-svc
+            - name: SHEEPDOG_CUCUMBER_PORT
+              value: "80"
           ports:
             - containerPort: 8080
           volumeMounts:

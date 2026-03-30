@@ -34,8 +34,8 @@ public class CucumberService {
 	private final RestClient restClient;
 
 	@Autowired
-	public CucumberService(@Value("${sheepdog.host:sheep-dog-dev-svc}") String host,
-			@Value("${sheepdog.port:80}") int port) {
+	public CucumberService(@Value("${sheepdog.cucumber.host:sheep-dog-cucumber-gen-svc}") String host,
+			@Value("${sheepdog.cucumber.port:80}") int port) {
 		BASE_URL = "http://" + host + ":" + port;
 		this.restClient = RestClient.builder()
 				.baseUrl(BASE_URL)
