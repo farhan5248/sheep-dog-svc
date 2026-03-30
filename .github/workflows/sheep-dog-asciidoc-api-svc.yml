@@ -22,8 +22,24 @@ jobs:
       plugin: 'Maven'
     secrets: inherit
 
-  sheep-dog-mcp-svc:
+  sheep-dog-svc-maven-plugin:
     needs: [sheep-dog-cucumber-gen-svc]
+    uses: farhan5248/sheep-dog-ops/.github/workflows/release-maven.yml@main
+    with:
+      project: 'sheep-dog-svc-maven-plugin'
+      plugin: 'Maven'
+    secrets: inherit
+
+  darmok-maven-plugin:
+    needs: [sheep-dog-svc-maven-plugin]
+    uses: farhan5248/sheep-dog-ops/.github/workflows/release-maven.yml@main
+    with:
+      project: 'darmok-maven-plugin'
+      plugin: 'Maven'
+    secrets: inherit
+
+  sheep-dog-mcp-svc:
+    needs: [darmok-maven-plugin]
     uses: farhan5248/sheep-dog-ops/.github/workflows/release-maven.yml@main
     with:
       project: 'sheep-dog-mcp-svc'

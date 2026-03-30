@@ -14,8 +14,16 @@ jobs:
       plugin: 'Maven'
     secrets: inherit
     
-  merge-into-develop:
+  darmok-maven-plugin:
     needs: [sheep-dog-svc-maven-plugin]
+    uses: farhan5248/sheep-dog-ops/.github/workflows/release-maven.yml@main
+    with:
+      project: 'darmok-maven-plugin'
+      plugin: 'Maven'
+    secrets: inherit
+
+  merge-into-develop:
+    needs: [darmok-maven-plugin]
     uses: farhan5248/sheep-dog-ops/.github/workflows/merge.yml@main
     with:
       source: 'main'
