@@ -10,7 +10,7 @@
 
     <groupId>org.farhan</groupId>
     <artifactId>sheep-dog-mcp-svc</artifactId>
-    <version>1.3-SNAPSHOT</version>
+    <version>1.3</version>
 
     <name>Sheep Dog MCP Service</name>
     <description>MCP server providing development tools for the Sheep Dog ecosystem</description>
@@ -24,7 +24,7 @@
 
     <scm>
         <connection>scm:git:https://github.com/farhan5248/sheep-dog-cloud</connection>
-        <tag>sheep-dog-mcp-svc-1.0</tag>
+        <tag>sheep-dog-mcp-svc-1.3</tag>
     </scm>
 
     <pluginRepositories>
