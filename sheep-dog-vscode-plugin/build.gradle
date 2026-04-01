@@ -32,7 +32,12 @@ repositories {
 
 // Configuration to resolve the LSP server and its dependencies
 configurations {
-	lspServer
+	lspServer {
+		attributes {
+			attribute(Usage.USAGE_ATTRIBUTE, objects.named(Usage, Usage.JAVA_RUNTIME))
+			attribute(TargetJvmEnvironment.TARGET_JVM_ENVIRONMENT_ATTRIBUTE, objects.named(TargetJvmEnvironment, TargetJvmEnvironment.STANDARD_JVM))
+		}
+	}
 }
 
 dependencies {
