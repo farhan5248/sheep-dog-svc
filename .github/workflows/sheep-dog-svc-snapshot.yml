@@ -1,0 +1,58 @@
+name: Publish Sheep Dog Svc Snapshot
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ "main" ]
+    paths:
+      - '.github/**'
+      - '**/kubernetes/**'
+      - '**/docker/**'
+      - '**/src/**'
+      - '**/pom.xml'
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  sheep-dog-asciidoc-api-svc:
+    uses: farhan5248/sheep-dog-ops/.github/workflows/snapshot-docker.yml@main
+    with:
+      project: 'sheep-dog-asciidoc-api-svc'
+    secrets: inherit
+
+  sheep-dog-cucumber-gen-svc:
+    needs: [sheep-dog-asciidoc-api-svc]
+    uses: farhan5248/sheep-dog-ops/.github/workflows/snapshot-docker.yml@main
+    with:
+      project: 'sheep-dog-cucumber-gen-svc'
+    secrets: inherit
+
+  sheep-dog-mcp-svc:
+    needs: [sheep-dog-cucumber-gen-svc]
+    uses: farhan5248/sheep-dog-ops/.github/workflows/snapshot-docker.yml@main
+    with:
+      project: 'sheep-dog-mcp-svc'
+    secrets: inherit
+
+  sheep-dog-svc-maven-plugin:
+    needs: [sheep-dog-cucumber-gen-svc]
+    uses: farhan5248/sheep-dog-ops/.github/workflows/snapshot-docker.yml@main
+    with:
+      project: 'sheep-dog-svc-maven-plugin'
+    secrets: inherit
+
+  darmok-maven-plugin:
+    needs: [sheep-dog-svc-maven-plugin]
+    uses: farhan5248/sheep-dog-ops/.github/workflows/snapshot-docker.yml@main
+    with:
+      project: 'darmok-maven-plugin'
+    secrets: inherit
+
+  merge-into-develop:
+    needs: [sheep-dog-mcp-svc, darmok-maven-plugin]
+    uses: farhan5248/sheep-dog-ops/.github/workflows/merge.yml@main
+    with:
+      source: 'main'
+      target: 'develop'
+    secrets: inherit
