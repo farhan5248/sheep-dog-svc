@@ -1,7 +1,7 @@
 # Extract all feature files, scenario names, and pattern tags from AsciiDoc files
 # Output: scenarios-list.txt
 
-$SpecsDir = "C:\Users\Farhan\git\sheep-dog-main\sheep-dog-qa\sheep-dog-specs\src\test\resources\asciidoc\specs\Ubiquitous Language"
+$SpecsDir = "C:\Users\Farhan\git\sheep-dog-main\sheep-dog-specs\sheep-dog-features\src\test\resources\asciidoc\specs\Ubiquitous Language"
 $OutputFile = "C:\Users\Farhan\git\sheep-dog-main\scripts\scenarios-list.txt"
 
 # Clear output file if it exists

@@ -121,7 +121,7 @@ src-gen/test/
 ## Cloud Deployment
 
 ### AWS EKS Integration
-- **Cluster Setup**: Use scripts in `../sheep-dog-qa/sheep-dog-specs/scripts/aws-*`
+- **Cluster Setup**: Use scripts in `../sheep-dog-specs/sheep-dog-features/scripts/aws-*`
 - **GitHub Actions**: Automated deployment via workflows
 - **Container Registry**: Uses GitHub Container Registry (ghcr.io)
 
@@ -189,7 +189,7 @@ curl -X POST http://localhost:8080/api/asciidoctor/to-uml \
 ## Repository-Specific Notes
 
 ### Dependencies
-- **Build Order**: This repo should be built after `sheep-dog-ops`, `sheep-dog-qa`, and `sheep-dog-local`
+- **Build Order**: This repo should be built after `sheep-dog-ops`, `sheep-dog-specs`, and `sheep-dog-local`
 - **Base Images**: Depends on dependency images for efficient builds
 - **Plugin Repository**: Uses GitHub Packages for Maven plugins
 
@@ -209,7 +209,7 @@ curl -X POST http://localhost:8080/api/asciidoctor/to-uml \
 ## Integration with Other Repositories
 
 ### Upstream Dependencies
-- **sheep-dog-qa**: Source of specifications and deployment configurations
+- **sheep-dog-specs**: Source of specifications and deployment configurations
 - **sheep-dog-local**: May reference core transformation libraries
 
 ### Service Endpoints

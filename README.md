@@ -1,6 +1,8 @@
 # Sheep Dog Svc
 
-Cloud microservices for AsciiDoc and Cucumber code generation, deployed to Kubernetes.
+Spring Boot microservices that expose the core transformation engine as REST APIs, deployed to Kubernetes. The Maven plugins call these services to perform code generation, and the MCP server integrates with Claude for AI-assisted development.
+
+Services communicate via REST and JMS (Apache Artemis), with MySQL for persistent UML model storage. Each service includes Docker multi-stage builds and Kubernetes manifests for dev/qa environments.
 
 ## Projects
 

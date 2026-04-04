@@ -1,7 +1,7 @@
 # Remove all tags from AsciiDoc files
 # This removes lines starting with @ that appear after Test-Case declarations
 
-$SpecsDir = "C:\Users\Farhan\git\sheep-dog-main\sheep-dog-qa\sheep-dog-specs\src\test\resources\asciidoc\specs\Ubiquitous Language"
+$SpecsDir = "C:\Users\Farhan\git\sheep-dog-main\sheep-dog-specs\sheep-dog-features\src\test\resources\asciidoc\specs\Ubiquitous Language"
 
 # Get all .asciidoc files
 $files = Get-ChildItem -Path $SpecsDir -Filter "*.asciidoc" | Sort-Object Name

@@ -19,10 +19,10 @@ public abstract class DarmokMojo extends AbstractMojo {
 	public MavenProject project;
 
 	// Path properties
-	@Parameter(property = "specsDir", defaultValue = "../../sheep-dog-qa/sheep-dog-specs")
+	@Parameter(property = "specsDir", defaultValue = "../../sheep-dog-specs/sheep-dog-features")
 	public String specsDir;
 
-	@Parameter(property = "asciidocDir", defaultValue = "../../sheep-dog-qa/sheep-dog-specs/src/test/resources/asciidoc/specs")
+	@Parameter(property = "asciidocDir", defaultValue = "../../sheep-dog-specs/sheep-dog-features/src/test/resources/asciidoc/specs")
 	public String asciidocDir;
 
 	@Parameter(property = "scenariosFile", defaultValue = "scenarios-list.txt")

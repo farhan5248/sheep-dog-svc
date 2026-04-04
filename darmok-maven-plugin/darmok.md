@@ -31,8 +31,8 @@ mvn org.farhan:darmok-maven-plugin:gen-from-comparison
 
 | Property | Default | Description |
 |---|---|---|
-| specsDir | ../../sheep-dog-qa/sheep-dog-specs | Path to specs project (relative to baseDir) |
-| asciidocDir | ../../sheep-dog-qa/sheep-dog-specs/src/test/resources/asciidoc/specs | Path to asciidoc files |
+| specsDir | ../../sheep-dog-specs/sheep-dog-features | Path to specs project (relative to baseDir) |
+| asciidocDir | ../../sheep-dog-specs/sheep-dog-features/src/test/resources/asciidoc/specs | Path to asciidoc files |
 | scenariosFile | scenarios-list.txt | Scenarios list file in baseDir |
 | host | dev.sheepdog.io | Service host |
 | port | 80 | Service port |
