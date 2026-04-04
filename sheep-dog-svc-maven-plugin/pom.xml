@@ -23,7 +23,7 @@
 	</properties>
 
 	<scm>
-		<connection>scm:git:https://github.com/farhan5248/sheep-dog-cloud</connection>
+		<connection>scm:git:https://github.com/farhan5248/sheep-dog-svc</connection>
 		<tag>sheep-dog-svc-maven-plugin-1.28</tag>
 	</scm>
 
@@ -31,6 +31,16 @@
 		<pluginRepository>
 			<id>github</id>
 			<url>https://maven.pkg.github.com/farhan5248/sheep-dog-cloud</url>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</pluginRepository>
+		<pluginRepository>
+			<id>github-main</id>
+			<url>https://maven.pkg.github.com/farhan5248/sheep-dog-main</url>
 			<releases>
 				<enabled>true</enabled>
 			</releases>
@@ -51,12 +61,22 @@
 				<enabled>true</enabled>
 			</snapshots>
 		</repository>
+		<repository>
+			<id>github-main</id>
+			<url>https://maven.pkg.github.com/farhan5248/sheep-dog-main</url>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
 	</repositories>
 
 	<distributionManagement>
 		<repository>
 			<id>github</id>
-			<url>https://maven.pkg.github.com/farhan5248/sheep-dog-cloud</url>
+			<url>https://maven.pkg.github.com/farhan5248/sheep-dog-main</url>
 			<releases>
 				<enabled>true</enabled>
 			</releases>
