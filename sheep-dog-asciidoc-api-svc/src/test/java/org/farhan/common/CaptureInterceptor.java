@@ -32,8 +32,7 @@ public class CaptureInterceptor implements ClientHttpRequestInterceptor {
             String responseBody) throws IOException {
         String method = request.getMethod().name();
         String url = request.getURI().getPath();
-        @SuppressWarnings("deprecation")
-        int status = response.getRawStatusCode();
+        int status = response.getStatusCode().value();
         String contentType = response.getHeaders().getContentType() != null
                 ? response.getHeaders().getContentType().toString()
                 : null;
@@ -137,12 +136,6 @@ public class CaptureInterceptor implements ClientHttpRequestInterceptor {
         @Override
         public org.springframework.http.HttpStatusCode getStatusCode() throws IOException {
             return response.getStatusCode();
-        }
-
-        @Override
-        public int getRawStatusCode() throws IOException {
-            // Deprecated in Spring 6+, but still required for interface
-            return response.getRawStatusCode();
         }
 
         @Override
