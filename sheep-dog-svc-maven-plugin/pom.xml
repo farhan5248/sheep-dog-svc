@@ -20,6 +20,7 @@
 		<sheep-dog-grammar.version>1.42-SNAPSHOT</sheep-dog-grammar.version>
 		<sheepdog.namespace>dev</sheepdog.namespace>
 		<sheepdog.host>${sheepdog.namespace}.sheepdog.io</sheepdog.host>
+		<argLine>-XX:+EnableDynamicAgentLoading</argLine>
 	</properties>
 
 	<scm>

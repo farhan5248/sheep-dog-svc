@@ -20,6 +20,7 @@
 		<spring-cloud-contract.version>4.3.0</spring-cloud-contract.version>
 		<sheepdog.namespace>dev</sheepdog.namespace>
 		<sheepdog.host>${sheepdog.namespace}.sheepdog.io</sheepdog.host>
+		<argLine>-XX:+EnableDynamicAgentLoading</argLine>
 	</properties>
 
 	<scm>
