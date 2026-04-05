@@ -20,6 +20,7 @@
         <java.version>21</java.version>
         <docker.registry.github>ghcr.io</docker.registry.github>
         <sheepdog.namespace>dev</sheepdog.namespace>
+        <sheep-dog-mgmt-maven-plugin.version>1.17-SNAPSHOT</sheep-dog-mgmt-maven-plugin.version>
     </properties>
 
     <scm>
@@ -194,6 +195,11 @@
                         <include>org.farhan:*:*</include>
                     </includes>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.farhan</groupId>
+                <artifactId>sheep-dog-mgmt-maven-plugin</artifactId>
+                <version>${sheep-dog-mgmt-maven-plugin.version}</version>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
