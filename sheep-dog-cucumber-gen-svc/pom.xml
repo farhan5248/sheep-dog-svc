@@ -15,8 +15,8 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<java.version>21</java.version>
-		<sheep-dog-asciidoc-api.version>1.3</sheep-dog-asciidoc-api.version>
-		<sheep-dog-cucumber-gen.version>1.1</sheep-dog-cucumber-gen.version>
+		<sheep-dog-asciidoc-api.version>1.4-SNAPSHOT</sheep-dog-asciidoc-api.version>
+		<sheep-dog-cucumber-gen.version>1.2-SNAPSHOT</sheep-dog-cucumber-gen.version>
 		<docker.registry.github>ghcr.io</docker.registry.github>
 		<spring-cloud-contract.version>4.3.0</spring-cloud-contract.version>
 		<sheepdog.namespace>dev</sheepdog.namespace>
