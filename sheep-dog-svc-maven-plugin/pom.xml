@@ -8,7 +8,7 @@
 	</parent>
 	<groupId>org.farhan</groupId>
 	<artifactId>sheep-dog-svc-maven-plugin</artifactId>
-	<version>1.4-SNAPSHOT</version>
+	<version>1.4</version>
 	<packaging>maven-plugin</packaging>
 	<name>Sheep Dog Service Maven Plugin</name>
 
@@ -17,7 +17,7 @@
 		<project.build.sourceEncoding>
 			UTF-8</project.build.sourceEncoding>
 		<java.version>21</java.version>
-		<sheep-dog-grammar.version>1.44-SNAPSHOT</sheep-dog-grammar.version>
+		<sheep-dog-grammar.version>1.51</sheep-dog-grammar.version>
 		<sheepdog.namespace>dev</sheepdog.namespace>
 		<sheepdog.host>${sheepdog.namespace}.sheepdog.io</sheepdog.host>
 		<argLine>-XX:+EnableDynamicAgentLoading</argLine>
