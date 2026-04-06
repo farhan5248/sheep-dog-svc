@@ -1,4 +1,4 @@
-name: Publish Sheep Dog Cucumber Gen Svc Release
+name: Publish Sheep Dog Svc Release
 
 on:
   workflow_dispatch:
@@ -10,14 +10,28 @@ permissions:
   packages: write
 
 jobs:
+  sheep-dog-asciidoc-api-svc:
+    uses: farhan5248/sheep-dog-ops/.github/workflows/release-maven.yml@main
+    with:
+      project: 'sheep-dog-asciidoc-api-svc'
+    secrets: inherit
+
   sheep-dog-cucumber-gen-svc:
+    needs: [sheep-dog-asciidoc-api-svc]
     uses: farhan5248/sheep-dog-ops/.github/workflows/release-maven.yml@main
     with:
       project: 'sheep-dog-cucumber-gen-svc'
     secrets: inherit
 
-  sheep-dog-svc-maven-plugin:
+  sheep-dog-mcp-svc:
     needs: [sheep-dog-cucumber-gen-svc]
+    uses: farhan5248/sheep-dog-ops/.github/workflows/release-maven.yml@main
+    with:
+      project: 'sheep-dog-mcp-svc'
+    secrets: inherit
+
+  sheep-dog-svc-maven-plugin:
+    needs: [sheep-dog-mcp-svc]
     uses: farhan5248/sheep-dog-ops/.github/workflows/release-maven.yml@main
     with:
       project: 'sheep-dog-svc-maven-plugin'
@@ -28,12 +42,4 @@ jobs:
     uses: farhan5248/sheep-dog-ops/.github/workflows/release-maven.yml@main
     with:
       project: 'darmok-maven-plugin'
-    secrets: inherit
-
-  merge-into-develop:
-    needs: [darmok-maven-plugin]
-    uses: farhan5248/sheep-dog-ops/.github/workflows/merge.yml@main
-    with:
-      source: 'main'
-      target: 'develop'
     secrets: inherit
