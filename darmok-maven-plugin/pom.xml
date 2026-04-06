@@ -127,7 +127,7 @@
 			<plugin>
 				<groupId>org.farhan</groupId>
 				<artifactId>sheep-dog-mgmt-maven-plugin</artifactId>
-				<version>1.22</version>
+				<version>1.23</version>
 			</plugin>
 		</plugins>
 	</build>
