@@ -2,6 +2,9 @@ name: Publish Darmok Maven Plugin Release
 
 on:
   workflow_dispatch:
+concurrency:
+  group: sheep-dog-svc
+  cancel-in-progress: false
 permissions:
   contents: write
   packages: write

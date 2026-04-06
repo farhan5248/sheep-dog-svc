@@ -2,6 +2,9 @@ name: Publish Sheep Dog Cucumber Gen Svc Release
 
 on:
   workflow_dispatch:
+concurrency:
+  group: sheep-dog-svc
+  cancel-in-progress: false
 permissions:
   contents: write
   packages: write
