@@ -8,11 +8,11 @@ Services communicate via REST and JMS (Apache Artemis), with MySQL for persisten
 
 | Project | Description |
 |---------|-------------|
-| sheep-dog-asciidoc-api-svc | Spring Boot REST API wrapping sheep-dog-asciidoc-api |
-| sheep-dog-cucumber-gen-svc | Spring Boot REST API wrapping sheep-dog-cucumber-gen |
-| sheep-dog-mcp-svc | MCP (Model Context Protocol) server |
-| sheep-dog-svc-maven-plugin | Maven plugin for service-based code generation |
-| darmok-maven-plugin | Darmok Maven plugin for TDD automation |
+| sheep-dog-asciidoc-api-svc | REST microservice for AsciiDoc-to-UML transformations |
+| sheep-dog-cucumber-gen-svc | REST microservice for Cucumber-to-UML transformations |
+| sheep-dog-mcp-svc | MCP server exposing transformation tools to AI assistants |
+| sheep-dog-svc-maven-plugin | Maven plugin integrating transformations into the build lifecycle |
+| darmok-maven-plugin | Maven plugin automating the Red-Green-Refactor TDD cycle |
 
 ## Build Order
 

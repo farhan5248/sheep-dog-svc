@@ -1,21 +1,27 @@
-# Sheep Dog Development MCP Server
+# Sheep Dog MCP Svc
 
-MCP server that exposes Sheep Dog development tools to AI assistants like Claude.
+Model Context Protocol (MCP) server that exposes Sheep Dog transformation tools to AI assistants.
 
 ## Overview
 
-This project provides a Model Context Protocol (MCP) server that allows AI assistants to interact with the Sheep Dog ecosystem. It acts as a bridge between AI clients and the sheep-dog-svc backend service, exposing transformation tools via the MCP protocol.
+Spring Boot MCP server that bridges AI assistants like Claude with the Sheep Dog transformation services. Delegates transformation work to sheep-dog-asciidoc-api-svc and sheep-dog-cucumber-gen-svc via REST calls. Supports SSE and STDIO transports.
 
 ## Key Functionality
 
-- Provides MCP tools for AI assistants to trigger specification transformations
-- Supports SSE (Server-Sent Events) and STDIO transports for MCP communication
-- Delegates transformation work to sheep-dog-svc via REST calls
-- Exposes tools like "Clear objects for AsciiDoctor files" for UML model management
+- MCP tools for AsciiDoc and Cucumber transformations
+- SSE and STDIO transport support
+- Delegates to backend services via REST
+- Spring Security integration
 
 ## Technology
 
 - Spring Boot 3.4
 - Spring AI MCP Server (WebMVC starter)
-- Docker/Kubernetes deployment
+- Spring Security
 - Java 21
+
+## Build
+
+```
+scripts/install.bat
+```

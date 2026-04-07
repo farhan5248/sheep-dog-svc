@@ -1,25 +1,28 @@
-# Sheep Dog Development Service
+# Sheep Dog Cucumber Gen Svc
 
-REST microservice that performs bidirectional transformations between specifications and UML models.
+REST microservice for bidirectional transformations between Cucumber specifications and UML models.
 
 ## Overview
 
-This is the core transformation engine of the Sheep Dog ecosystem. It provides REST endpoints for converting AsciiDoctor and Cucumber specifications to UML models, and vice versa. The service stores model data in a MySQL database and uses JMS for asynchronous processing.
+Spring Boot service that wraps the sheep-dog-cucumber-gen library as REST endpoints. Supports plain Cucumber, Guice, and Spring variants. Stores UML model data in MySQL and uses JMS (ActiveMQ Artemis) for asynchronous processing.
 
 ## Key Functionality
 
-- AsciiDoctor to UML transformation and reverse
-- Cucumber to UML transformation and reverse
-- Supports multiple Cucumber frameworks: plain, Guice, and Spring
-- Asynchronous message processing via JMS (ActiveMQ Artemis)
-- Persists UML model data in MySQL
+- Cucumber to UML transformation via REST
+- UML to Cucumber generation via REST (plain, Guice, Spring variants)
+- Asynchronous message processing via JMS
+- Persistent UML model storage in MySQL
 
 ## Technology
 
-- Spring Boot 3.4
-- Spring Data JPA, Spring JMS
+- Spring Boot 3.4 (Web, Data JPA, Artemis, Actuator)
 - ActiveMQ Artemis
 - MySQL
-- Depends on sheep-dog-dev library
-- Docker/Kubernetes deployment
+- Depends on sheep-dog-asciidoc-api, sheep-dog-cucumber-gen
 - Java 21
+
+## Build
+
+```
+scripts/install.bat
+```
