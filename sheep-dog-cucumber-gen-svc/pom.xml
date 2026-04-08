@@ -22,6 +22,13 @@
 		<sheepdog.namespace>dev</sheepdog.namespace>
 		<sheepdog.host>${sheepdog.namespace}.sheepdog.io</sheepdog.host>
 		<argLine>-XX:+EnableDynamicAgentLoading</argLine>
+		<!-- Docker tag format — default maven.build.timestamp has ':' which is illegal in Docker tags -->
+		<maven.build.timestamp.format>yyyyMMddHHmmss</maven.build.timestamp.format>
+		<sheepdog.image.tag>${project.version}-${maven.build.timestamp}</sheepdog.image.tag>
+		<!-- Helm chart resolution (relative path until Nexus hosts the chart — see #82) -->
+		<sheepdog.helm.chart>../../sheep-dog-ops/sheep-dog/helm/sheep-dog</sheepdog.helm.chart>
+		<sheepdog.helm.values>../../sheep-dog-ops/sheep-dog/helm/helm-values/values-${sheepdog.namespace}.yaml</sheepdog.helm.values>
+		<sheepdog.helm.image.key>cucumberGen</sheepdog.helm.image.key>
 	</properties>
 
 	<scm>
@@ -415,14 +422,14 @@
 							<name>${docker.registry.github}/farhan5248/%a-dependencies:%l</name>
 							<registry>${docker.registry.github}</registry>
 						</image>
-						<!-- Application image -->
+						<!-- Application image — tagged with unique timestamp per build so helm always sees a new tag -->
 						<image>
 							<build>
 								<contextDir>${project.basedir}</contextDir>
 								<dockerFile>docker/springboot.dockerfile</dockerFile>
 							</build>
 							<alias>${docker.registry.github}/${project.artifactId}</alias>
-							<name>${docker.registry.github}/farhan5248/%a:%l</name>
+							<name>${docker.registry.github}/farhan5248/%a:${sheepdog.image.tag}</name>
 							<registry>${docker.registry.github}</registry>
 						</image>
 					</images>
@@ -450,35 +457,26 @@
 				<version>3.1.0</version>
 				<executions>
 					<execution>
-						<id>delete-component</id>
+						<id>helm-deploy</id>
 						<phase>pre-integration-test</phase>
 						<goals>
 							<goal>exec</goal>
 						</goals>
 						<configuration>
-							<executable>kubectl</executable>
+							<executable>helm</executable>
 							<arguments>
-								<argument>delete</argument>
-								<argument>deployments</argument>
-								<argument>-l</argument>
-								<argument>component=sheep-dog-cucumber-gen-svc</argument>
+								<argument>upgrade</argument>
+								<argument>--install</argument>
+								<argument>sheep-dog</argument>
+								<argument>${sheepdog.helm.chart}</argument>
 								<argument>-n</argument>
 								<argument>${sheepdog.namespace}</argument>
-							</arguments>
-						</configuration>
-					</execution>
-					<execution>
-						<id>start-component</id>
-						<phase>pre-integration-test</phase>
-						<goals>
-							<goal>exec</goal>
-						</goals>
-						<configuration>
-							<executable>kubectl</executable>
-							<arguments>
-								<argument>apply</argument>
-								<argument>-k</argument>
-								<argument>kubernetes/overlays/${sheepdog.namespace}</argument>
+								<argument>--create-namespace</argument>
+								<argument>-f</argument>
+								<argument>${sheepdog.helm.values}</argument>
+								<argument>--set</argument>
+								<argument>images.${sheepdog.helm.image.key}.tag=${sheepdog.image.tag}</argument>
+								<argument>--wait</argument>
 							</arguments>
 						</configuration>
 					</execution>
