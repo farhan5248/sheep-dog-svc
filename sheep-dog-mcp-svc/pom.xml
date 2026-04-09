@@ -23,8 +23,10 @@
         <!-- Docker tag format — default maven.build.timestamp has ':' which is illegal in Docker tags -->
         <maven.build.timestamp.format>yyyyMMddHHmmss</maven.build.timestamp.format>
         <sheepdog.image.tag>${project.version}-${maven.build.timestamp}</sheepdog.image.tag>
-        <!-- Helm chart resolution (relative path until Nexus hosts the chart — see #82) -->
-        <sheepdog.helm.chart>../../sheep-dog-ops/sheep-dog/helm/sheep-dog</sheepdog.helm.chart>
+        <!-- Helm chart resolution — pulled from Nexus OCI repo (#82). Chart version
+             is pinned by ${sheepdog.chart.version}; #32 will automate bumping. -->
+        <sheepdog.helm.chart>oci://nexus-docker.sheepdog.io/helm-hosted/sheep-dog</sheepdog.helm.chart>
+        <sheepdog.chart.version>0.1.0</sheepdog.chart.version>
         <sheepdog.helm.values>../../sheep-dog-ops/sheep-dog/helm/helm-values/values-${sheepdog.namespace}.yaml</sheepdog.helm.values>
         <sheepdog.helm.image.key>mcp</sheepdog.helm.image.key>
     </properties>
@@ -300,6 +302,9 @@
                                 <argument>--install</argument>
                                 <argument>sheep-dog</argument>
                                 <argument>${sheepdog.helm.chart}</argument>
+                                <argument>--version</argument>
+                                <argument>${sheepdog.chart.version}</argument>
+                                <argument>--plain-http</argument>
                                 <argument>-n</argument>
                                 <argument>${sheepdog.namespace}</argument>
                                 <argument>--create-namespace</argument>
