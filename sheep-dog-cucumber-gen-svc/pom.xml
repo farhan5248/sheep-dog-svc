@@ -25,11 +25,15 @@
 		<!-- Docker tag format — default maven.build.timestamp has ':' which is illegal in Docker tags -->
 		<maven.build.timestamp.format>yyyyMMddHHmmss</maven.build.timestamp.format>
 		<sheepdog.image.tag>${project.version}-${maven.build.timestamp}</sheepdog.image.tag>
-		<!-- Helm chart resolution — pulled from Nexus OCI repo (#82). Chart version
-		     is pinned by ${sheepdog.chart.version}; #32 will automate bumping. -->
-		<sheepdog.helm.chart>oci://nexus-docker.sheepdog.io/helm-hosted/sheep-dog</sheepdog.helm.chart>
+		<!-- Helm chart resolution — pulled from Nexus OCI repo (#82). The chart
+		     ships its own env-specific values files under helm-values/, so we
+		     pull-untar once into target/ and reference the extracted paths.
+		     Chart version is pinned by ${sheepdog.chart.version}; #32 will
+		     automate bumping. -->
+		<sheepdog.helm.chart.oci>oci://nexus-docker.sheepdog.io/helm-hosted/sheep-dog</sheepdog.helm.chart.oci>
 		<sheepdog.chart.version>0.1.0</sheepdog.chart.version>
-		<sheepdog.helm.values>../../sheep-dog-ops/sheep-dog/helm/helm-values/values-${sheepdog.namespace}.yaml</sheepdog.helm.values>
+		<sheepdog.helm.chart>${project.build.directory}/sheep-dog</sheepdog.helm.chart>
+		<sheepdog.helm.values>${sheepdog.helm.chart}/helm-values/values-${sheepdog.namespace}.yaml</sheepdog.helm.values>
 		<sheepdog.helm.image.key>cucumberGen</sheepdog.helm.image.key>
 	</properties>
 
@@ -459,6 +463,26 @@
 				<version>3.1.0</version>
 				<executions>
 					<execution>
+						<id>helm-pull</id>
+						<phase>pre-integration-test</phase>
+						<goals>
+							<goal>exec</goal>
+						</goals>
+						<configuration>
+							<executable>helm</executable>
+							<arguments>
+								<argument>pull</argument>
+								<argument>${sheepdog.helm.chart.oci}</argument>
+								<argument>--version</argument>
+								<argument>${sheepdog.chart.version}</argument>
+								<argument>--plain-http</argument>
+								<argument>--untar</argument>
+								<argument>--untardir</argument>
+								<argument>${project.build.directory}</argument>
+							</arguments>
+						</configuration>
+					</execution>
+					<execution>
 						<id>helm-deploy</id>
 						<phase>pre-integration-test</phase>
 						<goals>
@@ -471,9 +495,6 @@
 								<argument>--install</argument>
 								<argument>sheep-dog</argument>
 								<argument>${sheepdog.helm.chart}</argument>
-								<argument>--version</argument>
-								<argument>${sheepdog.chart.version}</argument>
-								<argument>--plain-http</argument>
 								<argument>-n</argument>
 								<argument>${sheepdog.namespace}</argument>
 								<argument>--create-namespace</argument>
