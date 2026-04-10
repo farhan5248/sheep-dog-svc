@@ -469,7 +469,6 @@
 								<argument>${sheepdog.helm.chart.oci}</argument>
 								<argument>--version</argument>
 								<argument>${sheepdog.chart.version}</argument>
-								<argument>--plain-http</argument>
 								<argument>--untar</argument>
 								<argument>--untardir</argument>
 								<argument>${project.build.directory}</argument>
