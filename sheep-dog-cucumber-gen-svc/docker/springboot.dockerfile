@@ -1,4 +1,4 @@
-FROM ${docker.registry.github}/farhan5248/sheep-dog-cucumber-gen-svc-dependencies:latest
+FROM ${docker.registry}/sheep-dog-cucumber-gen-svc-dependencies:latest
 COPY maven/target/dependency/META-INF /app/META-INF
 COPY maven/target/dependency/BOOT-INF/classes /app/classes
 COPY maven/target/dependency-org-farhan/BOOT-INF/lib /app/lib

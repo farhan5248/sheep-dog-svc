@@ -17,7 +17,7 @@
 		<project.build.sourceEncoding>
 			UTF-8</project.build.sourceEncoding>
 		<java.version>21</java.version>
-		<sheep-dog-grammar.version>1.52</sheep-dog-grammar.version>
+		<sheep-dog-grammar.version>1.53-SNAPSHOT</sheep-dog-grammar.version>
 		<sheepdog.namespace>dev</sheepdog.namespace>
 		<sheepdog.host>${sheepdog.namespace}.sheepdog.io</sheepdog.host>
 		<argLine>-XX:+EnableDynamicAgentLoading</argLine>
@@ -30,8 +30,8 @@
 
 	<pluginRepositories>
 		<pluginRepository>
-			<id>github</id>
-			<url>https://maven.pkg.github.com/farhan5248/sheep-dog-main</url>
+			<id>nexus</id>
+			<url>https://nexus.sheepdog.io/repository/maven-public/</url>
 			<releases>
 				<enabled>true</enabled>
 			</releases>
@@ -43,8 +43,8 @@
 
 	<repositories>
 		<repository>
-			<id>github</id>
-			<url>https://maven.pkg.github.com/farhan5248/sheep-dog-main</url>
+			<id>nexus</id>
+			<url>https://nexus.sheepdog.io/repository/maven-public/</url>
 			<releases><enabled>true</enabled></releases>
 			<snapshots><enabled>true</enabled></snapshots>
 		</repository>
@@ -52,15 +52,13 @@
 
 	<distributionManagement>
 		<repository>
-			<id>github</id>
-			<url>https://maven.pkg.github.com/farhan5248/sheep-dog-main</url>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
+			<id>nexus-releases</id>
+			<url>https://nexus.sheepdog.io/repository/maven-releases/</url>
 		</repository>
+		<snapshotRepository>
+			<id>nexus-snapshots</id>
+			<url>https://nexus.sheepdog.io/repository/maven-snapshots/</url>
+		</snapshotRepository>
 	</distributionManagement>
 
 	<dependencyManagement>
