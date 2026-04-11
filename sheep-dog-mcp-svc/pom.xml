@@ -364,48 +364,35 @@
 	     into a public registry (today: ghcr.io/farhan5248/*) so EKS prod
 	     (which can't reach the LAN Nexus) can pull it. Activated by
 	     `-Ppublic`; the release workflow passes this per svc job, snapshot
-	     builds do not. docker tag is a local-only ref with no I/O; docker
-	     push is the heavy step. Auth for ghcr.io comes from
-	     ~/.docker/config.json (docker login ghcr.io) or the `github`
-	     server entry in ~/.m2/settings.xml.
+	     builds do not. Appends a ghcr.io <image> entry to jkube's base
+	     config via combine.children="append"; the same build+push goals
+	     then cover both registries. Second build is layer-cache cheap.
+	     Auth for ghcr.io comes from maven settings.xml (<server id="ghcr.io">)
+	     or ~/.docker/config.json as fallback. See #236, #238.
 	     Only the app image is mirrored — the dependencies image is a
 	     Nexus-only build cache for the multi-stage Dockerfile and isn't
-	     pulled by kubelets at runtime. See #236. -->
+	     pulled by kubelets at runtime. -->
 	<profiles>
 		<profile>
 			<id>public</id>
 			<build>
 				<plugins>
 					<plugin>
-						<groupId>org.codehaus.mojo</groupId>
-						<artifactId>exec-maven-plugin</artifactId>
-						<executions>
-							<execution>
-								<id>ghcr-tag-app</id>
-								<phase>pre-integration-test</phase>
-								<goals><goal>exec</goal></goals>
-								<configuration>
-									<executable>docker</executable>
-									<arguments>
-										<argument>tag</argument>
-										<argument>${docker.registry}/${project.artifactId}:${project.version}</argument>
-										<argument>${docker.registry.github}/farhan5248/${project.artifactId}:${project.version}</argument>
-									</arguments>
-								</configuration>
-							</execution>
-							<execution>
-								<id>ghcr-push-app</id>
-								<phase>pre-integration-test</phase>
-								<goals><goal>exec</goal></goals>
-								<configuration>
-									<executable>docker</executable>
-									<arguments>
-										<argument>push</argument>
-										<argument>${docker.registry.github}/farhan5248/${project.artifactId}:${project.version}</argument>
-									</arguments>
-								</configuration>
-							</execution>
-						</executions>
+						<groupId>org.eclipse.jkube</groupId>
+						<artifactId>kubernetes-maven-plugin</artifactId>
+						<configuration>
+							<images combine.children="append">
+								<image>
+									<build>
+										<contextDir>${project.basedir}</contextDir>
+										<dockerFile>docker/springboot.dockerfile</dockerFile>
+									</build>
+									<alias>${docker.registry.github}/farhan5248/${project.artifactId}</alias>
+									<name>${docker.registry.github}/farhan5248/%a:${sheepdog.image.tag}</name>
+									<registry>${docker.registry.github}</registry>
+								</image>
+							</images>
+						</configuration>
 					</plugin>
 				</plugins>
 			</build>
