@@ -25,9 +25,12 @@
 		<sheepdog.namespace>dev</sheepdog.namespace>
 		<sheepdog.host>${sheepdog.namespace}.sheepdog.io</sheepdog.host>
 		<argLine>-XX:+EnableDynamicAgentLoading</argLine>
-		<!-- Docker tag format — default maven.build.timestamp has ':' which is illegal in Docker tags -->
-		<maven.build.timestamp.format>yyyyMMddHHmmss</maven.build.timestamp.format>
-		<sheepdog.image.tag>${project.version}-${maven.build.timestamp}</sheepdog.image.tag>
+		<!-- Docker image tag = plain project version. Release builds push an
+		     immutable `1.9`; snapshot builds overwrite `1.10-SNAPSHOT` on
+		     each push. The umbrella chart's updateValuesYaml step pins
+		     values.yaml to ${project.version}, so this pattern keeps tag
+		     resolution consistent across both registries. See #240. -->
+		<sheepdog.image.tag>${project.version}</sheepdog.image.tag>
 		<!-- Helm chart resolution — pulled from Nexus OCI repo (#82). The chart
 		     ships its own env-specific values files under helm-values/, so we
 		     pull-untar once into target/ and reference the extracted paths.
@@ -433,7 +436,10 @@
 							<name>${docker.registry}/%a-dependencies:%l</name>
 							<registry>${docker.registry}</registry>
 						</image>
-						<!-- Application image — tagged with unique timestamp per build so helm always sees a new tag -->
+						<!-- Application image — tagged with ${project.version}. Release
+						     builds produce an immutable `1.9`, snapshot builds overwrite
+						     `1.10-SNAPSHOT`. Umbrella chart's values.yaml pins to this
+						     same ${project.version} via updateValuesYaml (#240). -->
 						<image>
 							<build>
 								<contextDir>${project.basedir}</contextDir>
@@ -517,14 +523,17 @@
 		</plugins>
 	</build>
 
-	<!-- public profile — mirrors the images jkube just pushed to Nexus into
-	     a public registry (today: ghcr.io/farhan5248/*) so EKS prod (which
-	     can't reach the LAN Nexus) can pull them. Activated by `-Ppublic`;
-	     the release workflow passes this per svc job, snapshot builds do
-	     not. docker tag is a local-only ref with no I/O; docker push is
-	     the heavy step. Auth for ghcr.io comes from ~/.docker/config.json
-	     (docker login ghcr.io) or the `github` server entry in
-	     ~/.m2/settings.xml. See #236 for context. -->
+	<!-- public profile — mirrors the app image jkube just pushed to Nexus
+	     into a public registry (today: ghcr.io/farhan5248/*) so EKS prod
+	     (which can't reach the LAN Nexus) can pull it. Activated by
+	     `-Ppublic`; the release workflow passes this per svc job, snapshot
+	     builds do not. docker tag is a local-only ref with no I/O; docker
+	     push is the heavy step. Auth for ghcr.io comes from
+	     ~/.docker/config.json (docker login ghcr.io) or the `github`
+	     server entry in ~/.m2/settings.xml.
+	     Only the app image is mirrored — the dependencies image is a
+	     Nexus-only build cache for the multi-stage Dockerfile and isn't
+	     pulled by kubelets at runtime. See #236. -->
 	<profiles>
 		<profile>
 			<id>public</id>
@@ -535,31 +544,6 @@
 						<artifactId>exec-maven-plugin</artifactId>
 						<executions>
 							<execution>
-								<id>ghcr-tag-deps</id>
-								<phase>pre-integration-test</phase>
-								<goals><goal>exec</goal></goals>
-								<configuration>
-									<executable>docker</executable>
-									<arguments>
-										<argument>tag</argument>
-										<argument>${docker.registry}/${project.artifactId}-dependencies:latest</argument>
-										<argument>${docker.registry.github}/farhan5248/${project.artifactId}-dependencies:latest</argument>
-									</arguments>
-								</configuration>
-							</execution>
-							<execution>
-								<id>ghcr-push-deps</id>
-								<phase>pre-integration-test</phase>
-								<goals><goal>exec</goal></goals>
-								<configuration>
-									<executable>docker</executable>
-									<arguments>
-										<argument>push</argument>
-										<argument>${docker.registry.github}/farhan5248/${project.artifactId}-dependencies:latest</argument>
-									</arguments>
-								</configuration>
-							</execution>
-							<execution>
 								<id>ghcr-tag-app</id>
 								<phase>pre-integration-test</phase>
 								<goals><goal>exec</goal></goals>
@@ -567,8 +551,8 @@
 									<executable>docker</executable>
 									<arguments>
 										<argument>tag</argument>
-										<argument>${docker.registry}/${project.artifactId}:${sheepdog.image.tag}</argument>
-										<argument>${docker.registry.github}/farhan5248/${project.artifactId}:latest</argument>
+										<argument>${docker.registry}/${project.artifactId}:${project.version}</argument>
+										<argument>${docker.registry.github}/farhan5248/${project.artifactId}:${project.version}</argument>
 									</arguments>
 								</configuration>
 							</execution>
@@ -580,7 +564,7 @@
 									<executable>docker</executable>
 									<arguments>
 										<argument>push</argument>
-										<argument>${docker.registry.github}/farhan5248/${project.artifactId}:latest</argument>
+										<argument>${docker.registry.github}/farhan5248/${project.artifactId}:${project.version}</argument>
 									</arguments>
 								</configuration>
 							</execution>
