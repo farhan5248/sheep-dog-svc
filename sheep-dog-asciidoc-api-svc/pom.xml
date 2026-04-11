@@ -34,6 +34,15 @@
 		<sheepdog.helm.chart>${project.build.directory}/sheep-dog</sheepdog.helm.chart>
 		<sheepdog.helm.values>${sheepdog.helm.chart}/helm-values/values-${sheepdog.namespace}.yaml</sheepdog.helm.values>
 		<sheepdog.helm.image.key>asciidocApi</sheepdog.helm.image.key>
+		<!-- Skip the helm-pull + helm-deploy exec executions (bound to
+		     pre-integration-test). Default false so snapshot deploys to
+		     dev on the runner's k8s continue to work. The svc release
+		     workflow passes -Dhelm.deploy.skip=true because release
+		     builds shouldn't touch k8s on the CI runners (not enough
+		     RAM to run dev+qa together); qa is deployed manually on
+		     windows-minipc via sheep-dog-ops/sheep-dog/scripts/deploy.bat
+		     (from #231) after the release completes. -->
+		<helm.deploy.skip>false</helm.deploy.skip>
 	</properties>
 
 	<scm>
@@ -461,6 +470,7 @@
 							<goal>exec</goal>
 						</goals>
 						<configuration>
+							<skip>${helm.deploy.skip}</skip>
 							<executable>helm</executable>
 							<arguments>
 								<argument>pull</argument>
@@ -480,6 +490,7 @@
 							<goal>exec</goal>
 						</goals>
 						<configuration>
+							<skip>${helm.deploy.skip}</skip>
 							<executable>helm</executable>
 							<arguments>
 								<argument>upgrade</argument>

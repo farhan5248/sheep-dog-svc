@@ -14,10 +14,14 @@ jobs:
     uses: farhan5248/sheep-dog-ops/.github/workflows/release-maven.yml@main
     with:
       project: 'sheep-dog-asciidoc-api-svc'
-      # Release builds deploy to qa (snapshot builds deploy to dev, see
-      # snapshot-docker.yml). Overrides the svc pom's default of
-      # sheepdog.namespace=dev.
-      preparation_goals: 'deploy,-DskipTests,-Dsheepdog.namespace=qa'
+      # Release builds deploy maven artifacts + docker images to Nexus
+      # but skip the helm upgrade/install into a k8s namespace. CI
+      # runners don't have enough memory to run both dev and qa; qa is
+      # deployed manually on windows-minipc via sheep-dog-ops/sheep-dog/
+      # scripts/deploy.bat (from #231) after this workflow completes.
+      # Snapshot builds continue to deploy to dev on the runner's k8s
+      # (see snapshot-docker.yml, which doesn't pass this flag).
+      preparation_goals: 'deploy,-DskipTests,-Dhelm.deploy.skip=true'
     secrets: inherit
 
   sheep-dog-cucumber-gen-svc:
@@ -25,7 +29,7 @@ jobs:
     uses: farhan5248/sheep-dog-ops/.github/workflows/release-maven.yml@main
     with:
       project: 'sheep-dog-cucumber-gen-svc'
-      preparation_goals: 'deploy,-DskipTests,-Dsheepdog.namespace=qa'
+      preparation_goals: 'deploy,-DskipTests,-Dhelm.deploy.skip=true'
     secrets: inherit
 
   sheep-dog-mcp-svc:
@@ -33,7 +37,7 @@ jobs:
     uses: farhan5248/sheep-dog-ops/.github/workflows/release-maven.yml@main
     with:
       project: 'sheep-dog-mcp-svc'
-      preparation_goals: 'deploy,-DskipTests,-Dsheepdog.namespace=qa'
+      preparation_goals: 'deploy,-DskipTests,-Dhelm.deploy.skip=true'
     secrets: inherit
 
   sheep-dog-svc-maven-plugin:
@@ -41,7 +45,7 @@ jobs:
     uses: farhan5248/sheep-dog-ops/.github/workflows/release-maven.yml@main
     with:
       project: 'sheep-dog-svc-maven-plugin'
-      preparation_goals: 'deploy,-DskipTests,-Dsheepdog.namespace=qa'
+      preparation_goals: 'deploy,-DskipTests,-Dhelm.deploy.skip=true'
     secrets: inherit
 
   darmok-maven-plugin:
@@ -49,5 +53,5 @@ jobs:
     uses: farhan5248/sheep-dog-ops/.github/workflows/release-maven.yml@main
     with:
       project: 'darmok-maven-plugin'
-      preparation_goals: 'deploy,-DskipTests,-Dsheepdog.namespace=qa'
+      preparation_goals: 'deploy,-DskipTests,-Dhelm.deploy.skip=true'
     secrets: inherit
