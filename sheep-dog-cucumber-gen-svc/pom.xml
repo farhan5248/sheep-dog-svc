@@ -521,6 +521,11 @@
 								<argument>--set</argument>
 								<argument>images.${sheepdog.helm.image.key}.tag=${sheepdog.image.tag}</argument>
 								<argument>--wait</argument>
+								<!-- Match sheep-dog-ops/sheep-dog/scripts/setup-namespace.*
+								     (15m for cold-start: image pulls, PVC binding, db init).
+								     Default 5m timed out in #238 snapshot CI. -->
+								<argument>--timeout</argument>
+								<argument>15m</argument>
 							</arguments>
 						</configuration>
 					</execution>
