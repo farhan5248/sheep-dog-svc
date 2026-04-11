@@ -8,7 +8,7 @@
 	</parent>
 	<groupId>org.farhan</groupId>
 	<artifactId>sheep-dog-svc-maven-plugin</artifactId>
-	<version>1.9</version>
+	<version>1.10-SNAPSHOT</version>
 	<packaging>maven-plugin</packaging>
 	<name>Sheep Dog Service Maven Plugin</name>
 
