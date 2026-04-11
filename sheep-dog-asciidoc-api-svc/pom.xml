@@ -17,6 +17,10 @@
 		<java.version>21</java.version>
 		<sheep-dog-asciidoc-api.version>1.10-SNAPSHOT</sheep-dog-asciidoc-api.version>
 		<docker.registry>nexus-docker.sheepdog.io</docker.registry>
+		<!-- ghcr.io mirror target — only pushed when the `qa` profile is
+		     active (see <profiles> at end of pom). Prod on EKS can't reach
+		     the LAN Nexus and pulls from ghcr.io instead (#236). -->
+		<docker.registry.github>ghcr.io</docker.registry.github>
 		<spring-cloud-contract.version>4.3.0</spring-cloud-contract.version>
 		<sheepdog.namespace>dev</sheepdog.namespace>
 		<sheepdog.host>${sheepdog.namespace}.sheepdog.io</sheepdog.host>
@@ -512,5 +516,79 @@
 			</plugin>
 		</plugins>
 	</build>
+
+	<!-- public profile — mirrors the images jkube just pushed to Nexus into
+	     a public registry (today: ghcr.io/farhan5248/*) so EKS prod (which
+	     can't reach the LAN Nexus) can pull them. Activated by `-Ppublic`;
+	     the release workflow passes this per svc job, snapshot builds do
+	     not. docker tag is a local-only ref with no I/O; docker push is
+	     the heavy step. Auth for ghcr.io comes from ~/.docker/config.json
+	     (docker login ghcr.io) or the `github` server entry in
+	     ~/.m2/settings.xml. See #236 for context. -->
+	<profiles>
+		<profile>
+			<id>public</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>exec-maven-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>ghcr-tag-deps</id>
+								<phase>pre-integration-test</phase>
+								<goals><goal>exec</goal></goals>
+								<configuration>
+									<executable>docker</executable>
+									<arguments>
+										<argument>tag</argument>
+										<argument>${docker.registry}/${project.artifactId}-dependencies:latest</argument>
+										<argument>${docker.registry.github}/farhan5248/${project.artifactId}-dependencies:latest</argument>
+									</arguments>
+								</configuration>
+							</execution>
+							<execution>
+								<id>ghcr-push-deps</id>
+								<phase>pre-integration-test</phase>
+								<goals><goal>exec</goal></goals>
+								<configuration>
+									<executable>docker</executable>
+									<arguments>
+										<argument>push</argument>
+										<argument>${docker.registry.github}/farhan5248/${project.artifactId}-dependencies:latest</argument>
+									</arguments>
+								</configuration>
+							</execution>
+							<execution>
+								<id>ghcr-tag-app</id>
+								<phase>pre-integration-test</phase>
+								<goals><goal>exec</goal></goals>
+								<configuration>
+									<executable>docker</executable>
+									<arguments>
+										<argument>tag</argument>
+										<argument>${docker.registry}/${project.artifactId}:${sheepdog.image.tag}</argument>
+										<argument>${docker.registry.github}/farhan5248/${project.artifactId}:latest</argument>
+									</arguments>
+								</configuration>
+							</execution>
+							<execution>
+								<id>ghcr-push-app</id>
+								<phase>pre-integration-test</phase>
+								<goals><goal>exec</goal></goals>
+								<configuration>
+									<executable>docker</executable>
+									<arguments>
+										<argument>push</argument>
+										<argument>${docker.registry.github}/farhan5248/${project.artifactId}:latest</argument>
+									</arguments>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 
 </project>

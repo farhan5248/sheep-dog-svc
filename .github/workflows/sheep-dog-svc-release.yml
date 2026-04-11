@@ -21,7 +21,9 @@ jobs:
       # scripts/deploy.bat (from #231) after this workflow completes.
       # Snapshot builds continue to deploy to dev on the runner's k8s
       # (see snapshot-docker.yml, which doesn't pass this flag).
-      preparation_goals: 'deploy,-DskipTests,-Dhelm.deploy.skip=true'
+      # -Ppublic activates the ghcr.io mirror push so EKS prod can pull
+      # these images (it can't reach LAN Nexus). See #236.
+      preparation_goals: 'deploy,-DskipTests,-Dhelm.deploy.skip=true,-Ppublic'
     secrets: inherit
 
   sheep-dog-cucumber-gen-svc:
@@ -29,7 +31,7 @@ jobs:
     uses: farhan5248/sheep-dog-ops/.github/workflows/release-maven.yml@main
     with:
       project: 'sheep-dog-cucumber-gen-svc'
-      preparation_goals: 'deploy,-DskipTests,-Dhelm.deploy.skip=true'
+      preparation_goals: 'deploy,-DskipTests,-Dhelm.deploy.skip=true,-Ppublic'
     secrets: inherit
 
   sheep-dog-mcp-svc:
@@ -37,7 +39,7 @@ jobs:
     uses: farhan5248/sheep-dog-ops/.github/workflows/release-maven.yml@main
     with:
       project: 'sheep-dog-mcp-svc'
-      preparation_goals: 'deploy,-DskipTests,-Dhelm.deploy.skip=true'
+      preparation_goals: 'deploy,-DskipTests,-Dhelm.deploy.skip=true,-Ppublic'
     secrets: inherit
 
   sheep-dog-svc-maven-plugin:
