@@ -14,6 +14,10 @@ jobs:
     uses: farhan5248/sheep-dog-ops/.github/workflows/release-maven.yml@main
     with:
       project: 'sheep-dog-asciidoc-api-svc'
+      # Release builds deploy to qa (snapshot builds deploy to dev, see
+      # snapshot-docker.yml). Overrides the svc pom's default of
+      # sheepdog.namespace=dev.
+      preparation_goals: 'deploy,-DskipTests,-Dsheepdog.namespace=qa'
     secrets: inherit
 
   sheep-dog-cucumber-gen-svc:
@@ -21,6 +25,7 @@ jobs:
     uses: farhan5248/sheep-dog-ops/.github/workflows/release-maven.yml@main
     with:
       project: 'sheep-dog-cucumber-gen-svc'
+      preparation_goals: 'deploy,-DskipTests,-Dsheepdog.namespace=qa'
     secrets: inherit
 
   sheep-dog-mcp-svc:
@@ -28,6 +33,7 @@ jobs:
     uses: farhan5248/sheep-dog-ops/.github/workflows/release-maven.yml@main
     with:
       project: 'sheep-dog-mcp-svc'
+      preparation_goals: 'deploy,-DskipTests,-Dsheepdog.namespace=qa'
     secrets: inherit
 
   sheep-dog-svc-maven-plugin:
@@ -35,6 +41,7 @@ jobs:
     uses: farhan5248/sheep-dog-ops/.github/workflows/release-maven.yml@main
     with:
       project: 'sheep-dog-svc-maven-plugin'
+      preparation_goals: 'deploy,-DskipTests,-Dsheepdog.namespace=qa'
     secrets: inherit
 
   darmok-maven-plugin:
@@ -42,4 +49,17 @@ jobs:
     uses: farhan5248/sheep-dog-ops/.github/workflows/release-maven.yml@main
     with:
       project: 'darmok-maven-plugin'
+      preparation_goals: 'deploy,-DskipTests,-Dsheepdog.namespace=qa'
+    secrets: inherit
+
+  # Final step: release the umbrella helm chart. Must run after all
+  # image-producing services so versions-maven-plugin:update-properties
+  # (invoked by ReleaseMojo inside the chart pom) can resolve the just-
+  # released service versions from Nexus. The chart pom doesn't use
+  # sheepdog.namespace, so the default preparation_goals is fine.
+  sheep-dog-chart:
+    needs: [darmok-maven-plugin]
+    uses: farhan5248/sheep-dog-ops/.github/workflows/release-maven.yml@main
+    with:
+      project: 'sheep-dog'
     secrets: inherit
