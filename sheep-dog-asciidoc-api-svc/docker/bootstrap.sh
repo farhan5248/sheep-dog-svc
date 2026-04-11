@@ -1,22 +1,15 @@
 #!/bin/bash
-echo "Testing MySQL connection"
-echo "select user from mysql.user where user = 'mbt';" | mysql -u root -proot
+# Idempotent MySQL init: run every container start so that pre-existing
+# volumes with partial state (e.g. user present but no grants) get corrected.
+# All statements use IF NOT EXISTS / idempotent forms so re-runs are harmless.
+set -e
 
-if [ $? -eq 1 ]; then
-  exit 1
-fi
+echo "Ensuring MBT database, user, and grants exist..."
+mysql -u root -proot <<'SQL'
+CREATE DATABASE IF NOT EXISTS mbt;
+CREATE USER IF NOT EXISTS 'mbt'@'%' IDENTIFIED BY 'mbt';
+GRANT ALL PRIVILEGES ON mbt.* TO 'mbt'@'%';
+FLUSH PRIVILEGES;
+SQL
 
-echo "Testing MBT user creation"
-cnt=$(echo "select user from mysql.user where user = 'mbt';" | mysql -u root -proot | wc -l)
-
-if [ $cnt -eq 0 ]; then
-# TODO move this all to a single sql script
-  echo "Creating MBT user"
-  echo "CREATE USER 'mbt'@'%' IDENTIFIED BY 'mbt';" | mysql -u root -proot
-  echo "Creating MBT database"
-  echo "CREATE DATABASE mbt;" | mysql -u root -proot
-  echo "Granting all privileges on MBT database to MBT user"
-  echo "GRANT ALL PRIVILEGES ON mbt.* TO 'mbt'@'%';" | mysql -u root -proot
-fi
-
-exit 0
+echo "MBT database init complete."
