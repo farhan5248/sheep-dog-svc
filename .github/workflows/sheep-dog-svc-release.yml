@@ -51,15 +51,3 @@ jobs:
       project: 'darmok-maven-plugin'
       preparation_goals: 'deploy,-DskipTests,-Dsheepdog.namespace=qa'
     secrets: inherit
-
-  # Final step: release the umbrella helm chart. Must run after all
-  # image-producing services so versions-maven-plugin:update-properties
-  # (invoked by ReleaseMojo inside the chart pom) can resolve the just-
-  # released service versions from Nexus. The chart pom doesn't use
-  # sheepdog.namespace, so the default preparation_goals is fine.
-  sheep-dog-chart:
-    needs: [darmok-maven-plugin]
-    uses: farhan5248/sheep-dog-ops/.github/workflows/release-maven.yml@main
-    with:
-      project: 'sheep-dog'
-    secrets: inherit
