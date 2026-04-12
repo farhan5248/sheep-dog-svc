@@ -38,7 +38,7 @@
 		     Chart version is pinned by ${sheepdog.chart.version}; #32 will
 		     automate bumping. -->
 		<sheepdog.helm.chart.oci>oci://nexus-docker.sheepdog.io/helm-hosted/sheep-dog</sheepdog.helm.chart.oci>
-		<sheepdog.chart.version>0.2.0</sheepdog.chart.version>
+		<sheepdog.chart.version>0.2.9</sheepdog.chart.version>
 		<sheepdog.helm.chart>${project.build.directory}/sheep-dog</sheepdog.helm.chart>
 		<sheepdog.helm.values>${sheepdog.helm.chart}/helm-values/values-${sheepdog.namespace}.yaml</sheepdog.helm.values>
 		<sheepdog.helm.image.key>cucumberGen</sheepdog.helm.image.key>
