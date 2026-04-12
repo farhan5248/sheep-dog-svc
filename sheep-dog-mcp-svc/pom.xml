@@ -30,13 +30,12 @@
 		     values.yaml to ${project.version}, so this pattern keeps tag
 		     resolution consistent across both registries. See #240. -->
 		<sheepdog.helm.image.tag>${project.version}</sheepdog.helm.image.tag>
-		<!-- Helm chart resolution — pulled from Nexus OCI repo (#82). The chart
+		<!-- Helm chart resolution: pulled from Nexus OCI repo (#82). The chart
 			 ships its own env-specific values files under helm-values/, so we
 			 pull-untar once into target/ and reference the extracted paths.
-			 Chart version is resolved by versions-maven-plugin via the
-			 sheep-dog-chart dependency (#243). -->
+			 Omitting the version flag from helm pull fetches the latest chart,
+			 breaking the cyclic Maven dependency between svc and chart. -->
 		<sheepdog.helm.chart.oci>oci://nexus-docker.sheepdog.io/helm-hosted/sheep-dog</sheepdog.helm.chart.oci>
-		<sheepdog.helm.chart.version>0.2.10-SNAPSHOT</sheepdog.helm.chart.version>
 		<sheepdog.helm.chart>${project.build.directory}/sheep-dog</sheepdog.helm.chart>
 		<sheepdog.helm.values>${sheepdog.helm.chart}/helm-values/values-${sheepdog.namespace}.yaml</sheepdog.helm.values>
 		<sheepdog.helm.image.key>mcp</sheepdog.helm.image.key>
@@ -136,22 +135,6 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-security</artifactId>
-		</dependency>
-		<!-- Helm chart version tracking — versions-maven-plugin resolves
-		     the latest release and updates sheepdog.helm.chart.version (#243).
-		     Exclusion prevents the chart's transitive svc dependencies
-		     from leaking into this classpath. -->
-		<dependency>
-			<groupId>org.farhan</groupId>
-			<artifactId>sheep-dog-chart</artifactId>
-			<version>${sheepdog.helm.chart.version}</version>
-			<type>pom</type>
-			<exclusions>
-				<exclusion>
-					<groupId>*</groupId>
-					<artifactId>*</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 	</dependencies>
 
@@ -338,8 +321,6 @@
 							<arguments>
 								<argument>pull</argument>
 								<argument>${sheepdog.helm.chart.oci}</argument>
-								<argument>--version</argument>
-								<argument>${sheepdog.helm.chart.version}</argument>
 								<argument>--untar</argument>
 								<argument>--untardir</argument>
 								<argument>${project.build.directory}</argument>
