@@ -18,7 +18,15 @@ permissions:
   packages: write
 
 jobs:
+  select-cluster:
+    uses: farhan5248/sheep-dog-ops/.github/workflows/select-cluster.yml@main
+    with:
+      cluster: minikube
+      namespace: dev
+    secrets: inherit
+
   sheep-dog-asciidoc-api-svc:
+    needs: [select-cluster]
     uses: farhan5248/sheep-dog-ops/.github/workflows/snapshot-docker.yml@main
     with:
       project: 'sheep-dog-asciidoc-api-svc'

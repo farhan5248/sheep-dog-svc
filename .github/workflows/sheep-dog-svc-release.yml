@@ -10,7 +10,15 @@ permissions:
   packages: write
 
 jobs:
+  select-cluster:
+    uses: farhan5248/sheep-dog-ops/.github/workflows/select-cluster.yml@main
+    with:
+      cluster: minikube
+      namespace: qa
+    secrets: inherit
+
   sheep-dog-asciidoc-api-svc:
+    needs: [select-cluster]
     uses: farhan5248/sheep-dog-ops/.github/workflows/release-maven.yml@main
     with:
       project: 'sheep-dog-asciidoc-api-svc'
