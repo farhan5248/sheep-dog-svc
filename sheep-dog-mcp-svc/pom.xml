@@ -29,14 +29,14 @@
 		     each push. The umbrella chart's updateValuesYaml step pins
 		     values.yaml to ${project.version}, so this pattern keeps tag
 		     resolution consistent across both registries. See #240. -->
-		<sheepdog.image.tag>${project.version}</sheepdog.image.tag>
+		<sheepdog.helm.image.tag>${project.version}</sheepdog.helm.image.tag>
 		<!-- Helm chart resolution — pulled from Nexus OCI repo (#82). The chart
 			 ships its own env-specific values files under helm-values/, so we
 			 pull-untar once into target/ and reference the extracted paths.
-			 Chart version is pinned by ${sheepdog.chart.version}; #32 will
-			 automate bumping. -->
+			 Chart version is resolved by versions-maven-plugin via the
+			 sheep-dog-chart dependency (#243). -->
 		<sheepdog.helm.chart.oci>oci://nexus-docker.sheepdog.io/helm-hosted/sheep-dog</sheepdog.helm.chart.oci>
-		<sheepdog.chart.version>0.2.9</sheepdog.chart.version>
+		<sheepdog.helm.chart.version>0.2.10-SNAPSHOT</sheepdog.helm.chart.version>
 		<sheepdog.helm.chart>${project.build.directory}/sheep-dog</sheepdog.helm.chart>
 		<sheepdog.helm.values>${sheepdog.helm.chart}/helm-values/values-${sheepdog.namespace}.yaml</sheepdog.helm.values>
 		<sheepdog.helm.image.key>mcp</sheepdog.helm.image.key>
@@ -46,7 +46,7 @@
 		     workflow passes -Dhelm.deploy.skip=true because release
 		     builds shouldn't touch k8s on the CI runners (not enough
 		     RAM to run dev+qa together); qa is deployed manually on
-		     windows-minipc via sheep-dog-ops/sheep-dog/scripts/deploy.bat
+		     windows-minipc via sheep-dog-ops/sheep-dog/scripts/deploy-to-minikube.bat
 		     (from #231) after the release completes. -->
 		<helm.deploy.skip>false</helm.deploy.skip>
 	</properties>
@@ -136,6 +136,22 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-security</artifactId>
+		</dependency>
+		<!-- Helm chart version tracking — versions-maven-plugin resolves
+		     the latest release and updates sheepdog.helm.chart.version (#243).
+		     Exclusion prevents the chart's transitive svc dependencies
+		     from leaking into this classpath. -->
+		<dependency>
+			<groupId>org.farhan</groupId>
+			<artifactId>sheep-dog-chart</artifactId>
+			<version>${sheepdog.helm.chart.version}</version>
+			<type>pom</type>
+			<exclusions>
+				<exclusion>
+					<groupId>*</groupId>
+					<artifactId>*</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 	</dependencies>
 
@@ -283,7 +299,7 @@
 								<dockerFile>docker/springboot.dockerfile</dockerFile>
 							</build>
 							<alias>${docker.registry}/${project.artifactId}</alias>
-							<name>${docker.registry}/%a:${sheepdog.image.tag}</name>
+							<name>${docker.registry}/%a:${sheepdog.helm.image.tag}</name>
 							<registry>${docker.registry}</registry>
 						</image>
 					</images>
@@ -323,10 +339,26 @@
 								<argument>pull</argument>
 								<argument>${sheepdog.helm.chart.oci}</argument>
 								<argument>--version</argument>
-								<argument>${sheepdog.chart.version}</argument>
+								<argument>${sheepdog.helm.chart.version}</argument>
 								<argument>--untar</argument>
 								<argument>--untardir</argument>
 								<argument>${project.build.directory}</argument>
+							</arguments>
+						</configuration>
+					</execution>
+					<execution>
+						<id>kubectl-use-context</id>
+						<phase>pre-integration-test</phase>
+						<goals>
+							<goal>exec</goal>
+						</goals>
+						<configuration>
+							<skip>${helm.deploy.skip}</skip>
+							<executable>kubectl</executable>
+							<arguments>
+								<argument>config</argument>
+								<argument>use-context</argument>
+								<argument>minikube</argument>
 							</arguments>
 						</configuration>
 					</execution>
@@ -350,7 +382,7 @@
 								<argument>-f</argument>
 								<argument>${sheepdog.helm.values}</argument>
 								<argument>--set</argument>
-								<argument>images.${sheepdog.helm.image.key}.tag=${sheepdog.image.tag}</argument>
+								<argument>images.${sheepdog.helm.image.key}.tag=${sheepdog.helm.image.tag}</argument>
 								<argument>--wait</argument>
 								<!-- Match sheep-dog-ops/sheep-dog/scripts/setup-namespace.*
 								     (15m for cold-start: image pulls, PVC binding, db init).
@@ -393,7 +425,7 @@
 										<dockerFile>docker/springboot.dockerfile</dockerFile>
 									</build>
 									<alias>${docker.registry.github}/farhan5248/${project.artifactId}</alias>
-									<name>${docker.registry.github}/farhan5248/%a:${sheepdog.image.tag}</name>
+									<name>${docker.registry.github}/farhan5248/%a:${sheepdog.helm.image.tag}</name>
 									<registry>${docker.registry.github}</registry>
 								</image>
 							</images>
