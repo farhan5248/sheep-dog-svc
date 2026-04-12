@@ -10,7 +10,7 @@
 
 	<groupId>org.farhan</groupId>
 	<artifactId>sheep-dog-mcp-svc</artifactId>
-	<version>1.12-SNAPSHOT</version>
+	<version>1.12</version>
 
 	<name>Sheep Dog MCP Service</name>
 	<description>MCP server providing development tools for the Sheep Dog ecosystem</description>
@@ -36,7 +36,7 @@
 			 Chart version is resolved by versions-maven-plugin via the
 			 sheep-dog-chart dependency (#243). -->
 		<sheepdog.helm.chart.oci>oci://nexus-docker.sheepdog.io/helm-hosted/sheep-dog</sheepdog.helm.chart.oci>
-		<sheepdog.helm.chart.version>0.2.10-SNAPSHOT</sheepdog.helm.chart.version>
+		<sheepdog.helm.chart.version>0.2.9</sheepdog.helm.chart.version>
 		<sheepdog.helm.chart>${project.build.directory}/sheep-dog</sheepdog.helm.chart>
 		<sheepdog.helm.values>${sheepdog.helm.chart}/helm-values/values-${sheepdog.namespace}.yaml</sheepdog.helm.values>
 		<sheepdog.helm.image.key>mcp</sheepdog.helm.image.key>
