@@ -7,7 +7,12 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.eclipse.emf.common.util.EList;
+import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.EStructuralFeature;
+import org.eclipse.emf.ecore.resource.Resource;
+import org.eclipse.emf.ecore.resource.impl.ResourceImpl;
 import org.farhan.dsl.grammar.SheepDogUtility;
 import org.farhan.dsl.grammar.IDescription;
 import org.farhan.dsl.grammar.IRow;
@@ -129,7 +134,7 @@ public abstract class TestObject {
         return result.toString();
     }
 
-    private boolean navigateToNode(String path, boolean create) {
+    protected boolean createNodeDependencies(String path) {
         try {
             String[] parts = path.split("/");
             Object current = SheepDogUtility.getTestDocumentParent((EObject) getProperty("cursor"));
@@ -141,22 +146,13 @@ public abstract class TestObject {
                         break;
                     }
                     int index = Integer.parseInt(parts[i + 1]) - 1;
-                    if (create) {
-                        current = getOrCreateNode(current, elementType, index);
-                    } else {
-                        try {
-                            current = getChildNode(current, elementType, index);
-                        } catch (IndexOutOfBoundsException e) {
-                            setProperty("cursor", null);
-                            return true;
-                        }
-                    }
+                    current = getOrCreateNode(current, elementType, index);
                     i += 2;
                 } else {
-                    if (create && elementType.equals("Text")) {
+                    if (elementType.equals("text")) {
                         break;
                     }
-                    current = create ? getOrCreateNode(current, elementType, 0) : getChildNode(current, elementType, 0);
+                    current = getOrCreateNode(current, elementType, 0);
                     i++;
                 }
                 if (current != null)
@@ -315,51 +311,93 @@ public abstract class TestObject {
         properties.remove("stateDesc");
     }
 
-    protected boolean createNodeDependencies(String path) {
-        return navigateToNode(path, true);
+    protected String toUriFragment(EObject document, String path) {
+        String documentFragment = document.eResource().getURIFragment(document);
+        if (path == null || path.isEmpty()) {
+            return documentFragment;
+        }
+        StringBuilder sb = new StringBuilder(documentFragment);
+        String[] parts = path.split("/");
+        int i = 0;
+        while (i < parts.length) {
+            String segment = parts[i];
+            if (segment.endsWith("List")) {
+                if (i + 1 >= parts.length || !parts[i + 1].matches("\\d+")) {
+                    break;
+                }
+                int index = Integer.parseInt(parts[i + 1]) - 1;
+                sb.append("/@").append(segment).append(".").append(index);
+                i += 2;
+            } else {
+                sb.append("/@").append(segment);
+                i++;
+            }
+        }
+        return sb.toString();
+    }
+
+    protected boolean navigateToNode(String path, boolean fallback) {
+        try {
+            EObject cursor = (EObject) getProperty("cursor");
+            EObject document = (EObject) SheepDogUtility.getTestDocumentParent(cursor);
+            if (document == null) {
+                setProperty("cursor", null);
+                return true;
+            }
+            Resource resource = document.eResource();
+            String fragment = toUriFragment(document, path);
+            EObject target = resource.getEObject(fragment);
+            if (target != null) {
+                setProperty("cursor", target);
+                return true;
+            }
+            if (fallback) {
+                String currentPath = dropLastSegment(path);
+                while (currentPath != null && !currentPath.isEmpty()) {
+                    fragment = toUriFragment(document, currentPath);
+                    target = resource.getEObject(fragment);
+                    if (target != null) {
+                        setProperty("cursor", target);
+                        return true;
+                    }
+                    currentPath = dropLastSegment(currentPath);
+                }
+            }
+            setProperty("cursor", null);
+            return true;
+        } catch (Exception e) {
+            setProperty("cursor", null);
+            return true;
+        }
+    }
+
+    private String dropLastSegment(String path) {
+        int lastSlash = path.lastIndexOf('/');
+        if (lastSlash < 0) {
+            return null;
+        }
+        String lastSegment = path.substring(lastSlash + 1);
+        String truncated = path.substring(0, lastSlash);
+        if (lastSegment.matches("\\d+")) {
+            // Index — drop the List name before it too
+            int prevSlash = truncated.lastIndexOf('/');
+            return prevSlash < 0 ? null : truncated.substring(0, prevSlash);
+        }
+        return truncated;
     }
 
     protected Object getChildNode(Object parent, String elementType, int index) {
-        switch (elementType) {
-        case "Table":
-            if (parent instanceof ITestStep)
-                return ((ITestStep) parent).getTable();
-            if (parent instanceof ITestData)
-                return ((ITestData) parent).getTable();
-            return ((IStepParameters) parent).getTable();
-        case "Text":
-            return ((ITestStep) parent).getText();
-        case "Description":
-            if (parent instanceof ITestSuite)
-                return ((ITestSuite) parent).getDescription();
-            if (parent instanceof ITestStepContainer)
-                return ((ITestStepContainer) parent).getDescription();
-            if (parent instanceof IStepObject)
-                return ((IStepObject) parent).getDescription();
-            if (parent instanceof IStepDefinition)
-                return ((IStepDefinition) parent).getDescription();
-            if (parent instanceof IStepParameters)
-                return ((IStepParameters) parent).getDescription();
-            return ((ITestData) parent).getDescription();
-        case "TestStepContainerList":
-            return ((ITestSuite) parent).getTestStepContainerList().get(index);
-        case "TestStepList":
-            return ((ITestStepContainer) parent).getTestStepList().get(index);
-        case "RowList":
-            return ((ITable) parent).getRowList().get(index);
-        case "CellList":
-            return ((IRow) parent).getCellList().get(index);
-        case "StepDefinitionList":
-            return ((IStepObject) parent).getStepDefinitionList().get(index);
-        case "StepParametersList":
-            return ((IStepDefinition) parent).getStepParametersList().get(index);
-        case "LineList":
-            return ((IDescription) parent).getLineList().get(index);
-        case "TestDataList":
-            return ((ITestCase) parent).getTestDataList().get(index);
-        default:
-            throw new IllegalArgumentException("Unknown element type: " + elementType);
+        EObject eParent = (EObject) parent;
+        EStructuralFeature feature = eParent.eClass().getEStructuralFeature(elementType);
+        if (feature == null) {
+            throw new IllegalArgumentException(
+                    "No feature '" + elementType + "' on " + eParent.eClass().getName());
         }
+        Object value = eParent.eGet(feature);
+        if (value instanceof EList<?>) {
+            return ((EList<?>) value).get(index);
+        }
+        return value;
     }
 
     // === Node navigation ===
@@ -390,10 +428,6 @@ public abstract class TestObject {
 
     protected void setComponent(String component) {
         this.component = component;
-    }
-
-    protected boolean setCursorAtNode(String path) {
-        return navigateToNode(path, false);
     }
 
     protected void setObject(String object) {
