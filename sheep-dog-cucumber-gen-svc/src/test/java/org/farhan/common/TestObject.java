@@ -352,7 +352,7 @@ public abstract class TestObject {
         case "StepDefinitionList":
             return ((IStepObject) parent).getStepDefinitionList().get(index);
         case "StepParametersList":
-            return ((IStepDefinition) parent).getStepParameterList().get(index);
+            return ((IStepDefinition) parent).getStepParametersList().get(index);
         case "LineList":
             return ((IDescription) parent).getLineList().get(index);
         case "TestDataList":
