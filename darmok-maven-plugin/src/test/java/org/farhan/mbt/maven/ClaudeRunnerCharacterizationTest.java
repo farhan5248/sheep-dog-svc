@@ -69,9 +69,8 @@ class ClaudeRunnerCharacterizationTest {
 	 */
 	@Test
 	void happyPath_logsExecutingCommand_andSuccessMarker() throws Exception {
-		// TODO (before Stage 2): add Given step describing the file state (asciidoc
-		//   file, scenarios-list entry, prior generated files) that would make Claude
-		//   return exit 0 on the green-phase prompt.
+		// Given: the claude command completes successfully on the first attempt
+		//        (exit 0 with a single line of output)
 		ProcessRunner.starter = pb -> new FakeProcess("mocked claude output line", 0);
 		ClaudeRunner claude = new ClaudeRunner(categoryLog, "sonnet", 3, 30);
 
@@ -100,8 +99,8 @@ class ClaudeRunnerCharacterizationTest {
 	 */
 	@Test
 	void retryRecovers_logsRetryableErrorAndSuccess() throws Exception {
-		// TODO (before Stage 2): add Given step describing file state that would
-		//   cause the upstream to return a retryable 500 on first call then succeed.
+		// Given: the claude command produces a retryable HTTP 500 on its first attempt
+		//        and succeeds on its second attempt
 		Deque<FakeProcessSpec> specs = new ArrayDeque<>();
 		specs.add(new FakeProcessSpec("API Error: 500 Internal server error", 1));
 		specs.add(new FakeProcessSpec("mocked claude output line", 0));
@@ -138,8 +137,8 @@ class ClaudeRunnerCharacterizationTest {
 	 */
 	@Test
 	void retriesExhausted_logsMaxRetriesExhaustedAtError() throws Exception {
-		// TODO (before Stage 2): add Given step describing the upstream being
-		//   persistently unhealthy (always returns retryable 500).
+		// Given: the claude command returns a retryable HTTP 500 on every attempt
+		//        up to the configured max retries (3)
 		ProcessRunner.starter = pb -> new FakeProcess("API Error: 500 Internal server error", 1);
 		ClaudeRunner claude = new ClaudeRunner(categoryLog, "sonnet", 3, 0);
 
@@ -167,8 +166,8 @@ class ClaudeRunnerCharacterizationTest {
 	 */
 	@Test
 	void nonRetryableFailure_doesNotRetry_logsExitCode() throws Exception {
-		// TODO (before Stage 2): add Given step describing what file state would
-		//   cause a non-retryable permission error (e.g. readonly src/main).
+		// Given: the claude command fails with a non-retryable error on its first attempt
+		//        (exit 2 with "permission denied" — no retryable-pattern match)
 		ProcessRunner.starter = pb -> new FakeProcess("permission denied: /foo", 2);
 		ClaudeRunner claude = new ClaudeRunner(categoryLog, "sonnet", 3, 0);
 
@@ -199,8 +198,8 @@ class ClaudeRunnerCharacterizationTest {
 	 */
 	@Test
 	void subprocessStdout_isMirroredToLogInOrder() throws Exception {
-		// TODO (before Stage 2): add Given step describing file state that would
-		//   elicit multi-line claude output.
+		// Given: the claude command writes three newline-separated lines of stdout
+		//        and exits 0
 		String stdout = String.join("\n",
 			"line one of output",
 			"line two of output",
@@ -233,7 +232,8 @@ class ClaudeRunnerCharacterizationTest {
 	 */
 	@Test
 	void gitRunnerThroughSeam_logsRunningCommand() throws Exception {
-		// TODO (before Stage 2): add Given step describing repo state ("no staged changes").
+		// Given: the git command writes "nothing to commit" to stdout and exits 0
+		//        (a clean repo state — nothing staged, nothing modified)
 		ProcessRunner.starter = pb -> new FakeProcess("nothing to commit", 0);
 		GitRunner git = new GitRunner(categoryLog);
 

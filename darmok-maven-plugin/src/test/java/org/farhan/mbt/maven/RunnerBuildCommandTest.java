@@ -65,8 +65,7 @@ class RunnerBuildCommandTest {
 	 */
 	@Test
 	void claudeRunner_withModel_assemblesFullCommandLine() throws Exception {
-		// TODO (before Stage 2): add Given step describing what input files
-		//   would cause darmok to invoke the green-phase prompt with model=sonnet.
+		// Given: a claude runner configured with model "sonnet", maxRetries 1, and no wait
 		AtomicReference<List<String>> captured = new AtomicReference<>();
 		ProcessRunner.starter = pb -> {
 			captured.set(List.copyOf(pb.command()));
@@ -98,8 +97,8 @@ class RunnerBuildCommandTest {
 	 */
 	@Test
 	void claudeRunner_emptyModel_omitsModelFlag() throws Exception {
-		// TODO (before Stage 2): add Given step describing a darmok invocation
-		//   without an explicit model parameter.
+		// Given: a claude runner configured with an empty-string model (caller opts
+		//        into the CLI's default model rather than passing --model)
 		AtomicReference<List<String>> captured = new AtomicReference<>();
 		ProcessRunner.starter = pb -> {
 			captured.set(List.copyOf(pb.command()));
@@ -133,8 +132,7 @@ class RunnerBuildCommandTest {
 	 */
 	@Test
 	void mavenRunner_prependsMvnBinary_andPassesArgsVerbatim() throws Exception {
-		// TODO (before Stage 2): add Given step describing the red-phase file
-		//   state that would cause darmok to invoke the svc-plugin asciidoctor-to-uml goal.
+		// Given: a maven runner ready to dispatch a svc-plugin goal invocation
 		AtomicReference<List<String>> captured = new AtomicReference<>();
 		ProcessRunner.starter = pb -> {
 			captured.set(List.copyOf(pb.command()));
@@ -168,8 +166,7 @@ class RunnerBuildCommandTest {
 	 */
 	@Test
 	void gitRunner_prependsGitBinary_andPassesArgsVerbatim() throws Exception {
-		// TODO (before Stage 2): add Given step describing files staged after
-		//   green phase that would trigger a darmok commit.
+		// Given: a git runner ready to dispatch a commit invocation
 		AtomicReference<List<String>> captured = new AtomicReference<>();
 		ProcessRunner.starter = pb -> {
 			captured.set(List.copyOf(pb.command()));
