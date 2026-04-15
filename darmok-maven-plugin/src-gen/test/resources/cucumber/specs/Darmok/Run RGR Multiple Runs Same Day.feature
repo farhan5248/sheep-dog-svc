@@ -1,0 +1,35 @@
+@darmok-maven-plugin
+Feature: Run RGR Multiple Runs Same Day
+
+  \@darmok-maven-plugin
+  Each Darmok invocation writes to the same dated log file (`darmok.mojo.<date>.log` / `darmok.runners.<date>.log`).
+  Sequential runs on the same day must append rather than truncate, so the full history of a day's RGR activity is preserved ? the PBC report skill depends on this for cross-invocation cycle-duration analysis.
+
+  Scenario: A second run on the same day appends to the existing log
+
+    The PBC report skill (`pbc-report-plantuml`) aggregates METRIC lines across all of a day's Darmok invocations to plot cycle durations over time.
+    If the second run of the day truncated the log file, the earlier run's METRIC history would be lost and the report would be misleading.
+    Darmok must open the dated log in append mode so both runs' markers accumulate in one file, in chronological order.
+
+    Given The maven plugin gen-from-existing goal is executed
+      And The code-prj project scenarios-list.txt file is created as follows
+          """
+          File: features/login.asciidoc
+            Scenario: User logs in successfully
+              Tag: loginHappyPath
+          """
+      And The code-prj project src/main/java/org/farhan/objects/LoginHappyPath.java file will be as follows
+          | State   |
+          | Present |
+     When The maven plugin gen-from-existing goal is executed
+     Then The code-prj project target/darmok/darmok.mojo.log file will be as follows
+          | Level | Category | Content                                                                                 |
+          | INFO  | mojo     | RGR Automation Plugin (gen-from-existing)                                               |
+          | INFO  | mojo     | RGR Automation Complete!                                                                |
+          | INFO  | mojo     | Total scenarios processed: 0                                                            |
+          | INFO  | mojo     | RGR Automation Plugin (gen-from-existing)                                               |
+          | INFO  | mojo     | Processing Scenario: features/login.asciidoc/User logs in successfully [loginHappyPath] |
+          | INFO  | mojo     | Any                                                                                     |
+          | INFO  | mojo     | RGR Automation Complete!                                                                |
+          | INFO  | mojo     | Total scenarios processed: 1                                                            |
+

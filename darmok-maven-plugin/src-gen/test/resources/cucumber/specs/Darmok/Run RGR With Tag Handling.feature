@@ -1,0 +1,115 @@
+@darmok-maven-plugin
+Feature: Run RGR With Tag Handling
+
+  \@darmok-maven-plugin
+  Before the Red phase, Darmok inserts the scenario's tag into the target asciidoc file's `Test-Case` block.
+  Three variations cover the observable behaviors: the target tag is already present, the test-case line carries a different tag, or the test-case has no tag line yet.
+  All three Test-Cases use an implementation that already satisfies the scenario, so the Red phase finishes quickly and Green / Refactor are skipped ? the differences are isolated to the tag-insertion log markers and the final asciidoc file state.
+
+  Background: A scenario whose implementation already exists
+
+    Given The code-prj project scenarios-list.txt file is created as follows
+          """
+          File: features/login.asciidoc
+            Scenario: User logs in successfully
+              Tag: loginHappyPath
+          """
+      And The code-prj project src/main/java/org/farhan/objects/LoginHappyPath.java file will be as follows
+          | State   |
+          | Present |
+
+  Scenario: The target tag is already present on the test-case
+
+    Tag insertion must be idempotent.
+    Re-running the same scenario (or running after a manual edit that already added the tag) should not duplicate tags or rewrite the asciidoc file, since the downstream `asciidoctor-to-uml` step is sensitive to duplicates and a no-op commit would muddy git history.
+    Darmok detects the target tag is already present, skips the file mutation, and logs the detection at DEBUG.
+
+    Given The spec-prj project src/test/resources/asciidoc/specs/ProcessDarmok.asciidoc file is created as follows
+          """
+          = Test-Suite: Login
+          
+          == Test-Case: User logs in successfully
+          
+          @loginHappyPath
+          Some description
+          """
+     When The maven plugin gen-from-existing goal is executed
+     Then The spec-prj project src/test/resources/asciidoc/specs/ProcessDarmok.asciidoc file will be created as follows
+          """
+          = Test-Suite: Login
+          
+          == Test-Case: User logs in successfully
+          
+          @loginHappyPath
+          Some description
+          """
+      And The code-prj project target/darmok/darmok.mojo.log file will be as follows
+          | Level | Category | Content                                                                                 |
+          | INFO  | mojo     | Processing Scenario: features/login.asciidoc/User logs in successfully [loginHappyPath] |
+          | DEBUG | mojo     | Tag @loginHappyPath already present in file                                             |
+          | INFO  | mojo     | Red: Running maven...                                                                   |
+          | INFO  | mojo     | Green: Skipped (tests already passing)                                                  |
+
+  Scenario: The test-case has a different tag line
+
+    When the test-case already carries a tag line (for a different concern ? category, ownership, priority), the new RGR tag should be appended to that same line rather than added on a fresh line.
+    Asciidoctor and the UML generator treat multiple tags on the same line as a set, but introduce a semantic shift if they land on separate lines.
+    The intent is to preserve whatever tagging convention the author was using.
+
+    Given The spec-prj project src/test/resources/asciidoc/specs/ProcessDarmok.asciidoc file is created as follows
+          """
+          = Test-Suite: Login
+          
+          == Test-Case: User logs in successfully
+          
+          @otherTag
+          Some description
+          """
+     When The maven plugin gen-from-existing goal is executed
+     Then The spec-prj project src/test/resources/asciidoc/specs/ProcessDarmok.asciidoc file will be created as follows
+          """
+          = Test-Suite: Login
+          
+          == Test-Case: User logs in successfully
+          
+          @otherTag @loginHappyPath
+          Some description
+          """
+      And The code-prj project target/darmok/darmok.mojo.log file will be as follows
+          | Level | Category | Content                                                                                 |
+          | INFO  | mojo     | Processing Scenario: features/login.asciidoc/User logs in successfully [loginHappyPath] |
+          | DEBUG | mojo     | Added tag @loginHappyPath to file                                                       |
+          | INFO  | mojo     | Red: Running maven...                                                                   |
+          | INFO  | mojo     | Green: Skipped (tests already passing)                                                  |
+
+  Scenario: The test-case has no tag line yet
+
+    The most common starting state: a freshly-authored asciidoc test-case has no tags at all.
+    Darmok inserts a new tag line directly below the `Test-Case:` heading (and above the test-case body) so the tag attaches cleanly during asciidoctor parsing.
+    The blank-line separation between heading, tag, and body is deliberate ? it's the formatting asciidoctor expects for tag attachment.
+
+    Given The spec-prj project src/test/resources/asciidoc/specs/ProcessDarmok.asciidoc file is created as follows
+          """
+          = Test-Suite: Login
+          
+          == Test-Case: User logs in successfully
+          
+          Some description
+          """
+     When The maven plugin gen-from-existing goal is executed
+     Then The spec-prj project src/test/resources/asciidoc/specs/ProcessDarmok.asciidoc file will be created as follows
+          """
+          = Test-Suite: Login
+          
+          == Test-Case: User logs in successfully
+          
+          @loginHappyPath
+          Some description
+          """
+      And The code-prj project target/darmok/darmok.mojo.log file will be as follows
+          | Level | Category | Content                                                                                 |
+          | INFO  | mojo     | Processing Scenario: features/login.asciidoc/User logs in successfully [loginHappyPath] |
+          | DEBUG | mojo     | Added tag @loginHappyPath to file                                                       |
+          | INFO  | mojo     | Red: Running maven...                                                                   |
+          | INFO  | mojo     | Green: Skipped (tests already passing)                                                  |
+

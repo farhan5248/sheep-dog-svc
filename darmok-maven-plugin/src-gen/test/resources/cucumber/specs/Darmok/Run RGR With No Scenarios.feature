@@ -1,0 +1,75 @@
+@darmok-maven-plugin
+Feature: Run RGR With No Scenarios
+
+  \@darmok-maven-plugin
+  When Darmok is invoked against a project where no work is queued, the goal completes without entering the Red / Green / Refactor loop.
+  The three Test-Cases below cover the three "no work" paths: the file is absent, the file exists but is empty, and the file lists a single entry whose tag is the sentinel `NoTag`.
+
+  Scenario: Scenarios-list.txt is absent
+
+    Darmok should treat a missing scenarios-list as "work queue is empty" rather than an error.
+    This lets a CI workflow run the goal unconditionally on every push without needing a guard for first-time invocations.
+    The goal prints the banner, cleans up, finds no entries, and completes with zero scenarios processed.
+
+    Given The code-prj project scenarios-list.txt file will be as follows
+          | State  |
+          | Absent |
+     When The maven plugin gen-from-existing goal is executed
+     Then The code-prj project scenarios-list.txt file will be as follows
+          | State  |
+          | Absent |
+      And The code-prj project target/darmok/darmok.mojo.log file will be as follows
+          | State   |
+          | Present |
+      And The code-prj project target/darmok/darmok.runners.log file will be as follows
+          | State |
+          | Empty |
+
+  Scenario: Scenarios-list.txt exists but is empty
+
+    An empty scenarios-list is the natural end-state after the last pending scenario was processed in a prior run.
+    Darmok should treat it the same as a missing file: parse yields zero entries, nothing to do, complete cleanly.
+    This keeps re-runs idempotent once the backlog drains.
+
+    Given The code-prj project scenarios-list.txt file will be as follows
+          | State |
+          | Empty |
+     When The maven plugin gen-from-existing goal is executed
+     Then The code-prj project scenarios-list.txt file will be as follows
+          | State |
+          | Empty |
+      And The code-prj project target/darmok/darmok.mojo.log file will be as follows
+          | Level | Category | Content                                   |
+          | INFO  | mojo     | RGR Automation Plugin (gen-from-existing) |
+          | INFO  | mojo     | RGR Automation Complete!                  |
+          | INFO  | mojo     | Total scenarios processed: 0              |
+      And The code-prj project target/darmok/darmok.runners.log file will be as follows
+          | State |
+          | Empty |
+
+  Scenario: Scenarios-list entry has tag NoTag
+
+    `NoTag` is the sentinel the pre-processor emits when a scenario's associated asciidoc file hasn't been tagged for RGR yet (or a developer wants to queue the scenario name but hold off on the RGR cycle).
+    The entry should be removed from the list so it doesn't block subsequent scenarios, but no maven, claude, or git work should happen ? no commits, no tag insertion, nothing.
+
+    Given The code-prj project scenarios-list.txt file is created as follows
+          """
+          File: features/login.asciidoc
+            Scenario: User logs in successfully
+              Tag: NoTag
+          """
+     When The maven plugin gen-from-existing goal is executed
+     Then The code-prj project scenarios-list.txt file will be as follows
+          | State |
+          | Empty |
+      And The code-prj project target/darmok/darmok.mojo.log file will be as follows
+          | Level | Category | Content                                                                        |
+          | INFO  | mojo     | RGR Automation Plugin (gen-from-existing)                                      |
+          | INFO  | mojo     | Processing Scenario: features/login.asciidoc/User logs in successfully [NoTag] |
+          | INFO  | mojo     | Skipping (NoTag)                                                               |
+          | INFO  | mojo     | RGR Automation Complete!                                                       |
+          | INFO  | mojo     | Total scenarios processed: 1                                                   |
+      And The code-prj project target/darmok/darmok.runners.log file will be as follows
+          | State |
+          | Empty |
+
