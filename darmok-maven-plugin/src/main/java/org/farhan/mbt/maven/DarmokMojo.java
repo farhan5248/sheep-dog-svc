@@ -51,10 +51,6 @@ public abstract class DarmokMojo extends AbstractMojo {
 	@Parameter(property = "retryWaitSeconds", defaultValue = "30")
 	public int retryWaitSeconds;
 
-	// Pipeline property
-	@Parameter(property = "pipeline", defaultValue = "forward")
-	public String pipeline;
-
 	@Parameter(property = "onlyChanges", defaultValue = "true")
 	public boolean onlyChanges;
 
@@ -402,7 +398,7 @@ public abstract class DarmokMojo extends AbstractMojo {
 
 	private int runRgrRefactor() throws Exception {
 		ClaudeRunner claude = new ClaudeRunner(runnerLog, modelRefactor, maxRetries, retryWaitSeconds);
-		return claude.run(baseDir + "/../..", "/rgr-refactor " + pipeline + " " + project.getArtifactId());
+		return claude.run(baseDir + "/../..", "/rgr-refactor forward " + project.getArtifactId());
 	}
 
 	int runCleanUp() throws Exception {
