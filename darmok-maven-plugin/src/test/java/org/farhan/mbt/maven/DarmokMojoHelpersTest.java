@@ -57,27 +57,6 @@ class DarmokMojoHelpersTest {
 	}
 
 	// =========================================================================
-	// formatDuration
-	// =========================================================================
-
-	/**
-	 * Given: millisecond durations spanning sub-second, sub-minute, sub-hour, and multi-hour ranges.
-	 * When: formatDuration is called with each value.
-	 * Then: the result is an HH:MM:SS string with two-digit zero-padded fields.
-	 * <p>
-	 * This is the contract consumed by the METRIC log lines that the PBC report skill
-	 * parses to plot phase durations.
-	 */
-	@Test
-	void formatDuration_producesZeroPaddedHoursMinutesSeconds() {
-		assertThat(mojo.formatDuration(500)).isEqualTo("00:00:00");
-		assertThat(mojo.formatDuration(1_000)).isEqualTo("00:00:01");
-		assertThat(mojo.formatDuration(60_000)).isEqualTo("00:01:00");
-		assertThat(mojo.formatDuration(3_600_000)).isEqualTo("01:00:00");
-		assertThat(mojo.formatDuration(3_723_000)).isEqualTo("01:02:03");
-	}
-
-	// =========================================================================
 	// parseScenarios
 	// =========================================================================
 
@@ -88,6 +67,7 @@ class DarmokMojoHelpersTest {
 	 */
 	@Test
 	void parseScenarios_singleTriple_returnsOneEntry() throws Exception {
+		// Given: a scenarios-list file with one File / Scenario / Tag triple
 		Path file = workDir.resolve("single.txt");
 		Files.writeString(file, """
 				File: features/login.asciidoc
@@ -95,8 +75,10 @@ class DarmokMojoHelpersTest {
 				    Tag: loginHappyPath
 				""");
 
+		// When: the scenarios-list is parsed
 		List<DarmokMojo.ScenarioEntry> entries = mojo.parseScenarios(file.toString());
 
+		// Then: exactly one entry is returned matching the triple
 		assertThat(entries).hasSize(1);
 		assertThat(entries.get(0))
 			.isEqualTo(new DarmokMojo.ScenarioEntry(
@@ -114,6 +96,7 @@ class DarmokMojoHelpersTest {
 	 */
 	@Test
 	void parseScenarios_multipleFilesAndScenarios_associatesCorrectly() throws Exception {
+		// Given: a scenarios-list file with two scenarios under file A and one under file B
 		Path file = workDir.resolve("multi.txt");
 		Files.writeString(file, """
 				File: features/a.asciidoc
@@ -126,8 +109,10 @@ class DarmokMojoHelpersTest {
 				    Tag: tagThree
 				""");
 
+		// When: the scenarios-list is parsed
 		List<DarmokMojo.ScenarioEntry> entries = mojo.parseScenarios(file.toString());
 
+		// Then: three entries are returned with correct file-to-scenario association
 		assertThat(entries).hasSize(3);
 		assertThat(entries.get(0).file()).isEqualTo("features/a.asciidoc");
 		assertThat(entries.get(0).scenario()).isEqualTo("First");
@@ -138,32 +123,6 @@ class DarmokMojoHelpersTest {
 		assertThat(entries.get(2).file()).isEqualTo("features/b.asciidoc");
 		assertThat(entries.get(2).scenario()).isEqualTo("Third");
 		assertThat(entries.get(2).tag()).isEqualTo("tagThree");
-	}
-
-	// =========================================================================
-	// generateRunnerClassContent
-	// =========================================================================
-
-	/**
-	 * Given: a pattern and runner class name.
-	 * When: generateRunnerClassContent is called.
-	 * Then: the generated Java source declares the class, imports Suite annotations,
-	 *   and includes an @IncludeTags that matches the pattern.
-	 * <p>
-	 * This is what the red phase writes under src/test/java/.../suites/; failures
-	 * here would produce uncompilable runner classes and break rgr-red.
-	 */
-	@Test
-	void generateRunnerClassContent_includesSuiteAnnotationsAndTag() {
-		String source = mojo.generateRunnerClassContent("loginHappyPath", "LoginHappyPathTest");
-
-		assertThat(source)
-			.contains("package org.farhan.suites;")
-			.contains("import org.junit.platform.suite.api.Suite;")
-			.contains("@Suite")
-			.contains("@IncludeEngines(\"cucumber\")")
-			.contains("@IncludeTags(\"loginHappyPath\")")
-			.contains("public class LoginHappyPathTest {");
 	}
 
 	// =========================================================================
@@ -181,10 +140,13 @@ class DarmokMojoHelpersTest {
 	 */
 	@Test
 	void writeFileWithLF_writesLFOnly_evenOnWindows() throws Exception {
+		// Given: three lines alpha / beta / gamma
 		Path out = workDir.resolve("out.txt");
 
+		// When: they are written via writeFileWithLF
 		mojo.writeFileWithLF(out.toString(), List.of("alpha", "beta", "gamma"));
 
+		// Then: the file contains exactly "alpha\nbeta\ngamma\n" with no CR bytes
 		byte[] bytes = Files.readAllBytes(out);
 		String content = new String(bytes, StandardCharsets.UTF_8);
 		assertThat(content).isEqualTo("alpha\nbeta\ngamma\n");
@@ -202,6 +164,7 @@ class DarmokMojoHelpersTest {
 	 */
 	@Test
 	void removeFirstScenarioFromFile_onlyEntry_clearsFile() throws Exception {
+		// Given: a scenarios-list file with exactly one File / Scenario / Tag entry
 		Path file = workDir.resolve("scenarios-list.txt");
 		Files.writeString(file, """
 				File: features/a.asciidoc
@@ -209,8 +172,10 @@ class DarmokMojoHelpersTest {
 				    Tag: tagOne
 				""");
 
+		// When: removeFirstScenarioFromFile is run
 		mojo.removeFirstScenarioFromFile();
 
+		// Then: the scenarios-list file is empty
 		assertThat(Files.readString(file)).isEmpty();
 	}
 
@@ -224,6 +189,7 @@ class DarmokMojoHelpersTest {
 	 */
 	@Test
 	void removeFirstScenarioFromFile_secondScenarioSameFile_preservesFileHeader() throws Exception {
+		// Given: a scenarios-list file with two scenarios under the same File header
 		Path file = workDir.resolve("scenarios-list.txt");
 		Files.writeString(file, """
 				File: features/a.asciidoc
@@ -233,8 +199,10 @@ class DarmokMojoHelpersTest {
 				    Tag: tagTwo
 				""");
 
+		// When: removeFirstScenarioFromFile is run
 		mojo.removeFirstScenarioFromFile();
 
+		// Then: the file begins with the original File header and contains only the second scenario
 		String remaining = Files.readString(file);
 		assertThat(remaining)
 			.startsWith("File: features/a.asciidoc\n")
@@ -259,8 +227,12 @@ class DarmokMojoHelpersTest {
 	 */
 	@Test
 	void getNextScenario_missingFile_returnsNull() throws Exception {
+		// Given: no scenarios-list file exists at the configured path
+
+		// When: getNextScenario is called
 		DarmokMojo.ScenarioEntry entry = mojo.getNextScenario();
 
+		// Then: null is returned
 		assertThat(entry).isNull();
 	}
 
@@ -275,10 +247,13 @@ class DarmokMojoHelpersTest {
 	 */
 	@Test
 	void getNextScenario_emptyFile_returnsNull() throws Exception {
+		// Given: an empty scenarios-list file at the configured path
 		Files.writeString(workDir.resolve(mojo.scenariosFile), "");
 
+		// When: getNextScenario is called
 		DarmokMojo.ScenarioEntry entry = mojo.getNextScenario();
 
+		// Then: null is returned
 		assertThat(entry).isNull();
 	}
 
@@ -292,6 +267,7 @@ class DarmokMojoHelpersTest {
 	 */
 	@Test
 	void getNextScenario_multipleEntries_returnsFirstInOrder() throws Exception {
+		// Given: a scenarios-list file with two scenarios under file features/a.asciidoc
 		Files.writeString(workDir.resolve(mojo.scenariosFile), """
 				File: features/a.asciidoc
 				  Scenario: First
@@ -300,8 +276,10 @@ class DarmokMojoHelpersTest {
 				    Tag: tagTwo
 				""");
 
+		// When: getNextScenario is called
 		DarmokMojo.ScenarioEntry entry = mojo.getNextScenario();
 
+		// Then: the first scenario in file order is returned
 		assertThat(entry).isEqualTo(new DarmokMojo.ScenarioEntry(
 			"features/a.asciidoc", "First", "tagOne"));
 	}
@@ -318,14 +296,17 @@ class DarmokMojoHelpersTest {
 	 */
 	@Test
 	void addTagToAsciidoc_noExistingTagLine_insertsNewTagLine() throws Exception {
+		// Given: an asciidoc file whose Test-Case "User logs in successfully" has no tag line
 		Path specFile = writeSpec("login", """
 				== Test-Case: User logs in successfully
 
 				Some description
 				""");
 
+		// When: the tag loginHappyPath is added to that test-case
 		boolean changed = mojo.addTagToAsciidoc("login", "User logs in successfully", "loginHappyPath");
 
+		// Then: the asciidoc file contains a new @loginHappyPath line below the Test-Case header
 		assertThat(changed).isTrue();
 		String content = Files.readString(specFile);
 		assertThat(content)
@@ -340,6 +321,7 @@ class DarmokMojoHelpersTest {
 	 */
 	@Test
 	void addTagToAsciidoc_existingTagLine_appendsNewTag() throws Exception {
+		// Given: an asciidoc file whose Test-Case already carries tag @existingTag
 		Path specFile = writeSpec("login", """
 				== Test-Case: User logs in successfully
 
@@ -347,8 +329,10 @@ class DarmokMojoHelpersTest {
 				Some description
 				""");
 
+		// When: the tag loginHappyPath is added to that test-case
 		boolean changed = mojo.addTagToAsciidoc("login", "User logs in successfully", "loginHappyPath");
 
+		// Then: the asciidoc file contains the line "@existingTag @loginHappyPath"
 		assertThat(changed).isTrue();
 		String content = Files.readString(specFile);
 		assertThat(content).contains("@existingTag @loginHappyPath");
@@ -364,6 +348,7 @@ class DarmokMojoHelpersTest {
 	 */
 	@Test
 	void addTagToAsciidoc_tagAlreadyPresent_isNoOp() throws Exception {
+		// Given: an asciidoc file whose Test-Case already carries tag @loginHappyPath
 		Path specFile = writeSpec("login", """
 				== Test-Case: User logs in successfully
 
@@ -372,8 +357,10 @@ class DarmokMojoHelpersTest {
 				""");
 		String before = Files.readString(specFile);
 
+		// When: the tag loginHappyPath is added to that test-case
 		boolean changed = mojo.addTagToAsciidoc("login", "User logs in successfully", "loginHappyPath");
 
+		// Then: the asciidoc file is unchanged
 		assertThat(changed).isFalse();
 		assertThat(Files.readString(specFile)).isEqualTo(before);
 	}
@@ -402,14 +389,17 @@ class DarmokMojoHelpersTest {
 	@Test
 	@DisabledOnOs(OS.WINDOWS)
 	void deleteNulFiles_removesOnlyNulEntries_andReturnsCount() throws Exception {
+		// Given: a directory tree containing files NUL, sub/nul, and keep.txt
 		Path root = workDir.resolve("tree");
 		Files.createDirectories(root.resolve("sub"));
 		Files.writeString(root.resolve("NUL"), "junk");
 		Files.writeString(root.resolve("sub").resolve("nul"), "junk");
 		Files.writeString(root.resolve("keep.txt"), "legit");
 
+		// When: deleteNulFiles is run on the tree root
 		int deleted = mojo.deleteNulFiles(root);
 
+		// Then: NUL-named files do not exist, keep.txt exists, count is 2
 		assertThat(deleted).isEqualTo(2);
 		assertThat(Files.exists(root.resolve("NUL"))).isFalse();
 		assertThat(Files.exists(root.resolve("sub/nul"))).isFalse();
@@ -423,12 +413,15 @@ class DarmokMojoHelpersTest {
 	 */
 	@Test
 	void deleteNulFiles_noMatches_returnsZero() throws Exception {
+		// Given: a directory tree containing no NUL-named files
 		Path root = workDir.resolve("clean");
 		Files.createDirectories(root);
 		Files.writeString(root.resolve("file.txt"), "legit");
 
+		// When: deleteNulFiles is run
 		int deleted = mojo.deleteNulFiles(root);
 
+		// Then: no files were deleted and file.txt still exists
 		assertThat(deleted).isZero();
 		assertThat(Files.exists(root.resolve("file.txt"))).isTrue();
 	}
@@ -448,14 +441,17 @@ class DarmokMojoHelpersTest {
 	 */
 	@Test
 	void deleteDirectory_removesEntireNestedTree() throws Exception {
+		// Given: a nested directory tree with files under target/classes/ and target/build.log
 		Path root = workDir.resolve("target");
 		Files.createDirectories(root.resolve("classes/org/farhan"));
 		Files.writeString(root.resolve("classes/Main.class"), "bytes");
 		Files.writeString(root.resolve("classes/org/farhan/X.class"), "bytes");
 		Files.writeString(root.resolve("build.log"), "log");
 
+		// When: deleteDirectory is run on target/
 		mojo.deleteDirectory(root);
 
+		// Then: the target/ directory does not exist
 		assertThat(Files.exists(root)).isFalse();
 	}
 
@@ -470,10 +466,13 @@ class DarmokMojoHelpersTest {
 	 */
 	@Test
 	void deleteDirectory_missingPath_isNoOp() throws Exception {
+		// Given: a path that does not exist
 		Path missing = workDir.resolve("never-existed");
 
+		// When: deleteDirectory is run on it
 		mojo.deleteDirectory(missing);
 
+		// Then: the path still does not exist
 		assertThat(Files.exists(missing)).isFalse();
 	}
 

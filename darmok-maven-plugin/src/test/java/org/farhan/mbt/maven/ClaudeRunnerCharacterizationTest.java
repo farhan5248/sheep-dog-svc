@@ -69,13 +69,17 @@ class ClaudeRunnerCharacterizationTest {
 	 */
 	@Test
 	void happyPath_logsExecutingCommand_andSuccessMarker() throws Exception {
+		// TODO (before Stage 2): add Given step describing the file state (asciidoc
+		//   file, scenarios-list entry, prior generated files) that would make Claude
+		//   return exit 0 on the green-phase prompt.
 		ProcessRunner.starter = pb -> new FakeProcess("mocked claude output line", 0);
 		ClaudeRunner claude = new ClaudeRunner(categoryLog, "sonnet", 3, 30);
 
+		// When: the claude runner is executed with args "/rgr-green sample-project sampleTag"
 		int exit = claude.run(workDir.toString(), "/rgr-green sample-project sampleTag");
 
+		// Then: runner log contains the executed command and success marker; no ERROR lines
 		assertThat(exit).isEqualTo(0);
-
 		List<String> lines = Files.readAllLines(logFile);
 		assertThat(lines)
 			.as("runner log contract — must expose executed command and success marker")
@@ -96,6 +100,8 @@ class ClaudeRunnerCharacterizationTest {
 	 */
 	@Test
 	void retryRecovers_logsRetryableErrorAndSuccess() throws Exception {
+		// TODO (before Stage 2): add Given step describing file state that would
+		//   cause the upstream to return a retryable 500 on first call then succeed.
 		Deque<FakeProcessSpec> specs = new ArrayDeque<>();
 		specs.add(new FakeProcessSpec("API Error: 500 Internal server error", 1));
 		specs.add(new FakeProcessSpec("mocked claude output line", 0));
@@ -105,8 +111,10 @@ class ClaudeRunnerCharacterizationTest {
 		};
 		ClaudeRunner claude = new ClaudeRunner(categoryLog, "sonnet", 3, 0);
 
+		// When: the claude runner is executed with args "/rgr-green project tag"
 		int exit = claude.run(workDir.toString(), "/rgr-green project tag");
 
+		// Then: runner log shows retryable-error detection, retry attempt marker, and success
 		assertThat(exit).isEqualTo(0);
 		List<String> lines = Files.readAllLines(logFile);
 		assertThat(lines)
@@ -130,11 +138,15 @@ class ClaudeRunnerCharacterizationTest {
 	 */
 	@Test
 	void retriesExhausted_logsMaxRetriesExhaustedAtError() throws Exception {
+		// TODO (before Stage 2): add Given step describing the upstream being
+		//   persistently unhealthy (always returns retryable 500).
 		ProcessRunner.starter = pb -> new FakeProcess("API Error: 500 Internal server error", 1);
 		ClaudeRunner claude = new ClaudeRunner(categoryLog, "sonnet", 3, 0);
 
+		// When: the claude runner is executed with args "/rgr-green project tag"
 		int exit = claude.run(workDir.toString(), "/rgr-green project tag");
 
+		// Then: runner log escalates to ERROR with "Max retries exhausted"
 		assertThat(exit).isEqualTo(1);
 		List<String> lines = Files.readAllLines(logFile);
 		assertThat(lines)
@@ -155,11 +167,15 @@ class ClaudeRunnerCharacterizationTest {
 	 */
 	@Test
 	void nonRetryableFailure_doesNotRetry_logsExitCode() throws Exception {
+		// TODO (before Stage 2): add Given step describing what file state would
+		//   cause a non-retryable permission error (e.g. readonly src/main).
 		ProcessRunner.starter = pb -> new FakeProcess("permission denied: /foo", 2);
 		ClaudeRunner claude = new ClaudeRunner(categoryLog, "sonnet", 3, 0);
 
+		// When: the claude runner is executed with args "/rgr-green project tag"
 		int exit = claude.run(workDir.toString(), "/rgr-green project tag");
 
+		// Then: exactly one subprocess invocation, no retry markers, failing exit code logged
 		assertThat(exit).isEqualTo(2);
 		List<String> lines = Files.readAllLines(logFile);
 		long executingLines = lines.stream().filter(l -> l.contains("Executing: claude")).count();
@@ -183,6 +199,8 @@ class ClaudeRunnerCharacterizationTest {
 	 */
 	@Test
 	void subprocessStdout_isMirroredToLogInOrder() throws Exception {
+		// TODO (before Stage 2): add Given step describing file state that would
+		//   elicit multi-line claude output.
 		String stdout = String.join("\n",
 			"line one of output",
 			"line two of output",
@@ -190,8 +208,10 @@ class ClaudeRunnerCharacterizationTest {
 		ProcessRunner.starter = pb -> new FakeProcess(stdout, 0);
 		ClaudeRunner claude = new ClaudeRunner(categoryLog, "sonnet", 1, 0);
 
+		// When: the claude runner is executed with args "/rgr-green project tag"
 		claude.run(workDir.toString(), "/rgr-green project tag");
 
+		// Then: the three output lines appear in the log in the order they were produced
 		List<String> lines = Files.readAllLines(logFile);
 		int firstIdx = indexOfContaining(lines, "line one of output");
 		int secondIdx = indexOfContaining(lines, "line two of output");
@@ -213,11 +233,14 @@ class ClaudeRunnerCharacterizationTest {
 	 */
 	@Test
 	void gitRunnerThroughSeam_logsRunningCommand() throws Exception {
+		// TODO (before Stage 2): add Given step describing repo state ("no staged changes").
 		ProcessRunner.starter = pb -> new FakeProcess("nothing to commit", 0);
 		GitRunner git = new GitRunner(categoryLog);
 
+		// When: the git runner is executed with args "status --porcelain"
 		int exit = git.run(workDir.toString(), "status", "--porcelain");
 
+		// Then: runner log contains "Running: git status --porcelain"
 		assertThat(exit).isEqualTo(0);
 		List<String> lines = Files.readAllLines(logFile);
 		assertThat(lines)

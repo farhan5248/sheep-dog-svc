@@ -65,6 +65,8 @@ class RunnerBuildCommandTest {
 	 */
 	@Test
 	void claudeRunner_withModel_assemblesFullCommandLine() throws Exception {
+		// TODO (before Stage 2): add Given step describing what input files
+		//   would cause darmok to invoke the green-phase prompt with model=sonnet.
 		AtomicReference<List<String>> captured = new AtomicReference<>();
 		ProcessRunner.starter = pb -> {
 			captured.set(List.copyOf(pb.command()));
@@ -72,8 +74,10 @@ class RunnerBuildCommandTest {
 		};
 		ClaudeRunner claude = new ClaudeRunner(categoryLog, "sonnet", 1, 0);
 
+		// When: the claude runner is executed with args "/rgr-green project tag"
 		claude.run(workDir.toString(), "/rgr-green project tag");
 
+		// Then: the claude command was invoked with the full flag set in the expected order
 		List<String> command = captured.get();
 		assertThat(command).hasSize(6);
 		assertThat(command.get(0)).startsWith("claude");
@@ -94,6 +98,8 @@ class RunnerBuildCommandTest {
 	 */
 	@Test
 	void claudeRunner_emptyModel_omitsModelFlag() throws Exception {
+		// TODO (before Stage 2): add Given step describing a darmok invocation
+		//   without an explicit model parameter.
 		AtomicReference<List<String>> captured = new AtomicReference<>();
 		ProcessRunner.starter = pb -> {
 			captured.set(List.copyOf(pb.command()));
@@ -101,8 +107,10 @@ class RunnerBuildCommandTest {
 		};
 		ClaudeRunner claude = new ClaudeRunner(categoryLog, "", 1, 0);
 
+		// When: the claude runner is executed with args "/rgr-green project tag"
 		claude.run(workDir.toString(), "/rgr-green project tag");
 
+		// Then: the claude command was invoked without --model
 		List<String> command = captured.get();
 		assertThat(command)
 			.doesNotContain("--model")
@@ -125,6 +133,8 @@ class RunnerBuildCommandTest {
 	 */
 	@Test
 	void mavenRunner_prependsMvnBinary_andPassesArgsVerbatim() throws Exception {
+		// TODO (before Stage 2): add Given step describing the red-phase file
+		//   state that would cause darmok to invoke the svc-plugin asciidoctor-to-uml goal.
 		AtomicReference<List<String>> captured = new AtomicReference<>();
 		ProcessRunner.starter = pb -> {
 			captured.set(List.copyOf(pb.command()));
@@ -132,11 +142,13 @@ class RunnerBuildCommandTest {
 		};
 		MavenRunner maven = new MavenRunner(categoryLog);
 
+		// When: the maven runner is executed with a goal and Dtags + Dhost args
 		maven.run(workDir.toString(),
 			"org.farhan:sheep-dog-svc-maven-plugin:asciidoctor-to-uml",
 			"-Dtags=loginHappyPath",
 			"-Dhost=dev.sheepdog.io");
 
+		// Then: the mvn command was invoked with the supplied args verbatim
 		List<String> command = captured.get();
 		assertThat(command.get(0)).startsWith("mvn");
 		assertThat(command.subList(1, command.size())).containsExactly(
@@ -156,6 +168,8 @@ class RunnerBuildCommandTest {
 	 */
 	@Test
 	void gitRunner_prependsGitBinary_andPassesArgsVerbatim() throws Exception {
+		// TODO (before Stage 2): add Given step describing files staged after
+		//   green phase that would trigger a darmok commit.
 		AtomicReference<List<String>> captured = new AtomicReference<>();
 		ProcessRunner.starter = pb -> {
 			captured.set(List.copyOf(pb.command()));
@@ -163,8 +177,10 @@ class RunnerBuildCommandTest {
 		};
 		GitRunner git = new GitRunner(categoryLog);
 
+		// When: the git runner is executed with args "commit -m \"run-rgr green someScenario\""
 		git.run(workDir.toString(), "commit", "-m", "run-rgr green someScenario");
 
+		// Then: the git command was invoked with the supplied args verbatim
 		List<String> command = captured.get();
 		assertThat(command).containsExactly(
 			"git", "commit", "-m", "run-rgr green someScenario");

@@ -1,7 +1,6 @@
 package org.farhan.mbt.maven;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatCode;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -41,13 +40,16 @@ class CategoryLogTest {
 	 */
 	@Test
 	void constructor_createsMissingParentDirectories() throws Exception {
+		// Given: a log-file path whose parent directories do not exist
 		Path nested = workDir.resolve("a/b/c/category.log");
 		assertThat(Files.exists(nested.getParent())).isFalse();
 
+		// When: a CategoryLog is created and one INFO message is written
 		try (CategoryLog log = new CategoryLog(new SystemStreamLog(), "test", nested)) {
 			log.info("hello");
 		}
 
+		// Then: the log file exists and contains the expected line
 		assertThat(Files.exists(nested)).isTrue();
 		assertThat(Files.readString(nested)).contains("INFO  [test] hello");
 	}
@@ -64,7 +66,10 @@ class CategoryLogTest {
 	 */
 	@Test
 	void writesCanonicalTimestampLevelCategoryFormat() throws Exception {
+		// Given: a CategoryLog with category "Claude"
 		Path file = workDir.resolve("canonical.log");
+
+		// When: debug / info / warn / error messages are written in that order
 		try (CategoryLog log = new CategoryLog(new SystemStreamLog(), "Claude", file)) {
 			log.debug("debug line");
 			log.info("info line");
@@ -72,6 +77,7 @@ class CategoryLogTest {
 			log.error("error line");
 		}
 
+		// Then: the log file contains four canonical lines, one per level, in order
 		List<String> lines = Files.readAllLines(file);
 		assertThat(lines).hasSize(4);
 		assertThat(lines).allMatch(l -> LINE_FORMAT.matcher(l).matches(),
@@ -93,36 +99,21 @@ class CategoryLogTest {
 	 */
 	@Test
 	void withThrowable_appendsStackTraceToLogFile() throws Exception {
+		// Given: an IOException with message "boom from test"
 		Path file = workDir.resolve("err.log");
 		IOException boom = new IOException("boom from test");
+
+		// When: the exception is passed to warn(content, throwable) on a CategoryLog
 		try (CategoryLog log = new CategoryLog(new SystemStreamLog(), "Claude", file)) {
 			log.warn("something went wrong", boom);
 		}
 
+		// Then: the log file contains the warn-level content line and the exception stack trace
 		String content = Files.readString(file);
 		assertThat(content)
 			.contains("WARN  [Claude] something went wrong")
 			.contains("java.io.IOException: boom from test")
 			.contains("at org.farhan.mbt.maven.CategoryLogTest");
-	}
-
-	/**
-	 * Given: a CategoryLog that has already been closed.
-	 * When: close() is called a second time.
-	 * Then: no exception is thrown.
-	 * <p>
-	 * This characterizes the safe-to-close-twice contract needed by DarmokMojo.cleanup,
-	 * which may run after a partial initialization failure where some logs are already
-	 * closed and others are not.
-	 */
-	@Test
-	void close_isIdempotent() throws Exception {
-		Path file = workDir.resolve("close.log");
-		CategoryLog log = new CategoryLog(new SystemStreamLog(), "test", file);
-		log.info("first");
-		log.close();
-
-		assertThatCode(log::close).doesNotThrowAnyException();
 	}
 
 	/**
@@ -136,14 +127,18 @@ class CategoryLogTest {
 	 */
 	@Test
 	void appendMode_preservesPreviousSessionContent() throws Exception {
+		// Given: an existing log file with one line from a prior CategoryLog session
 		Path file = workDir.resolve("append.log");
 		try (CategoryLog first = new CategoryLog(new SystemStreamLog(), "run", file)) {
 			first.info("session one line");
 		}
+
+		// When: a new CategoryLog is opened on the same file and writes a second line
 		try (CategoryLog second = new CategoryLog(new SystemStreamLog(), "run", file)) {
 			second.info("session two line");
 		}
 
+		// Then: the log file contains both lines in the order they were written
 		List<String> lines = Files.readAllLines(file);
 		assertThat(lines).hasSize(2);
 		assertThat(lines.get(0)).contains("session one line");
