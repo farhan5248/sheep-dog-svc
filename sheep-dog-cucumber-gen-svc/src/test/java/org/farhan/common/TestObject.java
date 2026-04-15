@@ -32,7 +32,7 @@ import io.cucumber.datatable.DataTable;
 public abstract class TestObject {
 
     public enum TestState {
-        Absent, Empty, Present;
+        Absent, Empty, Present, Any;
 
         private static final Set<String> NAMES = Arrays.stream(values()).map(Enum::name).collect(Collectors.toSet());
 
@@ -240,6 +240,9 @@ public abstract class TestObject {
                             .invoke(this, row);
                     if (operation.equals("get")) {
                         String expectedValue = replaceKeyword(row.get(fieldName));
+                        if (TestState.Any.name().equals(expectedValue)) {
+                            continue;
+                        }
                         String actual = returnValue == null ? null : returnValue.toString();
                         if (fieldName.equals("State") && TestState.contains(expectedValue)) {
                             String mappedActual;
