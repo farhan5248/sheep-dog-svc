@@ -1,6 +1,7 @@
 package org.farhan.stepdefs.codeprj.src.main.java.org.farhan.objects;
 
 import com.google.inject.Inject;
+import io.cucumber.datatable.DataTable;
 import io.cucumber.guice.ScenarioScoped;
 import io.cucumber.java.en.Given;
 import org.farhan.common.TestSteps;
@@ -15,12 +16,12 @@ public class CodePrjLoginHappyPathJavaFileSteps extends TestSteps {
     }
 
     @Given("^The code-prj project src/main/java/org/farhan/objects/LoginHappyPath.java file is created as follows$")
-    public void isCreatedAsFollows() {
-        object.setVertexStep("", "", "is", "created as follows");
+    public void isCreatedAsFollows(DataTable dataTable) {
+        object.setVertexStep("", "", "is", "created as follows", dataTable);
     }
 
     @Given("^The code-prj project src/main/java/org/farhan/objects/LoginHappyPath.java file will be as follows$")
-    public void willBeAsFollows() {
-        object.assertVertexStep("", "", "will be", "as follows");
+    public void willBeAsFollows(DataTable dataTable) {
+        object.assertVertexStep("", "", "will be", "as follows", dataTable);
     }
 }

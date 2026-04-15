@@ -10,6 +10,8 @@ public interface ProcessDarmokAsciidocFile {
 
     public String getAsFollows(HashMap<String, String> keyMap);
 
+    public String getState(HashMap<String, String> keyMap);
+
     public String getCreatedAsFollows(HashMap<String, String> keyMap);
 
     public String getContent(HashMap<String, String> keyMap);

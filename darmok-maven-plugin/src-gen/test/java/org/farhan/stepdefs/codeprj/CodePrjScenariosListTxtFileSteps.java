@@ -1,6 +1,7 @@
 package org.farhan.stepdefs.codeprj;
 
 import com.google.inject.Inject;
+import io.cucumber.datatable.DataTable;
 import io.cucumber.guice.ScenarioScoped;
 import io.cucumber.java.en.Given;
 import org.farhan.common.TestSteps;
@@ -20,7 +21,7 @@ public class CodePrjScenariosListTxtFileSteps extends TestSteps {
     }
 
     @Given("^The code-prj project scenarios-list.txt file will be as follows$")
-    public void willBeAsFollows() {
-        object.assertVertexStep("", "", "will be", "as follows");
+    public void willBeAsFollows(DataTable dataTable) {
+        object.assertVertexStep("", "", "will be", "as follows", dataTable);
     }
 }

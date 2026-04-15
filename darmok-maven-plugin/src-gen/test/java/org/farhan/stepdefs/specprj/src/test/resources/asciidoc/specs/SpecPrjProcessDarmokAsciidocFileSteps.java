@@ -1,6 +1,7 @@
 package org.farhan.stepdefs.specprj.src.test.resources.asciidoc.specs;
 
 import com.google.inject.Inject;
+import io.cucumber.datatable.DataTable;
 import io.cucumber.guice.ScenarioScoped;
 import io.cucumber.java.en.Given;
 import org.farhan.common.TestSteps;
@@ -20,8 +21,8 @@ public class SpecPrjProcessDarmokAsciidocFileSteps extends TestSteps {
     }
 
     @Given("^The spec-prj project src/test/resources/asciidoc/specs/ProcessDarmok.asciidoc file will be as follows$")
-    public void willBeAsFollows() {
-        object.assertVertexStep("", "", "will be", "as follows");
+    public void willBeAsFollows(DataTable dataTable) {
+        object.assertVertexStep("", "", "will be", "as follows", dataTable);
     }
 
     @Given("^The spec-prj project src/test/resources/asciidoc/specs/ProcessDarmok.asciidoc file will be created as follows$")
