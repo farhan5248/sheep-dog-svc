@@ -65,7 +65,7 @@ public class ClaudeRunner extends ProcessRunner {
 			ProcessBuilder pb = new ProcessBuilder(command);
 			pb.directory(new File(workingDirectory));
 			pb.redirectErrorStream(true);
-			Process process = pb.start();
+			Process process = starter.start(pb);
 			process.getOutputStream().close();
 
 			List<String> outputLines = new ArrayList<>();

@@ -2,6 +2,7 @@ package org.farhan.mbt.maven;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
@@ -9,6 +10,22 @@ import java.util.List;
 import org.apache.maven.plugin.logging.Log;
 
 public class ProcessRunner {
+
+	/**
+	 * Test seam: abstraction over {@link ProcessBuilder#start()} so tests can
+	 * substitute a fake {@link Process} without spawning real subprocesses.
+	 * <p>
+	 * This is intentionally a static field to keep Stage 1 tests minimally invasive
+	 * on the production code. It moves to instance injection once enough tests exist
+	 * to refactor safely (sheep-dog-main#253 Stage 2). Tests that reassign this
+	 * field must run sequentially and restore the default in teardown.
+	 */
+	@FunctionalInterface
+	public interface ProcessStarter {
+		Process start(ProcessBuilder pb) throws IOException;
+	}
+
+	public static volatile ProcessStarter starter = ProcessBuilder::start;
 
 	private Log log;
 
@@ -37,7 +54,7 @@ public class ProcessRunner {
 
 		log.debug("Running: " + String.join(" ", command));
 
-		Process process = pb.start();
+		Process process = starter.start(pb);
 		process.getOutputStream().close();
 		try (BufferedReader reader = new BufferedReader(
 				new InputStreamReader(process.getInputStream()))) {
