@@ -416,7 +416,7 @@ public abstract class DarmokMojo extends AbstractMojo {
 		return 0;
 	}
 
-	private int deleteNulFiles(Path root) throws Exception {
+	int deleteNulFiles(Path root) throws Exception {
 		int[] count = { 0 };
 		Files.walk(root)
 			.filter(Files::isRegularFile)
@@ -436,7 +436,7 @@ public abstract class DarmokMojo extends AbstractMojo {
 		return count[0];
 	}
 
-	private void deleteDirectory(Path dir) throws Exception {
+	void deleteDirectory(Path dir) throws Exception {
 		if (!Files.exists(dir)) {
 			return;
 		}

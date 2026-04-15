@@ -12,6 +12,8 @@ import org.apache.maven.plugin.logging.SystemStreamLog;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledOnOs;
+import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.io.TempDir;
 
 /**
@@ -374,6 +376,105 @@ class DarmokMojoHelpersTest {
 
 		assertThat(changed).isFalse();
 		assertThat(Files.readString(specFile)).isEqualTo(before);
+	}
+
+	// =========================================================================
+	// deleteNulFiles
+	// =========================================================================
+
+	/**
+	 * Given: a directory tree containing files named "NUL" (Windows reserved device
+	 *   name that can leak into the checkout when scripts redirect to /dev/null).
+	 * When: deleteNulFiles is called with the tree root.
+	 * Then: every NUL / nul file is removed, non-NUL siblings are preserved,
+	 *   and the returned count equals the number deleted.
+	 * <p>
+	 * This characterizes the Windows-footgun cleanup contract (see CLAUDE.md note
+	 * on /dev/null vs NUL). A regression here would silently leak phantom NUL files
+	 * into commits.
+	 * <p>
+	 * Disabled on Windows: the Win32 filesystem layer redirects writes to paths
+	 * literally named "NUL" to the NUL device, so the fixture cannot be created
+	 * through the standard {@link Files} API. The real bug this method addresses
+	 * happens when files named NUL arrive via cygwin/git-bash {@code 2>/dev/null}
+	 * translation. Linux CI exercises this path normally.
+	 */
+	@Test
+	@DisabledOnOs(OS.WINDOWS)
+	void deleteNulFiles_removesOnlyNulEntries_andReturnsCount() throws Exception {
+		Path root = workDir.resolve("tree");
+		Files.createDirectories(root.resolve("sub"));
+		Files.writeString(root.resolve("NUL"), "junk");
+		Files.writeString(root.resolve("sub").resolve("nul"), "junk");
+		Files.writeString(root.resolve("keep.txt"), "legit");
+
+		int deleted = mojo.deleteNulFiles(root);
+
+		assertThat(deleted).isEqualTo(2);
+		assertThat(Files.exists(root.resolve("NUL"))).isFalse();
+		assertThat(Files.exists(root.resolve("sub/nul"))).isFalse();
+		assertThat(Files.exists(root.resolve("keep.txt"))).isTrue();
+	}
+
+	/**
+	 * Given: a directory tree with no NUL-named entries.
+	 * When: deleteNulFiles is called.
+	 * Then: the returned count is zero and nothing is deleted.
+	 */
+	@Test
+	void deleteNulFiles_noMatches_returnsZero() throws Exception {
+		Path root = workDir.resolve("clean");
+		Files.createDirectories(root);
+		Files.writeString(root.resolve("file.txt"), "legit");
+
+		int deleted = mojo.deleteNulFiles(root);
+
+		assertThat(deleted).isZero();
+		assertThat(Files.exists(root.resolve("file.txt"))).isTrue();
+	}
+
+	// =========================================================================
+	// deleteDirectory
+	// =========================================================================
+
+	/**
+	 * Given: a nested directory tree with files at multiple depths.
+	 * When: deleteDirectory is called with the tree root.
+	 * Then: the entire tree is removed (files first, then containing directories).
+	 * <p>
+	 * This characterizes the target/ wipe used during cleanup between RGR cycles —
+	 * the whole Maven build output must be removable even when it contains nested
+	 * class files and subdirectories.
+	 */
+	@Test
+	void deleteDirectory_removesEntireNestedTree() throws Exception {
+		Path root = workDir.resolve("target");
+		Files.createDirectories(root.resolve("classes/org/farhan"));
+		Files.writeString(root.resolve("classes/Main.class"), "bytes");
+		Files.writeString(root.resolve("classes/org/farhan/X.class"), "bytes");
+		Files.writeString(root.resolve("build.log"), "log");
+
+		mojo.deleteDirectory(root);
+
+		assertThat(Files.exists(root)).isFalse();
+	}
+
+	/**
+	 * Given: a directory path that does not exist.
+	 * When: deleteDirectory is called.
+	 * Then: the method returns without throwing.
+	 * <p>
+	 * This characterizes the safe-to-call-on-missing-directory contract — runCleanUp
+	 * invokes this unconditionally and must tolerate a first-time run where target/
+	 * has never been created.
+	 */
+	@Test
+	void deleteDirectory_missingPath_isNoOp() throws Exception {
+		Path missing = workDir.resolve("never-existed");
+
+		mojo.deleteDirectory(missing);
+
+		assertThat(Files.exists(missing)).isFalse();
 	}
 
 	// =========================================================================
