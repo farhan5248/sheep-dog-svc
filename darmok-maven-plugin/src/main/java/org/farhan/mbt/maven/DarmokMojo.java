@@ -197,10 +197,10 @@ public abstract class DarmokMojo extends AbstractMojo {
 
 		// === METRIC LINES ===
 		long totalDuration = System.currentTimeMillis() - totalStart;
-		mojoLog.info("  METRIC|scenario=" + scenarioName + "|phase=red-maven|duration_ms=" + redMavenDuration);
-		mojoLog.info("  METRIC|scenario=" + scenarioName + "|phase=green|duration_ms=" + greenDuration);
-		mojoLog.info("  METRIC|scenario=" + scenarioName + "|phase=refactor|duration_ms=" + refactorDuration);
-		mojoLog.info("  METRIC|scenario=" + scenarioName + "|phase=total|duration_ms=" + totalDuration);
+		mojoLog.info("  METRIC-scenario=" + scenarioName + "-phase=red-maven-duration_ms=" + redMavenDuration);
+		mojoLog.info("  METRIC-scenario=" + scenarioName + "-phase=green-duration_ms=" + greenDuration);
+		mojoLog.info("  METRIC-scenario=" + scenarioName + "-phase=refactor-duration_ms=" + refactorDuration);
+		mojoLog.info("  METRIC-scenario=" + scenarioName + "-phase=total-duration_ms=" + totalDuration);
 	}
 
 	private void commitIfChanged(String message, String phase) throws Exception {
