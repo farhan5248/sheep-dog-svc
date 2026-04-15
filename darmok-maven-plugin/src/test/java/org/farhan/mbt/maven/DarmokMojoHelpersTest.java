@@ -243,6 +243,68 @@ class DarmokMojoHelpersTest {
 	}
 
 	// =========================================================================
+	// getNextScenario
+	// =========================================================================
+
+	/**
+	 * Given: no scenarios-list file exists at the configured path.
+	 * When: getNextScenario is called.
+	 * Then: null is returned (not an exception).
+	 * <p>
+	 * This characterizes the nothing-to-do contract — the mojo treats a missing
+	 * file as "work queue is empty" so CI can run the plugin unconditionally without
+	 * needing a guard for first-time runs.
+	 */
+	@Test
+	void getNextScenario_missingFile_returnsNull() throws Exception {
+		DarmokMojo.ScenarioEntry entry = mojo.getNextScenario();
+
+		assertThat(entry).isNull();
+	}
+
+	/**
+	 * Given: the scenarios-list file exists but is empty.
+	 * When: getNextScenario is called.
+	 * Then: null is returned.
+	 * <p>
+	 * Same nothing-to-do contract as the missing-file case — parseScenarios returns
+	 * an empty list, which getNextScenario normalizes to null so callers have a
+	 * single "no work" sentinel to check.
+	 */
+	@Test
+	void getNextScenario_emptyFile_returnsNull() throws Exception {
+		Files.writeString(workDir.resolve(mojo.scenariosFile), "");
+
+		DarmokMojo.ScenarioEntry entry = mojo.getNextScenario();
+
+		assertThat(entry).isNull();
+	}
+
+	/**
+	 * Given: the scenarios-list file contains multiple File / Scenario / Tag triples.
+	 * When: getNextScenario is called.
+	 * Then: the first entry in file order is returned.
+	 * <p>
+	 * This characterizes the FIFO processing contract — scenarios are worked in
+	 * the order they appear in the file, not alphabetically or by tag.
+	 */
+	@Test
+	void getNextScenario_multipleEntries_returnsFirstInOrder() throws Exception {
+		Files.writeString(workDir.resolve(mojo.scenariosFile), """
+				File: features/a.asciidoc
+				  Scenario: First
+				    Tag: tagOne
+				  Scenario: Second
+				    Tag: tagTwo
+				""");
+
+		DarmokMojo.ScenarioEntry entry = mojo.getNextScenario();
+
+		assertThat(entry).isEqualTo(new DarmokMojo.ScenarioEntry(
+			"features/a.asciidoc", "First", "tagOne"));
+	}
+
+	// =========================================================================
 	// addTagToAsciidoc
 	// =========================================================================
 
