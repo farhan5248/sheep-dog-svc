@@ -212,7 +212,7 @@ public abstract class DarmokMojo extends AbstractMojo {
 		}
 	}
 
-	private void removeFirstScenarioFromFile() throws Exception {
+	void removeFirstScenarioFromFile() throws Exception {
 		Path scenariosPath = Path.of(baseDir, scenariosFile);
 		List<String> lines = Files.readAllLines(scenariosPath, StandardCharsets.UTF_8);
 
@@ -265,7 +265,7 @@ public abstract class DarmokMojo extends AbstractMojo {
 	// Scenario Parsing
 	// =========================================================================
 
-	private List<ScenarioEntry> parseScenarios(String scenariosFilePath) throws Exception {
+	List<ScenarioEntry> parseScenarios(String scenariosFilePath) throws Exception {
 		List<String> lines = Files.readAllLines(Path.of(scenariosFilePath), StandardCharsets.UTF_8);
 		List<ScenarioEntry> result = new ArrayList<>();
 		String currentFile = "";
@@ -288,7 +288,7 @@ public abstract class DarmokMojo extends AbstractMojo {
 	// AsciiDoc Tag Insertion
 	// =========================================================================
 
-	private boolean addTagToAsciidoc(String fileName, String scenarioName, String tag) throws Exception {
+	boolean addTagToAsciidoc(String fileName, String scenarioName, String tag) throws Exception {
 		String filePath = baseDir + "/" + asciidocDir + "/" + fileName + ".asciidoc";
 		File file = new File(filePath);
 		if (!file.exists()) {
@@ -455,12 +455,12 @@ public abstract class DarmokMojo extends AbstractMojo {
 	// File I/O Helpers
 	// =========================================================================
 
-	private void writeFileWithLF(String filePath, List<String> lines) throws Exception {
+	void writeFileWithLF(String filePath, List<String> lines) throws Exception {
 		String content = String.join("\n", lines) + "\n";
 		Files.writeString(Path.of(filePath), content, StandardCharsets.UTF_8);
 	}
 
-	private String generateRunnerClassContent(String pattern, String runnerClassName) {
+	String generateRunnerClassContent(String pattern, String runnerClassName) {
 		return "package org.farhan.suites;\n"
 			+ "\n"
 			+ "import org.junit.platform.suite.api.ConfigurationParameter;\n"
@@ -481,7 +481,7 @@ public abstract class DarmokMojo extends AbstractMojo {
 			+ "}";
 	}
 
-	private String formatDuration(long millis) {
+	String formatDuration(long millis) {
 		long seconds = millis / 1000;
 		long hours = seconds / 3600;
 		long minutes = (seconds % 3600) / 60;
