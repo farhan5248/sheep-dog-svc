@@ -28,6 +28,15 @@ import org.springframework.stereotype.Component;
 @Scope(SCOPE_CUCUMBER_GLUE)
 public class DarmokMojoLogFileImpl extends AbstractFileImpl implements DarmokMojoLogFile {
 
+	private LogFileHelper helper;
+
+	private LogFileHelper helper() {
+		if (helper == null) {
+			helper = new LogFileHelper(resolveFilePath());
+		}
+		return helper;
+	}
+
 	@Override
 	protected Path resolveFilePath() {
 		Path logDir = (Path) getProperty("log.dir");
@@ -60,16 +69,16 @@ public class DarmokMojoLogFileImpl extends AbstractFileImpl implements DarmokMoj
 
 	@Override
 	public String getLevel(HashMap<String, String> keyMap) {
-		return keyMap.get("Level");
+		return helper().matchAndGetLevel(keyMap);
 	}
 
 	@Override
 	public String getCategory(HashMap<String, String> keyMap) {
-		return keyMap.get("Category");
+		return helper().matchAndGetCategory(keyMap);
 	}
 
 	@Override
 	public String getContent(HashMap<String, String> keyMap) {
-		return keyMap.get("Content");
+		return helper().matchAndGetContent(keyMap);
 	}
 }
