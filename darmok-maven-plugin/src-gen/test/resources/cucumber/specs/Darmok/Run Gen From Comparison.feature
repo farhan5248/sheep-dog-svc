@@ -9,7 +9,7 @@ Feature: Run Gen From Comparison
 
     Given The code-prj project scenarios-list.txt file is created as follows
           """
-          File: features/login.asciidoc
+          File: features/login
             Scenario: User logs in successfully
               Tag: loginHappyPath
           """
@@ -39,25 +39,25 @@ Feature: Run Gen From Comparison
           | State |
           | Empty |
       And The code-prj project target/darmok/darmok.mojo.log file will be as follows
-          | Level | Category | Content                                                                                 |
-          | INFO  | mojo     | RGR Automation Plugin (gen-from-comparison)                                             |
-          | INFO  | mojo     | Processing Scenario: features/login.asciidoc/User logs in successfully [loginHappyPath] |
-          | DEBUG | mojo     | Added tag @loginHappyPath to file                                                       |
-          | INFO  | mojo     | Red: Running maven...                                                                   |
-          | INFO  | mojo     | Any                                                                                     |
-          | INFO  | mojo     | Red: Committing                                                                         |
-          | INFO  | mojo     | Green: Running...                                                                       |
-          | INFO  | mojo     | Any                                                                                     |
-          | INFO  | mojo     | Green: Committing                                                                       |
-          | INFO  | mojo     | Refactor: Running...                                                                    |
-          | INFO  | mojo     | Any                                                                                     |
-          | INFO  | mojo     | Refactor: Committing                                                                    |
-          | INFO  | mojo     | Any                                                                                     |
-          | INFO  | mojo     | Any                                                                                     |
-          | INFO  | mojo     | Any                                                                                     |
-          | INFO  | mojo     | Any                                                                                     |
-          | INFO  | mojo     | RGR Automation Complete!                                                                |
-          | INFO  | mojo     | Total scenarios processed: 1                                                            |
+          | Level | Category | Content                                                                        |
+          | INFO  | mojo     | RGR Automation Plugin (gen-from-comparison)                                    |
+          | INFO  | mojo     | Processing Scenario: features/login/User logs in successfully [loginHappyPath] |
+          | DEBUG | mojo     | Added tag @loginHappyPath to file                                              |
+          | INFO  | mojo     | Red: Running maven...                                                          |
+          | INFO  | mojo     | Any                                                                            |
+          | INFO  | mojo     | Red: Committing                                                                |
+          | INFO  | mojo     | Green: Running...                                                              |
+          | INFO  | mojo     | Any                                                                            |
+          | INFO  | mojo     | Green: Committing                                                              |
+          | INFO  | mojo     | Refactor: Running...                                                           |
+          | INFO  | mojo     | Any                                                                            |
+          | INFO  | mojo     | Refactor: Committing                                                           |
+          | INFO  | mojo     | Any                                                                            |
+          | INFO  | mojo     | Any                                                                            |
+          | INFO  | mojo     | Any                                                                            |
+          | INFO  | mojo     | Any                                                                            |
+          | INFO  | mojo     | RGR Automation Complete!                                                       |
+          | INFO  | mojo     | Total scenarios processed: 1                                                   |
       And The code-prj project target/darmok/darmok.runners.log file will be as follows
           | Level | Category | Content                                                                                                      |
           | Any   | Any      | Any                                                                                                          |

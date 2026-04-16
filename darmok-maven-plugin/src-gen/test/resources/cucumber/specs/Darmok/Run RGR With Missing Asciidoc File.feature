@@ -11,7 +11,7 @@ Feature: Run RGR With Missing Asciidoc File
 
     Given The code-prj project scenarios-list.txt file is created as follows
           """
-          File: features/login.asciidoc
+          File: features/login
             Scenario: User logs in successfully
               Tag: loginHappyPath
           """
@@ -19,16 +19,16 @@ Feature: Run RGR With Missing Asciidoc File
      When The maven plugin gen-from-existing goal is executed
      Then The code-prj project scenarios-list.txt file is created as follows
           """
-          File: features/login.asciidoc
+          File: features/login
             Scenario: User logs in successfully
               Tag: loginHappyPath
           """
       And The code-prj project target/darmok/darmok.mojo.log file will be as follows
-          | Level | Category | Content                                                                                 |
-          | INFO  | mojo     | RGR Automation Plugin (gen-from-existing)                                               |
-          | INFO  | mojo     | Processing Scenario: features/login.asciidoc/User logs in successfully [loginHappyPath] |
-          | WARN  | mojo     | File not found: features/login.asciidoc                                                 |
-          | INFO  | mojo     | Red: Running maven...                                                                   |
+          | Level | Category | Content                                                                        |
+          | INFO  | mojo     | RGR Automation Plugin (gen-from-existing)                                      |
+          | INFO  | mojo     | Processing Scenario: features/login/User logs in successfully [loginHappyPath] |
+          | WARN  | mojo     | File not found: features/login.asciidoc                                        |
+          | INFO  | mojo     | Red: Running maven...                                                          |
       And The code-prj project target/darmok/darmok.mojo.log file won't be as follows
           | Level | Category | Content                  |
           | INFO  | mojo     | Red: Completed maven     |

@@ -10,7 +10,7 @@ Feature: Run RGR Multiple Scenarios
 
     Given The code-prj project scenarios-list.txt file is created as follows
           """
-          File: features/login.asciidoc
+          File: features/login
             Scenario: User logs in successfully
               Tag: loginHappyPath
             Scenario: User logs out successfully
@@ -23,16 +23,16 @@ Feature: Run RGR Multiple Scenarios
           | State |
           | Empty |
       And The code-prj project target/darmok/darmok.mojo.log file will be as follows
-          | Level | Category | Content                                                                                   |
-          | INFO  | mojo     | RGR Automation Plugin (gen-from-existing)                                                 |
-          | INFO  | mojo     | Processing Scenario: features/login.asciidoc/User logs in successfully [loginHappyPath]   |
-          | INFO  | mojo     | Green: Skipped (tests already passing)                                                    |
-          | INFO  | mojo     | Red: Committing                                                                           |
-          | INFO  | mojo     | Processing Scenario: features/login.asciidoc/User logs out successfully [logoutHappyPath] |
-          | INFO  | mojo     | Green: Skipped (tests already passing)                                                    |
-          | INFO  | mojo     | Red: Committing                                                                           |
-          | INFO  | mojo     | RGR Automation Complete!                                                                  |
-          | INFO  | mojo     | Total scenarios processed: 2                                                              |
+          | Level | Category | Content                                                                          |
+          | INFO  | mojo     | RGR Automation Plugin (gen-from-existing)                                        |
+          | INFO  | mojo     | Processing Scenario: features/login/User logs in successfully [loginHappyPath]   |
+          | INFO  | mojo     | Green: Skipped (tests already passing)                                           |
+          | INFO  | mojo     | Red: Committing                                                                  |
+          | INFO  | mojo     | Processing Scenario: features/login/User logs out successfully [logoutHappyPath] |
+          | INFO  | mojo     | Green: Skipped (tests already passing)                                           |
+          | INFO  | mojo     | Red: Committing                                                                  |
+          | INFO  | mojo     | RGR Automation Complete!                                                         |
+          | INFO  | mojo     | Total scenarios processed: 2                                                     |
       And The code-prj project target/darmok/darmok.runners.log file will be as follows
           | Level | Category | Content                                                       |
           | Any   | Any      | Any                                                           |

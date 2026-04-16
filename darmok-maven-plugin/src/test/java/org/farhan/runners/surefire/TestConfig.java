@@ -5,6 +5,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import org.farhan.common.TestObject;
+import org.farhan.mbt.maven.FakeProcess;
+import org.farhan.mbt.maven.ProcessRunner;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.ComponentScan;
@@ -52,12 +54,13 @@ public class TestConfig {
 		TestObject.properties.put("code-prj.baseDir", codePrjDir);
 		TestObject.properties.put("spec-prj.baseDir", specPrjDir);
 		TestObject.properties.put("log.dir", logDir);
-		// Redirect DarmokMojo log output outside baseDir/target/ so runCleanUp doesn't wipe it
 		System.setProperty("LOG_PATH", logDir.toString());
+		ProcessRunner.starter = pb -> new FakeProcess("", 0);
 	}
 
 	@After
 	public void cleanupTestProject() throws IOException {
+		ProcessRunner.starter = ProcessBuilder::start;
 		Path scenarioRoot = (Path) TestObject.properties.get("scenario.root");
 		if (scenarioRoot != null && Files.exists(scenarioRoot)) {
 			try (var stream = Files.walk(scenarioRoot)) {

@@ -9,7 +9,7 @@ Feature: Run RGR With Already Passing Tests
 
     Given The code-prj project scenarios-list.txt file is created as follows
           """
-          File: features/login.asciidoc
+          File: features/login
             Scenario: User logs in successfully
               Tag: loginHappyPath
           """
@@ -37,20 +37,20 @@ Feature: Run RGR With Already Passing Tests
           | State |
           | Empty |
       And The code-prj project target/darmok/darmok.mojo.log file will be as follows
-          | Level | Category | Content                                                                                 |
-          | INFO  | mojo     | RGR Automation Plugin (gen-from-existing)                                               |
-          | INFO  | mojo     | Processing Scenario: features/login.asciidoc/User logs in successfully [loginHappyPath] |
-          | DEBUG | mojo     | Added tag @loginHappyPath to file                                                       |
-          | INFO  | mojo     | Red: Running maven...                                                                   |
-          | INFO  | mojo     | Any                                                                                     |
-          | INFO  | mojo     | Green: Skipped (tests already passing)                                                  |
-          | INFO  | mojo     | Red: Committing                                                                         |
-          | INFO  | mojo     | Any                                                                                     |
-          | INFO  | mojo     | Any                                                                                     |
-          | INFO  | mojo     | Any                                                                                     |
-          | INFO  | mojo     | Any                                                                                     |
-          | INFO  | mojo     | RGR Automation Complete!                                                                |
-          | INFO  | mojo     | Total scenarios processed: 1                                                            |
+          | Level | Category | Content                                                                        |
+          | INFO  | mojo     | RGR Automation Plugin (gen-from-existing)                                      |
+          | INFO  | mojo     | Processing Scenario: features/login/User logs in successfully [loginHappyPath] |
+          | DEBUG | mojo     | Added tag @loginHappyPath to file                                              |
+          | INFO  | mojo     | Red: Running maven...                                                          |
+          | INFO  | mojo     | Any                                                                            |
+          | INFO  | mojo     | Green: Skipped (tests already passing)                                         |
+          | INFO  | mojo     | Red: Committing                                                                |
+          | INFO  | mojo     | Any                                                                            |
+          | INFO  | mojo     | Any                                                                            |
+          | INFO  | mojo     | Any                                                                            |
+          | INFO  | mojo     | Any                                                                            |
+          | INFO  | mojo     | RGR Automation Complete!                                                       |
+          | INFO  | mojo     | Total scenarios processed: 1                                                   |
       And The code-prj project target/darmok/darmok.runners.log file will be as follows
           | Level | Category | Content                                                                                                                                  |
           | DEBUG | runner   | Running: mvn org.farhan:sheep-dog-svc-maven-plugin:asciidoctor-to-uml -Dtags=loginHappyPath -Dhost=dev.sheepdog.io -DonlyChanges=true    |

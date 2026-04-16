@@ -37,6 +37,10 @@ final class LogFileHelper {
 
 	LogFileHelper(Path logFile) {
 		this.entries = parse(logFile);
+		System.err.println("[TEST] LogFileHelper parsed " + entries.size() + " entries from " + logFile);
+		for (LogEntry e : entries) {
+			System.err.println("[TEST]   " + e.level() + " [" + e.category() + "] " + e.content());
+		}
 	}
 
 	String matchAndGetLevel(HashMap<String, String> keyMap) {
@@ -83,7 +87,12 @@ final class LogFileHelper {
 		if (expected == null || TestObject.TestState.Any.name().equals(expected)) {
 			return true;
 		}
-		return expected.trim().equals(actual.trim());
+		return expected.trim().equals(normalizeCommandExtensions(actual.trim()));
+	}
+
+	private static String normalizeCommandExtensions(String s) {
+		return s.replace("mvn.cmd", "mvn")
+			.replace("claude.cmd", "claude");
 	}
 
 	private static List<LogEntry> parse(Path logFile) {

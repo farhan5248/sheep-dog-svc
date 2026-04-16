@@ -10,7 +10,7 @@ Feature: Run RGR With Tag Handling
 
     Given The code-prj project scenarios-list.txt file is created as follows
           """
-          File: features/login.asciidoc
+          File: features/login
             Scenario: User logs in successfully
               Tag: loginHappyPath
           """
@@ -42,15 +42,15 @@ Feature: Run RGR With Tag Handling
           Some description
           """
       And The code-prj project target/darmok/darmok.mojo.log file will be as follows
-          | Level | Category | Content                                                                                 |
-          | INFO  | mojo     | Processing Scenario: features/login.asciidoc/User logs in successfully [loginHappyPath] |
-          | DEBUG | mojo     | Tag @loginHappyPath already present in file                                             |
-          | INFO  | mojo     | Red: Running maven...                                                                   |
-          | INFO  | mojo     | Green: Skipped (tests already passing)                                                  |
+          | Level | Category | Content                                                                        |
+          | INFO  | mojo     | Processing Scenario: features/login/User logs in successfully [loginHappyPath] |
+          | DEBUG | mojo     | Tag @loginHappyPath already present in file                                    |
+          | INFO  | mojo     | Red: Running maven...                                                          |
+          | INFO  | mojo     | Green: Skipped (tests already passing)                                         |
 
   Scenario: The test-case has a different tag line
 
-    When the test-case already carries a tag line (for a different concern ? category, ownership, priority), the new RGR tag should be appended to that same line rather than added on a fresh line.
+    If the test-case already carries a tag line (for a different concern ? category, ownership, priority), the new RGR tag should be appended to that same line rather than added on a fresh line.
     Asciidoctor and the UML generator treat multiple tags on the same line as a set, but introduce a semantic shift if they land on separate lines.
     The intent is to preserve whatever tagging convention the author was using.
 
@@ -74,11 +74,11 @@ Feature: Run RGR With Tag Handling
           Some description
           """
       And The code-prj project target/darmok/darmok.mojo.log file will be as follows
-          | Level | Category | Content                                                                                 |
-          | INFO  | mojo     | Processing Scenario: features/login.asciidoc/User logs in successfully [loginHappyPath] |
-          | DEBUG | mojo     | Added tag @loginHappyPath to file                                                       |
-          | INFO  | mojo     | Red: Running maven...                                                                   |
-          | INFO  | mojo     | Green: Skipped (tests already passing)                                                  |
+          | Level | Category | Content                                                                        |
+          | INFO  | mojo     | Processing Scenario: features/login/User logs in successfully [loginHappyPath] |
+          | DEBUG | mojo     | Added tag @loginHappyPath to file                                              |
+          | INFO  | mojo     | Red: Running maven...                                                          |
+          | INFO  | mojo     | Green: Skipped (tests already passing)                                         |
 
   Scenario: The test-case has no tag line yet
 
@@ -105,9 +105,9 @@ Feature: Run RGR With Tag Handling
           Some description
           """
       And The code-prj project target/darmok/darmok.mojo.log file will be as follows
-          | Level | Category | Content                                                                                 |
-          | INFO  | mojo     | Processing Scenario: features/login.asciidoc/User logs in successfully [loginHappyPath] |
-          | DEBUG | mojo     | Added tag @loginHappyPath to file                                                       |
-          | INFO  | mojo     | Red: Running maven...                                                                   |
-          | INFO  | mojo     | Green: Skipped (tests already passing)                                                  |
+          | Level | Category | Content                                                                        |
+          | INFO  | mojo     | Processing Scenario: features/login/User logs in successfully [loginHappyPath] |
+          | DEBUG | mojo     | Added tag @loginHappyPath to file                                              |
+          | INFO  | mojo     | Red: Running maven...                                                          |
+          | INFO  | mojo     | Green: Skipped (tests already passing)                                         |
 

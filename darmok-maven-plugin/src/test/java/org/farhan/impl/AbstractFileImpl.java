@@ -46,6 +46,7 @@ public abstract class AbstractFileImpl extends TestObject {
 
 	public String getState(HashMap<String, String> keyMap) {
 		Path path = resolveFilePath();
+		System.err.println("[TEST] getState path=" + path + " exists=" + (path != null && Files.exists(path)));
 		if (path == null || !Files.exists(path)) {
 			return null;
 		}
@@ -58,6 +59,7 @@ public abstract class AbstractFileImpl extends TestObject {
 
 	public void setCreated(HashMap<String, String> keyMap) {
 		Path path = resolveFilePath();
+		System.err.println("[TEST] setCreated path=" + path + " stateType=" + getProperty("stateType"));
 		if (path == null) {
 			return;
 		}

@@ -50,7 +50,7 @@ Feature: Run RGR With No Scenarios
 
     Given The code-prj project scenarios-list.txt file is created as follows
           """
-          File: features/login.asciidoc
+          File: features/login
             Scenario: User logs in successfully
               Tag: NoTag
           """
@@ -59,12 +59,12 @@ Feature: Run RGR With No Scenarios
           | State |
           | Empty |
       And The code-prj project target/darmok/darmok.mojo.log file will be as follows
-          | Level | Category | Content                                                                        |
-          | INFO  | mojo     | RGR Automation Plugin (gen-from-existing)                                      |
-          | INFO  | mojo     | Processing Scenario: features/login.asciidoc/User logs in successfully [NoTag] |
-          | INFO  | mojo     | Skipping (NoTag)                                                               |
-          | INFO  | mojo     | RGR Automation Complete!                                                       |
-          | INFO  | mojo     | Total scenarios processed: 1                                                   |
+          | Level | Category | Content                                                               |
+          | INFO  | mojo     | RGR Automation Plugin (gen-from-existing)                             |
+          | INFO  | mojo     | Processing Scenario: features/login/User logs in successfully [NoTag] |
+          | INFO  | mojo     | Skipping (NoTag)                                                      |
+          | INFO  | mojo     | RGR Automation Complete!                                              |
+          | INFO  | mojo     | Total scenarios processed: 1                                          |
       And The code-prj project target/darmok/darmok.runners.log file will be as follows
           | State |
           | Empty |

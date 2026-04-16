@@ -7,33 +7,14 @@ import java.util.HashMap;
 
 import org.apache.maven.project.MavenProject;
 import org.farhan.common.TestObject;
-import org.farhan.mbt.maven.GenFromExistingMojo;
-import org.farhan.objects.maven.GenFromExistingGoal;
+import org.farhan.mbt.maven.GenFromComparisonMojo;
+import org.farhan.objects.maven.GenFromComparisonGoal;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-/**
- * Impl for the {@code gen-from-existing} Darmok goal.
- *
- * <p>
- * Programmatically instantiates {@link GenFromExistingMojo}, wires a stub
- * {@link MavenProject} pointing at the scenario's {@code code-prj} temp dir,
- * applies any buffered parameters (Stage / ModelGreen / ModelRefactor) from prior
- * setter calls, and invokes {@link GenFromExistingMojo#execute()}.
- *
- * <p>
- * Exceptions thrown by the mojo are caught and recorded in properties so that
- * failure-path Test-Cases can assert on observable log state rather than on the
- * exception itself.
- */
 @Component
 @Scope(SCOPE_CUCUMBER_GLUE)
-public class GenFromExistingGoalImpl extends TestObject implements GenFromExistingGoal {
-
-	@Override
-	public void setExecuted(HashMap<String, String> keyMap) {
-		execute();
-	}
+public class GenFromComparisonGoalImpl extends TestObject implements GenFromComparisonGoal {
 
 	@Override
 	public void setExecutedWith(HashMap<String, String> keyMap) {
@@ -41,8 +22,8 @@ public class GenFromExistingGoalImpl extends TestObject implements GenFromExisti
 	}
 
 	@Override
-	public void setStage(HashMap<String, String> keyMap) {
-		setProperty("Stage", keyMap.get("Stage"));
+	public void setModelComparison(HashMap<String, String> keyMap) {
+		setProperty("ModelComparison", keyMap.get("ModelComparison"));
 	}
 
 	@Override
@@ -58,16 +39,15 @@ public class GenFromExistingGoalImpl extends TestObject implements GenFromExisti
 	private void execute() {
 		Path codePrjDir = (Path) getProperty("code-prj.baseDir");
 		if (codePrjDir == null) {
-			throw new IllegalStateException("code-prj.baseDir not set — TestConfig @Before didn't run?");
+			throw new IllegalStateException("code-prj.baseDir not set");
 		}
 
 		MavenProject project = new MavenProject();
 		project.setArtifactId("code-prj");
 
-		GenFromExistingMojo mojo = new GenFromExistingMojo();
+		GenFromComparisonMojo mojo = new GenFromComparisonMojo();
 		mojo.project = project;
 		mojo.setBaseDir(codePrjDir.toString());
-		// @Parameter defaults — applied manually because Maven's plugin framework isn't injecting them in this test harness
 		mojo.specsDir = "../../spec-prj";
 		mojo.asciidocDir = "../../spec-prj/src/test/resources/asciidoc/specs";
 		mojo.scenariosFile = "scenarios-list.txt";
@@ -80,8 +60,8 @@ public class GenFromExistingGoalImpl extends TestObject implements GenFromExisti
 		mojo.retryWaitSeconds = 30;
 		mojo.stage = true;
 		mojo.onlyChanges = true;
-		if (getProperty("Stage") != null) {
-			mojo.stage = Boolean.parseBoolean(getProperty("Stage").toString());
+		if (getProperty("ModelComparison") != null) {
+			mojo.modelComparison = getProperty("ModelComparison").toString();
 		}
 		if (getProperty("ModelGreen") != null) {
 			mojo.modelGreen = getProperty("ModelGreen").toString();
