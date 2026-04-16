@@ -5,6 +5,7 @@ temp/*.*
 .venv/*
 **/log.txt
 **/target
+!**/src-gen/**/target
 **/.gradle
 **/build
 **/out
