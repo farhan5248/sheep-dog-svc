@@ -17,7 +17,7 @@
 		<project.build.sourceEncoding>
 			UTF-8</project.build.sourceEncoding>
 		<java.version>21</java.version>
-		<sheep-dog-grammar.version>1.55</sheep-dog-grammar.version>
+		<sheep-dog-grammar.version>1.56-SNAPSHOT</sheep-dog-grammar.version>
 		<sheepdog.namespace>dev</sheepdog.namespace>
 		<sheepdog.host>${sheepdog.namespace}.sheepdog.io</sheepdog.host>
 		<argLine>-XX:+EnableDynamicAgentLoading</argLine>
