@@ -23,9 +23,7 @@ Feature: Run RGR Full Cycle
           
           Some description
           """
-      And The code-prj project src/main/java/org/farhan/objects/LoginHappyPath.java file is created as follows
-          | State  |
-          | Absent |
+      And The code-prj project src/main/java/org/farhan/objects/LoginHappyPath.java file isn't created
 
   Scenario: Red fails, green and refactor succeed, one commit per phase
 

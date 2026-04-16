@@ -11,9 +11,14 @@ public class CodePrjLoginHappyPathJavaFileSteps extends TestSteps {
         super(object, "code-prj", "src/main/java/org/farhan/objects/LoginHappyPath.java");
     }
 
-    @Given("^The code-prj project src/main/java/org/farhan/objects/LoginHappyPath.java file is created as follows$")
-    public void isCreatedAsFollows(DataTable dataTable) {
-        object.setVertexStep("", "", "is", "created as follows", dataTable);
+    @Given("^The code-prj project src/main/java/org/farhan/objects/LoginHappyPath.java file is created$")
+    public void isCreated() {
+        object.setVertexStep("", "", "is", "created");
+    }
+
+    @Given("^The code-prj project src/main/java/org/farhan/objects/LoginHappyPath.java file isn't created$")
+    public void isntCreated() {
+        object.setVertexStep("", "", "isn't", "created");
     }
 
     @Given("^The code-prj project src/main/java/org/farhan/objects/LoginHappyPath.java file will be as follows$")

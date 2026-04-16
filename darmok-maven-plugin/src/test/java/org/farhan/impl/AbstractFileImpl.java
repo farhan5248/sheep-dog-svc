@@ -56,6 +56,30 @@ public abstract class AbstractFileImpl extends TestObject {
 		}
 	}
 
+	public void setCreated(HashMap<String, String> keyMap) {
+		Path path = resolveFilePath();
+		if (path == null) {
+			return;
+		}
+		String stateType = (String) getProperty("stateType");
+		if ("isn't".equals(stateType)) {
+			try {
+				Files.deleteIfExists(path);
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		} else {
+			try {
+				Files.createDirectories(path.getParent());
+				if (!Files.exists(path)) {
+					Files.writeString(path, "placeholder");
+				}
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		}
+	}
+
 	public void setCreatedAsFollows(HashMap<String, String> keyMap) {
 		// heredoc handled by setContent
 	}

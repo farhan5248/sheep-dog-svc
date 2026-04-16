@@ -15,6 +15,11 @@ public class SpecPrjProcessDarmokAsciidocFileSteps extends TestSteps {
         object.setVertexStep("", "", "is", "created as follows", docString);
     }
 
+    @Given("^The spec-prj project src/test/resources/asciidoc/specs/ProcessDarmok.asciidoc file isn't created$")
+    public void isntCreated() {
+        object.setVertexStep("", "", "isn't", "created");
+    }
+
     @Given("^The spec-prj project src/test/resources/asciidoc/specs/ProcessDarmok.asciidoc file will be created as follows$")
     public void willBeCreatedAsFollows(String docString) {
         object.assertVertexStep("", "", "will be", "created as follows", docString);

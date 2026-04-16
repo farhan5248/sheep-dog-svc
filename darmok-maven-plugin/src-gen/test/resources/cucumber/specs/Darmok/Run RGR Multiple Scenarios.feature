@@ -16,12 +16,8 @@ Feature: Run RGR Multiple Scenarios
             Scenario: User logs out successfully
               Tag: logoutHappyPath
           """
-      And The code-prj project src/main/java/org/farhan/objects/LoginHappyPath.java file is created as follows
-          | State   |
-          | Present |
-      And The code-prj project src/main/java/org/farhan/objects/LogoutHappyPath.java file is created as follows
-          | State   |
-          | Present |
+      And The code-prj project src/main/java/org/farhan/objects/LoginHappyPath.java file is created
+      And The code-prj project src/main/java/org/farhan/objects/LogoutHappyPath.java file is created
      When The maven plugin gen-from-existing goal is executed
      Then The code-prj project scenarios-list.txt file will be as follows
           | State |

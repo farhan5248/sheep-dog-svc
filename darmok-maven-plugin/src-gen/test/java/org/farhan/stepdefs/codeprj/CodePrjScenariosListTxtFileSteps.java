@@ -16,6 +16,16 @@ public class CodePrjScenariosListTxtFileSteps extends TestSteps {
         object.setVertexStep("", "", "is", "created as follows", docString);
     }
 
+    @Given("^The code-prj project scenarios-list.txt file is created without any scenarios$")
+    public void isCreatedWithoutAnyScenarios() {
+        object.setVertexStep("", "", "is", "created without any scenarios");
+    }
+
+    @Given("^The code-prj project scenarios-list.txt file isn't created$")
+    public void isntCreated() {
+        object.setVertexStep("", "", "isn't", "created");
+    }
+
     @Given("^The code-prj project scenarios-list.txt file will be as follows$")
     public void willBeAsFollows(DataTable dataTable) {
         object.assertVertexStep("", "", "will be", "as follows", dataTable);

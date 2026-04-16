@@ -4,9 +4,7 @@ import java.util.HashMap;
 
 public interface LoginHappyPathJavaFile {
 
-    public void setCreatedAsFollows(HashMap<String, String> keyMap);
-
-    public void setState(HashMap<String, String> keyMap);
+    public void setCreated(HashMap<String, String> keyMap);
 
     public String getAsFollows(HashMap<String, String> keyMap);
 

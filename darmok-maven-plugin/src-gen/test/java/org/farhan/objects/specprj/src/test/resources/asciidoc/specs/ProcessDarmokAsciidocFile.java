@@ -8,6 +8,8 @@ public interface ProcessDarmokAsciidocFile {
 
     public void setContent(HashMap<String, String> keyMap);
 
+    public void setCreated(HashMap<String, String> keyMap);
+
     public String getCreatedAsFollows(HashMap<String, String> keyMap);
 
     public String getContent(HashMap<String, String> keyMap);

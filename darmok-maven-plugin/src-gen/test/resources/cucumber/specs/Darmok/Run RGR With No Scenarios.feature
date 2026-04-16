@@ -11,9 +11,7 @@ Feature: Run RGR With No Scenarios
     This lets a CI workflow run the goal unconditionally on every push without needing a guard for first-time invocations.
     The goal prints the banner, cleans up, finds no entries, and completes with zero scenarios processed.
 
-    Given The code-prj project scenarios-list.txt file is created as follows
-          | State  |
-          | Absent |
+    Given The code-prj project scenarios-list.txt file isn't created
      When The maven plugin gen-from-existing goal is executed
      Then The code-prj project scenarios-list.txt file will be as follows
           | State  |
@@ -31,9 +29,7 @@ Feature: Run RGR With No Scenarios
     Darmok should treat it the same as a missing file: parse yields zero entries, nothing to do, complete cleanly.
     This keeps re-runs idempotent once the backlog drains.
 
-    Given The code-prj project scenarios-list.txt file is created as follows
-          | State |
-          | Empty |
+    Given The code-prj project scenarios-list.txt file is created without any scenarios
      When The maven plugin gen-from-existing goal is executed
      Then The code-prj project scenarios-list.txt file will be as follows
           | State |
