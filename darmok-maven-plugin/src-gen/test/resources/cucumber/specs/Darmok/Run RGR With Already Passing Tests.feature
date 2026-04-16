@@ -38,13 +38,8 @@ Feature: Run RGR With Already Passing Tests
           | INFO  | mojo     | Processing Scenario: ProcessDarmok/User logs in successfully [loginHappyPath] |
           | DEBUG | mojo     | Added tag @loginHappyPath to file                                             |
           | INFO  | mojo     | Red: Running maven...                                                         |
-          | INFO  | mojo     | Any                                                                           |
           | INFO  | mojo     | Green: Skipped (tests already passing)                                        |
           | INFO  | mojo     | Red: Committing                                                               |
-          | INFO  | mojo     | Any                                                                           |
-          | INFO  | mojo     | Any                                                                           |
-          | INFO  | mojo     | Any                                                                           |
-          | INFO  | mojo     | Any                                                                           |
           | INFO  | mojo     | RGR Automation Complete!                                                      |
           | INFO  | mojo     | Total scenarios processed: 1                                                  |
       And The code-prj project target/darmok/darmok.runners.log file will be as follows

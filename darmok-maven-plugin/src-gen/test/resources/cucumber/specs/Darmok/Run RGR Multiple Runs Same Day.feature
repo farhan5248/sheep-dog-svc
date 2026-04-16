@@ -27,7 +27,6 @@ Feature: Run RGR Multiple Runs Same Day
           | INFO  | mojo     | Total scenarios processed: 0                                                  |
           | INFO  | mojo     | RGR Automation Plugin (gen-from-existing)                                     |
           | INFO  | mojo     | Processing Scenario: ProcessDarmok/User logs in successfully [loginHappyPath] |
-          | INFO  | mojo     | Any                                                                           |
           | INFO  | mojo     | RGR Automation Complete!                                                      |
           | INFO  | mojo     | Total scenarios processed: 1                                                  |
 

@@ -33,12 +33,8 @@ Feature: Run RGR Multiple Scenarios
           | INFO  | mojo     | Total scenarios processed: 2                                                    |
       And The code-prj project target/darmok/darmok.runners.log file will be as follows
           | Level | Category | Content                                                       |
-          | Any   | Any      | Any                                                           |
           | DEBUG | runner   | Running: mvn test -Dtest=loginHappyPathTest                   |
-          | Any   | Any      | Any                                                           |
           | DEBUG | runner   | Running: git commit -m run-rgr red User logs in successfully  |
-          | Any   | Any      | Any                                                           |
           | DEBUG | runner   | Running: mvn test -Dtest=logoutHappyPathTest                  |
-          | Any   | Any      | Any                                                           |
           | DEBUG | runner   | Running: git commit -m run-rgr red User logs out successfully |
 

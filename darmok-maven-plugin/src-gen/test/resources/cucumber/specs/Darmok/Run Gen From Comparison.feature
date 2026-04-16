@@ -40,27 +40,16 @@ Feature: Run Gen From Comparison
           | INFO  | mojo     | Processing Scenario: ProcessDarmok/User logs in successfully [loginHappyPath] |
           | DEBUG | mojo     | Added tag @loginHappyPath to file                                             |
           | INFO  | mojo     | Red: Running maven...                                                         |
-          | INFO  | mojo     | Any                                                                           |
           | INFO  | mojo     | Red: Committing                                                               |
           | INFO  | mojo     | Green: Running...                                                             |
-          | INFO  | mojo     | Any                                                                           |
           | INFO  | mojo     | Green: Committing                                                             |
           | INFO  | mojo     | Refactor: Running...                                                          |
-          | INFO  | mojo     | Any                                                                           |
           | INFO  | mojo     | Refactor: Committing                                                          |
-          | INFO  | mojo     | Any                                                                           |
-          | INFO  | mojo     | Any                                                                           |
-          | INFO  | mojo     | Any                                                                           |
-          | INFO  | mojo     | Any                                                                           |
           | INFO  | mojo     | RGR Automation Complete!                                                      |
           | INFO  | mojo     | Total scenarios processed: 1                                                  |
       And The code-prj project target/darmok/darmok.runners.log file will be as follows
           | Level | Category | Content                                                                                                      |
-          | Any   | Any      | Any                                                                                                          |
           | DEBUG | runner   | Executing: claude --print --dangerously-skip-permissions --model sonnet /rgr-gen-from-comparison darmok-prj  |
-          | Any   | Any      | Any                                                                                                          |
           | DEBUG | runner   | Executing: claude --print --dangerously-skip-permissions --model sonnet /rgr-green darmok-prj loginHappyPath |
-          | Any   | Any      | Any                                                                                                          |
           | DEBUG | runner   | Executing: claude --print --dangerously-skip-permissions --model sonnet /rgr-refactor forward darmok-prj     |
-          | Any   | Any      | Any                                                                                                          |
 
