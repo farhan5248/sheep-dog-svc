@@ -361,7 +361,7 @@
 			<plugin>
 				<groupId>org.farhan</groupId>
 				<artifactId>sheep-dog-mgmt-maven-plugin</artifactId>
-				<version>1.41</version>
+				<version>1.42</version>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
