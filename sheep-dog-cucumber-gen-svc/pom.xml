@@ -227,7 +227,7 @@
 			<plugin>
 				<groupId>org.farhan</groupId>
 				<artifactId>sheep-dog-svc-maven-plugin</artifactId>
-				<version>1.10</version>
+				<version>1.13</version>
 			</plugin>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
@@ -367,7 +367,7 @@
 			<plugin>
 				<groupId>org.farhan</groupId>
 				<artifactId>sheep-dog-mgmt-maven-plugin</artifactId>
-				<version>1.39</version>
+				<version>1.41</version>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
