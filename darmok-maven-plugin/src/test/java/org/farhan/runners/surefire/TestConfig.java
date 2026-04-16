@@ -44,11 +44,16 @@ public class TestConfig {
 		Path scenarioRoot = Files.createTempDirectory("darmok-spec-");
 		Path codePrjDir = scenarioRoot.resolve("sheep-dog-svc").resolve("code-prj");
 		Path specPrjDir = scenarioRoot.resolve("spec-prj");
+		Path logDir = scenarioRoot.resolve("logs");
 		Files.createDirectories(codePrjDir);
 		Files.createDirectories(specPrjDir);
+		Files.createDirectories(logDir);
 		TestObject.properties.put("scenario.root", scenarioRoot);
 		TestObject.properties.put("code-prj.baseDir", codePrjDir);
 		TestObject.properties.put("spec-prj.baseDir", specPrjDir);
+		TestObject.properties.put("log.dir", logDir);
+		// Redirect DarmokMojo log output outside baseDir/target/ so runCleanUp doesn't wipe it
+		System.setProperty("LOG_PATH", logDir.toString());
 	}
 
 	@After

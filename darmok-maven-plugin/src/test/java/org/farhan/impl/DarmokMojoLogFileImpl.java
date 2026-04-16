@@ -30,11 +30,14 @@ public class DarmokMojoLogFileImpl extends AbstractFileImpl implements DarmokMoj
 
 	@Override
 	protected Path resolveFilePath() {
-		Object baseDir = getProperty(component + ".baseDir");
-		if (baseDir == null) {
-			return null;
+		Path logDir = (Path) getProperty("log.dir");
+		if (logDir == null) {
+			Object baseDir = getProperty(component + ".baseDir");
+			if (baseDir == null) {
+				return null;
+			}
+			logDir = ((Path) baseDir).resolve("target").resolve("darmok");
 		}
-		Path logDir = ((Path) baseDir).resolve("target").resolve("darmok");
 		return findDatedLog(logDir, "darmok.mojo");
 	}
 

@@ -67,6 +67,19 @@ public class GenFromExistingGoalImpl extends TestObject implements GenFromExisti
 		GenFromExistingMojo mojo = new GenFromExistingMojo();
 		mojo.project = project;
 		mojo.setBaseDir(codePrjDir.toString());
+		// @Parameter defaults — applied manually because Maven's plugin framework isn't injecting them in this test harness
+		mojo.specsDir = "../../sheep-dog-specs/sheep-dog-features";
+		mojo.asciidocDir = "../../sheep-dog-specs/sheep-dog-features/src/test/resources/asciidoc/specs";
+		mojo.scenariosFile = "scenarios-list.txt";
+		mojo.host = "dev.sheepdog.io";
+		mojo.modelRed = "sonnet";
+		mojo.modelGreen = "sonnet";
+		mojo.modelRefactor = "sonnet";
+		mojo.coAuthor = "Claude Sonnet 4.5 <noreply@anthropic.com>";
+		mojo.maxRetries = 3;
+		mojo.retryWaitSeconds = 30;
+		mojo.stage = true;
+		mojo.onlyChanges = true;
 		if (getProperty("Stage") != null) {
 			mojo.stage = Boolean.parseBoolean(getProperty("Stage").toString());
 		}

@@ -89,7 +89,10 @@ public abstract class DarmokMojo extends AbstractMojo {
 	}
 
 	private Path resolveLogDir() {
-		String logPath = System.getenv("LOG_PATH");
+		String logPath = System.getProperty("LOG_PATH");
+		if (logPath == null || logPath.isEmpty()) {
+			logPath = System.getenv("LOG_PATH");
+		}
 		if (logPath != null && !logPath.isEmpty()) {
 			return Path.of(logPath);
 		}
