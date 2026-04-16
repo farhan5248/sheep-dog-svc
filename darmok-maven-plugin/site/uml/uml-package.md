@@ -56,15 +56,6 @@
 
 **Desc**: Test object implementations that bridge Cucumber step definitions to file system and Maven goal operations. Each impl class handles a specific test artifact type.
 
-### AbstractFileImpl
-
-**Desc**: Abstract base for file-oriented test object implementations. Provides shared file state assertion and content manipulation logic.
-
-**Rule**: ONE class matches AbstractFileImpl pattern
-
-**Regex**: `^AbstractFileImpl$`
- - `AbstractFileImpl`
-
 ### {ObjectName}{ObjectType}Impl
 
 **Desc**: Test object implementation that bridges Cucumber step definitions to file system or Maven goal operations. File types assert file state and content; Goal types configure and execute Mojo instances.

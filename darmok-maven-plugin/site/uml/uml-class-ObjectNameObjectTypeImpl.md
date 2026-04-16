@@ -2,11 +2,11 @@
 
 **Directory**: `src/test/java/org/farhan/impl`
 
-Test object implementation that bridges Cucumber step definitions to file system or Maven goal operations. File types extend AbstractFileImpl and assert file state/content. Goal types extend TestObject, buffer parameters via setters, then execute the Mojo. Log file types use MojoLog for structured log matching.
+Test object implementation that bridges Cucumber step definitions to file system or Maven goal operations. File types extend MavenTestObject and assert file state/content. Goal types extend TestObject, buffer parameters via setters, then execute the Mojo. Log file types use MojoLog for structured log matching.
 
 ## get{StateDesc}
 
-**Desc**: Returns observable state for assertion. File impls delegate to AbstractFileImpl.getState or read content directly. Log file impls delegate to MojoLog.matchAndGet{Field}. Goal impls are not expected to have getters.
+**Desc**: Returns observable state for assertion. File impls delegate to MavenTestObject.getState or read content directly. Log file impls delegate to MojoLog.matchAndGet{Field}. Goal impls are not expected to have getters.
 
 **Rule**: SOME method names follow get{StateDesc} pattern.
  - **Name**: `^get{StateDesc}$`
@@ -23,7 +23,7 @@ Test object implementation that bridges Cucumber step definitions to file system
 
 ## set{StateDesc}
 
-**Desc**: Mutates state or triggers action. File impls delegate to AbstractFileImpl or write content. Goal impls buffer parameters (setStage, setModelGreen, etc.) then execute the Mojo on setExecuted/setExecutedWith.
+**Desc**: Mutates state or triggers action. File impls delegate to MavenTestObject or write content. Goal impls buffer parameters (setStage, setModelGreen, etc.) then execute the Mojo on setExecuted/setExecutedWith.
 
 **Rule**: SOME method names follow set{StateDesc} pattern.
  - **Name**: `^set{StateDesc}$`

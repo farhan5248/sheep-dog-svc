@@ -28,6 +28,19 @@ Complete mojo log — writes timestamped, structured entries to file while deleg
 **Examples**:
  - `public MojoLog(Path logFile)`
 
+## getLogFile
+
+**Desc**: Returns the log file path for this MojoLog instance.
+
+**Rule**: ONE method name follows getLogFile pattern.
+ - **Name**: `^getLogFile$`
+ - **Return**: `^Path$`
+ - **Parameters**: `^\(\)$`
+ - **Modifier**: `^public$`
+
+**Examples**:
+ - `public Path getLogFile()`
+
 ## findDatedLog
 
 **Desc**: Finds a dated log file in a directory by prefix. Returns the first matching file or a default path.

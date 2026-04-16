@@ -2,52 +2,48 @@ package org.farhan.impl;
 
 import static io.cucumber.spring.CucumberTestContext.SCOPE_CUCUMBER_GLUE;
 
-import java.nio.file.Path;
 import java.util.HashMap;
 
-import org.farhan.mbt.maven.MojoLog;
+import org.farhan.common.MavenTestObject;
 import org.farhan.objects.codeprj.target.darmok.DarmokMojoLogFile;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 @Component
 @Scope(SCOPE_CUCUMBER_GLUE)
-public class DarmokMojoLogFileImpl extends AbstractFileImpl implements DarmokMojoLogFile {
+public class DarmokMojoLogFileImpl extends MavenTestObject implements DarmokMojoLogFile {
 
-	private MojoLog mojoLog;
-
-	private MojoLog mojoLog() {
-		if (mojoLog == null) {
-			mojoLog = new MojoLog(resolveFilePath());
+	@Override
+	public String getAsFollows(HashMap<String, String> keyMap) {
+		String stateType = (String) getProperty("stateType");
+		if ("won't be".equals(stateType)) {
+			return null;
 		}
-		return mojoLog;
+		return getMojoLog("darmok.mojo") != null ? "present" : null;
 	}
 
 	@Override
-	public Path resolveFilePath() {
-		Path logDir = (Path) getProperty("log.dir");
-		if (logDir == null) {
-			Object baseDir = getProperty(component + ".baseDir");
-			if (baseDir == null) {
-				return null;
-			}
-			logDir = ((Path) baseDir).resolve("target").resolve("darmok");
-		}
-		return MojoLog.findDatedLog(logDir, "darmok.mojo");
+	public String getState(HashMap<String, String> keyMap) {
+		return getFileState(getMojoLog("darmok.mojo").getLogFile());
+	}
+
+	@Override
+	public String getPresent(HashMap<String, String> keyMap) {
+		return getState(keyMap);
 	}
 
 	@Override
 	public String getLevel(HashMap<String, String> keyMap) {
-		return mojoLog().matchAndGetLevel(keyMap);
+		return getMojoLog("darmok.mojo").matchAndGetLevel(keyMap);
 	}
 
 	@Override
 	public String getCategory(HashMap<String, String> keyMap) {
-		return mojoLog().matchAndGetCategory(keyMap);
+		return getMojoLog("darmok.mojo").matchAndGetCategory(keyMap);
 	}
 
 	@Override
 	public String getContent(HashMap<String, String> keyMap) {
-		return mojoLog().matchAndGetContent(keyMap);
+		return getMojoLog("darmok.mojo").matchAndGetContent(keyMap);
 	}
 }

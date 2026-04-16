@@ -51,6 +51,10 @@ public class MojoLog implements Log, Closeable {
 		this.writer = null;
 	}
 
+	public Path getLogFile() {
+		return logFile;
+	}
+
 	public static Path findDatedLog(Path logDir, String prefix) {
 		if (!Files.isDirectory(logDir)) {
 			return logDir.resolve(prefix + ".log");

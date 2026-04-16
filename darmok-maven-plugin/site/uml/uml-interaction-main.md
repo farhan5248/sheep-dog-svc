@@ -382,6 +382,17 @@ public int run(String workingDirectory, String... args) throws Exception {
 
 ## MojoLog
 
+### getLogFile
+
+Returns the log file path for this MojoLog instance.
+
+**Example: getLogFile method body**
+```java
+public Path getLogFile() {
+    return logFile;
+}
+```
+
 ### findDatedLog
 
 Finds a dated log file by prefix in a directory.

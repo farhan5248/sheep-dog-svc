@@ -5,10 +5,12 @@ import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
 import java.util.Properties;
 
 import org.apache.maven.project.MavenProject;
 import org.farhan.mbt.maven.DarmokMojo;
+import org.farhan.mbt.maven.MojoLog;
 
 public class MavenTestObject extends TestObject {
 
@@ -82,6 +84,62 @@ public class MavenTestObject extends TestObject {
 			}
 		}
 		throw new NoSuchFieldException(fieldName);
+	}
+
+	public String getAsFollows(HashMap<String, String> keyMap) {
+		String stateType = (String) getProperty("stateType");
+		if ("won't be".equals(stateType)) {
+			return null;
+		}
+		Path path = resolveFilePath();
+		return path == null ? null : path.toString();
+	}
+
+	public String getPresent(HashMap<String, String> keyMap) {
+		return getState(keyMap);
+	}
+
+	public String getEmpty(HashMap<String, String> keyMap) {
+		return getState(keyMap);
+	}
+
+	public String getAbsent(HashMap<String, String> keyMap) {
+		return getState(keyMap);
+	}
+
+	public String getState(HashMap<String, String> keyMap) {
+		return getFileState(resolveFilePath());
+	}
+
+	public void setCreated(HashMap<String, String> keyMap) {
+		createFile(resolveFilePath(), (String) getProperty("stateType"));
+	}
+
+	public void setCreatedAsFollows(HashMap<String, String> keyMap) {
+		// heredoc handled by setContent
+	}
+
+	public void setContent(HashMap<String, String> keyMap) {
+		writeFile(resolveFilePath(), keyMap.get("Content"));
+	}
+
+	public MojoLog getMojoLog(String prefix) {
+		String cacheKey = "mojoLog." + prefix;
+		Object cached = getProperty(cacheKey);
+		if (cached instanceof MojoLog) {
+			return (MojoLog) cached;
+		}
+		Path logDir = (Path) getProperty("log.dir");
+		if (logDir == null) {
+			Object baseDir = getProperty(component + ".baseDir");
+			if (baseDir == null) {
+				return null;
+			}
+			logDir = ((Path) baseDir).resolve("target").resolve("darmok");
+		}
+		MojoLog mojoLog = new MojoLog(MojoLog.findDatedLog(logDir, prefix));
+		setProperty(cacheKey, mojoLog);
+		return mojoLog;
 	}
 
 	public Path resolveFilePath() {

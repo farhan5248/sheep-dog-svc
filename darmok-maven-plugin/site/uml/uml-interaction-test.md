@@ -57,39 +57,42 @@ public void cleanupTestProject() throws IOException {
 
 ### get{StateDesc}
 
-Returns observable state for assertion. File impls delegate to AbstractFileImpl. Log impls delegate to MojoLog. Goal impls are not expected to have getters.
+Returns observable state for assertion. Each impl delegates to MavenTestObject helpers. Log impls use getMojoLog(). File impls use getState()/getFileState().
 
 **Example: Log column delegation (DarmokMojoLogFileImpl)**
 ```java
 @Override
 public String getLevel(HashMap<String, String> keyMap) {
-    return helper().matchAndGetLevel(keyMap);
+    return getMojoLog("darmok.mojo").matchAndGetLevel(keyMap);
 }
 ```
 
-**Example: File content read (ProcessDarmokAsciidocFileImpl)**
+**Example: File state delegation (ScenariosListTxtFileImpl)**
+```java
+@Override
+public String getEmpty(HashMap<String, String> keyMap) {
+    return getState(keyMap);
+}
+```
+
+**Example: File content (ProcessDarmokAsciidocFileImpl)**
 ```java
 @Override
 public String getContent(HashMap<String, String> keyMap) {
-    Path path = resolveFilePath();
-    if (path == null || !Files.exists(path)) return null;
-    try {
-        return Files.readString(path).trim();
-    } catch (IOException e) {
-        return null;
-    }
+    String content = getState(keyMap);
+    return content != null ? content.trim() : null;
 }
 ```
 
 ### set{StateDesc}
 
-Mutates state or triggers action. Goal impls buffer parameters then execute. File impls delegate to AbstractFileImpl or write content.
+Mutates state or triggers action. Goal impls buffer parameters then call executeMojo(). File impls delegate to createFile()/writeFile().
 
 **Example: Parameter buffering (GenFromExistingGoalImpl)**
 ```java
 @Override
 public void setStage(HashMap<String, String> keyMap) {
-    setProperty("Stage", keyMap.get("Stage"));
+    setProperty("stage", keyMap.get("Stage"));
 }
 ```
 
@@ -97,87 +100,22 @@ public void setStage(HashMap<String, String> keyMap) {
 ```java
 @Override
 public void setExecuted(HashMap<String, String> keyMap) {
-    Path codePrjDir = (Path) getProperty("code-prj.baseDir");
-    MavenProject project = new MavenProject();
-    project.setArtifactId("code-prj");
-    GenFromExistingMojo mojo = new GenFromExistingMojo();
-    mojo.project = project;
-    mojo.setBaseDir(codePrjDir.toString());
-    // ... wire @Parameter defaults, apply buffered properties ...
-    try {
-        mojo.execute();
-        setProperty("goal.exception", null);
-    } catch (Exception e) {
-        setProperty("goal.exception", e);
-    }
+    executeMojo(GenFromExistingMojo.class);
 }
 ```
 
-**Example: Custom file setup (ScenariosListTxtFileImpl)**
+**Example: File creation (LogoutHappyPathJavaFileImpl)**
+```java
+@Override
+public void setCreated(HashMap<String, String> keyMap) {
+    createFile(resolveFilePath(), (String) getProperty("stateType"));
+}
+```
+
+**Example: File content write (ScenariosListTxtFileImpl)**
 ```java
 @Override
 public void setCreatedWithoutAnyScenarios(HashMap<String, String> keyMap) {
-    Path path = resolveFilePath();
-    if (path == null) return;
-    try {
-        Files.createDirectories(path.getParent());
-        Files.writeString(path, "");
-    } catch (IOException e) {
-        throw new RuntimeException(e);
-    }
+    writeFile(resolveFilePath(), "");
 }
 ```
-
-## AbstractFileImpl
-
-### resolveFilePath
-
-Combines component baseDir property with the object path.
-
-**Example: Default path resolution**
-```java
-protected Path resolveFilePath() {
-    Object baseDir = getProperty(component + ".baseDir");
-    if (baseDir == null) return null;
-    return ((Path) baseDir).resolve(object);
-}
-```
-
-### get{StateDesc}
-
-Returns file state for assertion. getState returns null (Absent), "" (Empty), or content (Present). getPresent/getEmpty/getAbsent delegate to getState.
-
-**Example: State reading (getState)**
-```java
-public String getState(HashMap<String, String> keyMap) {
-    Path path = resolveFilePath();
-    if (path == null || !Files.exists(path)) return null;
-    try {
-        return Files.readString(path);
-    } catch (IOException e) {
-        return null;
-    }
-}
-```
-
-### set{StateDesc}
-
-Creates or deletes file based on stateType property.
-
-**Example: Conditional create/delete (setCreated)**
-```java
-public void setCreated(HashMap<String, String> keyMap) {
-    Path path = resolveFilePath();
-    if (path == null) return;
-    String stateType = (String) getProperty("stateType");
-    if ("isn't".equals(stateType)) {
-        Files.deleteIfExists(path);
-    } else {
-        Files.createDirectories(path.getParent());
-        if (!Files.exists(path)) {
-            Files.writeString(path, "placeholder");
-        }
-    }
-}
-```
-
