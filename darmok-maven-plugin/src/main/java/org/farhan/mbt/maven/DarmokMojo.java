@@ -71,10 +71,17 @@ public abstract class DarmokMojo extends AbstractMojo {
 	// =========================================================================
 
 	void init() throws Exception {
-		baseDir = project.getBasedir().getAbsolutePath();
+		if (baseDir == null) {
+			baseDir = project.getBasedir().getAbsolutePath();
+		}
 		initLogs();
 		git = new GitRunner(runnerLog);
 		maven = new MavenRunner(runnerLog);
+	}
+
+	/** Test-only setter. Lets tests pre-seed baseDir before execute() so init() skips the MavenProject path. */
+	public void setBaseDir(String baseDir) {
+		this.baseDir = baseDir;
 	}
 
 	void cleanup() {

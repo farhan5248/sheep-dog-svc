@@ -15,7 +15,7 @@ Feature: Run RGR With Missing Asciidoc File
             Scenario: User logs in successfully
               Tag: loginHappyPath
           """
-      And The spec-prj project src/test/resources/asciidoc/specs/ProcessDarmok.asciidoc file will be as follows
+      And The spec-prj project src/test/resources/asciidoc/specs/ProcessDarmok.asciidoc file is created as follows
           | State  |
           | Absent |
      When The maven plugin gen-from-existing goal is executed

@@ -1,16 +1,12 @@
 package org.farhan.stepdefs.maven;
 
-import com.google.inject.Inject;
 import io.cucumber.datatable.DataTable;
-import io.cucumber.guice.ScenarioScoped;
 import io.cucumber.java.en.Given;
 import org.farhan.common.TestSteps;
 import org.farhan.objects.maven.GenFromExistingGoal;
 
-@ScenarioScoped
 public class MavenGenFromExistingGoalSteps extends TestSteps {
 
-    @Inject
     public MavenGenFromExistingGoalSteps(GenFromExistingGoal object) {
         super(object, "maven", "gen-from-existing");
     }

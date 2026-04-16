@@ -21,7 +21,7 @@ Feature: Run Gen From Comparison
           
           Some description
           """
-      And The code-prj project src/main/java/org/farhan/objects/LoginHappyPath.java file will be as follows
+      And The code-prj project src/main/java/org/farhan/objects/LoginHappyPath.java file is created as follows
           | State  |
           | Absent |
 

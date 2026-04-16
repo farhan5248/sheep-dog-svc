@@ -14,7 +14,7 @@ Feature: Run RGR With Tag Handling
             Scenario: User logs in successfully
               Tag: loginHappyPath
           """
-      And The code-prj project src/main/java/org/farhan/objects/LoginHappyPath.java file will be as follows
+      And The code-prj project src/main/java/org/farhan/objects/LoginHappyPath.java file is created as follows
           | State   |
           | Present |
 

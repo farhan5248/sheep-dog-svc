@@ -21,7 +21,7 @@ Feature: Run RGR With Already Passing Tests
           
           Some description
           """
-      And The code-prj project src/main/java/org/farhan/objects/LoginHappyPath.java file will be as follows
+      And The code-prj project src/main/java/org/farhan/objects/LoginHappyPath.java file is created as follows
           | State   |
           | Present |
 
