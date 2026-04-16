@@ -7,28 +7,29 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.eclipse.emf.common.util.EList;
-import org.eclipse.emf.common.util.URI;
-import org.eclipse.emf.ecore.EObject;
-import org.eclipse.emf.ecore.EStructuralFeature;
-import org.eclipse.emf.ecore.resource.Resource;
-import org.eclipse.emf.ecore.resource.impl.ResourceImpl;
-import org.farhan.dsl.grammar.SheepDogUtility;
-import org.farhan.dsl.grammar.IDescription;
-import org.farhan.dsl.grammar.IRow;
-import org.farhan.dsl.grammar.IStepDefinition;
-import org.farhan.dsl.grammar.IStepObject;
-import org.farhan.dsl.grammar.IStepParameters;
-import org.farhan.dsl.grammar.ITable;
-import org.farhan.dsl.grammar.ITestCase;
-import org.farhan.dsl.grammar.ITestData;
-import org.farhan.dsl.grammar.ITestStep;
-import org.farhan.dsl.grammar.ITestStepContainer;
-import org.farhan.dsl.grammar.ITestSuite;
+import org.farhan.dsl.grammar.ISheepDogFactory;
+import org.farhan.dsl.grammar.SheepDogFactory;
 import org.junit.jupiter.api.Assertions;
 
 import io.cucumber.datatable.DataTable;
 
+/**
+ * Common base for project-specific test scaffolding.
+ *
+ * <p>
+ * Purpose: hold shared properties and table-interpretation logic used when
+ * running Cucumber-driven tests. Projects that need cursor/path navigation
+ * extend {@link PathNavigatorTestObject} instead of this class directly.
+ *
+ * <p>
+ * Table-style interpretation supports two feature-file shapes:
+ * <ul>
+ * <li>Vertical — one value per row, single data column. Each row produces a
+ * sibling child under the same parent.</li>
+ * <li>Horizontal — one row with many columns. Each column fills a different
+ * property within the same model element.</li>
+ * </ul>
+ */
 public abstract class TestObject {
 
     public enum TestState {
@@ -45,6 +46,7 @@ public abstract class TestObject {
 
     public static void reset() {
         TestObject.properties.clear();
+        SheepDogFactory.instance = ISheepDogFactory.eINSTANCE;
     }
 
     protected static Object getProperty(String key) {
@@ -62,7 +64,6 @@ public abstract class TestObject {
     public void assertVertexStep(String partDesc, String partType, String stateType, String stateDesc) {
         putProperties(partDesc, partType, stateType, stateDesc);
         processInputOutputsStepDefinitionRef(stateDesc, "get", partDesc, partType, stateType);
-        removeProperties();
     }
 
     public void assertVertexStep(String partDesc, String partType, String stateType, String stateDesc,
@@ -70,40 +71,34 @@ public abstract class TestObject {
         putProperties(partDesc, partType, stateType, stateDesc);
         processInputOutputsStepDefinitionRef(stateDesc, "get", partDesc, partType, stateType);
         processInputOutputsTable(dataTable, "get", partDesc, partType, stateType);
-        removeProperties();
     }
 
     public void assertVertexStep(String partDesc, String partType, String stateType, String stateDesc, String text) {
         putProperties(partDesc, partType, stateType, stateDesc);
         processInputOutputsStepDefinitionRef(stateDesc, "get", partDesc, partType, stateType);
         processInputOutputsText(text, "get", partDesc, partType, stateType);
-        removeProperties();
     }
 
     public void doEdgeStep(String partDesc, String partType, String stateType, String stateDesc) {
         putProperties(partDesc, partType, stateType, stateDesc);
         processInputOutputsStepDefinitionRef(stateDesc, "set", partDesc, partType, stateType);
-        removeProperties();
     }
 
     public void doEdgeStep(String partDesc, String partType, String stateType, String stateDesc, DataTable dataTable) {
         putProperties(partDesc, partType, stateType, stateDesc);
         processInputOutputsTable(dataTable, "set", partDesc, partType, stateType);
         processInputOutputsStepDefinitionRef(stateDesc, "set", partDesc, partType, stateType);
-        removeProperties();
     }
 
     public void doEdgeStep(String partDesc, String partType, String stateType, String stateDesc, String text) {
         putProperties(partDesc, partType, stateType, stateDesc);
         processInputOutputsText(text, "set", partDesc, partType, stateType);
         processInputOutputsStepDefinitionRef(stateDesc, "set", partDesc, partType, stateType);
-        removeProperties();
     }
 
     public void setVertexStep(String partDesc, String partType, String stateType, String stateDesc) {
         putProperties(partDesc, partType, stateType, stateDesc);
         processInputOutputsStepDefinitionRef(stateDesc, "set", partDesc, partType, stateType);
-        removeProperties();
     }
 
     public void setVertexStep(String partDesc, String partType, String stateType, String stateDesc,
@@ -111,58 +106,19 @@ public abstract class TestObject {
         putProperties(partDesc, partType, stateType, stateDesc);
         processInputOutputsStepDefinitionRef(stateDesc, "set", partDesc, partType, stateType);
         processInputOutputsTable(dataTable, "set", partDesc, partType, stateType);
-        removeProperties();
     }
 
     public void setVertexStep(String partDesc, String partType, String stateType, String stateDesc, String text) {
         putProperties(partDesc, partType, stateType, stateDesc);
         processInputOutputsStepDefinitionRef(stateDesc, "set", partDesc, partType, stateType);
         processInputOutputsText(text, "set", partDesc, partType, stateType);
-        removeProperties();
     }
 
-    private String convertToPascalCase(String s) {
-        StringBuilder result = new StringBuilder();
-        for (String word : s.split("[ \\-\\(\\)/]+")) {
-            if (!word.isEmpty()) {
-                result.append(Character.toUpperCase(word.charAt(0)));
-                if (word.length() > 1) {
-                    result.append(word.substring(1));
-                }
-            }
-        }
-        return result.toString();
-    }
-
-    protected boolean createNodeDependencies(String path) {
-        try {
-            String[] parts = path.split("/");
-            Object current = SheepDogUtility.getTestDocumentParent((EObject) getProperty("cursor"));
-            int i = 0;
-            while (i < parts.length && current != null) {
-                String elementType = parts[i];
-                if (elementType.endsWith("List")) {
-                    if (i + 1 >= parts.length || !parts[i + 1].matches("\\d+")) {
-                        break;
-                    }
-                    int index = Integer.parseInt(parts[i + 1]) - 1;
-                    current = getOrCreateNode(current, elementType, index);
-                    i += 2;
-                } else {
-                    if (elementType.equals("text")) {
-                        break;
-                    }
-                    current = getOrCreateNode(current, elementType, 0);
-                    i++;
-                }
-                if (current != null)
-                    setProperty("cursor", current);
-            }
-            return true;
-        } catch (Exception e) {
-            setProperty("cursor", null);
-            return false;
-        }
+    private void putProperties(String partDesc, String partType, String stateType, String stateDesc) {
+        properties.put("partDesc", partDesc);
+        properties.put("partType", partType);
+        properties.put("stateType", stateType);
+        properties.put("stateDesc", stateDesc);
     }
 
     private void processInputOutputsStepDefinitionRef(String stateDesc, String operation, String partDesc,
@@ -230,7 +186,7 @@ public abstract class TestObject {
         for (int i = 1; i < data.size(); i++) {
             HashMap<String, String> row = new HashMap<String, String>();
             for (int j = 0; j < headers.size(); j++) {
-                row.put(headers.get(j), data.get(i).get(j));
+                row.put(headers.get(j), replaceKeyword(data.get(i).get(j)));
             }
             for (String fieldName : headers) {
                 try {
@@ -239,7 +195,7 @@ public abstract class TestObject {
                                     HashMap.class)
                             .invoke(this, row);
                     if (operation.equals("get")) {
-                        String expectedValue = replaceKeyword(row.get(fieldName));
+                        String expectedValue = row.get(fieldName);
                         if (TestState.Any.name().equals(expectedValue)) {
                             continue;
                         }
@@ -274,6 +230,7 @@ public abstract class TestObject {
 
     private void processInputOutputsText(String text, String operation, String partDesc, String partType,
             String stateType) {
+        text = replaceKeyword(text);
         boolean negativeTest = false;
         if (stateType.contentEquals("isn't") || stateType.contentEquals("won't be")) {
             negativeTest = true;
@@ -300,115 +257,30 @@ public abstract class TestObject {
         }
     }
 
-    private void putProperties(String partDesc, String partType, String stateType, String stateDesc) {
-        properties.put("partDesc", partDesc);
-        properties.put("partType", partType);
-        properties.put("stateType", stateType);
-        properties.put("stateDesc", stateDesc);
-    }
-
-    private void removeProperties() {
-        properties.remove("partDesc");
-        properties.remove("partType");
-        properties.remove("stateType");
-        properties.remove("stateDesc");
-    }
-
-    protected String toUriFragment(EObject document, String path) {
-        String documentFragment = document.eResource().getURIFragment(document);
-        if (path == null || path.isEmpty()) {
-            return documentFragment;
+    private static String replaceKeyword(String value) {
+        if (value.contentEquals(TestState.Empty.name().toLowerCase())) {
+            return "";
+        } else {
+            return value;
         }
-        StringBuilder sb = new StringBuilder(documentFragment);
-        String[] parts = path.split("/");
-        int i = 0;
-        while (i < parts.length) {
-            String segment = parts[i];
-            if (segment.endsWith("List")) {
-                if (i + 1 >= parts.length || !parts[i + 1].matches("\\d+")) {
-                    break;
-                }
-                int index = Integer.parseInt(parts[i + 1]) - 1;
-                sb.append("/@").append(segment).append(".").append(index);
-                i += 2;
-            } else {
-                sb.append("/@").append(segment);
-                i++;
-            }
-        }
-        return sb.toString();
     }
 
-    protected boolean navigateToNode(String path, boolean fallback) {
-        try {
-            EObject cursor = (EObject) getProperty("cursor");
-            EObject document = (EObject) SheepDogUtility.getTestDocumentParent(cursor);
-            if (document == null) {
-                setProperty("cursor", null);
-                return true;
-            }
-            Resource resource = document.eResource();
-            String fragment = toUriFragment(document, path);
-            EObject target = resource.getEObject(fragment);
-            if (target != null) {
-                setProperty("cursor", target);
-                return true;
-            }
-            if (fallback) {
-                String currentPath = dropLastSegment(path);
-                while (currentPath != null && !currentPath.isEmpty()) {
-                    fragment = toUriFragment(document, currentPath);
-                    target = resource.getEObject(fragment);
-                    if (target != null) {
-                        setProperty("cursor", target);
-                        return true;
-                    }
-                    currentPath = dropLastSegment(currentPath);
+    private static String convertToPascalCase(String s) {
+        StringBuilder result = new StringBuilder();
+        for (String word : s.split("[ \\-\\(\\)/]+")) {
+            if (!word.isEmpty()) {
+                result.append(Character.toUpperCase(word.charAt(0)));
+                if (word.length() > 1) {
+                    result.append(word.substring(1));
                 }
             }
-            setProperty("cursor", null);
-            return true;
-        } catch (Exception e) {
-            setProperty("cursor", null);
-            return true;
         }
+        return result.toString();
     }
 
-    private String dropLastSegment(String path) {
-        int lastSlash = path.lastIndexOf('/');
-        if (lastSlash < 0) {
-            return null;
-        }
-        String lastSegment = path.substring(lastSlash + 1);
-        String truncated = path.substring(0, lastSlash);
-        if (lastSegment.matches("\\d+")) {
-            // Index — drop the List name before it too
-            int prevSlash = truncated.lastIndexOf('/');
-            return prevSlash < 0 ? null : truncated.substring(0, prevSlash);
-        }
-        return truncated;
-    }
-
-    protected Object getChildNode(Object parent, String elementType, int index) {
-        EObject eParent = (EObject) parent;
-        EStructuralFeature feature = eParent.eClass().getEStructuralFeature(elementType);
-        if (feature == null) {
-            throw new IllegalArgumentException(
-                    "No feature '" + elementType + "' on " + eParent.eClass().getName());
-        }
-        Object value = eParent.eGet(feature);
-        if (value instanceof EList<?>) {
-            return ((EList<?>) value).get(index);
-        }
-        return value;
-    }
-
-    // === Node navigation ===
     protected String getFullNameFromPath() {
         return object.replaceFirst("^src/test/resources/[^/]+/", "");
     }
-
-    abstract protected Object getOrCreateNode(Object parent, String elementType, int index);
 
     protected String listToCsvString(List<?> list) {
         StringBuilder sb = new StringBuilder();
@@ -419,14 +291,6 @@ public abstract class TestObject {
             sb.append(list.get(i).toString());
         }
         return sb.toString();
-    }
-
-    protected String replaceKeyword(String value) {
-        if (value.contentEquals("empty")) {
-            return "";
-        } else {
-            return value;
-        }
     }
 
     protected void setComponent(String component) {
