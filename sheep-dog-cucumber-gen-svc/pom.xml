@@ -9,7 +9,7 @@
 	</parent>
 	<groupId>org.farhan</groupId>
 	<artifactId>sheep-dog-cucumber-gen-svc</artifactId>
-	<version>1.13</version>
+	<version>1.14-SNAPSHOT</version>
 	<name>Sheep Dog Cucumber Gen Service</name>
 
 	<properties>
