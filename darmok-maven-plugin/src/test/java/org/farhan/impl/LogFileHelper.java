@@ -55,7 +55,7 @@ final class LogFileHelper {
 
 	String matchAndGetContent(HashMap<String, String> keyMap) {
 		ensureMatched(keyMap);
-		return lastMatch != null ? lastMatch.content() : null;
+		return lastMatch != null ? normalizeCommandExtensions(lastMatch.content()) : null;
 	}
 
 	private void ensureMatched(HashMap<String, String> keyMap) {

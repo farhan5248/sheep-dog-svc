@@ -14,20 +14,20 @@ Feature: Run RGR Multiple Runs Same Day
     Given The maven plugin gen-from-existing goal is executed
       And The code-prj project scenarios-list.txt file is created as follows
           """
-          File: features/login
+          File: ProcessDarmok
             Scenario: User logs in successfully
               Tag: loginHappyPath
           """
       And The code-prj project src/main/java/org/farhan/objects/LoginHappyPath.java file is created
      When The maven plugin gen-from-existing goal is executed
      Then The code-prj project target/darmok/darmok.mojo.log file will be as follows
-          | Level | Category | Content                                                                        |
-          | INFO  | mojo     | RGR Automation Plugin (gen-from-existing)                                      |
-          | INFO  | mojo     | RGR Automation Complete!                                                       |
-          | INFO  | mojo     | Total scenarios processed: 0                                                   |
-          | INFO  | mojo     | RGR Automation Plugin (gen-from-existing)                                      |
-          | INFO  | mojo     | Processing Scenario: features/login/User logs in successfully [loginHappyPath] |
-          | INFO  | mojo     | Any                                                                            |
-          | INFO  | mojo     | RGR Automation Complete!                                                       |
-          | INFO  | mojo     | Total scenarios processed: 1                                                   |
+          | Level | Category | Content                                                                       |
+          | INFO  | mojo     | RGR Automation Plugin (gen-from-existing)                                     |
+          | INFO  | mojo     | RGR Automation Complete!                                                      |
+          | INFO  | mojo     | Total scenarios processed: 0                                                  |
+          | INFO  | mojo     | RGR Automation Plugin (gen-from-existing)                                     |
+          | INFO  | mojo     | Processing Scenario: ProcessDarmok/User logs in successfully [loginHappyPath] |
+          | INFO  | mojo     | Any                                                                           |
+          | INFO  | mojo     | RGR Automation Complete!                                                      |
+          | INFO  | mojo     | Total scenarios processed: 1                                                  |
 

@@ -55,7 +55,14 @@ public class TestConfig {
 		TestObject.properties.put("spec-prj.baseDir", specPrjDir);
 		TestObject.properties.put("log.dir", logDir);
 		System.setProperty("LOG_PATH", logDir.toString());
-		ProcessRunner.starter = pb -> new FakeProcess("", 0);
+		ProcessRunner.starter = pb -> {
+			// git diff --cached --quiet returns 1 when there ARE staged changes (so commitIfChanged proceeds)
+			String cmd = String.join(" ", pb.command());
+			if (cmd.contains("diff") && cmd.contains("--cached") && cmd.contains("--quiet")) {
+				return new FakeProcess("", 1);
+			}
+			return new FakeProcess("", 0);
+		};
 	}
 
 	@After

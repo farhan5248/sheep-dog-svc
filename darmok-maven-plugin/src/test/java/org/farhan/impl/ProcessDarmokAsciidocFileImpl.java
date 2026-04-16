@@ -24,7 +24,7 @@ public class ProcessDarmokAsciidocFileImpl extends AbstractFileImpl implements P
 			return null;
 		}
 		try {
-			return java.nio.file.Files.readString(path);
+			return java.nio.file.Files.readString(path).trim();
 		} catch (java.io.IOException e) {
 			return null;
 		}
