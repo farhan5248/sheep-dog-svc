@@ -7,7 +7,7 @@ Feature: Run RGR Multiple Runs Same Day
 
   Scenario: A second run on the same day appends to the existing log
 
-    The PBC report skill (`pbc-report-plantuml`) aggregates METRIC lines across all of a day's Darmok invocations to plot cycle durations over time.
+    The PBC report skill (`pbc-report-histogram`) aggregates METRIC lines across all of a day's Darmok invocations to plot cycle durations over time.
     If the second run of the day truncated the log file, the earlier run's METRIC history would be lost and the report would be misleading.
     Darmok must open the dated log in append mode so both runs' markers accumulate in one file, in chronological order.
 
