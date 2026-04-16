@@ -15,11 +15,12 @@ public class DarmokRunnersLogFileImpl extends MavenTestObject implements DarmokR
 
 	@Override
 	public String getAsFollows(HashMap<String, String> keyMap) {
+		// TODO: "won't be" guard needed until TestObject.processInputOutputsStepDefinitionRef handles negation for "as follows"
 		String stateType = (String) getProperty("stateType");
 		if ("won't be".equals(stateType)) {
 			return null;
 		}
-		return getMojoLog("darmok.runners") != null ? "present" : null;
+		return getFileState(getMojoLog("darmok.runners").getLogFile());
 	}
 
 	@Override
@@ -29,7 +30,7 @@ public class DarmokRunnersLogFileImpl extends MavenTestObject implements DarmokR
 
 	@Override
 	public String getEmpty(HashMap<String, String> keyMap) {
-		return getState(keyMap);
+		return getFileState(getMojoLog("darmok.runners").getLogFile());
 	}
 
 	@Override

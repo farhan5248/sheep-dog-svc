@@ -15,12 +15,12 @@ public class ScenariosListTxtFileImpl extends MavenTestObject implements Scenari
 
 	@Override
 	public void setCreated(HashMap<String, String> keyMap) {
-		createFile(resolveFilePath(), (String) getProperty("stateType"));
+		createOrDeleteFile(resolveFilePath());
 	}
 
 	@Override
 	public void setCreatedAsFollows(HashMap<String, String> keyMap) {
-		// heredoc handled by setContent
+		createOrDeleteFile(resolveFilePath());
 	}
 
 	@Override
@@ -35,11 +35,11 @@ public class ScenariosListTxtFileImpl extends MavenTestObject implements Scenari
 
 	@Override
 	public String getAbsent(HashMap<String, String> keyMap) {
-		return getState(keyMap);
+		return getFileState(resolveFilePath());
 	}
 
 	@Override
 	public String getEmpty(HashMap<String, String> keyMap) {
-		return getState(keyMap);
+		return getFileState(resolveFilePath());
 	}
 }

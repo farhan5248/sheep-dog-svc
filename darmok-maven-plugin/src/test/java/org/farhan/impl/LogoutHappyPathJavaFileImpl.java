@@ -15,6 +15,6 @@ public class LogoutHappyPathJavaFileImpl extends MavenTestObject implements Logo
 
 	@Override
 	public void setCreated(HashMap<String, String> keyMap) {
-		createFile(resolveFilePath(), (String) getProperty("stateType"));
+		createOrDeleteFile(resolveFilePath());
 	}
 }

@@ -15,12 +15,12 @@ public class ProcessDarmokAsciidocFileImpl extends MavenTestObject implements Pr
 
 	@Override
 	public void setCreated(HashMap<String, String> keyMap) {
-		createFile(resolveFilePath(), (String) getProperty("stateType"));
+		createOrDeleteFile(resolveFilePath());
 	}
 
 	@Override
 	public void setCreatedAsFollows(HashMap<String, String> keyMap) {
-		// heredoc handled by setContent
+		createOrDeleteFile(resolveFilePath());
 	}
 
 	@Override
@@ -30,12 +30,11 @@ public class ProcessDarmokAsciidocFileImpl extends MavenTestObject implements Pr
 
 	@Override
 	public String getCreatedAsFollows(HashMap<String, String> keyMap) {
-		return getAsFollows(keyMap);
+		return getFileState(resolveFilePath());
 	}
 
 	@Override
 	public String getContent(HashMap<String, String> keyMap) {
-		String content = getState(keyMap);
-		return content != null ? content.trim() : null;
+		return getFileContent(resolveFilePath());
 	}
 }

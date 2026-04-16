@@ -15,11 +15,11 @@ public class LoginHappyPathJavaFileImpl extends MavenTestObject implements Login
 
 	@Override
 	public void setCreated(HashMap<String, String> keyMap) {
-		createFile(resolveFilePath(), (String) getProperty("stateType"));
+		createOrDeleteFile(resolveFilePath());
 	}
 
 	@Override
 	public String getPresent(HashMap<String, String> keyMap) {
-		return getState(keyMap);
+		return getFileState(resolveFilePath());
 	}
 }
