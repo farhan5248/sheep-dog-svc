@@ -40,6 +40,10 @@ public abstract class AbstractFileImpl extends TestObject {
 	}
 
 	public String getAsFollows(HashMap<String, String> keyMap) {
+		String stateType = (String) getProperty("stateType");
+		if ("won't be".equals(stateType)) {
+			return null;
+		}
 		Path path = resolveFilePath();
 		return path == null ? null : path.toString();
 	}
