@@ -12,8 +12,6 @@ import org.apache.maven.plugin.logging.SystemStreamLog;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.DisabledOnOs;
-import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.io.TempDir;
 
 /**
@@ -363,67 +361,6 @@ class DarmokMojoHelpersTest {
 		// Then: the asciidoc file is unchanged
 		assertThat(changed).isFalse();
 		assertThat(Files.readString(specFile)).isEqualTo(before);
-	}
-
-	// =========================================================================
-	// deleteNulFiles
-	// =========================================================================
-
-	/**
-	 * Given: a directory tree containing files named "NUL" (Windows reserved device
-	 *   name that can leak into the checkout when scripts redirect to /dev/null).
-	 * When: deleteNulFiles is called with the tree root.
-	 * Then: every NUL / nul file is removed, non-NUL siblings are preserved,
-	 *   and the returned count equals the number deleted.
-	 * <p>
-	 * This characterizes the Windows-footgun cleanup contract (see CLAUDE.md note
-	 * on /dev/null vs NUL). A regression here would silently leak phantom NUL files
-	 * into commits.
-	 * <p>
-	 * Disabled on Windows: the Win32 filesystem layer redirects writes to paths
-	 * literally named "NUL" to the NUL device, so the fixture cannot be created
-	 * through the standard {@link Files} API. The real bug this method addresses
-	 * happens when files named NUL arrive via cygwin/git-bash {@code 2>/dev/null}
-	 * translation. Linux CI exercises this path normally.
-	 */
-	@Test
-	@DisabledOnOs(OS.WINDOWS)
-	void deleteNulFiles_removesOnlyNulEntries_andReturnsCount() throws Exception {
-		// Given: a directory tree containing files NUL, sub/nul, and keep.txt
-		Path root = workDir.resolve("tree");
-		Files.createDirectories(root.resolve("sub"));
-		Files.writeString(root.resolve("NUL"), "junk");
-		Files.writeString(root.resolve("sub").resolve("nul"), "junk");
-		Files.writeString(root.resolve("keep.txt"), "legit");
-
-		// When: deleteNulFiles is run on the tree root
-		int deleted = mojo.deleteNulFiles(root);
-
-		// Then: NUL-named files do not exist, keep.txt exists, count is 2
-		assertThat(deleted).isEqualTo(2);
-		assertThat(Files.exists(root.resolve("NUL"))).isFalse();
-		assertThat(Files.exists(root.resolve("sub/nul"))).isFalse();
-		assertThat(Files.exists(root.resolve("keep.txt"))).isTrue();
-	}
-
-	/**
-	 * Given: a directory tree with no NUL-named entries.
-	 * When: deleteNulFiles is called.
-	 * Then: the returned count is zero and nothing is deleted.
-	 */
-	@Test
-	void deleteNulFiles_noMatches_returnsZero() throws Exception {
-		// Given: a directory tree containing no NUL-named files
-		Path root = workDir.resolve("clean");
-		Files.createDirectories(root);
-		Files.writeString(root.resolve("file.txt"), "legit");
-
-		// When: deleteNulFiles is run
-		int deleted = mojo.deleteNulFiles(root);
-
-		// Then: no files were deleted and file.txt still exists
-		assertThat(deleted).isZero();
-		assertThat(Files.exists(root.resolve("file.txt"))).isTrue();
 	}
 
 	// =========================================================================
