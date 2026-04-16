@@ -12,7 +12,7 @@ public interface ScenariosListTxtFile {
 
     public void setCreated(HashMap<String, String> keyMap);
 
-    public String getAsFollows(HashMap<String, String> keyMap);
+    public String getAbsent(HashMap<String, String> keyMap);
 
-    public String getState(HashMap<String, String> keyMap);
+    public String getEmpty(HashMap<String, String> keyMap);
 }

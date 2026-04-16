@@ -1,6 +1,5 @@
 package org.farhan.stepdefs.codeprj;
 
-import io.cucumber.datatable.DataTable;
 import io.cucumber.java.en.Given;
 import org.farhan.common.TestSteps;
 import org.farhan.objects.codeprj.ScenariosListTxtFile;
@@ -26,8 +25,13 @@ public class CodePrjScenariosListTxtFileSteps extends TestSteps {
         object.setVertexStep("", "", "isn't", "created");
     }
 
-    @Given("^The code-prj project scenarios-list.txt file will be as follows$")
-    public void willBeAsFollows(DataTable dataTable) {
-        object.assertVertexStep("", "", "will be", "as follows", dataTable);
+    @Given("^The code-prj project scenarios-list.txt file will be absent$")
+    public void willBeAbsent() {
+        object.assertVertexStep("", "", "will be", "absent");
+    }
+
+    @Given("^The code-prj project scenarios-list.txt file will be empty$")
+    public void willBeEmpty() {
+        object.assertVertexStep("", "", "will be", "empty");
     }
 }

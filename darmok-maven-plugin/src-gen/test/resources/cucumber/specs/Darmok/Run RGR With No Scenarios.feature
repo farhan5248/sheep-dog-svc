@@ -13,15 +13,9 @@ Feature: Run RGR With No Scenarios
 
     Given The code-prj project scenarios-list.txt file isn't created
      When The maven plugin gen-from-existing goal is executed
-     Then The code-prj project scenarios-list.txt file will be as follows
-          | State  |
-          | Absent |
-      And The code-prj project target/darmok/darmok.mojo.log file will be as follows
-          | State   |
-          | Present |
-      And The code-prj project target/darmok/darmok.runners.log file will be as follows
-          | State |
-          | Empty |
+     Then The code-prj project scenarios-list.txt file will be absent
+      And The code-prj project target/darmok/darmok.mojo.log file will be present
+      And The code-prj project target/darmok/darmok.runners.log file will be empty
 
   Scenario: Scenarios-list.txt exists but is empty
 
@@ -31,17 +25,13 @@ Feature: Run RGR With No Scenarios
 
     Given The code-prj project scenarios-list.txt file is created without any scenarios
      When The maven plugin gen-from-existing goal is executed
-     Then The code-prj project scenarios-list.txt file will be as follows
-          | State |
-          | Empty |
+     Then The code-prj project scenarios-list.txt file will be empty
       And The code-prj project target/darmok/darmok.mojo.log file will be as follows
           | Level | Category | Content                                   |
           | INFO  | mojo     | RGR Automation Plugin (gen-from-existing) |
           | INFO  | mojo     | RGR Automation Complete!                  |
           | INFO  | mojo     | Total scenarios processed: 0              |
-      And The code-prj project target/darmok/darmok.runners.log file will be as follows
-          | State |
-          | Empty |
+      And The code-prj project target/darmok/darmok.runners.log file will be empty
 
   Scenario: Scenarios-list entry has tag NoTag
 
@@ -55,9 +45,7 @@ Feature: Run RGR With No Scenarios
               Tag: NoTag
           """
      When The maven plugin gen-from-existing goal is executed
-     Then The code-prj project scenarios-list.txt file will be as follows
-          | State |
-          | Empty |
+     Then The code-prj project scenarios-list.txt file will be empty
       And The code-prj project target/darmok/darmok.mojo.log file will be as follows
           | Level | Category | Content                                                              |
           | INFO  | mojo     | RGR Automation Plugin (gen-from-existing)                            |
@@ -65,7 +53,5 @@ Feature: Run RGR With No Scenarios
           | INFO  | mojo     | Skipping (NoTag)                                                     |
           | INFO  | mojo     | RGR Automation Complete!                                             |
           | INFO  | mojo     | Total scenarios processed: 1                                         |
-      And The code-prj project target/darmok/darmok.runners.log file will be as follows
-          | State |
-          | Empty |
+      And The code-prj project target/darmok/darmok.runners.log file will be empty
 

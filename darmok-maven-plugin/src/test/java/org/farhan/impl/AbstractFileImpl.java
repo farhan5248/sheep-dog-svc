@@ -48,6 +48,18 @@ public abstract class AbstractFileImpl extends TestObject {
 		return path == null ? null : path.toString();
 	}
 
+	public String getPresent(HashMap<String, String> keyMap) {
+		return getState(keyMap);
+	}
+
+	public String getEmpty(HashMap<String, String> keyMap) {
+		return getState(keyMap);
+	}
+
+	public String getAbsent(HashMap<String, String> keyMap) {
+		return getState(keyMap);
+	}
+
 	public String getState(HashMap<String, String> keyMap) {
 		Path path = resolveFilePath();
 		System.err.println("[TEST] getState path=" + path + " exists=" + (path != null && Files.exists(path)));

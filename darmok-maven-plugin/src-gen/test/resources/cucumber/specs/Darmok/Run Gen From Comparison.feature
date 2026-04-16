@@ -32,12 +32,8 @@ Feature: Run Gen From Comparison
      When The maven plugin gen-from-comparison goal is executed with
           | ModelComparison | ModelGreen | ModelRefactor |
           | sonnet          | sonnet     | sonnet        |
-     Then The code-prj project src/main/java/org/farhan/objects/LoginHappyPath.java file will be as follows
-          | State   |
-          | Present |
-      And The code-prj project scenarios-list.txt file will be as follows
-          | State |
-          | Empty |
+     Then The code-prj project src/main/java/org/farhan/objects/LoginHappyPath.java file will be present
+      And The code-prj project scenarios-list.txt file will be empty
       And The code-prj project target/darmok/darmok.mojo.log file will be as follows
           | Level | Category | Content                                                                       |
           | INFO  | mojo     | RGR Automation Plugin (gen-from-comparison)                                   |

@@ -1,6 +1,5 @@
 package org.farhan.stepdefs.codeprj.src.main.java.org.farhan.objects;
 
-import io.cucumber.datatable.DataTable;
 import io.cucumber.java.en.Given;
 import org.farhan.common.TestSteps;
 import org.farhan.objects.codeprj.src.main.java.org.farhan.objects.LoginHappyPathJavaFile;
@@ -21,8 +20,8 @@ public class CodePrjLoginHappyPathJavaFileSteps extends TestSteps {
         object.setVertexStep("", "", "isn't", "created");
     }
 
-    @Given("^The code-prj project src/main/java/org/farhan/objects/LoginHappyPath.java file will be as follows$")
-    public void willBeAsFollows(DataTable dataTable) {
-        object.assertVertexStep("", "", "will be", "as follows", dataTable);
+    @Given("^The code-prj project src/main/java/org/farhan/objects/LoginHappyPath.java file will be present$")
+    public void willBePresent() {
+        object.assertVertexStep("", "", "will be", "present");
     }
 }

@@ -15,4 +15,9 @@ public class CodePrjDarmokRunnersLogFileSteps extends TestSteps {
     public void willBeAsFollows(DataTable dataTable) {
         object.assertVertexStep("", "", "will be", "as follows", dataTable);
     }
+
+    @Given("^The code-prj project target/darmok/darmok.runners.log file will be empty$")
+    public void willBeEmpty() {
+        object.assertVertexStep("", "", "will be", "empty");
+    }
 }
