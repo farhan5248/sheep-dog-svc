@@ -37,12 +37,12 @@ class ClaudeRunnerCharacterizationTest {
 	Path workDir;
 
 	Path logFile;
-	CategoryLog categoryLog;
+	MojoLog categoryLog;
 
 	@BeforeEach
 	void setup() throws Exception {
 		logFile = workDir.resolve("runner.log");
-		categoryLog = new CategoryLog(new SystemStreamLog(), "Claude", logFile);
+		categoryLog = new MojoLog(new SystemStreamLog(), "Claude", logFile);
 	}
 
 	@AfterEach

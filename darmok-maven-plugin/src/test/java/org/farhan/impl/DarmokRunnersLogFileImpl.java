@@ -5,30 +5,26 @@ import static io.cucumber.spring.CucumberTestContext.SCOPE_CUCUMBER_GLUE;
 import java.nio.file.Path;
 import java.util.HashMap;
 
+import org.farhan.mbt.maven.MojoLog;
 import org.farhan.objects.codeprj.target.darmok.DarmokRunnersLogFile;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-/**
- * Impl for {@code code-prj/target/darmok/darmok.runners.log}.
- * Dated-filename resolution identical to {@link DarmokMojoLogFileImpl}; log-content
- * columns are stubs until the log-content path lands in a later Test-Case.
- */
 @Component
 @Scope(SCOPE_CUCUMBER_GLUE)
 public class DarmokRunnersLogFileImpl extends AbstractFileImpl implements DarmokRunnersLogFile {
 
-	private LogFileHelper helper;
+	private MojoLog mojoLog;
 
-	private LogFileHelper helper() {
-		if (helper == null) {
-			helper = new LogFileHelper(resolveFilePath());
+	private MojoLog mojoLog() {
+		if (mojoLog == null) {
+			mojoLog = new MojoLog(resolveFilePath());
 		}
-		return helper;
+		return mojoLog;
 	}
 
 	@Override
-	protected Path resolveFilePath() {
+	public Path resolveFilePath() {
 		Path logDir = (Path) getProperty("log.dir");
 		if (logDir == null) {
 			Object baseDir = getProperty(component + ".baseDir");
@@ -37,21 +33,21 @@ public class DarmokRunnersLogFileImpl extends AbstractFileImpl implements Darmok
 			}
 			logDir = ((Path) baseDir).resolve("target").resolve("darmok");
 		}
-		return DarmokMojoLogFileImpl.findDatedLog(logDir, "darmok.runners");
+		return MojoLog.findDatedLog(logDir, "darmok.runners");
 	}
 
 	@Override
 	public String getLevel(HashMap<String, String> keyMap) {
-		return helper().matchAndGetLevel(keyMap);
+		return mojoLog().matchAndGetLevel(keyMap);
 	}
 
 	@Override
 	public String getCategory(HashMap<String, String> keyMap) {
-		return helper().matchAndGetCategory(keyMap);
+		return mojoLog().matchAndGetCategory(keyMap);
 	}
 
 	@Override
 	public String getContent(HashMap<String, String> keyMap) {
-		return helper().matchAndGetContent(keyMap);
+		return mojoLog().matchAndGetContent(keyMap);
 	}
 }

@@ -2,43 +2,29 @@ package org.farhan.impl;
 
 import static io.cucumber.spring.CucumberTestContext.SCOPE_CUCUMBER_GLUE;
 
-import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 
+import org.farhan.mbt.maven.MojoLog;
 import org.farhan.objects.codeprj.target.darmok.DarmokMojoLogFile;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-/**
- * Impl for {@code code-prj/target/darmok/darmok.mojo.log}.
- *
- * <p>
- * The real on-disk filename includes today's date (e.g. {@code darmok.mojo.2026-04-15.log})
- * because {@link org.farhan.mbt.maven.DarmokMojo#initLogs} dates the filename per-run.
- * {@link #resolveFilePath()} maps the spec's stable name {@code darmok.mojo.log} to
- * whichever dated file currently exists in the target/darmok directory.
- *
- * <p>
- * Column-specific getters ({@link #getLevel}, {@link #getCategory}, {@link #getContent})
- * are stubs until the log-content path lands in a later Test-Case.
- */
 @Component
 @Scope(SCOPE_CUCUMBER_GLUE)
 public class DarmokMojoLogFileImpl extends AbstractFileImpl implements DarmokMojoLogFile {
 
-	private LogFileHelper helper;
+	private MojoLog mojoLog;
 
-	private LogFileHelper helper() {
-		if (helper == null) {
-			helper = new LogFileHelper(resolveFilePath());
+	private MojoLog mojoLog() {
+		if (mojoLog == null) {
+			mojoLog = new MojoLog(resolveFilePath());
 		}
-		return helper;
+		return mojoLog;
 	}
 
 	@Override
-	protected Path resolveFilePath() {
+	public Path resolveFilePath() {
 		Path logDir = (Path) getProperty("log.dir");
 		if (logDir == null) {
 			Object baseDir = getProperty(component + ".baseDir");
@@ -47,38 +33,21 @@ public class DarmokMojoLogFileImpl extends AbstractFileImpl implements DarmokMoj
 			}
 			logDir = ((Path) baseDir).resolve("target").resolve("darmok");
 		}
-		return findDatedLog(logDir, "darmok.mojo");
-	}
-
-	static Path findDatedLog(Path logDir, String prefix) {
-		if (!Files.isDirectory(logDir)) {
-			return logDir.resolve(prefix + ".log");
-		}
-		try (var stream = Files.list(logDir)) {
-			return stream
-				.filter(p -> {
-					String name = p.getFileName().toString();
-					return name.startsWith(prefix + ".") && name.endsWith(".log");
-				})
-				.findFirst()
-				.orElse(logDir.resolve(prefix + ".log"));
-		} catch (IOException e) {
-			return logDir.resolve(prefix + ".log");
-		}
+		return MojoLog.findDatedLog(logDir, "darmok.mojo");
 	}
 
 	@Override
 	public String getLevel(HashMap<String, String> keyMap) {
-		return helper().matchAndGetLevel(keyMap);
+		return mojoLog().matchAndGetLevel(keyMap);
 	}
 
 	@Override
 	public String getCategory(HashMap<String, String> keyMap) {
-		return helper().matchAndGetCategory(keyMap);
+		return mojoLog().matchAndGetCategory(keyMap);
 	}
 
 	@Override
 	public String getContent(HashMap<String, String> keyMap) {
-		return helper().matchAndGetContent(keyMap);
+		return mojoLog().matchAndGetContent(keyMap);
 	}
 }

@@ -61,8 +61,8 @@ public abstract class DarmokMojo extends AbstractMojo {
 	String baseDir;
 	private GitRunner git;
 	private MavenRunner maven;
-	CategoryLog mojoLog;
-	CategoryLog runnerLog;
+	MojoLog mojoLog;
+	MojoLog runnerLog;
 
 	record ScenarioEntry(String file, String scenario, String tag) {}
 
@@ -102,8 +102,8 @@ public abstract class DarmokMojo extends AbstractMojo {
 	private void initLogs() throws Exception {
 		Path logDir = resolveLogDir();
 		String date = LocalDate.now().toString();
-		mojoLog = new CategoryLog(getLog(), "mojo", logDir.resolve("darmok.mojo." + date + ".log"));
-		runnerLog = new CategoryLog(getLog(), "runner", logDir.resolve("darmok.runners." + date + ".log"));
+		mojoLog = new MojoLog(getLog(), "mojo", logDir.resolve("darmok.mojo." + date + ".log"));
+		runnerLog = new MojoLog(getLog(), "runner", logDir.resolve("darmok.runners." + date + ".log"));
 	}
 
 	private void closeLogs() {
