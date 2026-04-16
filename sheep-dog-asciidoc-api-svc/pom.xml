@@ -9,13 +9,13 @@
 	</parent>
 	<groupId>org.farhan</groupId>
 	<artifactId>sheep-dog-asciidoc-api-svc</artifactId>
-	<version>1.14-SNAPSHOT</version>
+	<version>1.14</version>
 	<name>Sheep Dog AsciiDoc API Service</name>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<java.version>21</java.version>
-		<sheep-dog-asciidoc-api.version>1.12-SNAPSHOT</sheep-dog-asciidoc-api.version>
+		<sheep-dog-asciidoc-api.version>1.11</sheep-dog-asciidoc-api.version>
 		<docker.registry>nexus-docker.sheepdog.io</docker.registry>
 		<!-- ghcr.io mirror target — only pushed when the `qa` profile is
 		     active (see <profiles> at end of pom). Prod on EKS can't reach
