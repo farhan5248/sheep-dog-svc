@@ -8,7 +8,7 @@
 	</parent>
 	<groupId>org.farhan</groupId>
 	<artifactId>darmok-maven-plugin</artifactId>
-	<version>1.19-SNAPSHOT</version>
+	<version>1.19</version>
 	<packaging>maven-plugin</packaging>
 	<name>Darmok RGR Automation Maven Plugin</name>
 
