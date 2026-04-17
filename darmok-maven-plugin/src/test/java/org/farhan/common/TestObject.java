@@ -8,8 +8,6 @@ import java.lang.reflect.Field;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.farhan.dsl.grammar.ISheepDogFactory;
-import org.farhan.dsl.grammar.SheepDogFactory;
 import org.junit.jupiter.api.Assertions;
 
 import io.cucumber.datatable.DataTable;
@@ -19,8 +17,9 @@ import io.cucumber.datatable.DataTable;
  *
  * <p>
  * Purpose: hold shared properties and table-interpretation logic used when
- * running Cucumber-driven tests. Projects that need cursor/path navigation
- * extend {@link PathNavigatorTestObject} instead of this class directly.
+ * running Cucumber-driven tests. Projects extend a bounded-context subclass
+ * (MavenTestObject, EMFTestObject, RESTTestObject, MCPTestObject, ...) rather
+ * than this class directly.
  *
  * <p>
  * Table-style interpretation supports two feature-file shapes:
@@ -47,7 +46,6 @@ public abstract class TestObject {
 
     public static void reset() {
         TestObject.properties.clear();
-        SheepDogFactory.instance = ISheepDogFactory.eINSTANCE;
     }
 
     protected static Object getProperty(String key) {

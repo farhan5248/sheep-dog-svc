@@ -1,5 +1,7 @@
 package org.farhan.impl;
 
+import org.farhan.common.MavenTestObject;
+
 import java.util.HashMap;
 
 import org.farhan.objects.specprj.src.test.resources.asciidoc.stepdefs.blahapplication.ObjectPageAsciidocFile;
@@ -9,11 +11,11 @@ import static io.cucumber.spring.CucumberTestContext.SCOPE_CUCUMBER_GLUE;
 
 @Component
 @Scope(SCOPE_CUCUMBER_GLUE)
-public class ObjectPageAsciidocFileImpl extends TestObjectFileImpl implements ObjectPageAsciidocFile {
+public class ObjectPageAsciidocFileImpl extends MavenTestObject implements ObjectPageAsciidocFile {
 
 	@Override
 	public String getContent(HashMap<String, String> keyMap) {
-		return getContent();
+		return getFileContent();
 	}
 
 	@Override

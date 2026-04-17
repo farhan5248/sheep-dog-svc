@@ -1,5 +1,7 @@
 package org.farhan.impl;
 
+import org.farhan.common.MavenTestObject;
+
 import java.util.HashMap;
 
 import org.farhan.objects.codeprj.srcgen.test.java.org.farhan.stepdefs.blah.BlahObjectPageStepsJavaFile;
@@ -9,11 +11,11 @@ import static io.cucumber.spring.CucumberTestContext.SCOPE_CUCUMBER_GLUE;
 
 @Component
 @Scope(SCOPE_CUCUMBER_GLUE)
-public class BlahObjectPageStepsJavaFileImpl extends TestObjectFileImpl implements BlahObjectPageStepsJavaFile {
+public class BlahObjectPageStepsJavaFileImpl extends MavenTestObject implements BlahObjectPageStepsJavaFile {
 
 	@Override
 	public String getContent(HashMap<String, String> keyMap) {
-		return getContent();
+		return getFileContent();
 	}
 
 	@Override

@@ -1,5 +1,7 @@
 package org.farhan.impl;
 
+import org.farhan.common.MavenTestObject;
+
 import java.util.HashMap;
 
 import org.farhan.objects.maven.UmlToCucumberSpringGoal;
@@ -10,7 +12,7 @@ import static io.cucumber.spring.CucumberTestContext.SCOPE_CUCUMBER_GLUE;
 
 @Component
 @Scope(SCOPE_CUCUMBER_GLUE)
-public class UmlToCucumberSpringGoalImpl extends TestObjectGoalImpl implements UmlToCucumberSpringGoal {
+public class UmlToCucumberSpringGoalImpl extends MavenTestObject implements UmlToCucumberSpringGoal {
 
 	@Override
 	public void setExecuted(HashMap<String, String> keyMap) {

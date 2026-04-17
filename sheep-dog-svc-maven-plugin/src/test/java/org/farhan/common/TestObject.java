@@ -4,11 +4,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.lang.reflect.Field;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.farhan.dsl.grammar.ISheepDogFactory;
-import org.farhan.dsl.grammar.SheepDogFactory;
 import org.junit.jupiter.api.Assertions;
 
 import io.cucumber.datatable.DataTable;
@@ -18,8 +17,9 @@ import io.cucumber.datatable.DataTable;
  *
  * <p>
  * Purpose: hold shared properties and table-interpretation logic used when
- * running Cucumber-driven tests. Projects that need cursor/path navigation
- * extend {@link PathNavigatorTestObject} instead of this class directly.
+ * running Cucumber-driven tests. Projects extend a bounded-context subclass
+ * (MavenTestObject, EMFTestObject, RESTTestObject, MCPTestObject, ...) rather
+ * than this class directly.
  *
  * <p>
  * Table-style interpretation supports two feature-file shapes:
@@ -46,7 +46,6 @@ public abstract class TestObject {
 
     public static void reset() {
         TestObject.properties.clear();
-        SheepDogFactory.instance = ISheepDogFactory.eINSTANCE;
     }
 
     protected static Object getProperty(String key) {
@@ -138,13 +137,6 @@ public abstract class TestObject {
             if (operation.equals("get")) {
                 String expectedValue = convertToPascalCase(stateDesc);
                 String actual = returnValue == null ? null : returnValue.toString();
-                // TODO temporary stub: skip assertion for "created as follows" pre-check.
-                // The method can't determine what to return because it lacks context.
-                // Class section should be path::to::class class. Then the part desc
-                // property can be used to identify what to assert exists or not.
-                if (stateDesc.contentEquals("created as follows")) {
-                    return;
-                }
                 if (TestState.contains(convertToPascalCase(stateDesc))) {
                     String mappedActual;
                     if (actual == null)
@@ -299,6 +291,39 @@ public abstract class TestObject {
 
     protected void setObject(String object) {
         this.object = object;
+    }
+
+    protected static void setField(Object target, String fieldName, String value) {
+        try {
+            Field field = findField(target.getClass(), fieldName);
+            if (field == null) {
+                return;
+            }
+            field.setAccessible(true);
+            Class<?> type = field.getType();
+            if (type == String.class) {
+                field.set(target, value);
+            } else if (type == int.class || type == Integer.class) {
+                field.set(target, Integer.parseInt(value));
+            } else if (type == boolean.class || type == Boolean.class) {
+                field.set(target, Boolean.parseBoolean(value));
+            }
+        } catch (NoSuchFieldException e) {
+            // field doesn't exist on this class, skip
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to set field " + fieldName, e);
+        }
+    }
+
+    protected static Field findField(Class<?> clazz, String fieldName) throws NoSuchFieldException {
+        while (clazz != null) {
+            try {
+                return clazz.getDeclaredField(fieldName);
+            } catch (NoSuchFieldException e) {
+                clazz = clazz.getSuperclass();
+            }
+        }
+        throw new NoSuchFieldException(fieldName);
     }
 
 }

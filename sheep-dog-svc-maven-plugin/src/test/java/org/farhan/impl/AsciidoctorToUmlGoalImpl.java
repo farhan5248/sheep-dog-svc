@@ -1,5 +1,7 @@
 package org.farhan.impl;
 
+import org.farhan.common.MavenTestObject;
+
 import static io.cucumber.spring.CucumberTestContext.SCOPE_CUCUMBER_GLUE;
 
 import java.util.HashMap;
@@ -11,7 +13,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Scope(SCOPE_CUCUMBER_GLUE)
-public class AsciidoctorToUmlGoalImpl extends TestObjectGoalImpl implements AsciidoctorToUmlGoal {
+public class AsciidoctorToUmlGoalImpl extends MavenTestObject implements AsciidoctorToUmlGoal {
 
 	@Override
 	public void setTags(HashMap<String, String> keyMap) {
