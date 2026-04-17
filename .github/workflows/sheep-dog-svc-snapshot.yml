@@ -40,14 +40,14 @@ jobs:
 
   sheep-dog-svc-maven-plugin:
     needs: [sheep-dog-cucumber-gen-svc]
-    uses: farhan5248/sheep-dog-ops/.github/workflows/snapshot-docker.yml@main
+    uses: farhan5248/sheep-dog-ops/.github/workflows/snapshot-maven.yml@main
     with:
       project: 'sheep-dog-svc-maven-plugin'
     secrets: inherit
 
   darmok-maven-plugin:
     needs: [sheep-dog-svc-maven-plugin]
-    uses: farhan5248/sheep-dog-ops/.github/workflows/snapshot-docker.yml@main
+    uses: farhan5248/sheep-dog-ops/.github/workflows/snapshot-maven.yml@main
     with:
       project: 'darmok-maven-plugin'
     secrets: inherit
