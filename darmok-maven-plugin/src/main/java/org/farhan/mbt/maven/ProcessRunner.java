@@ -14,23 +14,22 @@ public class ProcessRunner {
 	/**
 	 * Test seam: abstraction over {@link ProcessBuilder#start()} so tests can
 	 * substitute a fake {@link Process} without spawning real subprocesses.
-	 * <p>
-	 * This is intentionally a static field to keep Stage 1 tests minimally invasive
-	 * on the production code. It moves to instance injection once enough tests exist
-	 * to refactor safely (sheep-dog-main#253 Stage 2). Tests that reassign this
-	 * field must run sequentially and restore the default in teardown.
 	 */
 	@FunctionalInterface
 	public interface ProcessStarter {
 		Process start(ProcessBuilder pb) throws IOException;
 	}
 
-	public static volatile ProcessStarter starter = ProcessBuilder::start;
-
-	private Log log;
+	private final Log log;
+	private final ProcessStarter starter;
 
 	public ProcessRunner(Log log) {
+		this(log, ProcessBuilder::start);
+	}
+
+	public ProcessRunner(Log log, ProcessStarter starter) {
 		this.log = log;
+		this.starter = starter;
 	}
 
 	protected static boolean isWindows() {
@@ -68,5 +67,9 @@ public class ProcessRunner {
 
 	protected Log getLog() {
 		return log;
+	}
+
+	protected ProcessStarter getStarter() {
+		return starter;
 	}
 }

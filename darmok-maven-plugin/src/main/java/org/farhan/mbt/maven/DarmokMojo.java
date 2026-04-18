@@ -60,9 +60,11 @@ public abstract class DarmokMojo extends AbstractMojo {
 	// Instance fields
 	String baseDir;
 	private GitRunner git;
-	private MavenRunner maven;
 	MojoLog mojoLog;
 	MojoLog runnerLog;
+	RedPhase redPhase;
+	GreenPhase greenPhase;
+	RefactorPhase refactorPhase;
 
 	// Runner factories — default to production constructors; tests override via setters.
 	GitRunnerFactory gitRunnerFactory = GitRunner::new;
@@ -81,7 +83,16 @@ public abstract class DarmokMojo extends AbstractMojo {
 		}
 		initLogs();
 		git = gitRunnerFactory.create(runnerLog);
-		maven = mavenRunnerFactory.create(runnerLog);
+		MavenRunner maven = mavenRunnerFactory.create(runnerLog);
+		String sheepDogRoot = baseDir + "/../..";
+		String artifactId = project.getArtifactId();
+		redPhase = new RedPhase(maven, mojoLog, baseDir, specsDir, host, onlyChanges);
+		greenPhase = new GreenPhase(
+			claudeRunnerFactory.create(runnerLog, modelGreen, maxRetries, retryWaitSeconds),
+			mojoLog, sheepDogRoot, artifactId);
+		refactorPhase = new RefactorPhase(
+			claudeRunnerFactory.create(runnerLog, modelRefactor, maxRetries, retryWaitSeconds),
+			mojoLog, sheepDogRoot, artifactId);
 	}
 
 	/** Test-only setter. Lets tests pre-seed baseDir before execute() so init() skips the MavenProject path. */
@@ -162,21 +173,15 @@ public abstract class DarmokMojo extends AbstractMojo {
 		// Add tag to asciidoc file
 		addTagToAsciidoc(fileName, scenarioName, tag);
 
-		// === RED PHASE ===
-		mojoLog.info("  Red: Running maven...");
-		long redMavenStart = System.currentTimeMillis();
-		int redExitCode = runRgrRed(tag);
-		long redMavenDuration = System.currentTimeMillis() - redMavenStart;
-
-		if (redExitCode != 0 && redExitCode != 100) {
-			throw new MojoExecutionException("rgr-red failed with exit code " + redExitCode);
+		PhaseResult redResult = redPhase.run(tag);
+		if (redResult.exitCode() != 0 && redResult.exitCode() != 100) {
+			throw new MojoExecutionException("rgr-red failed with exit code " + redResult.exitCode());
 		}
-		mojoLog.info("  Red: Completed maven (" + formatDuration(redMavenDuration) + ")");
 
 		long greenDuration = 0;
 		long refactorDuration = 0;
 
-		if (redExitCode == 100) {
+		if (redResult.exitCode() == 100) {
 			// Tests already passing — include scenario removal in red commit
 			mojoLog.info("  Green: Skipped (tests already passing)");
 			removeFirstScenarioFromFile();
@@ -189,15 +194,11 @@ public abstract class DarmokMojo extends AbstractMojo {
 				commitIfChanged("run-rgr red " + scenarioName, "Red");
 			}
 
-			// === GREEN PHASE ===
-			mojoLog.info("  Green: Running...");
-			long greenStart = System.currentTimeMillis();
-			int greenExitCode = runRgrGreen(tag);
-			greenDuration = System.currentTimeMillis() - greenStart;
-			if (greenExitCode != 0) {
-				throw new MojoExecutionException("rgr-green failed with exit code " + greenExitCode);
+			PhaseResult greenResult = greenPhase.run(tag);
+			greenDuration = greenResult.durationMs();
+			if (greenResult.exitCode() != 0) {
+				throw new MojoExecutionException("rgr-green failed with exit code " + greenResult.exitCode());
 			}
-			mojoLog.info("  Green: Completed (" + formatDuration(greenDuration) + ")");
 
 			removeFirstScenarioFromFile();
 			git.run(baseDir, "add", ".");
@@ -205,16 +206,11 @@ public abstract class DarmokMojo extends AbstractMojo {
 				commitIfChanged("run-rgr green " + scenarioName, "Green");
 			}
 
-			// === REFACTOR PHASE ===
-			mojoLog.info("  Refactor: Running...");
-			long refactorStart = System.currentTimeMillis();
-			int refactorExit = runRgrRefactor();
-			refactorDuration = System.currentTimeMillis() - refactorStart;
-
-			if (refactorExit != 0) {
-				throw new MojoExecutionException("rgr-refactor failed with exit code " + refactorExit);
+			PhaseResult refactorResult = refactorPhase.run();
+			refactorDuration = refactorResult.durationMs();
+			if (refactorResult.exitCode() != 0) {
+				throw new MojoExecutionException("rgr-refactor failed with exit code " + refactorResult.exitCode());
 			}
-			mojoLog.info("  Refactor: Completed (" + formatDuration(refactorDuration) + ")");
 
 			git.run(baseDir, "add", ".");
 			String commitMessage = stage ? "run-rgr " + scenarioName : "run-rgr refactor " + scenarioName;
@@ -223,7 +219,7 @@ public abstract class DarmokMojo extends AbstractMojo {
 
 		// === METRIC LINES ===
 		long totalDuration = System.currentTimeMillis() - totalStart;
-		mojoLog.info("  METRIC-scenario=" + scenarioName + "-phase=red-maven-duration_ms=" + redMavenDuration);
+		mojoLog.info("  METRIC-scenario=" + scenarioName + "-phase=red-maven-duration_ms=" + redResult.durationMs());
 		mojoLog.info("  METRIC-scenario=" + scenarioName + "-phase=green-duration_ms=" + greenDuration);
 		mojoLog.info("  METRIC-scenario=" + scenarioName + "-phase=refactor-duration_ms=" + refactorDuration);
 		mojoLog.info("  METRIC-scenario=" + scenarioName + "-phase=total-duration_ms=" + totalDuration);
@@ -385,52 +381,6 @@ public abstract class DarmokMojo extends AbstractMojo {
 		return false;
 	}
 
-	// =========================================================================
-	// RGR Workflow Methods
-	// =========================================================================
-
-	private int runRgrRed(String pattern) throws Exception {
-		String runnerClassName = pattern + "Test";
-
-		// Step 1: AsciiDoctor to UML (maven call from specsDir)
-		String specsDirAbsolute = Path.of(baseDir, specsDir).normalize().toString();
-		maven.run(specsDirAbsolute, "org.farhan:sheep-dog-svc-maven-plugin:asciidoctor-to-uml",
-				"-Dtags=" + pattern, "-Dhost=" + host, "-DonlyChanges=" + onlyChanges);
-
-		// Step 2: UML to Cucumber-Guice (maven call from baseDir)
-		maven.run(baseDir, "org.farhan:sheep-dog-svc-maven-plugin:uml-to-cucumber-guice",
-				"-Dtags=" + pattern, "-Dhost=" + host, "-DonlyChanges=" + onlyChanges);
-
-		// Step 3: Generate runner class
-		String runnerClassPath = baseDir
-			+ "/src/test/java/org/farhan/suites/" + runnerClassName + ".java";
-		Files.createDirectories(Path.of(runnerClassPath).getParent());
-		String runnerContent = generateRunnerClassContent(pattern, runnerClassName);
-		writeFileWithLF(runnerClassPath, List.of(runnerContent.split("\n", -1)));
-		mojoLog.debug("  Created runner class: " + runnerClassPath);
-
-		// Step 4: Run tests
-		int testExitCode = maven.run(baseDir, "test", "-Dtest=" + runnerClassName);
-
-		if (testExitCode == 0) {
-			mojoLog.debug("  Tests are PASSING - no failing tests to fix (returning 100)");
-			return 100;
-		} else {
-			mojoLog.debug("  Tests are FAILING - ready for green phase (returning 0)");
-			return 0;
-		}
-	}
-
-	private int runRgrGreen(String pattern) throws Exception {
-		ClaudeRunner claude = claudeRunnerFactory.create(runnerLog, modelGreen, maxRetries, retryWaitSeconds);
-		return claude.run(baseDir + "/../..", "/rgr-green " + project.getArtifactId() + " " + pattern);
-	}
-
-	private int runRgrRefactor() throws Exception {
-		ClaudeRunner claude = claudeRunnerFactory.create(runnerLog, modelRefactor, maxRetries, retryWaitSeconds);
-		return claude.run(baseDir + "/../..", "/rgr-refactor forward " + project.getArtifactId());
-	}
-
 	int runCleanUp() throws Exception {
 		Path sheepDogMain = Path.of(baseDir, "../..").normalize();
 
@@ -484,34 +434,5 @@ public abstract class DarmokMojo extends AbstractMojo {
 	void writeFileWithLF(String filePath, List<String> lines) throws Exception {
 		String content = String.join("\n", lines) + "\n";
 		Files.writeString(Path.of(filePath), content, StandardCharsets.UTF_8);
-	}
-
-	String generateRunnerClassContent(String pattern, String runnerClassName) {
-		return "package org.farhan.suites;\n"
-			+ "\n"
-			+ "import org.junit.platform.suite.api.ConfigurationParameter;\n"
-			+ "import org.junit.platform.suite.api.IncludeEngines;\n"
-			+ "import org.junit.platform.suite.api.IncludeTags;\n"
-			+ "import org.junit.platform.suite.api.SelectClasspathResource;\n"
-			+ "import org.junit.platform.suite.api.Suite;\n"
-			+ "import static io.cucumber.junit.platform.engine.Constants.PLUGIN_PROPERTY_NAME;\n"
-			+ "import static io.cucumber.junit.platform.engine.Constants.GLUE_PROPERTY_NAME;\n"
-			+ "\n"
-			+ "@Suite\n"
-			+ "@IncludeEngines(\"cucumber\")\n"
-			+ "@SelectClasspathResource(\"cucumber/\")\n"
-			+ "@ConfigurationParameter(key = PLUGIN_PROPERTY_NAME, value = \"pretty\")\n"
-			+ "@ConfigurationParameter(key = GLUE_PROPERTY_NAME, value = \"org.farhan.common,org.farhan.objects,org.farhan.stepdefs,org.farhan.suites\")\n"
-			+ "@IncludeTags(\"" + pattern + "\")\n"
-			+ "public class " + runnerClassName + " {\n"
-			+ "}";
-	}
-
-	String formatDuration(long millis) {
-		long seconds = millis / 1000;
-		long hours = seconds / 3600;
-		long minutes = (seconds % 3600) / 60;
-		long secs = seconds % 60;
-		return String.format("%02d:%02d:%02d", hours, minutes, secs);
 	}
 }

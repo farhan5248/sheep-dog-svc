@@ -9,12 +9,11 @@ import java.util.Deque;
 import java.util.List;
 
 import org.apache.maven.plugin.logging.SystemStreamLog;
+import org.farhan.mbt.maven.ProcessRunner.ProcessStarter;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import org.junit.jupiter.api.parallel.Execution;
-import org.junit.jupiter.api.parallel.ExecutionMode;
 
 /**
  * Characterization tests for {@link ClaudeRunner}.
@@ -25,12 +24,10 @@ import org.junit.jupiter.api.parallel.ExecutionMode;
  * The Javadoc on each test method is the plain-language intent that feeds downstream
  * asciidoc spec and DSL grammar generation (sheep-dog-main#253).
  * <p>
- * <b>Isolation:</b> uses the static {@link ProcessRunner#starter} seam to substitute a
- * {@link FakeProcess} for the real Claude subprocess. Tests run sequentially
- * ({@link ExecutionMode#SAME_THREAD}) because the seam is a static field. Per-class
- * instance injection is a later refactor (#253 Stage 2).
+ * <b>Isolation:</b> each test constructs a {@link ClaudeRunner} with a stub
+ * {@link ProcessStarter} that returns a {@link FakeProcess}, bypassing real subprocess
+ * spawning. No shared mutable state — tests can run in parallel.
  */
-@Execution(ExecutionMode.SAME_THREAD)
 class ClaudeRunnerCharacterizationTest {
 
 	@TempDir
@@ -50,7 +47,6 @@ class ClaudeRunnerCharacterizationTest {
 		if (categoryLog != null) {
 			categoryLog.close();
 		}
-		ProcessRunner.starter = ProcessBuilder::start;
 	}
 
 	/**
@@ -71,8 +67,8 @@ class ClaudeRunnerCharacterizationTest {
 	void happyPath_logsExecutingCommand_andSuccessMarker() throws Exception {
 		// Given: the claude command completes successfully on the first attempt
 		//        (exit 0 with a single line of output)
-		ProcessRunner.starter = pb -> new FakeProcess("mocked claude output line", 0);
-		ClaudeRunner claude = new ClaudeRunner(categoryLog, "sonnet", 3, 30);
+		ProcessStarter starter = pb -> new FakeProcess("mocked claude output line", 0);
+		ClaudeRunner claude = new ClaudeRunner(categoryLog, "sonnet", 3, 30, starter);
 
 		// When: the claude runner is executed with args "/rgr-green sample-project sampleTag"
 		int exit = claude.run(workDir.toString(), "/rgr-green sample-project sampleTag");
@@ -104,11 +100,11 @@ class ClaudeRunnerCharacterizationTest {
 		Deque<FakeProcessSpec> specs = new ArrayDeque<>();
 		specs.add(new FakeProcessSpec("API Error: 500 Internal server error", 1));
 		specs.add(new FakeProcessSpec("mocked claude output line", 0));
-		ProcessRunner.starter = pb -> {
+		ProcessStarter starter = pb -> {
 			FakeProcessSpec s = specs.poll();
 			return new FakeProcess(s.stdout(), s.exit());
 		};
-		ClaudeRunner claude = new ClaudeRunner(categoryLog, "sonnet", 3, 0);
+		ClaudeRunner claude = new ClaudeRunner(categoryLog, "sonnet", 3, 0, starter);
 
 		// When: the claude runner is executed with args "/rgr-green project tag"
 		int exit = claude.run(workDir.toString(), "/rgr-green project tag");
@@ -139,8 +135,8 @@ class ClaudeRunnerCharacterizationTest {
 	void retriesExhausted_logsMaxRetriesExhaustedAtError() throws Exception {
 		// Given: the claude command returns a retryable HTTP 500 on every attempt
 		//        up to the configured max retries (3)
-		ProcessRunner.starter = pb -> new FakeProcess("API Error: 500 Internal server error", 1);
-		ClaudeRunner claude = new ClaudeRunner(categoryLog, "sonnet", 3, 0);
+		ProcessStarter starter = pb -> new FakeProcess("API Error: 500 Internal server error", 1);
+		ClaudeRunner claude = new ClaudeRunner(categoryLog, "sonnet", 3, 0, starter);
 
 		// When: the claude runner is executed with args "/rgr-green project tag"
 		int exit = claude.run(workDir.toString(), "/rgr-green project tag");
@@ -168,8 +164,8 @@ class ClaudeRunnerCharacterizationTest {
 	void nonRetryableFailure_doesNotRetry_logsExitCode() throws Exception {
 		// Given: the claude command fails with a non-retryable error on its first attempt
 		//        (exit 2 with "permission denied" — no retryable-pattern match)
-		ProcessRunner.starter = pb -> new FakeProcess("permission denied: /foo", 2);
-		ClaudeRunner claude = new ClaudeRunner(categoryLog, "sonnet", 3, 0);
+		ProcessStarter starter = pb -> new FakeProcess("permission denied: /foo", 2);
+		ClaudeRunner claude = new ClaudeRunner(categoryLog, "sonnet", 3, 0, starter);
 
 		// When: the claude runner is executed with args "/rgr-green project tag"
 		int exit = claude.run(workDir.toString(), "/rgr-green project tag");
@@ -204,8 +200,8 @@ class ClaudeRunnerCharacterizationTest {
 			"line one of output",
 			"line two of output",
 			"line three of output");
-		ProcessRunner.starter = pb -> new FakeProcess(stdout, 0);
-		ClaudeRunner claude = new ClaudeRunner(categoryLog, "sonnet", 1, 0);
+		ProcessStarter starter = pb -> new FakeProcess(stdout, 0);
+		ClaudeRunner claude = new ClaudeRunner(categoryLog, "sonnet", 1, 0, starter);
 
 		// When: the claude runner is executed with args "/rgr-green project tag"
 		claude.run(workDir.toString(), "/rgr-green project tag");
@@ -234,8 +230,8 @@ class ClaudeRunnerCharacterizationTest {
 	void gitRunnerThroughSeam_logsRunningCommand() throws Exception {
 		// Given: the git command writes "nothing to commit" to stdout and exits 0
 		//        (a clean repo state — nothing staged, nothing modified)
-		ProcessRunner.starter = pb -> new FakeProcess("nothing to commit", 0);
-		GitRunner git = new GitRunner(categoryLog);
+		ProcessStarter starter = pb -> new FakeProcess("nothing to commit", 0);
+		GitRunner git = new GitRunner(categoryLog, starter);
 
 		// When: the git runner is executed with args "status --porcelain"
 		int exit = git.run(workDir.toString(), "status", "--porcelain");

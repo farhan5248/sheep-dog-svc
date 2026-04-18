@@ -6,7 +6,7 @@ Spring context configuration and Cucumber lifecycle hooks for scenario glue. Cre
 
 ## resetTestProject
 
-**Desc**: Before hook that resets TestObject static state, creates temp directories for code-prj and spec-prj components, stores their paths as properties, and installs a FakeProcess-based ProcessStarter.
+**Desc**: Before hook that resets TestObject static state, creates temp directories for code-prj and spec-prj components, stores their paths as properties, and stashes a FakeProcess-based ProcessStarter in TestObject.properties for the mojo-invoking layer to wire into runner factories.
 
 **Rule**: ONE method name follows resetTestProject pattern.
  - **Name**: `^resetTestProject$`
@@ -19,7 +19,7 @@ Spring context configuration and Cucumber lifecycle hooks for scenario glue. Cre
 
 ## cleanupTestProject
 
-**Desc**: After hook that restores the default ProcessStarter and deletes the scenario's temp directory tree.
+**Desc**: After hook that deletes the scenario's temp directory tree. No static state to restore — the ProcessStarter is scoped to TestObject.properties, which is reset per scenario.
 
 **Rule**: ONE method name follows cleanupTestProject pattern.
  - **Name**: `^cleanupTestProject$`

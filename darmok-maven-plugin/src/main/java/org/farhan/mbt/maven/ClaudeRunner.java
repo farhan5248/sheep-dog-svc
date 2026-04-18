@@ -23,7 +23,11 @@ public class ClaudeRunner extends ProcessRunner {
 	private String model;
 
 	public ClaudeRunner(Log log, String model, int maxRetries, int retryWaitSeconds) {
-		super(log);
+		this(log, model, maxRetries, retryWaitSeconds, ProcessBuilder::start);
+	}
+
+	public ClaudeRunner(Log log, String model, int maxRetries, int retryWaitSeconds, ProcessStarter starter) {
+		super(log, starter);
 		this.model = model;
 		this.maxRetries = maxRetries;
 		this.retryWaitSeconds = retryWaitSeconds;
@@ -65,7 +69,7 @@ public class ClaudeRunner extends ProcessRunner {
 			ProcessBuilder pb = new ProcessBuilder(command);
 			pb.directory(new File(workingDirectory));
 			pb.redirectErrorStream(true);
-			Process process = starter.start(pb);
+			Process process = getStarter().start(pb);
 			process.getOutputStream().close();
 
 			List<String> outputLines = new ArrayList<>();

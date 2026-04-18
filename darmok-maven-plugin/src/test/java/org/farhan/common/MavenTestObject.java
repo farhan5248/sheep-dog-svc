@@ -7,8 +7,12 @@ import java.nio.file.Path;
 import java.util.Properties;
 
 import org.apache.maven.project.MavenProject;
+import org.farhan.mbt.maven.ClaudeRunner;
 import org.farhan.mbt.maven.DarmokMojo;
+import org.farhan.mbt.maven.GitRunner;
+import org.farhan.mbt.maven.MavenRunner;
 import org.farhan.mbt.maven.MojoLog;
+import org.farhan.mbt.maven.ProcessRunner.ProcessStarter;
 
 /**
  * {@link TestObject} subclass that adds Maven plugin test scaffolding:
@@ -42,6 +46,14 @@ public abstract class MavenTestObject extends TestObject {
             project.setArtifactId("code-prj");
             mojo.project = project;
             mojo.setBaseDir(codePrjDir.toString());
+
+            Object starterProp = getProperty("processStarter");
+            if (starterProp instanceof ProcessStarter starter) {
+                mojo.setGitRunnerFactory(log -> new GitRunner(log, starter));
+                mojo.setMavenRunnerFactory(log -> new MavenRunner(log, starter));
+                mojo.setClaudeRunnerFactory((log, model, retries, wait) ->
+                    new ClaudeRunner(log, model, retries, wait, starter));
+            }
 
             for (String key : mojoDefaults.stringPropertyNames()) {
                 Object override = properties.get(key);

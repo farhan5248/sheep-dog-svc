@@ -10,7 +10,7 @@ DarmokMojo logs via MojoLog instances (mojoLog for orchestration, runnerLog for 
 ```java
 mojoLog.info("  Red: Running maven...");
 // ... do work ...
-mojoLog.info("  Red: Completed maven (" + formatDuration(duration) + ")");
+mojoLog.info("  Red: Completed maven (" + PhaseResult.formatDuration(duration) + ")");
 ```
 
 **Example: Runner output streaming**
@@ -91,7 +91,7 @@ public void setBaseDir(String baseDir) {
 
 ### init
 
-Initializes baseDir, creates MojoLog instances and Runners.
+Initializes baseDir, creates MojoLog instances, instantiates runners via their factories, and constructs the three RGR phase classes.
 
 **Example: init method body**
 ```java
@@ -100,8 +100,17 @@ void init() throws Exception {
         baseDir = project.getBasedir().getAbsolutePath();
     }
     initLogs();
-    git = new GitRunner(runnerLog);
-    maven = new MavenRunner(runnerLog);
+    git = gitRunnerFactory.create(runnerLog);
+    MavenRunner maven = mavenRunnerFactory.create(runnerLog);
+    String sheepDogRoot = baseDir + "/../..";
+    String artifactId = project.getArtifactId();
+    redPhase = new RedPhase(maven, mojoLog, baseDir, specsDir, host, onlyChanges);
+    greenPhase = new GreenPhase(
+        claudeRunnerFactory.create(runnerLog, modelGreen, maxRetries, retryWaitSeconds),
+        sheepDogRoot, artifactId);
+    refactorPhase = new RefactorPhase(
+        claudeRunnerFactory.create(runnerLog, modelRefactor, maxRetries, retryWaitSeconds),
+        sheepDogRoot, artifactId);
 }
 ```
 
@@ -138,15 +147,17 @@ ScenarioEntry getNextScenario() throws Exception {
 
 ### processScenario
 
-Orchestrates the RGR cycle for a single scenario. Each phase follows the same shape: log start, do work, log completion with duration, git add, commit if changed.
+Orchestrates the RGR cycle for a single scenario. Delegates each phase to its phase class (which owns its own start/complete log markers and timing), branches on the returned PhaseResult, handles git staging + commit policy, and emits METRIC-scenario lines using the phase durations.
 
-**Example: Phase shape (repeated for red/green/refactor)**
+**Example: Phase delegation shape**
 ```java
 void processScenario(ScenarioEntry entry) throws MojoExecutionException, Exception {
     String scenarioName = entry.scenario();
     String tag = entry.tag();
-    String fileName = entry.file();
-    // ... addTagToAsciidoc, red phase, green phase, refactor phase ...
+    // ... addTagToAsciidoc ...
+    PhaseResult redResult = redPhase.run(tag);
+    if (redResult.exitCode() != 0 && redResult.exitCode() != 100) { /* throw */ }
+    // ... branch on red, run green+refactor, commit per stage policy ...
     mojoLog.info("  METRIC-scenario=" + scenarioName + "-phase=total-duration_ms=" + totalDuration);
 }
 ```
@@ -240,6 +251,25 @@ void writeFileWithLF(String filePath, List<String> lines) throws Exception {
 }
 ```
 
+## RedPhase
+
+### run
+
+Runs the red-phase workflow: invoke upstream maven goals, generate the cucumber runner class, run `mvn test`. Logs phase start/complete markers, times the work, returns a PhaseResult whose exit code is 100 if tests already pass, 0 if they fail.
+
+**Example: run method body**
+```java
+public PhaseResult run(String pattern) throws Exception {
+    mojoLog.info("  Red: Running maven...");
+    long start = System.currentTimeMillis();
+    // asciidoctor-to-uml, uml-to-cucumber-guice, generate runner class, mvn test ...
+    int exitCode = testExitCode == 0 ? 100 : 0;
+    long duration = System.currentTimeMillis() - start;
+    mojoLog.info("  Red: Completed maven (" + PhaseResult.formatDuration(duration) + ")");
+    return new PhaseResult(exitCode, duration);
+}
+```
+
 ### generateRunnerClassContent
 
 Generates Java source for a Cucumber suite runner class filtered by tag.
@@ -255,13 +285,51 @@ String generateRunnerClassContent(String pattern, String runnerClassName) {
 }
 ```
 
+## GreenPhase
+
+### run
+
+Invokes the Claude `/rgr-green` skill for the current scenario tag. Logs start/complete markers, times the work, returns a PhaseResult with the ClaudeRunner exit code and duration.
+
+**Example: run method body**
+```java
+public PhaseResult run(String pattern) throws Exception {
+    mojoLog.info("  Green: Running...");
+    long start = System.currentTimeMillis();
+    int exitCode = claude.run(workingDir, "/rgr-green " + artifactId + " " + pattern);
+    long duration = System.currentTimeMillis() - start;
+    mojoLog.info("  Green: Completed (" + PhaseResult.formatDuration(duration) + ")");
+    return new PhaseResult(exitCode, duration);
+}
+```
+
+## RefactorPhase
+
+### run
+
+Invokes the Claude `/rgr-refactor forward` skill for the current scenario. Logs start/complete markers, times the work, returns a PhaseResult with the ClaudeRunner exit code and duration.
+
+**Example: run method body**
+```java
+public PhaseResult run() throws Exception {
+    mojoLog.info("  Refactor: Running...");
+    long start = System.currentTimeMillis();
+    int exitCode = claude.run(workingDir, "/rgr-refactor forward " + artifactId);
+    long duration = System.currentTimeMillis() - start;
+    mojoLog.info("  Refactor: Completed (" + PhaseResult.formatDuration(duration) + ")");
+    return new PhaseResult(exitCode, duration);
+}
+```
+
+## PhaseResult
+
 ### formatDuration
 
 Formats milliseconds as HH:MM:SS.
 
 **Example: formatDuration method body**
 ```java
-String formatDuration(long millis) {
+public static String formatDuration(long millis) {
     long seconds = millis / 1000;
     long hours = seconds / 3600;
     long minutes = (seconds % 3600) / 60;

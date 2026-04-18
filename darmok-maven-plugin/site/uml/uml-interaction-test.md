@@ -4,7 +4,7 @@
 
 ### resetTestProject
 
-Spring/Cucumber @Before hook that resets TestObject static state, creates fresh temp directories, and installs FakeProcess ProcessStarter.
+Spring/Cucumber @Before hook that resets TestObject static state, creates fresh temp directories, and stashes a FakeProcess ProcessStarter in TestObject.properties for MavenTestObject.executeMojo to wire into the mojo via runner factories.
 
 **Example: resetTestProject method body**
 ```java
@@ -23,25 +23,25 @@ public void resetTestProject() throws Exception {
     TestObject.properties.put("spec-prj.baseDir", specPrjDir);
     TestObject.properties.put("log.dir", logDir);
     System.setProperty("LOG_PATH", logDir.toString());
-    ProcessRunner.starter = pb -> {
+    ProcessStarter starter = pb -> {
         String cmd = String.join(" ", pb.command());
         if (cmd.contains("diff") && cmd.contains("--cached") && cmd.contains("--quiet")) {
             return new FakeProcess("", 1);
         }
         return new FakeProcess("", 0);
     };
+    TestObject.properties.put("processStarter", starter);
 }
 ```
 
 ### cleanupTestProject
 
-@After hook that restores the default ProcessStarter and deletes the scenario temp directory tree.
+@After hook that deletes the scenario temp directory tree. No static state to restore — the ProcessStarter lived only in TestObject.properties, which is reset per scenario.
 
 **Example: cleanupTestProject method body**
 ```java
 @After
 public void cleanupTestProject() throws IOException {
-    ProcessRunner.starter = ProcessBuilder::start;
     Path scenarioRoot = (Path) TestObject.properties.get("scenario.root");
     if (scenarioRoot != null && Files.exists(scenarioRoot)) {
         try (var stream = Files.walk(scenarioRoot)) {

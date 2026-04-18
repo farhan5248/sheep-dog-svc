@@ -26,7 +26,7 @@ Pattern variables used in UML files to represent families of classes following s
 
 4. **{RgrPhase}** - RGR workflow phases executed by DarmokMojo
    - Values: `(Red|Green|Refactor)`
-   - Used in: runRgr{RgrPhase}(), phase logging and commit messages
+   - Used in: {RgrPhase}Phase class names, phase logging and commit messages
 
 5. **{ObjectName}** - Test object name from AsciiDoc specs, free-form text identifying the specific test object
    - Values: `.+` (e.g., DarmokMojoLog, DarmokRunnersLog, ScenariosListTxt, ProcessDarmokAsciidoc, LoginHappyPathJava, LogoutHappyPathJava)

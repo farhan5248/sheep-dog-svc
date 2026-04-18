@@ -11,6 +11,10 @@ public class MavenRunner extends ProcessRunner {
 		super(log);
 	}
 
+	public MavenRunner(Log log, ProcessStarter starter) {
+		super(log, starter);
+	}
+
 	@Override
 	protected List<String> buildCommand(String... args) {
 		List<String> command = new ArrayList<>();

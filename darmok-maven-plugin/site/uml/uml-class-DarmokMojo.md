@@ -56,7 +56,7 @@ Abstract base Mojo providing shared lifecycle, scenario iteration, RGR phase orc
 
 ## init
 
-**Desc**: Initializes baseDir from MavenProject, creates MojoLog instances for mojo and runner output, and instantiates GitRunner and MavenRunner.
+**Desc**: Initializes baseDir from MavenProject, creates MojoLog instances for mojo and runner output, instantiates GitRunner and MavenRunner via their factories, and constructs the RedPhase, GreenPhase, and RefactorPhase with their wired runners.
 
 **Rule**: ONE method name follows init pattern.
  - **Name**: `^init$`
@@ -95,7 +95,7 @@ Abstract base Mojo providing shared lifecycle, scenario iteration, RGR phase orc
 
 ## processScenario
 
-**Desc**: Executes the full RGR cycle (red, green, refactor) for a single scenario entry, with git staging and commit between phases. Logs metric lines for each phase duration.
+**Desc**: Orchestrates the full RGR cycle for a single scenario entry by delegating to RedPhase, GreenPhase, and RefactorPhase in sequence, with git staging and commit between phases. Logs metric lines for each phase duration.
 
 **Rule**: ONE method name follows processScenario pattern.
  - **Name**: `^processScenario$`
@@ -171,28 +171,3 @@ Abstract base Mojo providing shared lifecycle, scenario iteration, RGR phase orc
 **Examples**:
  - `void writeFileWithLF(String filePath, List<String> lines)`
 
-## generateRunnerClassContent
-
-**Desc**: Generates Java source for a Cucumber suite runner class filtered by tag.
-
-**Rule**: ONE method name follows generateRunnerClassContent pattern.
- - **Name**: `^generateRunnerClassContent$`
- - **Return**: `^String$`
- - **Parameters**: `^\(String\s+\w+,\s*String\s+\w+\)$`
- - **Modifier**: `^(default|package-private)$`
-
-**Examples**:
- - `String generateRunnerClassContent(String pattern, String runnerClassName)`
-
-## formatDuration
-
-**Desc**: Formats milliseconds as HH:MM:SS string.
-
-**Rule**: ONE method name follows formatDuration pattern.
- - **Name**: `^formatDuration$`
- - **Return**: `^String$`
- - **Parameters**: `^\(long\s+\w+\)$`
- - **Modifier**: `^(default|package-private)$`
-
-**Examples**:
- - `String formatDuration(long millis)`
