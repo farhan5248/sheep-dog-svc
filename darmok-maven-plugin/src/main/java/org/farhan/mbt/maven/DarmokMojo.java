@@ -64,6 +64,11 @@ public abstract class DarmokMojo extends AbstractMojo {
 	MojoLog mojoLog;
 	MojoLog runnerLog;
 
+	// Runner factories — default to production constructors; tests override via setters.
+	GitRunnerFactory gitRunnerFactory = GitRunner::new;
+	MavenRunnerFactory mavenRunnerFactory = MavenRunner::new;
+	ClaudeRunnerFactory claudeRunnerFactory = ClaudeRunner::new;
+
 	record ScenarioEntry(String file, String scenario, String tag) {}
 
 	// =========================================================================
@@ -75,13 +80,28 @@ public abstract class DarmokMojo extends AbstractMojo {
 			baseDir = project.getBasedir().getAbsolutePath();
 		}
 		initLogs();
-		git = new GitRunner(runnerLog);
-		maven = new MavenRunner(runnerLog);
+		git = gitRunnerFactory.create(runnerLog);
+		maven = mavenRunnerFactory.create(runnerLog);
 	}
 
 	/** Test-only setter. Lets tests pre-seed baseDir before execute() so init() skips the MavenProject path. */
 	public void setBaseDir(String baseDir) {
 		this.baseDir = baseDir;
+	}
+
+	/** Test-only setter. Substitutes a mock GitRunner factory; default is {@code GitRunner::new}. */
+	public void setGitRunnerFactory(GitRunnerFactory factory) {
+		this.gitRunnerFactory = factory;
+	}
+
+	/** Test-only setter. Substitutes a mock MavenRunner factory; default is {@code MavenRunner::new}. */
+	public void setMavenRunnerFactory(MavenRunnerFactory factory) {
+		this.mavenRunnerFactory = factory;
+	}
+
+	/** Test-only setter. Substitutes a mock ClaudeRunner factory; default is {@code ClaudeRunner::new}. */
+	public void setClaudeRunnerFactory(ClaudeRunnerFactory factory) {
+		this.claudeRunnerFactory = factory;
 	}
 
 	void cleanup() {
@@ -402,12 +422,12 @@ public abstract class DarmokMojo extends AbstractMojo {
 	}
 
 	private int runRgrGreen(String pattern) throws Exception {
-		ClaudeRunner claude = new ClaudeRunner(runnerLog, modelGreen, maxRetries, retryWaitSeconds);
+		ClaudeRunner claude = claudeRunnerFactory.create(runnerLog, modelGreen, maxRetries, retryWaitSeconds);
 		return claude.run(baseDir + "/../..", "/rgr-green " + project.getArtifactId() + " " + pattern);
 	}
 
 	private int runRgrRefactor() throws Exception {
-		ClaudeRunner claude = new ClaudeRunner(runnerLog, modelRefactor, maxRetries, retryWaitSeconds);
+		ClaudeRunner claude = claudeRunnerFactory.create(runnerLog, modelRefactor, maxRetries, retryWaitSeconds);
 		return claude.run(baseDir + "/../..", "/rgr-refactor forward " + project.getArtifactId());
 	}
 
