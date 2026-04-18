@@ -10,6 +10,7 @@ import java.util.List;
 import org.apache.maven.project.MavenProject;
 import org.farhan.mbt.maven.DarmokMojo.ScenarioEntry;
 import org.farhan.mbt.maven.ProcessRunner.ProcessStarter;
+import org.farhan.fake.FakeProcess;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 

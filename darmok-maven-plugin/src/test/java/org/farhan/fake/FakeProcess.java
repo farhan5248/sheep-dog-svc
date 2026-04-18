@@ -1,4 +1,4 @@
-package org.farhan.mbt.maven;
+package org.farhan.fake;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

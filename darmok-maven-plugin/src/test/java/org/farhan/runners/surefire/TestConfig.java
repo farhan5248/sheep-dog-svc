@@ -5,7 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import org.farhan.common.TestObject;
-import org.farhan.mbt.maven.FakeProcess;
+import org.farhan.fake.FakeProcess;
 import org.farhan.mbt.maven.ProcessRunner.ProcessStarter;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;

@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.apache.maven.plugin.logging.SystemStreamLog;
 import org.farhan.mbt.maven.ProcessRunner.ProcessStarter;
+import org.farhan.fake.FakeProcess;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

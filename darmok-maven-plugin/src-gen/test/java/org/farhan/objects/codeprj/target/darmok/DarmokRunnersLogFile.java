@@ -14,5 +14,7 @@ public interface DarmokRunnersLogFile {
 
     public String getState(HashMap<String, String> keyMap);
 
+    public String getAsFollowsWithThisFailure(HashMap<String, String> keyMap);
+
     public String getEmpty(HashMap<String, String> keyMap);
 }

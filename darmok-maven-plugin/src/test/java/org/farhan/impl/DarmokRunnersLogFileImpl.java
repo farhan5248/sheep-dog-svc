@@ -24,6 +24,15 @@ public class DarmokRunnersLogFileImpl extends MavenTestObject implements DarmokR
 	}
 
 	@Override
+	public String getAsFollowsWithThisFailure(HashMap<String, String> keyMap) {
+		String stateType = (String) getProperty("stateType");
+		if ("won't be".equals(stateType)) {
+			return null;
+		}
+		return getFileState(getMojoLog("darmok.runners").getLogFile());
+	}
+
+	@Override
 	public String getState(HashMap<String, String> keyMap) {
 		return getFileState(getMojoLog("darmok.runners").getLogFile());
 	}
