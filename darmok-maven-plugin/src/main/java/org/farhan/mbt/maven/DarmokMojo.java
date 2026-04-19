@@ -170,6 +170,9 @@ public abstract class DarmokMojo extends AbstractMojo {
 			return;
 		}
 
+		String commit = git.getCurrentCommit(baseDir);
+		mojoLog.info("  Commit: " + commit);
+
 		// Add tag to asciidoc file
 		addTagToAsciidoc(fileName, scenarioName, tag);
 

@@ -24,4 +24,8 @@ public class GitRunner extends ProcessRunner {
 		}
 		return command;
 	}
+
+	public String getCurrentCommit(String workingDirectory) throws Exception {
+		return capture(workingDirectory, "rev-parse", "HEAD");
+	}
 }

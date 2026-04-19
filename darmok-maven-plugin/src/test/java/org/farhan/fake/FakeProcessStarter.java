@@ -85,6 +85,10 @@ public class FakeProcessStarter implements ProcessStarter {
 			return new FakeProcess("", 1);
 		}
 
+		if (joined.contains("rev-parse") && joined.contains("HEAD")) {
+			return new FakeProcess("abc1234567890abcdef1234567890abcdef12345", 0);
+		}
+
 		if (joined.contains("claude") && cmd.stream().anyMatch(a -> a.startsWith("/rgr-green"))) {
 			greenCalls++;
 			if ("retry-success".equals(claudeGreenMode)) {
