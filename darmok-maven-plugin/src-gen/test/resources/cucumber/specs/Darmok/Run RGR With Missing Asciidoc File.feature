@@ -16,7 +16,7 @@ Feature: Run RGR With Missing Asciidoc File
               Tag: loginHappyPath
           """
       And The spec-prj project src/test/resources/asciidoc/specs/ProcessDarmok.asciidoc file isn't created
-     When The maven plugin gen-from-existing goal is executed
+     When The darmok plugin gen-from-existing goal is executed
      Then The code-prj project scenarios-list.txt file is created as follows
           """
           File: ProcessDarmok

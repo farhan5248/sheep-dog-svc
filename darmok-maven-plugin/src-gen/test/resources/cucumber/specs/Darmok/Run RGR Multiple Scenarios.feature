@@ -18,7 +18,7 @@ Feature: Run RGR Multiple Scenarios
           """
       And The code-prj project src/main/java/org/farhan/objects/LoginHappyPath.java file is created
       And The code-prj project src/main/java/org/farhan/objects/LogoutHappyPath.java file is created
-     When The maven plugin gen-from-existing goal is executed
+     When The darmok plugin gen-from-existing goal is executed
      Then The code-prj project scenarios-list.txt file will be empty
       And The code-prj project target/darmok/darmok.mojo.log file will be as follows
           | Level | Category | Content                                                                         |

@@ -31,7 +31,7 @@ Feature: Run RGR Full Cycle
     Someone reading the log later can walk the commits backwards to see what the failing test looked like, what code was generated to pass it, and how the refactor stabilized it.
     This Test-Case exercises the happy path end-to-end: red fails as expected, green generates the implementation, and refactor stabilizes without issues.
 
-     When The maven plugin gen-from-existing goal is executed with
+     When The darmok plugin gen-from-existing goal is executed with
           | Stage | ModelGreen | ModelRefactor |
           | false | sonnet     | sonnet        |
      Then The code-prj project src/main/java/org/farhan/objects/LoginHappyPath.java file will be present
@@ -71,7 +71,7 @@ Feature: Run RGR Full Cycle
     The intent is for continuous-integration runs where intermediate Red / Green states aren't interesting to reviewers ? the per-scenario commit is the reviewable unit of work.
     Intermediate `Red: Committing` and `Green: Committing` markers are absent from the mojo log because those commits never happen in staged mode.
 
-     When The maven plugin gen-from-existing goal is executed with
+     When The darmok plugin gen-from-existing goal is executed with
           | Stage | ModelGreen | ModelRefactor |
           | true  | sonnet     | sonnet        |
      Then The code-prj project src/main/java/org/farhan/objects/LoginHappyPath.java file will be present

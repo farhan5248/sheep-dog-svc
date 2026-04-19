@@ -11,7 +11,7 @@ Feature: Run RGR Multiple Runs Same Day
     If the second run of the day truncated the log file, the earlier run's METRIC history would be lost and the report would be misleading.
     Darmok must open the dated log in append mode so both runs' markers accumulate in one file, in chronological order.
 
-    Given The maven plugin gen-from-existing goal is executed
+    Given The darmok plugin gen-from-existing goal is executed
       And The code-prj project scenarios-list.txt file is created as follows
           """
           File: ProcessDarmok
@@ -19,7 +19,7 @@ Feature: Run RGR Multiple Runs Same Day
               Tag: loginHappyPath
           """
       And The code-prj project src/main/java/org/farhan/objects/LoginHappyPath.java file is created
-     When The maven plugin gen-from-existing goal is executed
+     When The darmok plugin gen-from-existing goal is executed
      Then The code-prj project target/darmok/darmok.mojo.log file will be as follows
           | Level | Category | Content                                                                       |
           | INFO  | mojo     | RGR Automation Plugin (gen-from-existing)                                     |

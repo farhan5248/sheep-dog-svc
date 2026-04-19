@@ -31,7 +31,7 @@ Feature: Run RGR With Tag Handling
           @loginHappyPath
           Some description
           """
-     When The maven plugin gen-from-existing goal is executed
+     When The darmok plugin gen-from-existing goal is executed
      Then The spec-prj project src/test/resources/asciidoc/specs/ProcessDarmok.asciidoc file will be created as follows
           """
           = Test-Suite: Login
@@ -63,7 +63,7 @@ Feature: Run RGR With Tag Handling
           @otherTag
           Some description
           """
-     When The maven plugin gen-from-existing goal is executed
+     When The darmok plugin gen-from-existing goal is executed
      Then The spec-prj project src/test/resources/asciidoc/specs/ProcessDarmok.asciidoc file will be created as follows
           """
           = Test-Suite: Login
@@ -94,7 +94,7 @@ Feature: Run RGR With Tag Handling
           
           Some description
           """
-     When The maven plugin gen-from-existing goal is executed
+     When The darmok plugin gen-from-existing goal is executed
      Then The spec-prj project src/test/resources/asciidoc/specs/ProcessDarmok.asciidoc file will be created as follows
           """
           = Test-Suite: Login
