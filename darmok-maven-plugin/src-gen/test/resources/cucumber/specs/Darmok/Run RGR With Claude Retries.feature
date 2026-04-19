@@ -33,7 +33,7 @@ Feature: Run RGR With Claude Retries
      Then The code-prj project target/darmok/darmok.runners.log file will be as follows
           | Level | Category | Content                                  |
           | WARN  | runner   | Retryable error detected: API Error: 500 |
-          | DEBUG | runner   | Retry attempt 2 of 3                     |
+          | DEBUG | runner   | Retry attempt 2 of 3...                    |
           | DEBUG | runner   | Claude CLI completed successfully        |
 
   Scenario: Claude retries on API Error 529 then succeeds
@@ -47,7 +47,7 @@ Feature: Run RGR With Claude Retries
      Then The code-prj project target/darmok/darmok.runners.log file will be as follows
           | Level | Category | Content                                  |
           | WARN  | runner   | Retryable error detected: API Error: 529 |
-          | DEBUG | runner   | Retry attempt 2 of 3                     |
+          | DEBUG | runner   | Retry attempt 2 of 3...                    |
           | DEBUG | runner   | Claude CLI completed successfully        |
 
   Scenario: Claude retries on Internal server error then succeeds
@@ -61,7 +61,7 @@ Feature: Run RGR With Claude Retries
      Then The code-prj project target/darmok/darmok.runners.log file will be as follows
           | Level | Category | Content                                         |
           | WARN  | runner   | Retryable error detected: Internal server error |
-          | DEBUG | runner   | Retry attempt 2 of 3                            |
+          | DEBUG | runner   | Retry attempt 2 of 3...                           |
           | DEBUG | runner   | Claude CLI completed successfully               |
 
   Scenario: Claude retries on overloaded then succeeds
@@ -75,7 +75,7 @@ Feature: Run RGR With Claude Retries
      Then The code-prj project target/darmok/darmok.runners.log file will be as follows
           | Level | Category | Content                              |
           | WARN  | runner   | Retryable error detected: overloaded |
-          | DEBUG | runner   | Retry attempt 2 of 3                 |
+          | DEBUG | runner   | Retry attempt 2 of 3...                |
           | DEBUG | runner   | Claude CLI completed successfully    |
 
   Scenario: Claude exhausts retries on API Error 500
@@ -145,6 +145,6 @@ Feature: Run RGR With Claude Retries
      Then The code-prj project target/darmok/darmok.runners.log file will be as follows
           | Level | Category | Content                                  |
           | WARN  | runner   | Retryable error detected: API Error: 500 |
-          | DEBUG | runner   | Retry attempt 2 of 3                     |
+          | DEBUG | runner   | Retry attempt 2 of 3...                    |
           | DEBUG | runner   | Claude CLI completed successfully        |
 

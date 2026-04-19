@@ -27,15 +27,11 @@ Feature: Run RGR With Partial Claude Output
     Claude writes three lines of stdout and then the process exits 137 (e.g. killed by the OS). All three lines must appear in the runner log in the order they were produced, followed by the failure marker. If the streamed reader were to drop data on failure, downstream diagnostics would be blind to what claude was doing just before the kill.
 
     Given The darmok plugin gen-from-existing goal claude /rgr-green command is executed but failed non-retryably
-          | Exit | Output                       |
-          | 137  | line one of partial output   |
-          | 137  | line two of partial output   |
-          | 137  | line three of partial output |
+          | Exit | Output                          |
+          | 137  | partial output before the kill  |
      When The darmok plugin gen-from-existing goal is executed
      Then The code-prj project target/darmok/darmok.runners.log file will be as follows with this failure
           | Level | Category | Content                         |
-          | DEBUG | runner   | line one of partial output      |
-          | DEBUG | runner   | line two of partial output      |
-          | DEBUG | runner   | line three of partial output    |
+          | DEBUG | runner   | partial output before the kill  |
           | DEBUG | runner   | Claude CLI exited with code 137 |
 

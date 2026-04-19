@@ -54,6 +54,6 @@ Feature: Run RGR With Maven Failures
           | 1    | COMPILATION ERROR : [ERROR] /suites/loginHappyPathTest.java:[3,1] cannot find symbol |
      When The darmok plugin gen-from-existing goal is executed
      Then The code-prj project target/darmok/darmok.runners.log file will be as follows with this failure
-          | Level | Category | Content           |
-          | DEBUG | runner   | COMPILATION ERROR |
+          | Level | Category | Content                                                                              |
+          | DEBUG | runner   | COMPILATION ERROR : [ERROR] /suites/loginHappyPathTest.java:[3,1] cannot find symbol |
 
