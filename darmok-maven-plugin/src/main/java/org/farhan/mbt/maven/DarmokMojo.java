@@ -62,6 +62,7 @@ public abstract class DarmokMojo extends AbstractMojo {
 	private GitRunner git;
 	MojoLog mojoLog;
 	MojoLog runnerLog;
+	MetricsCsv metrics;
 	RedPhase redPhase;
 	GreenPhase greenPhase;
 	RefactorPhase refactorPhase;
@@ -135,6 +136,7 @@ public abstract class DarmokMojo extends AbstractMojo {
 		String date = LocalDate.now().toString();
 		mojoLog = new MojoLog(getLog(), "mojo", logDir.resolve("darmok.mojo." + date + ".log"));
 		runnerLog = new MojoLog(getLog(), "runner", logDir.resolve("darmok.runners." + date + ".log"));
+		metrics = new MetricsCsv(logDir.resolve("metrics.csv"));
 	}
 
 	private void closeLogs() {
@@ -220,12 +222,9 @@ public abstract class DarmokMojo extends AbstractMojo {
 			commitIfChanged(commitMessage, "Refactor");
 		}
 
-		// === METRIC LINES ===
 		long totalDuration = System.currentTimeMillis() - totalStart;
-		mojoLog.info("  METRIC-scenario=" + scenarioName + "-phase=red-maven-duration_ms=" + redResult.durationMs());
-		mojoLog.info("  METRIC-scenario=" + scenarioName + "-phase=green-duration_ms=" + greenDuration);
-		mojoLog.info("  METRIC-scenario=" + scenarioName + "-phase=refactor-duration_ms=" + refactorDuration);
-		mojoLog.info("  METRIC-scenario=" + scenarioName + "-phase=total-duration_ms=" + totalDuration);
+		metrics.append(commit, scenarioName,
+			redResult.durationMs(), greenDuration, refactorDuration, totalDuration);
 	}
 
 	private void commitIfChanged(String message, String phase) throws Exception {

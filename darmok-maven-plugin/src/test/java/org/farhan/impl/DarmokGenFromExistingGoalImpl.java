@@ -110,4 +110,25 @@ public class DarmokGenFromExistingGoalImpl extends MavenTestObject implements Ge
 		setProperty("processStarter", new FakeProcessStarter(properties));
 		executeMojo(GenFromExistingMojo.class);
 	}
+
+	@Override
+	public void setExecutedWith(HashMap<String, String> keyMap) {
+		setProperty("processStarter", new FakeProcessStarter(properties));
+		executeMojo(GenFromExistingMojo.class);
+	}
+
+	@Override
+	public void setStage(HashMap<String, String> keyMap) {
+		setProperty("stage", keyMap.get("Stage"));
+	}
+
+	@Override
+	public void setModelGreen(HashMap<String, String> keyMap) {
+		setProperty("modelGreen", keyMap.get("ModelGreen"));
+	}
+
+	@Override
+	public void setModelRefactor(HashMap<String, String> keyMap) {
+		setProperty("modelRefactor", keyMap.get("ModelRefactor"));
+	}
 }

@@ -35,4 +35,7 @@ Feature: Run RGR For Process Charts
       And The code-prj project target/darmok/darmok.runners.log file will be as follows
           | Level | Category | Content                     |
           | DEBUG | runner   | Running: git rev-parse HEAD |
+      And The code-prj project target/darmok/metrics.csv file will be as follows
+          | Timestamp | Commit                                   | Scenario                  | PhaseRedMs   | PhaseGreenMs | PhaseRefactorMs | PhaseTotalMs |
+          | Timestamp | abc1234567890abcdef1234567890abcdef12345 | User logs in successfully | Milliseconds | Milliseconds | Milliseconds    | Milliseconds |
 

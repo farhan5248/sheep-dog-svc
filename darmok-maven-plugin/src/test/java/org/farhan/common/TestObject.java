@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.lang.reflect.Field;
+import java.time.format.DateTimeFormatter;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -33,7 +34,19 @@ import io.cucumber.datatable.DataTable;
 public abstract class TestObject {
 
     public enum TestState {
-        Absent, Empty, Present, Any;
+        Absent(null), Empty(""), Present(null), Any(null),
+        Timestamp("yyyy-MM-dd'T'HH:mm:ss.SSS"),
+        Milliseconds("[0-9]+");
+
+        private final String value;
+
+        TestState(String value) {
+            this.value = value;
+        }
+
+        public String value() {
+            return value;
+        }
 
         private static final Set<String> NAMES = Arrays.stream(values()).map(Enum::name).collect(Collectors.toSet());
 
@@ -192,6 +205,20 @@ public abstract class TestObject {
                             continue;
                         }
                         String actual = returnValue == null ? null : returnValue.toString();
+                        if (TestState.Timestamp.name().equals(expectedValue)) {
+                            try {
+                                DateTimeFormatter.ofPattern(TestState.Timestamp.value()).parse(actual);
+                            } catch (Exception e) {
+                                Assertions.fail("Expected Timestamp format but got: " + actual);
+                            }
+                            continue;
+                        }
+                        if (TestState.Milliseconds.name().equals(expectedValue)) {
+                            if (actual == null || !actual.matches(TestState.Milliseconds.value())) {
+                                Assertions.fail("Expected Milliseconds format but got: " + actual);
+                            }
+                            continue;
+                        }
                         if (fieldName.equals("State") && TestState.contains(expectedValue)) {
                             String mappedActual;
                             if (actual == null)
@@ -251,7 +278,7 @@ public abstract class TestObject {
 
     private static String replaceKeyword(String value) {
         if (value.contentEquals(TestState.Empty.name().toLowerCase())) {
-            return "";
+            return TestState.Empty.value();
         } else {
             return value;
         }
