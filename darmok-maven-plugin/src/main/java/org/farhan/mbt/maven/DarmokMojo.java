@@ -60,9 +60,9 @@ public abstract class DarmokMojo extends AbstractMojo {
 	// Instance fields
 	String baseDir;
 	private GitRunner git;
-	MojoLog mojoLog;
-	MojoLog runnerLog;
-	MetricsCsv metrics;
+	DarmokMojoLog mojoLog;
+	DarmokMojoLog runnerLog;
+	DarmokMojoMetrics metrics;
 	RedPhase redPhase;
 	GreenPhase greenPhase;
 	RefactorPhase refactorPhase;
@@ -134,9 +134,9 @@ public abstract class DarmokMojo extends AbstractMojo {
 	private void initLogs() throws Exception {
 		Path logDir = resolveLogDir();
 		String date = LocalDate.now().toString();
-		mojoLog = new MojoLog(getLog(), "mojo", logDir.resolve("darmok.mojo." + date + ".log"));
-		runnerLog = new MojoLog(getLog(), "runner", logDir.resolve("darmok.runners." + date + ".log"));
-		metrics = new MetricsCsv(logDir.resolve("metrics.csv"));
+		mojoLog = new DarmokMojoLog(getLog(), "mojo", logDir.resolve("darmok.mojo." + date + ".log"));
+		runnerLog = new DarmokMojoLog(getLog(), "runner", logDir.resolve("darmok.runners." + date + ".log"));
+		metrics = new DarmokMojoMetrics(logDir.resolve("metrics.csv"));
 	}
 
 	private void closeLogs() {

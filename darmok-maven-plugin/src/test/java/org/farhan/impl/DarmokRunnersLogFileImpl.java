@@ -20,7 +20,7 @@ public class DarmokRunnersLogFileImpl extends MavenTestObject implements DarmokR
 		if ("won't be".equals(stateType)) {
 			return null;
 		}
-		return getFileState(getMojoLog("darmok.runners").getLogFile());
+		return getFileState(getDarmokMojoLog("darmok.runners").getLogFile());
 	}
 
 	@Override
@@ -29,31 +29,31 @@ public class DarmokRunnersLogFileImpl extends MavenTestObject implements DarmokR
 		if ("won't be".equals(stateType)) {
 			return null;
 		}
-		return getFileState(getMojoLog("darmok.runners").getLogFile());
+		return getFileState(getDarmokMojoLog("darmok.runners").getLogFile());
 	}
 
 	@Override
 	public String getState(HashMap<String, String> keyMap) {
-		return getFileState(getMojoLog("darmok.runners").getLogFile());
+		return getFileState(getDarmokMojoLog("darmok.runners").getLogFile());
 	}
 
 	@Override
 	public String getEmpty(HashMap<String, String> keyMap) {
-		return getFileState(getMojoLog("darmok.runners").getLogFile());
+		return getFileState(getDarmokMojoLog("darmok.runners").getLogFile());
 	}
 
 	@Override
 	public String getLevel(HashMap<String, String> keyMap) {
-		return getMojoLog("darmok.runners").matchAndGetLevel(keyMap);
+		return getDarmokMojoLog("darmok.runners").matchAndGetLevel(keyMap);
 	}
 
 	@Override
 	public String getCategory(HashMap<String, String> keyMap) {
-		return getMojoLog("darmok.runners").matchAndGetCategory(keyMap);
+		return getDarmokMojoLog("darmok.runners").matchAndGetCategory(keyMap);
 	}
 
 	@Override
 	public String getContent(HashMap<String, String> keyMap) {
-		return getMojoLog("darmok.runners").matchAndGetContent(keyMap);
+		return getDarmokMojoLog("darmok.runners").matchAndGetContent(keyMap);
 	}
 }

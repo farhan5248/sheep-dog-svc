@@ -6,7 +6,7 @@ import java.nio.file.Path;
 import java.util.HashMap;
 
 import org.farhan.common.MavenTestObject;
-import org.farhan.mbt.maven.MetricsCsv;
+import org.farhan.mbt.maven.DarmokMojoMetrics;
 import org.farhan.objects.codeprj.target.darmok.MetricsCsvFile;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -21,46 +21,46 @@ public class MetricsCsvFileImpl extends MavenTestObject implements MetricsCsvFil
 		if ("won't be".equals(stateType)) {
 			return null;
 		}
-		return getFileState(metricsCsv().getFile());
+		return getFileState(metrics().getFile());
 	}
 
 	@Override
 	public String getTimestamp(HashMap<String, String> keyMap) {
-		return metricsCsv().matchAndGetTimestamp(keyMap);
+		return metrics().matchAndGetTimestamp(keyMap);
 	}
 
 	@Override
 	public String getCommit(HashMap<String, String> keyMap) {
-		return metricsCsv().matchAndGetCommit(keyMap);
+		return metrics().matchAndGetCommit(keyMap);
 	}
 
 	@Override
 	public String getScenario(HashMap<String, String> keyMap) {
-		return metricsCsv().matchAndGetScenario(keyMap);
+		return metrics().matchAndGetScenario(keyMap);
 	}
 
 	@Override
 	public String getPhaseRedMs(HashMap<String, String> keyMap) {
-		return metricsCsv().matchAndGetPhaseRedMs(keyMap);
+		return metrics().matchAndGetPhaseRedMs(keyMap);
 	}
 
 	@Override
 	public String getPhaseGreenMs(HashMap<String, String> keyMap) {
-		return metricsCsv().matchAndGetPhaseGreenMs(keyMap);
+		return metrics().matchAndGetPhaseGreenMs(keyMap);
 	}
 
 	@Override
 	public String getPhaseRefactorMs(HashMap<String, String> keyMap) {
-		return metricsCsv().matchAndGetPhaseRefactorMs(keyMap);
+		return metrics().matchAndGetPhaseRefactorMs(keyMap);
 	}
 
 	@Override
 	public String getPhaseTotalMs(HashMap<String, String> keyMap) {
-		return metricsCsv().matchAndGetPhaseTotalMs(keyMap);
+		return metrics().matchAndGetPhaseTotalMs(keyMap);
 	}
 
-	private MetricsCsv metricsCsv() {
-		MetricsCsv cached = (MetricsCsv) getProperty("metricsCsv");
+	private DarmokMojoMetrics metrics() {
+		DarmokMojoMetrics cached = (DarmokMojoMetrics) getProperty("metrics");
 		if (cached != null) {
 			return cached;
 		}
@@ -69,8 +69,8 @@ public class MetricsCsvFileImpl extends MavenTestObject implements MetricsCsvFil
 			Path baseDir = (Path) getProperty(component + ".baseDir");
 			logDir = baseDir.resolve("target").resolve("darmok");
 		}
-		MetricsCsv fresh = new MetricsCsv(logDir.resolve("metrics.csv"));
-		setProperty("metricsCsv", fresh);
+		DarmokMojoMetrics fresh = new DarmokMojoMetrics(logDir.resolve("metrics.csv"));
+		setProperty("metrics", fresh);
 		return fresh;
 	}
 }

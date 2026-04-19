@@ -43,14 +43,70 @@
  - `GitRunner`
  - `MavenRunner`
 
-### MojoLog
+### {Tool}RunnerFactory
+
+**Desc**: Functional interface (SAM) for constructing a {Tool}Runner. Production wires the runner's public constructor via method reference; tests substitute a lambda that binds a FakeProcessStarter to the runner's test-seam constructor.
+
+**Rule**: SOME class matches {Tool}RunnerFactory pattern
+
+**Regex**: `^{Tool}RunnerFactory$`
+ - `ClaudeRunnerFactory`
+ - `GitRunnerFactory`
+ - `MavenRunnerFactory`
+
+### DarmokMojoLog
 
 **Desc**: Logging decorator that implements Maven's Log interface, delegating to a wrapped Log while simultaneously writing timestamped, categorized entries to a file. Separates structured file logging from Maven's console logging.
 
-**Rule**: ONE class matches MojoLog pattern
+**Rule**: ONE class matches DarmokMojoLog pattern
 
-**Regex**: `^MojoLog$`
- - `MojoLog`
+**Regex**: `^DarmokMojoLog$`
+ - `DarmokMojoLog`
+
+### DarmokMojoMetrics
+
+**Desc**: Per-scenario metrics emitter. Writes cycle-time measurements (Red / Green / Refactor / Total durations) tagged with scenario name and git commit SHA to a CSV file for downstream SPC analysis, and reads them back for test verification. Storage format is CSV today; future revisions may push to a central time-series store without changing the class boundary.
+
+**Rule**: ONE class matches DarmokMojoMetrics pattern
+
+**Regex**: `^DarmokMojoMetrics$`
+ - `DarmokMojoMetrics`
+
+### RedPhase
+
+**Desc**: RGR Red phase — generates failing test artifacts by running the sheep-dog-svc-maven-plugin asciidoctor-to-uml + uml-to-cucumber-guice goals, then executing mvn test to verify the generated tests fail.
+
+**Rule**: ONE class matches RedPhase pattern
+
+**Regex**: `^RedPhase$`
+ - `RedPhase`
+
+### GreenPhase
+
+**Desc**: RGR Green phase — invokes the Claude /rgr-green skill to implement code that makes the red-phase tests pass.
+
+**Rule**: ONE class matches GreenPhase pattern
+
+**Regex**: `^GreenPhase$`
+ - `GreenPhase`
+
+### RefactorPhase
+
+**Desc**: RGR Refactor phase — invokes the Claude /rgr-refactor skill to verify code against UML specs and apply fixes.
+
+**Rule**: ONE class matches RefactorPhase pattern
+
+**Regex**: `^RefactorPhase$`
+ - `RefactorPhase`
+
+### PhaseResult
+
+**Desc**: Value record capturing the exit code and elapsed duration of an RGR phase execution.
+
+**Rule**: ONE class matches PhaseResult pattern
+
+**Regex**: `^PhaseResult$`
+ - `PhaseResult`
 
 ## src/test/java/org/farhan/impl
 

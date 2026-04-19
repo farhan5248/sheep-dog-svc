@@ -11,7 +11,7 @@ import org.farhan.mbt.maven.ClaudeRunner;
 import org.farhan.mbt.maven.DarmokMojo;
 import org.farhan.mbt.maven.GitRunner;
 import org.farhan.mbt.maven.MavenRunner;
-import org.farhan.mbt.maven.MojoLog;
+import org.farhan.mbt.maven.DarmokMojoLog;
 import org.farhan.mbt.maven.ProcessRunner.ProcessStarter;
 
 /**
@@ -102,11 +102,11 @@ public abstract class MavenTestObject extends TestObject {
         }
     }
 
-    protected final MojoLog getMojoLog(String prefix) {
+    protected final DarmokMojoLog getDarmokMojoLog(String prefix) {
         String cacheKey = "mojoLog." + prefix;
         Object cached = getProperty(cacheKey);
-        if (cached instanceof MojoLog) {
-            return (MojoLog) cached;
+        if (cached instanceof DarmokMojoLog) {
+            return (DarmokMojoLog) cached;
         }
         Path logDir = (Path) getProperty("log.dir");
         if (logDir == null) {
@@ -116,7 +116,7 @@ public abstract class MavenTestObject extends TestObject {
             }
             logDir = ((Path) baseDir).resolve("target").resolve("darmok");
         }
-        MojoLog mojoLog = new MojoLog(MojoLog.findDatedLog(logDir, prefix));
+        DarmokMojoLog mojoLog = new DarmokMojoLog(DarmokMojoLog.findDatedLog(logDir, prefix));
         setProperty(cacheKey, mojoLog);
         return mojoLog;
     }

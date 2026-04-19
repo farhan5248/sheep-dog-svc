@@ -3,11 +3,11 @@ package org.farhan.mbt.maven;
 public class RefactorPhase {
 
 	private final ClaudeRunner claude;
-	private final MojoLog mojoLog;
+	private final DarmokMojoLog mojoLog;
 	private final String workingDir;
 	private final String artifactId;
 
-	public RefactorPhase(ClaudeRunner claude, MojoLog mojoLog, String workingDir, String artifactId) {
+	public RefactorPhase(ClaudeRunner claude, DarmokMojoLog mojoLog, String workingDir, String artifactId) {
 		this.claude = claude;
 		this.mojoLog = mojoLog;
 		this.workingDir = workingDir;

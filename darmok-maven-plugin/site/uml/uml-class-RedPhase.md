@@ -6,15 +6,15 @@ First RGR phase. Runs the asciidoctor-to-uml and uml-to-cucumber-guice maven goa
 
 ## RedPhase
 
-**Desc**: Constructs a RedPhase with its MavenRunner collaborator, a MojoLog for phase markers, and the path/host/onlyChanges configuration needed to drive the two upstream maven goals.
+**Desc**: Constructs a RedPhase with its MavenRunner collaborator, a DarmokMojoLog for phase markers, and the path/host/onlyChanges configuration needed to drive the two upstream maven goals.
 
 **Rule**: ONE constructor matches RedPhase pattern.
  - **Name**: `^RedPhase$`
- - **Parameters**: `^\(MavenRunner\s+\w+,\s*MojoLog\s+\w+,\s*String\s+\w+,\s*String\s+\w+,\s*String\s+\w+,\s*boolean\s+\w+\)$`
+ - **Parameters**: `^\(MavenRunner\s+\w+,\s*DarmokMojoLog\s+\w+,\s*String\s+\w+,\s*String\s+\w+,\s*String\s+\w+,\s*boolean\s+\w+\)$`
  - **Modifier**: `^public$`
 
 **Examples**:
- - `public RedPhase(MavenRunner maven, MojoLog mojoLog, String baseDir, String specsDir, String host, boolean onlyChanges)`
+ - `public RedPhase(MavenRunner maven, DarmokMojoLog mojoLog, String baseDir, String specsDir, String host, boolean onlyChanges)`
 
 ## run
 

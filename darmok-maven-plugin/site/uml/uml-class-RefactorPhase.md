@@ -6,15 +6,15 @@ Third RGR phase. Invokes the Claude CLI `/rgr-refactor forward` skill to refacto
 
 ## RefactorPhase
 
-**Desc**: Constructs a RefactorPhase with its ClaudeRunner collaborator (pre-configured with the refactor-phase model), a MojoLog for phase start/complete markers, the working directory Claude runs in, and the maven artifact id passed as the skill's project argument.
+**Desc**: Constructs a RefactorPhase with its ClaudeRunner collaborator (pre-configured with the refactor-phase model), a DarmokMojoLog for phase start/complete markers, the working directory Claude runs in, and the maven artifact id passed as the skill's project argument.
 
 **Rule**: ONE constructor matches RefactorPhase pattern.
  - **Name**: `^RefactorPhase$`
- - **Parameters**: `^\(ClaudeRunner\s+\w+,\s*MojoLog\s+\w+,\s*String\s+\w+,\s*String\s+\w+\)$`
+ - **Parameters**: `^\(ClaudeRunner\s+\w+,\s*DarmokMojoLog\s+\w+,\s*String\s+\w+,\s*String\s+\w+\)$`
  - **Modifier**: `^public$`
 
 **Examples**:
- - `public RefactorPhase(ClaudeRunner claude, MojoLog mojoLog, String workingDir, String artifactId)`
+ - `public RefactorPhase(ClaudeRunner claude, DarmokMojoLog mojoLog, String workingDir, String artifactId)`
 
 ## run
 

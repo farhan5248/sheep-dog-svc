@@ -1,36 +1,36 @@
-# MojoLog
+# DarmokMojoLog
 
 **Directory**: `src/main/java/org/farhan/mbt/maven`
 
 Complete mojo log — writes timestamped, structured entries to file while delegating to Maven's console Log, and reads them back for verification. Implements Maven's Log interface.
 
-## MojoLog
+## DarmokMojoLog
 
-**Desc**: Constructs a MojoLog with a delegate Log, category name, and log file path. Creates parent directories if needed.
+**Desc**: Constructs a DarmokMojoLog with a delegate Log, category name, and log file path. Creates parent directories if needed.
 
-**Rule**: ONE constructor matches MojoLog pattern.
- - **Name**: `^MojoLog$`
+**Rule**: ONE constructor matches DarmokMojoLog pattern.
+ - **Name**: `^DarmokMojoLog$`
  - **Parameters**: `^\(Log\s+\w+,\s*String\s+\w+,\s*Path\s+\w+\)$`
  - **Modifier**: `^public$`
 
 **Examples**:
- - `public MojoLog(Log delegate, String category, Path logFile)`
+ - `public DarmokMojoLog(Log delegate, String category, Path logFile)`
 
-## MojoLog (read-only)
+## DarmokMojoLog (read-only)
 
-**Desc**: Constructs a read-only MojoLog for log inspection without writing.
+**Desc**: Constructs a read-only DarmokMojoLog for log inspection without writing.
 
-**Rule**: ONE constructor matches MojoLog read-only pattern.
- - **Name**: `^MojoLog$`
+**Rule**: ONE constructor matches DarmokMojoLog read-only pattern.
+ - **Name**: `^DarmokMojoLog$`
  - **Parameters**: `^\(Path\s+\w+\)$`
  - **Modifier**: `^public$`
 
 **Examples**:
- - `public MojoLog(Path logFile)`
+ - `public DarmokMojoLog(Path logFile)`
 
 ## getLogFile
 
-**Desc**: Returns the log file path for this MojoLog instance.
+**Desc**: Returns the log file path for this DarmokMojoLog instance.
 
 **Rule**: ONE method name follows getLogFile pattern.
  - **Name**: `^getLogFile$`

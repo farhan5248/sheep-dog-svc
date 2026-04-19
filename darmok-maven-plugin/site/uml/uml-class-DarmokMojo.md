@@ -54,6 +54,21 @@ Abstract base Mojo providing shared lifecycle, scenario iteration, RGR phase orc
 **Examples**:
  - `public void setBaseDir(String baseDir)`
 
+## set{Tool}RunnerFactory
+
+**Desc**: Test-only setter that substitutes a runner factory so tests can inject a FakeProcessStarter-backed runner. Default factories use the production runner constructors (e.g. `GitRunner::new`).
+
+**Rule**: SOME method names follow set{Tool}RunnerFactory pattern.
+ - **Name**: `^set{Tool}RunnerFactory$`
+ - **Return**: `^void$`
+ - **Parameters**: `^\({Tool}RunnerFactory\s+\w+\)$`
+ - **Modifier**: `^public$`
+
+**Examples**:
+ - `public void setGitRunnerFactory(GitRunnerFactory factory)`
+ - `public void setMavenRunnerFactory(MavenRunnerFactory factory)`
+ - `public void setClaudeRunnerFactory(ClaudeRunnerFactory factory)`
+
 ## init
 
 **Desc**: Initializes baseDir from MavenProject, creates MojoLog instances for mojo and runner output, instantiates GitRunner and MavenRunner via their factories, and constructs the RedPhase, GreenPhase, and RefactorPhase with their wired runners.

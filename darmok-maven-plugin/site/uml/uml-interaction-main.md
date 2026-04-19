@@ -379,6 +379,36 @@ public int run(String workingDirectory, String... args) throws Exception {
 }
 ```
 
+### capture
+
+Builds the command, starts the process, reads stdout to a string, and returns the trimmed output. Throws IOException on non-zero exit. Used by runners that need the subprocess's output as a value rather than streamed to the log.
+
+**Example: capture method body**
+```java
+public String capture(String workingDirectory, String... args) throws Exception {
+    List<String> command = buildCommand(args);
+    ProcessBuilder pb = new ProcessBuilder(command);
+    pb.directory(new File(workingDirectory));
+    pb.redirectErrorStream(true);
+    log.debug("Running: " + String.join(" ", command));
+    Process process = starter.start(pb);
+    process.getOutputStream().close();
+    StringBuilder output = new StringBuilder();
+    try (BufferedReader reader = new BufferedReader(
+            new InputStreamReader(process.getInputStream()))) {
+        String line;
+        while ((line = reader.readLine()) != null) {
+            output.append(line).append("\n");
+        }
+    }
+    int exit = process.waitFor();
+    if (exit != 0) {
+        throw new IOException("Command failed (exit " + exit + "): " + String.join(" ", command));
+    }
+    return output.toString().trim();
+}
+```
+
 ### getLog
 
 Returns the Maven Log instance.
@@ -448,11 +478,22 @@ public int run(String workingDirectory, String... args) throws Exception {
 }
 ```
 
-## MojoLog
+### getCurrentCommit
+
+GitRunner convenience method that captures the current HEAD commit SHA via `git rev-parse HEAD`. Used by DarmokMojo to tag per-scenario metrics rows with the commit responsible for that cycle-time point.
+
+**Example: GitRunner.getCurrentCommit method body**
+```java
+public String getCurrentCommit(String workingDirectory) throws Exception {
+    return capture(workingDirectory, "rev-parse", "HEAD");
+}
+```
+
+## DarmokMojoLog
 
 ### getLogFile
 
-Returns the log file path for this MojoLog instance.
+Returns the log file path for this DarmokMojoLog instance.
 
 **Example: getLogFile method body**
 ```java
@@ -546,4 +587,54 @@ Closes the underlying PrintWriter.
 public void close() {
     writer.close();
 }
+```
+
+## DarmokMojoMetrics
+
+### getFile
+
+Returns the target file path for this metrics instance.
+
+**Example: getFile method body**
+```java
+public Path getFile() {
+    return file;
+}
+```
+
+### append
+
+Appends one data row to the CSV. Writes the header on the first call if the file does not yet exist. Scenario names containing commas, quotes, or newlines are CSV-escaped.
+
+**Example: append method body**
+```java
+public void append(String commit, String scenario, long redMs, long greenMs, long refactorMs, long totalMs) throws IOException {
+    Files.createDirectories(file.getParent());
+    if (!Files.exists(file)) {
+        Files.writeString(file, HEADER + "\n", StandardCharsets.UTF_8);
+    }
+    String row = LocalDateTime.now().format(TIMESTAMP) + "," + commit + "," + escape(scenario) + "," + redMs + "," + greenMs + "," + refactorMs + "," + totalMs + "\n";
+    Files.writeString(file, row, StandardCharsets.UTF_8, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+}
+```
+
+## {Tool}RunnerFactory
+
+### create
+
+Single abstract method of a functional interface. Interface body shown as its functional equivalent — production wires this via a constructor method reference (`{Tool}Runner::new`); tests substitute a lambda that binds a FakeProcessStarter.
+
+**Example: create method body (functional equivalent)**
+```java
+GitRunner create(Log log) { return new GitRunner(log); }
+```
+
+**Example: Production wiring via constructor reference**
+```java
+GitRunnerFactory gitRunnerFactory = GitRunner::new;
+```
+
+**Example: Test wiring via FakeProcessStarter**
+```java
+mojo.setGitRunnerFactory(log -> new GitRunner(log, starter));
 ```

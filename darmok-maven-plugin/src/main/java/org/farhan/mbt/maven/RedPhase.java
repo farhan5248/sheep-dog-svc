@@ -7,13 +7,13 @@ import java.nio.file.Path;
 public class RedPhase {
 
 	private final MavenRunner maven;
-	private final MojoLog mojoLog;
+	private final DarmokMojoLog mojoLog;
 	private final String baseDir;
 	private final String specsDir;
 	private final String host;
 	private final boolean onlyChanges;
 
-	public RedPhase(MavenRunner maven, MojoLog mojoLog, String baseDir, String specsDir, String host, boolean onlyChanges) {
+	public RedPhase(MavenRunner maven, DarmokMojoLog mojoLog, String baseDir, String specsDir, String host, boolean onlyChanges) {
 		this.maven = maven;
 		this.mojoLog = mojoLog;
 		this.baseDir = baseDir;

@@ -18,7 +18,7 @@ This pattern covers the full lifecycle of a Darmok Maven goal invocation: initia
 | 6 | [PhaseResult](uml-class-PhaseResult.md) | Record carrying exit code + duration from each phase, plus static duration formatter. |
 | 7 | [ProcessRunner](uml-class-ProcessRunner.md) | Process lifecycle and output streaming. |
 | 8 | [{Tool}Runner](uml-class-ToolRunner.md) | Tool-specific command construction. ClaudeRunner adds retry logic. |
-| 9 | [MojoLog](uml-class-MojoLog.md) | Structured logging to console and dated log files. |
+| 9 | [DarmokMojoLog](uml-class-DarmokMojoLog.md) | Structured logging to console and dated log files. |
 
 ### Sequence
 

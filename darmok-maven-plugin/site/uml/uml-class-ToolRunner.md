@@ -20,6 +20,20 @@ Specialized process runner that extends ProcessRunner with tool-specific command
  - `public MavenRunner(Log log)`
  - `public ClaudeRunner(Log log, String model, int maxRetries, int retryWaitSeconds)`
 
+## {Tool}Runner (test seam)
+
+**Desc**: Test-only constructor variant that appends a ProcessStarter test seam parameter so tests can inject a FakeProcessStarter without spawning real subprocesses.
+
+**Rule**: SOME constructors match {Tool}Runner test seam pattern.
+ - **Name**: `^{Tool}Runner$`
+ - **Parameters**: `^\(Log\s+\w+(,\s*(String|int)\s+\w+)*,\s*ProcessStarter\s+\w+\)$`
+ - **Modifier**: `^public$`
+
+**Examples**:
+ - `public GitRunner(Log log, ProcessStarter starter)`
+ - `public MavenRunner(Log log, ProcessStarter starter)`
+ - `public ClaudeRunner(Log log, String model, int maxRetries, int retryWaitSeconds, ProcessStarter starter)`
+
 ## buildCommand
 
 **Desc**: Overrides ProcessRunner.buildCommand to prepend the tool-specific executable (e.g. git, mvn.cmd, claude.cmd) before the args. Platform-aware runners use isWindows() to select .cmd extensions.
@@ -47,3 +61,16 @@ Specialized process runner that extends ProcessRunner with tool-specific command
 
 **Examples**:
  - `public int run(String workingDirectory, String... args)` (ClaudeRunner — with retry logic)
+
+## getCurrentCommit
+
+**Desc**: GitRunner convenience method that captures the current HEAD commit SHA via `git rev-parse HEAD`. Used by DarmokMojo to tag per-scenario metrics rows with the commit responsible for that cycle-time point.
+
+**Rule**: SOME method names follow getCurrentCommit pattern.
+ - **Name**: `^getCurrentCommit$`
+ - **Return**: `^String$`
+ - **Parameters**: `^\(String\s+\w+\)$`
+ - **Modifier**: `^public$`
+
+**Examples**:
+ - `public String getCurrentCommit(String workingDirectory)` (GitRunner)

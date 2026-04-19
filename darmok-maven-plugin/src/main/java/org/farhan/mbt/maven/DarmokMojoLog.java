@@ -15,7 +15,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.maven.plugin.logging.Log;
-public class MojoLog implements Log, Closeable {
+public class DarmokMojoLog implements Log, Closeable {
 
 	private static final DateTimeFormatter TIMESTAMP = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
 
@@ -35,7 +35,7 @@ public class MojoLog implements Log, Closeable {
 	private HashMap<String, String> lastKeyMap;
 	private LogEntry lastMatch;
 
-	public MojoLog(Log delegate, String category, Path logFile) throws IOException {
+	public DarmokMojoLog(Log delegate, String category, Path logFile) throws IOException {
 		this.delegate = delegate;
 		this.category = category;
 		this.logFile = logFile;
@@ -44,7 +44,7 @@ public class MojoLog implements Log, Closeable {
 	}
 
 	/** Read-only constructor for log inspection (no writing). */
-	public MojoLog(Path logFile) {
+	public DarmokMojoLog(Path logFile) {
 		this.delegate = null;
 		this.category = null;
 		this.logFile = logFile;

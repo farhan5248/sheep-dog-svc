@@ -13,7 +13,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-public class MetricsCsv {
+public class DarmokMojoMetrics {
 
 	private static final String HEADER =
 		"timestamp,commit,scenario,phase_red_ms,phase_green_ms,phase_refactor_ms,phase_total_ms";
@@ -29,7 +29,7 @@ public class MetricsCsv {
 	private HashMap<String, String> lastKeyMap;
 	private Map<String, String> lastRow;
 
-	public MetricsCsv(Path file) {
+	public DarmokMojoMetrics(Path file) {
 		this.file = file;
 	}
 
