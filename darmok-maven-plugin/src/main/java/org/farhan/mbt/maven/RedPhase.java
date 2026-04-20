@@ -73,7 +73,7 @@ public class RedPhase {
 			+ "@IncludeEngines(\"cucumber\")\n"
 			+ "@SelectClasspathResource(\"cucumber/\")\n"
 			+ "@ConfigurationParameter(key = PLUGIN_PROPERTY_NAME, value = \"pretty\")\n"
-			+ "@ConfigurationParameter(key = GLUE_PROPERTY_NAME, value = \"org.farhan.common,org.farhan.objects,org.farhan.stepdefs,org.farhan.suites\")\n"
+			+ "@ConfigurationParameter(key = GLUE_PROPERTY_NAME, value = \"org.farhan\")\n"
 			+ "@IncludeTags(\"" + pattern + "\")\n"
 			+ "public class " + runnerClassName + " {\n"
 			+ "}";
