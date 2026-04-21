@@ -61,4 +61,30 @@ public interface GenFromExistingGoal {
     public void setMvnCleanVerifyCommandPhase(HashMap<String, String> keyMap);
 
     public void setMvnCleanVerifyCommandExecutedButFailsOnceThenSucceeds(HashMap<String, String> keyMap);
+
+    public void setClaudeRgrGreenCommandHungOnEveryCall(HashMap<String, String> keyMap);
+
+    public void setClaudeRgrGreenCommandHungOnFirstCallThenCompletedOnResume(HashMap<String, String> keyMap);
+
+    public void setClaudeRgrGreenCommandHungUntilKilled(HashMap<String, String> keyMap);
+
+    public void setClaudeRgrRefactorCommandHungOnEveryCall(HashMap<String, String> keyMap);
+
+    public void setClaudeRgrRefactorCommandHungOnFirstCallThenCompletedOnResume(HashMap<String, String> keyMap);
+
+    public void setMaxClaudeSeconds(HashMap<String, String> keyMap);
+
+    public void setMaxTimeoutAttempts(HashMap<String, String> keyMap);
+
+    public void setMvnCleanInstallCommandExecutedAndFailsOnEveryCallInTheGreenPhase(HashMap<String, String> keyMap);
+
+    public void setMvnCleanInstallCommandExecutedAndFailsOnEveryCallInTheRefactorPhase(HashMap<String, String> keyMap);
+
+    public void setMvnCleanInstallCommandExecutedAndFailsThenPassesInTheGreenPhase(HashMap<String, String> keyMap);
+
+    public void setMvnCleanInstallCommandAttempt(HashMap<String, String> keyMap);
+
+    public void setMvnCleanInstallCommandExit(HashMap<String, String> keyMap);
+
+    public void setMvnCleanInstallCommandExecutedAndFailsThenPassesInTheRefactorPhase(HashMap<String, String> keyMap);
 }

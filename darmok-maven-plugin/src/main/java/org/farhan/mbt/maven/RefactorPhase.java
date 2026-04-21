@@ -9,9 +9,12 @@ public class RefactorPhase {
 	private final String targetDir;
 	private final String artifactId;
 	private final int maxVerifyAttempts;
+	private final int maxTimeoutAttempts;
+	private final int maxClaudeSeconds;
 
 	public RefactorPhase(ClaudeRunner claude, MavenRunner maven, DarmokMojoLog mojoLog,
-			String workingDir, String targetDir, String artifactId, int maxVerifyAttempts) {
+			String workingDir, String targetDir, String artifactId,
+			int maxVerifyAttempts, int maxTimeoutAttempts, int maxClaudeSeconds) {
 		this.claude = claude;
 		this.maven = maven;
 		this.mojoLog = mojoLog;
@@ -19,12 +22,15 @@ public class RefactorPhase {
 		this.targetDir = targetDir;
 		this.artifactId = artifactId;
 		this.maxVerifyAttempts = maxVerifyAttempts;
+		this.maxTimeoutAttempts = maxTimeoutAttempts;
+		this.maxClaudeSeconds = maxClaudeSeconds;
 	}
 
 	public PhaseResult run() throws Exception {
 		mojoLog.info("  Refactor: Running...");
 		long start = System.currentTimeMillis();
 		int claudeExit = claude.run(workingDir, "/rgr-refactor forward " + artifactId);
+		claudeExit = runTimeoutRecoveryLoop(claudeExit);
 		long claudeDuration = System.currentTimeMillis() - start;
 		mojoLog.info("  Refactor: Completed (" + PhaseResult.formatDuration(claudeDuration) + ")");
 		if (claudeExit != 0) {
@@ -33,6 +39,30 @@ public class RefactorPhase {
 		runVerifyLoop();
 		long totalDuration = System.currentTimeMillis() - start;
 		return new PhaseResult(0, totalDuration);
+	}
+
+	private int runTimeoutRecoveryLoop(int claudeExit) throws Exception {
+		if (claudeExit != ClaudeRunner.TIMEOUT_EXIT_CODE) {
+			return claudeExit;
+		}
+		mojoLog.warn("  Refactor: Claude timed out after " + maxClaudeSeconds + "s, killing...");
+		int attempt = 1;
+		while (true) {
+			mojoLog.info("  Refactor: Running mvn clean install to check phase state...");
+			int installExit = maven.run(targetDir, "clean", "install");
+			if (installExit == 0) {
+				mojoLog.info("  Refactor: Install passed, proceeding");
+				return 0;
+			}
+			if (attempt >= maxTimeoutAttempts) {
+				mojoLog.error("  Refactor: Timeout exhausted after " + maxTimeoutAttempts + " attempts");
+				throw new Exception("rgr-refactor timed out after " + maxTimeoutAttempts + " attempts");
+			}
+			attempt++;
+			mojoLog.info("  Refactor: Install failed, resuming claude (attempt " + attempt
+				+ " of " + maxTimeoutAttempts + ")...");
+			claude.resume(workingDir, GreenPhase.TIMEOUT_RESUME_MESSAGE);
+		}
 	}
 
 	private void runVerifyLoop() throws Exception {

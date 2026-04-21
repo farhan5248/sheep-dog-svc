@@ -6,7 +6,7 @@ Test object implementation that bridges Cucumber step definitions to file system
 
 ## get{StateDesc}
 
-**Desc**: Returns observable state for assertion. File impls delegate to MavenTestObject.getState or read content directly. Log file impls delegate to MojoLog.matchAndGet{Field}. Goal impls are not expected to have getters.
+**Desc**: Returns observable state for assertion. File impls delegate to `MavenTestObject.getFileState` (raw file contents, used for Absent/Empty/as-follows checks) or `MavenTestObject.getFileContent` (trimmed + CR-stripped). Log file impls delegate to `DarmokMojoLog.matchAndGet{Field}` obtained via `getDarmokMojoLog(<prefix>)`. Goal impls are not expected to have getters.
 
 **Rule**: SOME method names follow get{StateDesc} pattern.
  - **Name**: `^get{StateDesc}$`
@@ -23,7 +23,7 @@ Test object implementation that bridges Cucumber step definitions to file system
 
 ## set{StateDesc}
 
-**Desc**: Mutates state or triggers action. File impls delegate to MavenTestObject or write content. Goal impls buffer parameters (setStage, setModelGreen, etc.) then execute the Mojo on setExecuted/setExecutedWith.
+**Desc**: Mutates state or triggers action. File impls delegate to `createOrDeleteFile` (branches on the `stateType` property — creates for `is created`, deletes for `isn't created`) or `writeFile`. Goal impls buffer parameters (setStage, setModelGreen, setMaxClaudeSeconds, etc.) into TestObject.properties; the setExecuted/setExecutedWith terminal setters construct a FakeProcessStarter from those accumulated properties and then call `executeMojo`.
 
 **Rule**: SOME method names follow set{StateDesc} pattern.
  - **Name**: `^set{StateDesc}$`

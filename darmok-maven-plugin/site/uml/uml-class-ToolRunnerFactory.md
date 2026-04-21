@@ -17,4 +17,4 @@ Functional interface (SAM) for constructing a {Tool}Runner. Production wires the
 **Examples**:
  - `GitRunner create(Log log)`
  - `MavenRunner create(Log log)`
- - `ClaudeRunner create(Log log, String model, int maxRetries, int retryWaitSeconds)`
+ - `ClaudeRunner create(Log log, String model, int maxRetries, int retryWaitSeconds, int maxClaudeSeconds)`

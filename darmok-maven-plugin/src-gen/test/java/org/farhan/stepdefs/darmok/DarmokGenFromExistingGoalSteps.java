@@ -75,4 +75,49 @@ public class DarmokGenFromExistingGoalSteps extends TestSteps {
     public void mvnCleanVerifyCommandIsExecutedButFailsOnceThenSucceeds(DataTable dataTable) {
         object.doEdgeStep("mvn clean verify", "command", "is", "executed but fails once then succeeds", dataTable);
     }
+
+    @Given("^The darmok plugin gen-from-existing goal claude /rgr-green command is hung on every call$")
+    public void claudeRgrGreenCommandIsHungOnEveryCall() {
+        object.doEdgeStep("claude /rgr-green", "command", "is", "hung on every call");
+    }
+
+    @Given("^The darmok plugin gen-from-existing goal claude /rgr-green command is hung on first call then completed on resume$")
+    public void claudeRgrGreenCommandIsHungOnFirstCallThenCompletedOnResume() {
+        object.doEdgeStep("claude /rgr-green", "command", "is", "hung on first call then completed on resume");
+    }
+
+    @Given("^The darmok plugin gen-from-existing goal claude /rgr-green command is hung until killed$")
+    public void claudeRgrGreenCommandIsHungUntilKilled() {
+        object.doEdgeStep("claude /rgr-green", "command", "is", "hung until killed");
+    }
+
+    @Given("^The darmok plugin gen-from-existing goal claude /rgr-refactor command is hung on every call$")
+    public void claudeRgrRefactorCommandIsHungOnEveryCall() {
+        object.doEdgeStep("claude /rgr-refactor", "command", "is", "hung on every call");
+    }
+
+    @Given("^The darmok plugin gen-from-existing goal claude /rgr-refactor command is hung on first call then completed on resume$")
+    public void claudeRgrRefactorCommandIsHungOnFirstCallThenCompletedOnResume() {
+        object.doEdgeStep("claude /rgr-refactor", "command", "is", "hung on first call then completed on resume");
+    }
+
+    @Given("^The darmok plugin gen-from-existing goal mvn clean install command is executed and fails on every call in the green phase$")
+    public void mvnCleanInstallCommandIsExecutedAndFailsOnEveryCallInTheGreenPhase() {
+        object.doEdgeStep("mvn clean install", "command", "is", "executed and fails on every call in the green phase");
+    }
+
+    @Given("^The darmok plugin gen-from-existing goal mvn clean install command is executed and fails on every call in the refactor phase$")
+    public void mvnCleanInstallCommandIsExecutedAndFailsOnEveryCallInTheRefactorPhase() {
+        object.doEdgeStep("mvn clean install", "command", "is", "executed and fails on every call in the refactor phase");
+    }
+
+    @Given("^The darmok plugin gen-from-existing goal mvn clean install command is executed and fails then passes in the green phase$")
+    public void mvnCleanInstallCommandIsExecutedAndFailsThenPassesInTheGreenPhase(DataTable dataTable) {
+        object.doEdgeStep("mvn clean install", "command", "is", "executed and fails then passes in the green phase", dataTable);
+    }
+
+    @Given("^The darmok plugin gen-from-existing goal mvn clean install command is executed and fails then passes in the refactor phase$")
+    public void mvnCleanInstallCommandIsExecutedAndFailsThenPassesInTheRefactorPhase(DataTable dataTable) {
+        object.doEdgeStep("mvn clean install", "command", "is", "executed and fails then passes in the refactor phase", dataTable);
+    }
 }

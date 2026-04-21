@@ -57,13 +57,13 @@ public void cleanupTestProject() throws IOException {
 
 ### get{StateDesc}
 
-Returns observable state for assertion. Each impl delegates to MavenTestObject helpers. Log impls use getMojoLog(). File impls use getState()/getFileState().
+Returns observable state for assertion. Each impl delegates to MavenTestObject helpers. Log impls use `getDarmokMojoLog(<prefix>)` to obtain a read-only DarmokMojoLog and call `matchAndGet{Field}` for per-row sequential matching. File impls use `getFileState(path)` (raw contents, used by `will be absent` / `will be empty` / `will be as follows`) or `getFileContent(path)` (trimmed + CR-stripped, used by `getContent`).
 
 **Example: Log column delegation (DarmokMojoLogFileImpl)**
 ```java
 @Override
 public String getLevel(HashMap<String, String> keyMap) {
-    return getMojoLog("darmok.mojo").matchAndGetLevel(keyMap);
+    return getDarmokMojoLog("darmok.mojo").matchAndGetLevel(keyMap);
 }
 ```
 
@@ -71,7 +71,7 @@ public String getLevel(HashMap<String, String> keyMap) {
 ```java
 @Override
 public String getEmpty(HashMap<String, String> keyMap) {
-    return getState(keyMap);
+    return getFileState(resolveFilePath());
 }
 ```
 
@@ -79,14 +79,13 @@ public String getEmpty(HashMap<String, String> keyMap) {
 ```java
 @Override
 public String getContent(HashMap<String, String> keyMap) {
-    String content = getState(keyMap);
-    return content != null ? content.trim() : null;
+    return getFileContent(resolveFilePath());
 }
 ```
 
 ### set{StateDesc}
 
-Mutates state or triggers action. Goal impls buffer parameters then call executeMojo(). File impls delegate to createFile()/writeFile().
+Mutates state or triggers action. Goal impls buffer parameters then call `executeMojo` (which first builds a FakeProcessStarter from the accumulated properties). File impls delegate to `createOrDeleteFile(path)` (respects the `stateType` property — creates for `is created`, deletes for `isn't created`) or `writeFile(path, content)`.
 
 **Example: Parameter buffering (GenFromExistingGoalImpl)**
 ```java
@@ -100,6 +99,7 @@ public void setStage(HashMap<String, String> keyMap) {
 ```java
 @Override
 public void setExecuted(HashMap<String, String> keyMap) {
+    setProperty("processStarter", new FakeProcessStarter(properties));
     executeMojo(GenFromExistingMojo.class);
 }
 ```
@@ -108,7 +108,7 @@ public void setExecuted(HashMap<String, String> keyMap) {
 ```java
 @Override
 public void setCreated(HashMap<String, String> keyMap) {
-    createFile(resolveFilePath(), (String) getProperty("stateType"));
+    createOrDeleteFile(resolveFilePath());
 }
 ```
 

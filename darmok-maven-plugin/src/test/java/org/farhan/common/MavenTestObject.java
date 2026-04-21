@@ -51,8 +51,8 @@ public abstract class MavenTestObject extends TestObject {
             if (starterProp instanceof ProcessStarter starter) {
                 mojo.setGitRunnerFactory(log -> new GitRunner(log, starter));
                 mojo.setMavenRunnerFactory(log -> new MavenRunner(log, starter));
-                mojo.setClaudeRunnerFactory((log, model, retries, wait) ->
-                    new ClaudeRunner(log, model, retries, wait, starter));
+                mojo.setClaudeRunnerFactory((log, model, retries, wait, maxSeconds) ->
+                    new ClaudeRunner(log, model, retries, wait, maxSeconds, starter));
             }
 
             for (String key : mojoDefaults.stringPropertyNames()) {

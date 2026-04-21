@@ -54,6 +54,20 @@ public abstract class DarmokMojo extends AbstractMojo {
 	@Parameter(property = "retryWaitSeconds", defaultValue = "30")
 	public int retryWaitSeconds;
 
+	// Upper bound on a single claude invocation (initial call or --resume).
+	// Default 720s (12 min) is the UCL of the per-scenario runtime distribution
+	// on the SPC dashboard; override via -DmaxClaudeSeconds=... until the
+	// grafana read-back wiring exists. Timeout recovery lives in the phase
+	// classes (GreenPhase/RefactorPhase); see issue 140.
+	@Parameter(property = "maxClaudeSeconds", defaultValue = "720")
+	public int maxClaudeSeconds;
+
+	// How many times a phase will run claude + mvn clean install before
+	// aborting. Counts the initial claude call; a value of 2 means "initial
+	// call + one --resume retry".
+	@Parameter(property = "maxTimeoutAttempts", defaultValue = "2")
+	public int maxTimeoutAttempts;
+
 	@Parameter(property = "onlyChanges", defaultValue = "true")
 	public boolean onlyChanges;
 
@@ -106,11 +120,11 @@ public abstract class DarmokMojo extends AbstractMojo {
 		String artifactId = project.getArtifactId();
 		redPhase = new RedPhase(maven, mojoLog, baseDir, specsDir, host, onlyChanges);
 		greenPhase = new GreenPhase(
-			claudeRunnerFactory.create(runnerLog, modelGreen, maxRetries, retryWaitSeconds),
-			maven, mojoLog, sheepDogRoot, baseDir, artifactId, maxVerifyAttempts);
+			claudeRunnerFactory.create(runnerLog, modelGreen, maxRetries, retryWaitSeconds, maxClaudeSeconds),
+			maven, mojoLog, sheepDogRoot, baseDir, artifactId, maxVerifyAttempts, maxTimeoutAttempts, maxClaudeSeconds);
 		refactorPhase = new RefactorPhase(
-			claudeRunnerFactory.create(runnerLog, modelRefactor, maxRetries, retryWaitSeconds),
-			maven, mojoLog, sheepDogRoot, baseDir, artifactId, maxVerifyAttempts);
+			claudeRunnerFactory.create(runnerLog, modelRefactor, maxRetries, retryWaitSeconds, maxClaudeSeconds),
+			maven, mojoLog, sheepDogRoot, baseDir, artifactId, maxVerifyAttempts, maxTimeoutAttempts, maxClaudeSeconds);
 	}
 
 	/** Test-only setter. Lets tests pre-seed baseDir before execute() so init() skips the MavenProject path. */

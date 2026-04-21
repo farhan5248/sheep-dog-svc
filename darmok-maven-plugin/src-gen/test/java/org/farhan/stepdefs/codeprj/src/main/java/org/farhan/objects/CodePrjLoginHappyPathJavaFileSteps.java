@@ -24,4 +24,9 @@ public class CodePrjLoginHappyPathJavaFileSteps extends TestSteps {
     public void willBePresent() {
         object.assertVertexStep("", "", "will be", "present");
     }
+
+    @Given("^The code-prj project src/main/java/org/farhan/objects/LoginHappyPath.java file will be absent$")
+    public void willBeAbsent() {
+        object.assertVertexStep("", "", "will be", "absent");
+    }
 }

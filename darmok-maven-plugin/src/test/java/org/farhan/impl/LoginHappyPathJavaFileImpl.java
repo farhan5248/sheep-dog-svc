@@ -22,4 +22,9 @@ public class LoginHappyPathJavaFileImpl extends MavenTestObject implements Login
 	public String getPresent(HashMap<String, String> keyMap) {
 		return getFileState(resolveFilePath());
 	}
+
+	@Override
+	public String getAbsent(HashMap<String, String> keyMap) {
+		return getFileState(resolveFilePath());
+	}
 }

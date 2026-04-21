@@ -80,8 +80,15 @@ execute(goal)
 │        │         │     ├── retryable 500/529/overloaded   → retry up to maxRetries
 │        │         │     │     ├── recovers                 → proceed (WARN markers in log)
 │        │         │     │     └── exhausted                → return non-zero (ERROR markers)
+│        │         │     ├── exceeds maxClaudeSeconds       → destroyForcibly()                  (140)
+│        │         │     │     ├── mvn clean install passes → treat as exit 0 + continue         (140)
+│        │         │     │     ├── install fails            → claude --resume "pls continue"     (140)
+│        │         │     │     │     └── loop up to maxTimeoutAttempts
+│        │         │     │     └── all attempts exhausted   → FAIL "rgr-green timed out after N" (140)
 │        │         │     └── non-retryable non-zero         → return non-zero (single attempt)
 │        │         ├── if greenExit != 0 → FAIL "rgr-green failed with exit code N"
+│        │         ├── runGreenVerify (155) → mvn clean verify / claude --resume
+│        │         │     └── abort on exhaustion
 │        │         ├── log "Green: Completed (HH:MM:SS)"
 │        │         ├── removeFirstScenarioFromFile
 │        │         ├── git add .
@@ -119,6 +126,10 @@ Parameters that change observable behavior:
 | `pipeline` parameter | `forward` · `reverse` |
 | `onlyChanges` | `true` · `false` (used by svc-plugin goals) |
 | `LOG_PATH` env | unset (target/darmok/) · set (use that dir) |
+| `maxClaudeSeconds` | 720 (prod default from UCL) · small N (test-compressed) |
+| `maxTimeoutAttempts` | 2 (default) · N |
+| per-attempt claude runtime (green/refactor) | under timeout · exceeds timeout → kill |
+| post-kill install outcome | `mvn clean install` passes · fails |
 
 Observably distinct paths grouped below.
 
@@ -452,7 +463,7 @@ All assume: exactly one scenario in the list with a regular tag; the asciidoc fi
 
 ---
 
-### Phase verification (#155 — deterministic verify inside green and refactor)
+### Phase verification (155 — deterministic verify inside green and refactor)
 
 Both green and refactor phases run `mvn clean verify` in the target project after the
 claude invocation succeeds. A failing verify is treated as "claude left the code in an
@@ -562,6 +573,120 @@ phases, not green alone.
 
 ---
 
+### Phase timeout (140 — kill claude after maxClaudeSeconds and recover)
+
+Each claude call inside green and refactor is bounded by `maxClaudeSeconds`
+(default 720, i.e. 12 min — the number comes from the UCL of the per-scenario
+runtime distribution on the SPC dashboard; exposed as a property until the
+grafana read-back wiring exists). When the timer fires, Darmok calls
+`process.destroyForcibly()` on the claude subprocess, then runs
+`mvn clean install` in the target project to decide whether the killed phase
+produced usable code:
+
+- install passes → log it, treat the claude call as having completed with exit 0 and continue into the 155 verify loop
+- install fails → resume the claude session with the literal message `"pls continue"` and re-check with another `mvn clean install`, bounded by `maxTimeoutAttempts` (default 2)
+
+Timeout handling sits inside each phase (green/refactor) between the claude call
+and the 155 verify loop, so verify still runs on top of a recovered phase.
+The timeout is a separate axis from the existing API-error retry loop
+(500/529/overloaded) — timeouts are not API errors and don't consume
+`maxRetries`.
+
+New observable signals:
+- Mojo log gains `WARN [mojo]   Green: Claude timed out after <N>s, killing...`
+  when the timer fires, then `INFO [mojo]   Green: Running mvn clean install to check phase state...`,
+  then either `INFO [mojo]   Green: Install passed, proceeding` or
+  `INFO [mojo]   Green: Install failed, resuming claude (attempt N/M)...`.
+- On exhaustion: `ERROR [mojo]   Green: Timeout exhausted after M attempts`.
+- Runner log gains `DEBUG [runner] Running: mvn clean install` per check, and
+  `DEBUG [runner] Executing: claude --resume --print --dangerously-skip-permissions --model <m> "pls continue"` per resume.
+- Refactor phase emits the symmetric `Refactor: ...` log lines.
+
+#### Path 24 — Green: claude completes within timeout (new default happy path)
+
+- Preconditions match Path 18 (green succeeds, verify passes)
+- And claude `/rgr-green` returned exit 0 within `maxClaudeSeconds`
+- When the `darmok:gen-from-existing` goal is executed
+- Then the observable outcome is identical to Path 18 — no timeout-related log lines appear
+- And `mvn clean install` is never invoked in the green phase (only in the post-verify step, if 155 needed it — not this path)
+
+#### Path 25 — Green: claude killed, install passes
+
+- Given `maxClaudeSeconds` is 1 (test-compressed)
+- And the claude `/rgr-green` subprocess never exits on its own
+- And the first `mvn clean install` invocation on the target project returns exit 0 (the killed session happened to have produced working code)
+- When the `darmok:gen-from-existing` goal is executed
+- Then control proceeds into the 155 verify loop as if claude had returned 0
+- And the mojo log contains
+  ```
+  | Level | Category | Content                                                  |
+  | INFO  | mojo     |   Green: Running...                                      |
+  | WARN  | mojo     |   Green: Claude timed out after 1s, killing...           |
+  | INFO  | mojo     |   Green: Running mvn clean install to check phase state...|
+  | INFO  | mojo     |   Green: Install passed, proceeding                      |
+  | INFO  | mojo     |   Green: Verify running...                               |
+  ```
+- And the runner log contains exactly one `Executing: claude ... /rgr-green ...` line and one `Running: mvn clean install` line
+- And no `Executing: claude --resume ... "pls continue"` line appears
+
+#### Path 26 — Green: claude killed, install fails, resume recovers
+
+- Given `maxClaudeSeconds` is 1 and `maxTimeoutAttempts` is 2
+- And the claude `/rgr-green` subprocess never exits on its own
+- And the first `mvn clean install` returns exit 1
+- And the resumed claude `--resume "pls continue"` call returns exit 0 within 1s
+- And the second `mvn clean install` returns exit 0
+- When the `darmok:gen-from-existing` goal is executed
+- Then control proceeds into the 155 verify loop
+- And the mojo log contains
+  ```
+  | Level | Category | Content                                                      |
+  | WARN  | mojo     |   Green: Claude timed out after 1s, killing...               |
+  | INFO  | mojo     |   Green: Install failed, resuming claude (attempt 2 of 2)... |
+  | INFO  | mojo     |   Green: Install passed, proceeding                          |
+  ```
+- And the runner log contains, in order
+  ```
+  | Level | Category | Content                                                                                                       |
+  | DEBUG | runner   | Executing: claude --print --dangerously-skip-permissions --model sonnet /rgr-green darmok-prj <tag>           |
+  | DEBUG | runner   | Running: mvn clean install                                                                                    |
+  | DEBUG | runner   | Executing: claude --resume --print --dangerously-skip-permissions --model sonnet pls continue                 |
+  | DEBUG | runner   | Running: mvn clean install                                                                                    |
+  ```
+
+#### Path 27 — Green: timeouts exhaust maxTimeoutAttempts
+
+- Given every claude call (initial + resumes) is killed by the timeout
+- And every `mvn clean install` returns exit 1
+- When the `darmok:gen-from-existing` goal is executed with default `maxTimeoutAttempts=2`
+- Then the goal fails with `MojoExecutionException`: `rgr-green timed out after 2 attempts`
+- And `mvn clean install` was invoked exactly 2 times in the green phase
+- And `claude --resume "pls continue"` was invoked exactly 1 time (not 2 — we don't resume after the final failing install)
+- And the mojo log ends the green phase with
+  ```
+  | Level | Category | Content                                          |
+  | ERROR | mojo     |   Green: Timeout exhausted after 2 attempts      |
+  ```
+- And no green commit was made
+- And the mojo log will not contain `Refactor: Running...` (refactor phase is never reached)
+
+#### Path 28 — Refactor: claude completes within timeout
+
+Symmetric with Path 24 for the refactor phase. Already covered by Path 24's assertions;
+this entry documents that the timeout gate applies to both claude calls.
+
+#### Path 29 — Refactor: claude killed, install fails, resume recovers
+
+Symmetric with Path 26 — substitute `Refactor` for `Green` in all log lines and
+`/rgr-refactor forward darmok-prj` for the initial claude invocation.
+
+#### Path 30 — Refactor: timeouts exhaust maxTimeoutAttempts
+
+Symmetric with Path 27 — exception message becomes `rgr-refactor timed out after 2 attempts`.
+The green commit from this scenario remains in git history (stage=false); no refactor commit is made.
+
+---
+
 ### gen-from-comparison specific
 
 The comparison goal runs a `/rgr-gen-from-comparison` skill before each scenario-processing iteration.
@@ -622,7 +747,9 @@ The comparison goal runs a `/rgr-gen-from-comparison` skill before each scenario
 5a. **git_branch column** — `metrics.csv` gains a `git_branch` column populated with the value of the `gitBranch` parameter. The column is stable for the whole run (every row has the same value) and the branch is validated against git HEAD at init time, so `git_branch` is always the name of the branch that produced the commits recorded alongside it. The SPC dashboard joins on this column to overlay runs.
 6. **`LOG_PATH` env var** — if set, logs land elsewhere. A single path covering "LOG_PATH set" is enough; the rest of the behavior is identical.
 7. **Refactor-only path missing** — there's no code path that runs refactor without green. The tree shape is Red → (Green → Refactor) or Red alone.
-8. **Verify is a sub-step, not a phase** (#155) — verify lives inside green and inside refactor, not beside them. Paths 9, 10, and 12 (all the "green succeeds … refactor succeeds" flows) gained `Green: Verify running/passed` and `Refactor: Verify running/passed` lines as a side-effect of #155; the original path text does not call them out because the verify sub-step is documented once under Paths 18–23. When re-reading Paths 9–12, treat Path 18 as the canonical assertion template for the phase-verify lines.
+8. **Verify is a sub-step, not a phase** (155) — verify lives inside green and inside refactor, not beside them. Paths 9, 10, and 12 (all the "green succeeds … refactor succeeds" flows) gained `Green: Verify running/passed` and `Refactor: Verify running/passed` lines as a side-effect of 155; the original path text does not call them out because the verify sub-step is documented once under Paths 18–23. When re-reading Paths 9–12, treat Path 18 as the canonical assertion template for the phase-verify lines.
+9. **Timeout is a third sub-step inside each phase** (140) — ordering within the green phase is: claude call (bounded by maxClaudeSeconds) → timeout-recovery loop (mvn clean install / claude --resume "pls continue") → 155 verify loop → commit. The timeout recovery and the 155 verify loop both drain into "phase succeeded with exit 0", so Paths 25, 26, 29 observably continue through Path 18's verify assertions. Don't re-assert those lines in Paths 24–30; they belong to the verify section.
+10. **`maxClaudeSeconds` source** — the default 720s comes from the UCL of the per-scenario runtime distribution on the SPC dashboard. It's currently a static property; when grafana becomes queryable from the plugin (future issue), this property becomes the fallback for the "grafana unavailable" path, not the default value.
 
 ---
 

@@ -52,7 +52,7 @@ public class GenFromComparisonMojo extends DarmokMojo {
 	}
 
 	private int runGenFromComparison() throws Exception {
-		ClaudeRunner claude = claudeRunnerFactory.create(runnerLog, modelComparison, maxRetries, retryWaitSeconds);
+		ClaudeRunner claude = claudeRunnerFactory.create(runnerLog, modelComparison, maxRetries, retryWaitSeconds, maxClaudeSeconds);
 		return claude.run(baseDir + "/../..", "/rgr-gen-from-comparison " + project.getArtifactId());
 	}
 }

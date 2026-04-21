@@ -107,11 +107,11 @@ void init() throws Exception {
     String artifactId = project.getArtifactId();
     redPhase = new RedPhase(maven, mojoLog, baseDir, specsDir, host, onlyChanges);
     greenPhase = new GreenPhase(
-        claudeRunnerFactory.create(runnerLog, modelGreen, maxRetries, retryWaitSeconds),
-        maven, mojoLog, sheepDogRoot, baseDir, artifactId, maxVerifyAttempts);
+        claudeRunnerFactory.create(runnerLog, modelGreen, maxRetries, retryWaitSeconds, maxClaudeSeconds),
+        maven, mojoLog, sheepDogRoot, baseDir, artifactId, maxVerifyAttempts, maxTimeoutAttempts, maxClaudeSeconds);
     refactorPhase = new RefactorPhase(
-        claudeRunnerFactory.create(runnerLog, modelRefactor, maxRetries, retryWaitSeconds),
-        maven, mojoLog, sheepDogRoot, baseDir, artifactId, maxVerifyAttempts);
+        claudeRunnerFactory.create(runnerLog, modelRefactor, maxRetries, retryWaitSeconds, maxClaudeSeconds),
+        maven, mojoLog, sheepDogRoot, baseDir, artifactId, maxVerifyAttempts, maxTimeoutAttempts, maxClaudeSeconds);
 }
 ```
 
@@ -148,18 +148,24 @@ ScenarioEntry getNextScenario() throws Exception {
 
 ### processScenario
 
-Orchestrates the RGR cycle for a single scenario. Delegates each phase to its phase class (which owns its own start/complete log markers and timing), branches on the returned PhaseResult, handles git staging + commit policy, and emits METRIC-scenario lines using the phase durations.
+Orchestrates the RGR cycle for a single scenario. Delegates each phase to its phase class (which owns its own start/complete log markers and timing), branches on the returned PhaseResult, handles git staging + commit policy, captures the post-scenario HEAD commit, and appends a row to the metrics.csv file carrying the configured gitBranch, the captured commit, the scenario name, and the four phase durations.
 
 **Example: Phase delegation shape**
 ```java
 void processScenario(ScenarioEntry entry) throws MojoExecutionException, Exception {
     String scenarioName = entry.scenario();
     String tag = entry.tag();
+    long totalStart = System.currentTimeMillis();
     // ... addTagToAsciidoc ...
     PhaseResult redResult = redPhase.run(tag);
     if (redResult.exitCode() != 0 && redResult.exitCode() != 100) { /* throw */ }
-    // ... branch on red, run green+refactor, commit per stage policy ...
-    mojoLog.info("  METRIC-scenario=" + scenarioName + "-phase=total-duration_ms=" + totalDuration);
+    // ... branch on red.exitCode(), run green+refactor, commit per stage policy ...
+
+    String commit = git.getCurrentCommit(baseDir);
+    mojoLog.info("  Commit: " + commit);
+    long totalDuration = System.currentTimeMillis() - totalStart;
+    metrics.append(gitBranch, commit, scenarioName,
+        redResult.durationMs(), greenDuration, refactorDuration, totalDuration);
 }
 ```
 
@@ -290,7 +296,7 @@ String generateRunnerClassContent(String pattern, String runnerClassName) {
 
 ### run
 
-Invokes the Claude `/rgr-green` skill for the current scenario tag, then runs the inner verify loop (`mvn clean verify` + `claude --resume` retries up to `maxVerifyAttempts`). Logs start/complete markers, times the whole phase, returns a PhaseResult. A non-zero claude exit short-circuits before verify runs and returns that exit code; a verify-loop exhaustion throws with a message naming the phase and attempt count.
+Invokes the Claude `/rgr-green` skill for the current scenario tag. If the claude call times out (returns `ClaudeRunner.TIMEOUT_EXIT_CODE`), delegates to `runTimeoutRecoveryLoop` which calls `mvn clean install` and, on failure, resumes the session with `"pls continue"` — bounded by `maxTimeoutAttempts`. On successful recovery (or normal exit 0), then runs the inner verify loop (`mvn clean verify` + `claude --resume "mvn clean verify failures should be fixed"` retries up to `maxVerifyAttempts`). Logs start/complete markers, times the whole phase, returns a PhaseResult. A non-zero non-timeout claude exit short-circuits before verify runs; verify-loop or timeout-loop exhaustion throws with a message naming the phase and attempt count.
 
 **Example: run method body**
 ```java
@@ -298,6 +304,7 @@ public PhaseResult run(String pattern) throws Exception {
     mojoLog.info("  Green: Running...");
     long start = System.currentTimeMillis();
     int claudeExit = claude.run(workingDir, "/rgr-green " + artifactId + " " + pattern);
+    claudeExit = runTimeoutRecoveryLoop(claudeExit);
     long claudeDuration = System.currentTimeMillis() - start;
     mojoLog.info("  Green: Completed (" + PhaseResult.formatDuration(claudeDuration) + ")");
     if (claudeExit != 0) {
@@ -306,6 +313,37 @@ public PhaseResult run(String pattern) throws Exception {
     runVerifyLoop();
     long totalDuration = System.currentTimeMillis() - start;
     return new PhaseResult(0, totalDuration);
+}
+```
+
+### runTimeoutRecoveryLoop
+
+Timeout-recovery sub-step of the green phase. No-op unless `claude.run` returned the sentinel `ClaudeRunner.TIMEOUT_EXIT_CODE`. Logs a single `Claude timed out after <N>s, killing...` (WARN) on entry; then loops running `mvn clean install` against the target project. Install exit 0 → log `Install passed, proceeding` and return 0 (phase continues into the verify loop as though claude had returned 0). Install non-zero → log `Install failed, resuming claude (attempt N of M)...` and call `claude.resume(workingDir, "pls continue")` — the resume's exit code is intentionally ignored; the next install check is authoritative. Bounded by `maxTimeoutAttempts`; on exhaustion logs `Timeout exhausted after M attempts` (ERROR) and throws `"rgr-green timed out after M attempts"`.
+
+**Example: runTimeoutRecoveryLoop method body**
+```java
+private int runTimeoutRecoveryLoop(int claudeExit) throws Exception {
+    if (claudeExit != ClaudeRunner.TIMEOUT_EXIT_CODE) {
+        return claudeExit;
+    }
+    mojoLog.warn("  Green: Claude timed out after " + maxClaudeSeconds + "s, killing...");
+    int attempt = 1;
+    while (true) {
+        mojoLog.info("  Green: Running mvn clean install to check phase state...");
+        int installExit = maven.run(targetDir, "clean", "install");
+        if (installExit == 0) {
+            mojoLog.info("  Green: Install passed, proceeding");
+            return 0;
+        }
+        if (attempt >= maxTimeoutAttempts) {
+            mojoLog.error("  Green: Timeout exhausted after " + maxTimeoutAttempts + " attempts");
+            throw new Exception("rgr-green timed out after " + maxTimeoutAttempts + " attempts");
+        }
+        attempt++;
+        mojoLog.info("  Green: Install failed, resuming claude (attempt " + attempt
+            + " of " + maxTimeoutAttempts + ")...");
+        claude.resume(workingDir, TIMEOUT_RESUME_MESSAGE);
+    }
 }
 ```
 
@@ -339,7 +377,7 @@ private void runVerifyLoop() throws Exception {
 
 ### run
 
-Invokes the Claude `/rgr-refactor forward` skill for the current scenario, then runs the same verify loop as GreenPhase. Logs start/complete markers, times the whole phase, returns a PhaseResult. A verify-loop exhaustion throws with `"rgr-refactor verify failed after <N> attempts"`.
+Invokes the Claude `/rgr-refactor forward` skill for the current scenario, then runs the same timeout-recovery + verify loops as GreenPhase. Logs start/complete markers, times the whole phase, returns a PhaseResult. Timeout-loop exhaustion throws `"rgr-refactor timed out after <N> attempts"`; verify-loop exhaustion throws `"rgr-refactor verify failed after <N> attempts"`.
 
 **Example: run method body**
 ```java
@@ -347,6 +385,7 @@ public PhaseResult run() throws Exception {
     mojoLog.info("  Refactor: Running...");
     long start = System.currentTimeMillis();
     int claudeExit = claude.run(workingDir, "/rgr-refactor forward " + artifactId);
+    claudeExit = runTimeoutRecoveryLoop(claudeExit);
     long claudeDuration = System.currentTimeMillis() - start;
     mojoLog.info("  Refactor: Completed (" + PhaseResult.formatDuration(claudeDuration) + ")");
     if (claudeExit != 0) {
@@ -357,6 +396,10 @@ public PhaseResult run() throws Exception {
     return new PhaseResult(0, totalDuration);
 }
 ```
+
+### runTimeoutRecoveryLoop
+
+Symmetric with GreenPhase.runTimeoutRecoveryLoop — see that entry for the full log/flow contract. Differences: log category prefix is `Refactor:`, shared `TIMEOUT_RESUME_MESSAGE` constant (`GreenPhase.TIMEOUT_RESUME_MESSAGE = "pls continue"`), exhaustion message is `"rgr-refactor timed out after M attempts"`.
 
 ## PhaseResult
 
@@ -489,9 +532,9 @@ protected List<String> buildCommand(String... args) {
 
 ### run
 
-ClaudeRunner overrides run() to add retry logic on known API error patterns. GitRunner and MavenRunner inherit ProcessRunner.run unchanged.
+ClaudeRunner overrides run() to add (a) an API-retry loop on known transient error patterns (500/529/overloaded) and (b) a per-invocation timeout via `executeCommand`, which wraps each attempt in `waitFor(maxClaudeSeconds, SECONDS)` with a background stdout reader. On timeout the subprocess is destroyed and the sentinel `TIMEOUT_EXIT_CODE` is returned immediately — no API-retry is attempted, because the caller (GreenPhase/RefactorPhase) owns timeout recovery. GitRunner and MavenRunner inherit ProcessRunner.run unchanged.
 
-**Example: ClaudeRunner retry loop**
+**Example: ClaudeRunner retry + timeout loop**
 ```java
 @Override
 public int run(String workingDirectory, String... args) throws Exception {
@@ -500,9 +543,9 @@ public int run(String workingDirectory, String... args) throws Exception {
     int exitCode = -1;
     while (attempt < maxRetries) {
         attempt++;
-        Process process = starter.start(pb);
-        // ... read output ...
-        exitCode = process.waitFor();
+        List<String> outputLines = new ArrayList<>();
+        exitCode = executeCommand(command, workingDirectory, outputLines);
+        if (exitCode == TIMEOUT_EXIT_CODE) return TIMEOUT_EXIT_CODE;  // phase owns recovery
         if (exitCode == 0) break;
         String matchedPattern = findRetryableError(outputLines);
         if (matchedPattern != null && attempt < maxRetries) {
@@ -517,7 +560,7 @@ public int run(String workingDirectory, String... args) throws Exception {
 
 ### resume
 
-ClaudeRunner-only. Single-shot invocation of `claude --resume` with a continuation message; the most recent claude session gets the message and the caller's outer verify loop decides whether to retry. No internal retry loop — different failure domain from `run`'s API-error retries.
+ClaudeRunner-only. Single-shot invocation of `claude --resume` with a continuation message; the most recent claude session gets the message and the caller's outer loop (verify loop for `"mvn clean verify failures should be fixed"`, timeout loop for `"pls continue"`) decides whether to retry. Bounded by the same `maxClaudeSeconds` timeout as `run`; returns `TIMEOUT_EXIT_CODE` on timeout. No API-retry loop — different failure domain from `run`'s API-error retries.
 
 **Example: ClaudeRunner.resume method body**
 ```java
@@ -532,10 +575,49 @@ public int resume(String workingDirectory, String message) throws Exception {
         command.add(model);
     }
     command.add(message);
-    Log log = getLog();
-    log.debug("Executing: " + String.join(" ", command));
-    // ... run process, stream output, return exit code ...
+    List<String> outputLines = new ArrayList<>();
+    int exitCode = executeCommand(command, workingDirectory, outputLines);
+    if (exitCode == TIMEOUT_EXIT_CODE) return TIMEOUT_EXIT_CODE;
+    getLog().debug("Claude CLI exited with code " + exitCode);
     return exitCode;
+}
+```
+
+### executeCommand
+
+Private helper shared by `run` and `resume` that owns the subprocess lifecycle: starts the process, streams stdout on a background daemon thread (so a hung claude can't block the main thread's `waitFor(timeout)`), calls `waitFor(maxClaudeSeconds, SECONDS)`, and on timeout calls `destroyForcibly()` + reaps + joins the reader thread before returning `TIMEOUT_EXIT_CODE`. The background reader is why stdout-based retryable-error detection still works: `outputLines` is populated as the process writes, and `readerThread.join()` before returning the exit code ensures the list is complete.
+
+**Example: executeCommand body shape**
+```java
+private int executeCommand(List<String> command, String workingDirectory,
+        List<String> outputLines) throws Exception {
+    ProcessBuilder pb = new ProcessBuilder(command);
+    pb.directory(new File(workingDirectory));
+    pb.redirectErrorStream(true);
+    Process process = getStarter().start(pb);
+    process.getOutputStream().close();
+
+    Thread readerThread = new Thread(() -> {
+        try (BufferedReader reader = new BufferedReader(
+                new InputStreamReader(process.getInputStream()))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                synchronized (outputLines) { outputLines.add(line); }
+            }
+        } catch (Exception ignored) {}
+    });
+    readerThread.setDaemon(true);
+    readerThread.start();
+
+    boolean completed = process.waitFor(maxClaudeSeconds, TimeUnit.SECONDS);
+    if (!completed) {
+        process.destroyForcibly();
+        process.waitFor(5, TimeUnit.SECONDS);
+        readerThread.join(5000);
+        return TIMEOUT_EXIT_CODE;
+    }
+    readerThread.join();
+    return process.exitValue();
 }
 ```
 
@@ -665,17 +747,23 @@ public Path getFile() {
 
 ### append
 
-Appends one data row to the CSV. Writes the header on the first call if the file does not yet exist. Scenario names containing commas, quotes, or newlines are CSV-escaped.
+Appends one data row to the CSV. Writes the header on the first call if the file does not yet exist. The gitBranch argument is stored verbatim in the `git_branch` column so SPC dashboards can group by run. Scenario names containing commas, quotes, or newlines are CSV-escaped.
 
 **Example: append method body**
 ```java
-public void append(String commit, String scenario, long redMs, long greenMs, long refactorMs, long totalMs) throws IOException {
+public void append(String gitBranch, String commit, String scenario,
+        long redMs, long greenMs, long refactorMs, long totalMs) throws IOException {
     Files.createDirectories(file.getParent());
     if (!Files.exists(file)) {
         Files.writeString(file, HEADER + "\n", StandardCharsets.UTF_8);
     }
-    String row = LocalDateTime.now().format(TIMESTAMP) + "," + commit + "," + escape(scenario) + "," + redMs + "," + greenMs + "," + refactorMs + "," + totalMs + "\n";
-    Files.writeString(file, row, StandardCharsets.UTF_8, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+    String row = LocalDateTime.now().format(TIMESTAMP) + ","
+        + gitBranch + ","
+        + commit + ","
+        + escape(scenario) + ","
+        + redMs + "," + greenMs + "," + refactorMs + "," + totalMs + "\n";
+    Files.writeString(file, row, StandardCharsets.UTF_8,
+        StandardOpenOption.CREATE, StandardOpenOption.APPEND);
 }
 ```
 

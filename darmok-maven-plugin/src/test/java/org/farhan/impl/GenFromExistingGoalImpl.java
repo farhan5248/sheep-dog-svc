@@ -171,4 +171,74 @@ public class GenFromExistingGoalImpl extends MavenTestObject implements GenFromE
 		setProperty(key, "fail-all");
 	}
 
+	// =========================================================================
+	// Issue 140 — phase timeout recovery
+	// =========================================================================
+
+	@Override
+	public void setClaudeRgrGreenCommandHungUntilKilled(HashMap<String, String> keyMap) {
+		setProperty("claudeGreenHangMode", "hung-until-killed");
+	}
+
+	@Override
+	public void setClaudeRgrGreenCommandHungOnFirstCallThenCompletedOnResume(HashMap<String, String> keyMap) {
+		setProperty("claudeGreenHangMode", "hung-first");
+	}
+
+	@Override
+	public void setClaudeRgrGreenCommandHungOnEveryCall(HashMap<String, String> keyMap) {
+		setProperty("claudeGreenHangMode", "hung-every");
+	}
+
+	@Override
+	public void setClaudeRgrRefactorCommandHungOnFirstCallThenCompletedOnResume(HashMap<String, String> keyMap) {
+		setProperty("claudeRefactorHangMode", "hung-first");
+	}
+
+	@Override
+	public void setClaudeRgrRefactorCommandHungOnEveryCall(HashMap<String, String> keyMap) {
+		setProperty("claudeRefactorHangMode", "hung-every");
+	}
+
+	@Override
+	public void setMvnCleanInstallCommandExecutedAndFailsThenPassesInTheGreenPhase(HashMap<String, String> keyMap) {
+		setProperty("mvnInstallModeGreen", "fail-once-then-pass");
+	}
+
+	@Override
+	public void setMvnCleanInstallCommandExecutedAndFailsOnEveryCallInTheGreenPhase(HashMap<String, String> keyMap) {
+		setProperty("mvnInstallModeGreen", "fail-all");
+	}
+
+	@Override
+	public void setMvnCleanInstallCommandExecutedAndFailsThenPassesInTheRefactorPhase(HashMap<String, String> keyMap) {
+		setProperty("mvnInstallModeRefactor", "fail-once-then-pass");
+	}
+
+	@Override
+	public void setMvnCleanInstallCommandExecutedAndFailsOnEveryCallInTheRefactorPhase(HashMap<String, String> keyMap) {
+		setProperty("mvnInstallModeRefactor", "fail-all");
+	}
+
+	@Override
+	public void setMvnCleanInstallCommandAttempt(HashMap<String, String> keyMap) {
+		// No-op: the mode setter above carries all state; the Attempt/Exit columns
+		// are purely documentary for spec readers.
+	}
+
+	@Override
+	public void setMvnCleanInstallCommandExit(HashMap<String, String> keyMap) {
+		// No-op: see setMvnCleanInstallCommandAttempt.
+	}
+
+	@Override
+	public void setMaxClaudeSeconds(HashMap<String, String> keyMap) {
+		setProperty("maxClaudeSeconds", keyMap.get("MaxClaudeSeconds"));
+	}
+
+	@Override
+	public void setMaxTimeoutAttempts(HashMap<String, String> keyMap) {
+		setProperty("maxTimeoutAttempts", keyMap.get("MaxTimeoutAttempts"));
+	}
+
 }

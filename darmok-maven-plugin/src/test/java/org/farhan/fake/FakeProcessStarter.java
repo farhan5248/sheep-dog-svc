@@ -17,15 +17,24 @@ import org.farhan.mbt.maven.ProcessRunner.ProcessStarter;
  * <ul>
  *   <li><b>git diff --cached --quiet</b> — exit 0 when {@code gitWorkspaceState} is
  *       {@code "clean"}, exit 1 otherwise (matching TestConfig default of dirty workspace).</li>
- *   <li><b>claude /rgr-green</b> — dispatches on {@code claudeGreenMode}: retry-success /
- *       retry-exhaust / non-retryable / (default success). Stateful across calls.</li>
- *   <li><b>claude /rgr-refactor</b> — dispatches on {@code claudeRefactorMode}: retry-success
- *       / (default success). Stateful across calls.</li>
+ *   <li><b>claude /rgr-green</b> — dispatches on {@code claudeGreenMode} (retry-success /
+ *       retry-exhaust / non-retryable / default success) then on {@code claudeGreenHangMode}
+ *       (hung-until-killed / hung-first / hung-every).</li>
+ *   <li><b>claude /rgr-refactor</b> — parallel to green; {@code claudeRefactorMode} +
+ *       {@code claudeRefactorHangMode}.</li>
+ *   <li><b>claude --resume</b> — matches on the trailing message: the #140 timeout resume
+ *       (<code>"pls continue"</code>) honours the current phase's hang mode so the resume can
+ *       itself time out; the #155 verify resume returns exit 0.</li>
  *   <li><b>mvn asciidoctor-to-uml / uml-to-cucumber-guice / test</b> — each takes an
  *       optional {@code *Mode="fail"} override with explicit Exit+Output values.</li>
  *   <li><b>mvn test default</b> — when no override is set, exits 0 iff the implementation
  *       file (derived from the {@code -Dtest=<Tag>Test} arg) exists in code-prj. Mirrors
  *       real darmok behavior: tests fail iff impl is absent.</li>
+ *   <li><b>mvn clean verify</b> — dispatches on {@code mvnVerifyModeGreen} or
+ *       {@code mvnVerifyModeRefactor} depending on current phase (fail-once / fail-all).</li>
+ *   <li><b>mvn clean install</b> — same per-phase pattern via {@code mvnInstallModeGreen} /
+ *       {@code mvnInstallModeRefactor} (fail-once-then-pass / fail-all); used by the
+ *       #140 timeout-recovery check.</li>
  *   <li>Anything else — exit 0.</li>
  * </ul>
  */
@@ -35,8 +44,10 @@ public class FakeProcessStarter implements ProcessStarter {
 	private final String claudeGreenPattern;
 	private final int claudeGreenExit;
 	private final String claudeGreenOutput;
+	private final String claudeGreenHangMode;
 	private final String claudeRefactorMode;
 	private final String claudeRefactorPattern;
+	private final String claudeRefactorHangMode;
 	private final String gitWorkspaceState;
 	private final String gitBranchCanned;
 	private final String mvnAsciidoctorMode;
@@ -50,12 +61,16 @@ public class FakeProcessStarter implements ProcessStarter {
 	private final String mvnTestOutput;
 	private final String mvnVerifyModeGreen;
 	private final String mvnVerifyModeRefactor;
+	private final String mvnInstallModeGreen;
+	private final String mvnInstallModeRefactor;
 	private final Path codePrjBaseDir;
 
 	private int greenCalls = 0;
 	private int refactorCalls = 0;
 	private int greenVerifyCalls = 0;
 	private int refactorVerifyCalls = 0;
+	private int greenInstallCalls = 0;
+	private int refactorInstallCalls = 0;
 	private String currentPhase;
 
 	public FakeProcessStarter(Map<String, Object> properties) {
@@ -63,8 +78,10 @@ public class FakeProcessStarter implements ProcessStarter {
 		this.claudeGreenPattern = string(properties, "claudeGreenPattern");
 		this.claudeGreenExit = intOrZero(properties, "claudeGreenExit");
 		this.claudeGreenOutput = string(properties, "claudeGreenOutput");
+		this.claudeGreenHangMode = string(properties, "claudeGreenHangMode");
 		this.claudeRefactorMode = string(properties, "claudeRefactorMode");
 		this.claudeRefactorPattern = string(properties, "claudeRefactorPattern");
+		this.claudeRefactorHangMode = string(properties, "claudeRefactorHangMode");
 		this.gitWorkspaceState = string(properties, "gitWorkspaceState");
 		// Default matches mojo-defaults.properties gitBranch=main so specs that don't
 		// configure either side still pass the init-time branch check.
@@ -81,6 +98,8 @@ public class FakeProcessStarter implements ProcessStarter {
 		this.mvnTestOutput = string(properties, "mvnTestOutput");
 		this.mvnVerifyModeGreen = string(properties, "mvnVerifyModeGreen");
 		this.mvnVerifyModeRefactor = string(properties, "mvnVerifyModeRefactor");
+		this.mvnInstallModeGreen = string(properties, "mvnInstallModeGreen");
+		this.mvnInstallModeRefactor = string(properties, "mvnInstallModeRefactor");
 		Object baseDir = properties.get("code-prj.baseDir");
 		this.codePrjBaseDir = baseDir instanceof Path ? (Path) baseDir : null;
 	}
@@ -108,6 +127,9 @@ public class FakeProcessStarter implements ProcessStarter {
 		if (joined.contains("claude") && cmd.stream().anyMatch(a -> a.startsWith("/rgr-green"))) {
 			greenCalls++;
 			currentPhase = "green";
+			if (shouldHangInitialCall(claudeGreenHangMode)) {
+				return new FakeProcess("", 0).withHang();
+			}
 			if ("retry-success".equals(claudeGreenMode)) {
 				return greenCalls == 1 ? new FakeProcess(orEmpty(claudeGreenPattern), 1) : new FakeProcess("", 0);
 			}
@@ -123,6 +145,9 @@ public class FakeProcessStarter implements ProcessStarter {
 		if (joined.contains("claude") && cmd.stream().anyMatch(a -> a.startsWith("/rgr-refactor"))) {
 			refactorCalls++;
 			currentPhase = "refactor";
+			if (shouldHangInitialCall(claudeRefactorHangMode)) {
+				return new FakeProcess("", 0).withHang();
+			}
 			if ("retry-success".equals(claudeRefactorMode)) {
 				return refactorCalls == 1 ? new FakeProcess(orEmpty(claudeRefactorPattern), 1) : new FakeProcess("", 0);
 			}
@@ -130,6 +155,12 @@ public class FakeProcessStarter implements ProcessStarter {
 		}
 
 		if (joined.contains("claude") && joined.contains("--resume")) {
+			if (joined.contains(" pls continue")) {
+				String hangMode = "green".equals(currentPhase) ? claudeGreenHangMode : claudeRefactorHangMode;
+				if ("hung-every".equals(hangMode)) {
+					return new FakeProcess("", 0).withHang();
+				}
+			}
 			return new FakeProcess("", 0);
 		}
 
@@ -158,6 +189,19 @@ public class FakeProcessStarter implements ProcessStarter {
 		}
 
 		if (cmd.size() >= 3 && cmd.get(0).toLowerCase().startsWith("mvn")
+				&& cmd.contains("clean") && cmd.contains("install")) {
+			String mode = "green".equals(currentPhase) ? mvnInstallModeGreen : mvnInstallModeRefactor;
+			int count = "green".equals(currentPhase) ? ++greenInstallCalls : ++refactorInstallCalls;
+			if ("fail-once-then-pass".equals(mode)) {
+				return count == 1 ? new FakeProcess("", 1) : new FakeProcess("", 0);
+			}
+			if ("fail-all".equals(mode)) {
+				return new FakeProcess("", 1);
+			}
+			return new FakeProcess("", 0);
+		}
+
+		if (cmd.size() >= 3 && cmd.get(0).toLowerCase().startsWith("mvn")
 				&& cmd.contains("clean") && cmd.contains("verify")) {
 			String mode = "green".equals(currentPhase) ? mvnVerifyModeGreen : mvnVerifyModeRefactor;
 			int count = "green".equals(currentPhase) ? ++greenVerifyCalls : ++refactorVerifyCalls;
@@ -171,6 +215,12 @@ public class FakeProcessStarter implements ProcessStarter {
 		}
 
 		return new FakeProcess("", 0);
+	}
+
+	private static boolean shouldHangInitialCall(String hangMode) {
+		return "hung-until-killed".equals(hangMode)
+			|| "hung-first".equals(hangMode)
+			|| "hung-every".equals(hangMode);
 	}
 
 	private boolean implFileExists(List<String> cmd) {

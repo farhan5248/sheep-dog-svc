@@ -18,7 +18,7 @@ Specialized process runner that extends ProcessRunner with tool-specific command
 **Examples**:
  - `public GitRunner(Log log)`
  - `public MavenRunner(Log log)`
- - `public ClaudeRunner(Log log, String model, int maxRetries, int retryWaitSeconds)`
+ - `public ClaudeRunner(Log log, String model, int maxRetries, int retryWaitSeconds, int maxClaudeSeconds)`
 
 ## {Tool}Runner (test seam)
 
@@ -32,7 +32,7 @@ Specialized process runner that extends ProcessRunner with tool-specific command
 **Examples**:
  - `public GitRunner(Log log, ProcessStarter starter)`
  - `public MavenRunner(Log log, ProcessStarter starter)`
- - `public ClaudeRunner(Log log, String model, int maxRetries, int retryWaitSeconds, ProcessStarter starter)`
+ - `public ClaudeRunner(Log log, String model, int maxRetries, int retryWaitSeconds, int maxClaudeSeconds, ProcessStarter starter)`
 
 ## buildCommand
 
@@ -51,7 +51,7 @@ Specialized process runner that extends ProcessRunner with tool-specific command
 
 ## run
 
-**Desc**: ClaudeRunner overrides run to add retry logic with configurable max retries and wait seconds. Retries on known API error patterns (500, 529, overloaded). GitRunner and MavenRunner inherit ProcessRunner.run unchanged.
+**Desc**: ClaudeRunner overrides run to add retry logic with configurable max retries and wait seconds. Retries on known API error patterns (500, 529, overloaded). Each invocation is bounded by maxClaudeSeconds via `waitFor(timeout, unit)`; on timeout the subprocess is destroyed and the sentinel `TIMEOUT_EXIT_CODE` is returned so the calling phase can enter timeout recovery. GitRunner and MavenRunner inherit ProcessRunner.run unchanged.
 
 **Rule**: SOME method names follow run pattern.
  - **Name**: `^run$`
@@ -64,7 +64,7 @@ Specialized process runner that extends ProcessRunner with tool-specific command
 
 ## resume
 
-**Desc**: ClaudeRunner-only. Invokes `claude --resume` with a continuation message so the most recent session can be nudged forward — used by GreenPhase and RefactorPhase when `mvn clean verify` fails and the claude-authored code needs another pass. Single-shot (no retry loop); the caller's outer verify loop controls retries.
+**Desc**: ClaudeRunner-only. Invokes `claude --resume` with a continuation message so the most recent session can be nudged forward — used by GreenPhase and RefactorPhase both when `mvn clean verify` fails (message `mvn clean verify failures should be fixed`) and when the initial claude call times out (message `pls continue`, inside the timeout-recovery loop). Single-shot (no API-retry loop, but still bounded by maxClaudeSeconds); the caller's outer verify/timeout loop controls retries.
 
 **Rule**: SOME method names follow resume pattern.
  - **Name**: `^resume$`

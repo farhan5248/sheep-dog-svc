@@ -65,7 +65,7 @@
 
 ### DarmokMojoMetrics
 
-**Desc**: Per-scenario metrics emitter. Writes cycle-time measurements (Red / Green / Refactor / Total durations) tagged with scenario name and git commit SHA to a CSV file for downstream SPC analysis, and reads them back for test verification. Storage format is CSV today; future revisions may push to a central time-series store without changing the class boundary.
+**Desc**: Per-scenario metrics emitter. Writes cycle-time measurements (Red / Green / Refactor / Total durations) tagged with scenario name, git commit SHA, and configured git branch to a CSV file for downstream SPC analysis, and reads them back for test verification. Storage format is CSV today; future revisions may push to a central time-series store without changing the class boundary.
 
 **Rule**: ONE class matches DarmokMojoMetrics pattern
 
@@ -83,7 +83,7 @@
 
 ### GreenPhase
 
-**Desc**: RGR Green phase — invokes the Claude /rgr-green skill to implement code that makes the red-phase tests pass.
+**Desc**: RGR Green phase — invokes the Claude /rgr-green skill to implement code that makes the red-phase tests pass, then runs deterministic sub-steps (timeout recovery via `mvn clean install` + `claude --resume "pls continue"`, then a verify loop via `mvn clean verify` + `claude --resume "mvn clean verify failures should be fixed"`) that keep the resulting code buildable and test-passing.
 
 **Rule**: ONE class matches GreenPhase pattern
 
@@ -92,7 +92,7 @@
 
 ### RefactorPhase
 
-**Desc**: RGR Refactor phase — invokes the Claude /rgr-refactor skill to verify code against UML specs and apply fixes.
+**Desc**: RGR Refactor phase — invokes the Claude `/rgr-refactor forward` skill to refactor the freshly-green code, wrapped in the same timeout-recovery + verify loops as GreenPhase.
 
 **Rule**: ONE class matches RefactorPhase pattern
 
@@ -130,7 +130,7 @@
 
 ### TestConfig
 
-**Desc**: Guice configuration and Cucumber hooks for test dependency injection. Binds generated interfaces to impl classes and provides test lifecycle management.
+**Desc**: Spring context configuration and Cucumber lifecycle hooks for scenario glue. Creates fresh temp directories per scenario, stashes their paths in TestObject.properties, and wires a FakeProcess-based ProcessStarter so no real subprocesses are spawned.
 
 **Rule**: ONE class matches TestConfig pattern
 

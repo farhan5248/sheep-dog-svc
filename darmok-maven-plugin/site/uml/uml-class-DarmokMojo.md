@@ -20,10 +20,10 @@ Abstract base Mojo providing shared lifecycle, scenario iteration, RGR phase orc
 
 ## @Parameter
 
-**Desc**: Maven plugin configuration parameters with default values. Covers path properties (specsDir, asciidocDir, scenariosFile, metricsDir), server properties (host), Claude CLI properties (modelRed, modelGreen, modelRefactor, coAuthor, maxRetries, retryWaitSeconds), phase-verify policy (maxVerifyAttempts — cap on `mvn clean verify` + `claude --resume` cycles inside each of GreenPhase and RefactorPhase before the phase aborts), behavior flags (onlyChanges, stage), and run identity (gitBranch — the branch this Darmok run is configured for; verified against git HEAD at init-time and written to every metrics.csv row as `git_branch`).
+**Desc**: Maven plugin configuration parameters with default values. Covers path properties (specsDir, asciidocDir, scenariosFile, metricsDir), server properties (host), Claude CLI properties (modelRed, modelGreen, modelRefactor, coAuthor, maxRetries, retryWaitSeconds), phase-verify policy (maxVerifyAttempts — cap on `mvn clean verify` + `claude --resume` cycles inside each of GreenPhase and RefactorPhase before the phase aborts), phase-timeout policy (maxClaudeSeconds — per-invocation bound on any claude subprocess; maxTimeoutAttempts — cap on `mvn clean install` + `claude --resume "pls continue"` cycles inside the phase's timeout-recovery loop), behavior flags (onlyChanges, stage), and run identity (gitBranch — the branch this Darmok run is configured for; verified against git HEAD at init-time and written to every metrics.csv row as `git_branch`).
 
 **Rule**: SOME attribute matches @Parameter pattern.
- - **Name**: `^(specsDir|asciidocDir|scenariosFile|metricsDir|host|modelRed|modelGreen|modelRefactor|coAuthor|maxRetries|maxVerifyAttempts|retryWaitSeconds|onlyChanges|stage|gitBranch)$`
+ - **Name**: `^(specsDir|asciidocDir|scenariosFile|metricsDir|host|modelRed|modelGreen|modelRefactor|coAuthor|maxRetries|maxVerifyAttempts|maxClaudeSeconds|maxTimeoutAttempts|retryWaitSeconds|onlyChanges|stage|gitBranch)$`
  - **Return**: `^(String|int|boolean)$`
  - **Modifier**: `^public$`
 
@@ -39,6 +39,8 @@ Abstract base Mojo providing shared lifecycle, scenario iteration, RGR phase orc
  - `public String coAuthor`
  - `public int maxRetries`
  - `public int maxVerifyAttempts`
+ - `public int maxClaudeSeconds`
+ - `public int maxTimeoutAttempts`
  - `public int retryWaitSeconds`
  - `public boolean onlyChanges`
  - `public boolean stage`
@@ -113,7 +115,7 @@ Abstract base Mojo providing shared lifecycle, scenario iteration, RGR phase orc
 
 ## processScenario
 
-**Desc**: Orchestrates the full RGR cycle for a single scenario entry by delegating to RedPhase, GreenPhase, and RefactorPhase in sequence, with git staging and commit between phases. Logs metric lines for each phase duration.
+**Desc**: Orchestrates the full RGR cycle for a single scenario entry by delegating to RedPhase, GreenPhase, and RefactorPhase in sequence, with git staging and commit between phases. After all commits are made, captures the HEAD commit SHA via `git.getCurrentCommit`, logs it as `Commit: <sha>`, and writes a row to `metrics.csv` via `DarmokMojoMetrics.append` carrying the configured gitBranch, the captured commit, the scenario name, and the four phase durations (red/green/refactor/total).
 
 **Rule**: ONE method name follows processScenario pattern.
  - **Name**: `^processScenario$`
