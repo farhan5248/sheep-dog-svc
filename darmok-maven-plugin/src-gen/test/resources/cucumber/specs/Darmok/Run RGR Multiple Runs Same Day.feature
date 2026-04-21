@@ -20,7 +20,7 @@ Feature: Run RGR Multiple Runs Same Day
           """
       And The code-prj project src/main/java/org/farhan/objects/LoginHappyPath.java file is created
      When The darmok plugin gen-from-existing goal is executed
-     Then The code-prj project target/darmok/darmok.mojo.log file will be as follows
+     Then The code-prj project darmok.mojo.log file will be as follows
           | Level | Category | Content                                                                       |
           | INFO  | mojo     | RGR Automation Plugin (gen-from-existing)                                     |
           | INFO  | mojo     | RGR Automation Complete!                                                      |

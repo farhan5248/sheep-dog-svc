@@ -20,7 +20,7 @@ Feature: Run RGR Multiple Scenarios
       And The code-prj project src/main/java/org/farhan/objects/LogoutHappyPath.java file is created
      When The darmok plugin gen-from-existing goal is executed
      Then The code-prj project scenarios-list.txt file will be empty
-      And The code-prj project target/darmok/darmok.mojo.log file will be as follows
+      And The code-prj project darmok.mojo.log file will be as follows
           | Level | Category | Content                                                                         |
           | INFO  | mojo     | RGR Automation Plugin (gen-from-existing)                                       |
           | INFO  | mojo     | Processing Scenario: ProcessDarmok/User logs in successfully [loginHappyPath]   |
@@ -31,7 +31,7 @@ Feature: Run RGR Multiple Scenarios
           | INFO  | mojo     | Red: Committing                                                                 |
           | INFO  | mojo     | RGR Automation Complete!                                                        |
           | INFO  | mojo     | Total scenarios processed: 2                                                    |
-      And The code-prj project target/darmok/darmok.runners.log file will be as follows
+      And The code-prj project darmok.runners.log file will be as follows
           | Level | Category | Content                                                       |
           | DEBUG | runner   | Running: mvn test -Dtest=loginHappyPathTest                   |
           | DEBUG | runner   | Running: git commit -m run-rgr red User logs in successfully  |

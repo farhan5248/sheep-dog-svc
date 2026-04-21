@@ -41,7 +41,7 @@ Feature: Run RGR With Tag Handling
           @loginHappyPath
           Some description
           """
-      And The code-prj project target/darmok/darmok.mojo.log file will be as follows
+      And The code-prj project darmok.mojo.log file will be as follows
           | Level | Category | Content                                                                       |
           | INFO  | mojo     | Processing Scenario: ProcessDarmok/User logs in successfully [loginHappyPath] |
           | DEBUG | mojo     | Tag @loginHappyPath already present in file                                   |
@@ -73,7 +73,7 @@ Feature: Run RGR With Tag Handling
           @otherTag @loginHappyPath
           Some description
           """
-      And The code-prj project target/darmok/darmok.mojo.log file will be as follows
+      And The code-prj project darmok.mojo.log file will be as follows
           | Level | Category | Content                                                                       |
           | INFO  | mojo     | Processing Scenario: ProcessDarmok/User logs in successfully [loginHappyPath] |
           | DEBUG | mojo     | Added tag @loginHappyPath to file                                             |
@@ -105,7 +105,7 @@ Feature: Run RGR With Tag Handling
           
           Some description
           """
-      And The code-prj project target/darmok/darmok.mojo.log file will be as follows
+      And The code-prj project darmok.mojo.log file will be as follows
           | Level | Category | Content                                                                       |
           | INFO  | mojo     | Processing Scenario: ProcessDarmok/User logs in successfully [loginHappyPath] |
           | DEBUG | mojo     | Added tag @loginHappyPath to file                                             |

@@ -57,6 +57,13 @@ public abstract class DarmokMojo extends AbstractMojo {
 	@Parameter(property = "stage", defaultValue = "true")
 	public boolean stage;
 
+	// Metrics CSV output directory. Separate from LOG_PATH (which is shared with other
+	// log-collecting processes and must stay their property) so metrics can be routed
+	// independently — e.g. into the Grafana-readable hostPath for SPC dashboards.
+	// Default: project baseDir, so metrics.csv survives `runCleanUp` out of the box.
+	@Parameter(property = "metricsDir")
+	public String metricsDir;
+
 	// Instance fields
 	String baseDir;
 	private GitRunner git;
@@ -128,7 +135,17 @@ public abstract class DarmokMojo extends AbstractMojo {
 		if (logPath != null && !logPath.isEmpty()) {
 			return Path.of(logPath);
 		}
-		return Path.of(baseDir, "target", "darmok");
+		// Default: project root, sibling of target/ so runCleanUp doesn't delete the file.
+		return Path.of(baseDir);
+	}
+
+	private Path resolveMetricsDir() {
+		if (metricsDir != null && !metricsDir.isEmpty()) {
+			return Path.of(metricsDir);
+		}
+		// Default: project root. Override via -DmetricsDir=... to route metrics.csv
+		// into a hostPath shared with the Grafana pod.
+		return Path.of(baseDir);
 	}
 
 	private void initLogs() throws Exception {
@@ -136,7 +153,7 @@ public abstract class DarmokMojo extends AbstractMojo {
 		String date = LocalDate.now().toString();
 		mojoLog = new DarmokMojoLog(getLog(), "mojo", logDir.resolve("darmok.mojo." + date + ".log"));
 		runnerLog = new DarmokMojoLog(getLog(), "runner", logDir.resolve("darmok.runners." + date + ".log"));
-		metrics = new DarmokMojoMetrics(logDir.resolve("metrics.csv"));
+		metrics = new DarmokMojoMetrics(resolveMetricsDir().resolve("metrics.csv"));
 	}
 
 	private void closeLogs() {

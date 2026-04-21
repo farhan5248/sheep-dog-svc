@@ -41,6 +41,11 @@ public class DarmokGenFromExistingGoalSteps extends TestSteps {
         object.doEdgeStep("", "", "is", "executed");
     }
 
+    @Given("^The darmok plugin gen-from-existing goal is executed with$")
+    public void isExecutedWith(DataTable dataTable) {
+        object.doEdgeStep("", "", "is", "executed with", dataTable);
+    }
+
     @Given("^The darmok plugin gen-from-existing goal mvn asciidoctor-to-uml command is executed but failed$")
     public void mvnAsciidoctorToUmlCommandIsExecutedButFailed(DataTable dataTable) {
         object.doEdgeStep("mvn asciidoctor-to-uml", "command", "is", "executed but failed", dataTable);
@@ -54,10 +59,5 @@ public class DarmokGenFromExistingGoalSteps extends TestSteps {
     @Given("^The darmok plugin gen-from-existing goal mvn uml-to-cucumber-guice command is executed but failed$")
     public void mvnUmlToCucumberGuiceCommandIsExecutedButFailed(DataTable dataTable) {
         object.doEdgeStep("mvn uml-to-cucumber-guice", "command", "is", "executed but failed", dataTable);
-    }
-
-    @Given("^The darmok plugin gen-from-existing goal is executed with$")
-    public void isExecutedWith(DataTable dataTable) {
-        object.doEdgeStep("", "", "is", "executed with", dataTable);
     }
 }

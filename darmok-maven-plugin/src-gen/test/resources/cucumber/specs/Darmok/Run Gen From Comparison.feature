@@ -34,7 +34,7 @@ Feature: Run Gen From Comparison
           | sonnet          | sonnet     | sonnet        |
      Then The code-prj project src/main/java/org/farhan/objects/LoginHappyPath.java file will be present
       And The code-prj project scenarios-list.txt file will be empty
-      And The code-prj project target/darmok/darmok.mojo.log file will be as follows
+      And The code-prj project darmok.mojo.log file will be as follows
           | Level | Category | Content                                                                       |
           | INFO  | mojo     | RGR Automation Plugin (gen-from-comparison)                                   |
           | INFO  | mojo     | Processing Scenario: ProcessDarmok/User logs in successfully [loginHappyPath] |
@@ -47,7 +47,7 @@ Feature: Run Gen From Comparison
           | INFO  | mojo     | Refactor: Committing                                                          |
           | INFO  | mojo     | RGR Automation Complete!                                                      |
           | INFO  | mojo     | Total scenarios processed: 1                                                  |
-      And The code-prj project target/darmok/darmok.runners.log file will be as follows
+      And The code-prj project darmok.runners.log file will be as follows
           | Level | Category | Content                                                                                                      |
           | DEBUG | runner   | Executing: claude --print --dangerously-skip-permissions --model sonnet /rgr-gen-from-comparison darmok-prj  |
           | DEBUG | runner   | Executing: claude --print --dangerously-skip-permissions --model sonnet /rgr-green darmok-prj loginHappyPath |

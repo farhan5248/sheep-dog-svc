@@ -114,7 +114,7 @@ public abstract class MavenTestObject extends TestObject {
             if (baseDir == null) {
                 return null;
             }
-            logDir = ((Path) baseDir).resolve("target").resolve("darmok");
+            logDir = (Path) baseDir;
         }
         DarmokMojoLog mojoLog = new DarmokMojoLog(DarmokMojoLog.findDatedLog(logDir, prefix));
         setProperty(cacheKey, mojoLog);

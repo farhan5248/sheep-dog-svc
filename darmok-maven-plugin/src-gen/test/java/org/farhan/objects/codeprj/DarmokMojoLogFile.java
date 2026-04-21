@@ -1,4 +1,4 @@
-package org.farhan.objects.codeprj.target.darmok;
+package org.farhan.objects.codeprj;
 
 import java.util.HashMap;
 
@@ -11,8 +11,6 @@ public interface DarmokMojoLogFile {
     public String getCategory(HashMap<String, String> keyMap);
 
     public String getContent(HashMap<String, String> keyMap);
-
-    public String getState(HashMap<String, String> keyMap);
 
     public String getPresent(HashMap<String, String> keyMap);
 }

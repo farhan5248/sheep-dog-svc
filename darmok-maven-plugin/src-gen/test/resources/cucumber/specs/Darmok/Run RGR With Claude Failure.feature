@@ -30,7 +30,7 @@ Feature: Run RGR With Claude Failure
           | Exit | Output                                           |
           | 1    | 500 Server Error occurred (no API Error: prefix) |
      When The darmok plugin gen-from-existing goal is executed
-     Then The code-prj project target/darmok/darmok.runners.log file will be as follows with this failure
+     Then The code-prj project darmok.runners.log file will be as follows with this failure
           | Level | Category | Content                       |
           | DEBUG | runner   | Claude CLI exited with code 1 |
 
@@ -42,7 +42,7 @@ Feature: Run RGR With Claude Failure
           | Exit |
           | 137  |
      When The darmok plugin gen-from-existing goal is executed
-     Then The code-prj project target/darmok/darmok.runners.log file will be as follows with this failure
+     Then The code-prj project darmok.runners.log file will be as follows with this failure
           | Level | Category | Content                         |
           | DEBUG | runner   | Claude CLI exited with code 137 |
 
@@ -54,7 +54,7 @@ Feature: Run RGR With Claude Failure
           | Exit |
           | 130  |
      When The darmok plugin gen-from-existing goal is executed
-     Then The code-prj project target/darmok/darmok.runners.log file will be as follows with this failure
+     Then The code-prj project darmok.runners.log file will be as follows with this failure
           | Level | Category | Content                         |
           | DEBUG | runner   | Claude CLI exited with code 130 |
 

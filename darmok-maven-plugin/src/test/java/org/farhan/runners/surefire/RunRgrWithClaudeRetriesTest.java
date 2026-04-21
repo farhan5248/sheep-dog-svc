@@ -13,7 +13,7 @@ import org.junit.platform.suite.api.Suite;
 @IncludeEngines("cucumber")
 @SelectClasspathResource("cucumber/specs/Darmok/Run RGR With Claude Retries.feature")
 @ConfigurationParameter(key = PLUGIN_PROPERTY_NAME, value = "pretty")
-@ConfigurationParameter(key = GLUE_PROPERTY_NAME, value = "org.farhan.common,org.farhan.objects,org.farhan.stepdefs,org.farhan.runners.surefire")
+@ConfigurationParameter(key = GLUE_PROPERTY_NAME, value = "org.farhan")
 @IncludeTags("darmok-maven-plugin")
 public class RunRgrWithClaudeRetriesTest {
 }

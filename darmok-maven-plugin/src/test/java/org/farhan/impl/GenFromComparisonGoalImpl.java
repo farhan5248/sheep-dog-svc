@@ -6,7 +6,7 @@ import java.util.HashMap;
 
 import org.farhan.common.MavenTestObject;
 import org.farhan.mbt.maven.GenFromComparisonMojo;
-import org.farhan.objects.maven.GenFromComparisonGoal;
+import org.farhan.objects.darmok.GenFromComparisonGoal;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 

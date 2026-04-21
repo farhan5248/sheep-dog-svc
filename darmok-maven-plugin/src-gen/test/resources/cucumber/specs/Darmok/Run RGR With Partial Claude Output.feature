@@ -30,7 +30,7 @@ Feature: Run RGR With Partial Claude Output
           | Exit | Output                         |
           | 137  | partial output before the kill |
      When The darmok plugin gen-from-existing goal is executed
-     Then The code-prj project target/darmok/darmok.runners.log file will be as follows with this failure
+     Then The code-prj project darmok.runners.log file will be as follows with this failure
           | Level | Category | Content                         |
           | DEBUG | runner   | partial output before the kill  |
           | DEBUG | runner   | Claude CLI exited with code 137 |

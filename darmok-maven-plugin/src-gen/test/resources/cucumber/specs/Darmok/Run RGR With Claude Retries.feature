@@ -30,7 +30,7 @@ Feature: Run RGR With Claude Retries
           | Pattern        |
           | API Error: 500 |
      When The darmok plugin gen-from-existing goal is executed
-     Then The code-prj project target/darmok/darmok.runners.log file will be as follows
+     Then The code-prj project darmok.runners.log file will be as follows
           | Level | Category | Content                                  |
           | WARN  | runner   | Retryable error detected: API Error: 500 |
           | DEBUG | runner   | Retry attempt 2 of 3...                  |
@@ -44,7 +44,7 @@ Feature: Run RGR With Claude Retries
           | Pattern        |
           | API Error: 529 |
      When The darmok plugin gen-from-existing goal is executed
-     Then The code-prj project target/darmok/darmok.runners.log file will be as follows
+     Then The code-prj project darmok.runners.log file will be as follows
           | Level | Category | Content                                  |
           | WARN  | runner   | Retryable error detected: API Error: 529 |
           | DEBUG | runner   | Retry attempt 2 of 3...                  |
@@ -58,7 +58,7 @@ Feature: Run RGR With Claude Retries
           | Pattern               |
           | Internal server error |
      When The darmok plugin gen-from-existing goal is executed
-     Then The code-prj project target/darmok/darmok.runners.log file will be as follows
+     Then The code-prj project darmok.runners.log file will be as follows
           | Level | Category | Content                                         |
           | WARN  | runner   | Retryable error detected: Internal server error |
           | DEBUG | runner   | Retry attempt 2 of 3...                         |
@@ -72,7 +72,7 @@ Feature: Run RGR With Claude Retries
           | Pattern    |
           | overloaded |
      When The darmok plugin gen-from-existing goal is executed
-     Then The code-prj project target/darmok/darmok.runners.log file will be as follows
+     Then The code-prj project darmok.runners.log file will be as follows
           | Level | Category | Content                              |
           | WARN  | runner   | Retryable error detected: overloaded |
           | DEBUG | runner   | Retry attempt 2 of 3...              |
@@ -86,7 +86,7 @@ Feature: Run RGR With Claude Retries
           | Pattern        |
           | API Error: 500 |
      When The darmok plugin gen-from-existing goal is executed
-     Then The code-prj project target/darmok/darmok.runners.log file will be as follows with this failure
+     Then The code-prj project darmok.runners.log file will be as follows with this failure
           | Level | Category | Content                                  |
           | ERROR | runner   | Retryable error detected: API Error: 500 |
           | ERROR | runner   | Max retries (3) exhausted                |
@@ -100,7 +100,7 @@ Feature: Run RGR With Claude Retries
           | Pattern        |
           | API Error: 529 |
      When The darmok plugin gen-from-existing goal is executed
-     Then The code-prj project target/darmok/darmok.runners.log file will be as follows with this failure
+     Then The code-prj project darmok.runners.log file will be as follows with this failure
           | Level | Category | Content                                  |
           | ERROR | runner   | Retryable error detected: API Error: 529 |
           | ERROR | runner   | Max retries (3) exhausted                |
@@ -114,7 +114,7 @@ Feature: Run RGR With Claude Retries
           | Pattern               |
           | Internal server error |
      When The darmok plugin gen-from-existing goal is executed
-     Then The code-prj project target/darmok/darmok.runners.log file will be as follows with this failure
+     Then The code-prj project darmok.runners.log file will be as follows with this failure
           | Level | Category | Content                                         |
           | ERROR | runner   | Retryable error detected: Internal server error |
           | ERROR | runner   | Max retries (3) exhausted                       |
@@ -128,7 +128,7 @@ Feature: Run RGR With Claude Retries
           | Pattern    |
           | overloaded |
      When The darmok plugin gen-from-existing goal is executed
-     Then The code-prj project target/darmok/darmok.runners.log file will be as follows with this failure
+     Then The code-prj project darmok.runners.log file will be as follows with this failure
           | Level | Category | Content                              |
           | ERROR | runner   | Retryable error detected: overloaded |
           | ERROR | runner   | Max retries (3) exhausted            |
@@ -142,7 +142,7 @@ Feature: Run RGR With Claude Retries
           | Pattern        |
           | API Error: 500 |
      When The darmok plugin gen-from-existing goal is executed
-     Then The code-prj project target/darmok/darmok.runners.log file will be as follows
+     Then The code-prj project darmok.runners.log file will be as follows
           | Level | Category | Content                                  |
           | WARN  | runner   | Retryable error detected: API Error: 500 |
           | DEBUG | runner   | Retry attempt 2 of 3...                  |

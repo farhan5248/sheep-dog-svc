@@ -1,4 +1,4 @@
-package org.farhan.objects.codeprj.target.darmok;
+package org.farhan.objects.codeprj;
 
 import java.util.HashMap;
 

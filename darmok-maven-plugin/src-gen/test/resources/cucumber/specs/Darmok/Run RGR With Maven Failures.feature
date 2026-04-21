@@ -29,7 +29,7 @@ Feature: Run RGR With Maven Failures
           | Exit | Output                              |
           | 1    | svc unreachable: connection refused |
      When The darmok plugin gen-from-existing goal is executed
-     Then The code-prj project target/darmok/darmok.runners.log file will be as follows with this failure
+     Then The code-prj project darmok.runners.log file will be as follows with this failure
           | Level | Category | Content                             |
           | DEBUG | runner   | svc unreachable: connection refused |
 
@@ -41,7 +41,7 @@ Feature: Run RGR With Maven Failures
           | Exit | Output                               |
           | 1    | TooManyRequests: upstream rate limit |
      When The darmok plugin gen-from-existing goal is executed
-     Then The code-prj project target/darmok/darmok.runners.log file will be as follows with this failure
+     Then The code-prj project darmok.runners.log file will be as follows with this failure
           | Level | Category | Content                              |
           | DEBUG | runner   | TooManyRequests: upstream rate limit |
 
@@ -53,7 +53,7 @@ Feature: Run RGR With Maven Failures
           | Exit | Output                                                                               |
           | 1    | COMPILATION ERROR : [ERROR] /suites/loginHappyPathTest.java:[3,1] cannot find symbol |
      When The darmok plugin gen-from-existing goal is executed
-     Then The code-prj project target/darmok/darmok.runners.log file will be as follows with this failure
+     Then The code-prj project darmok.runners.log file will be as follows with this failure
           | Level | Category | Content                                                                              |
           | DEBUG | runner   | COMPILATION ERROR : [ERROR] /suites/loginHappyPathTest.java:[3,1] cannot find symbol |
 

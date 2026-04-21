@@ -51,14 +51,14 @@ The observability Helm chart (`sheep-dog-ops/infra/grafana/`) runs a Grafana pod
 
 **One-time setup** on windows-minipc (the Darmok host):
 ```bat
-mkdir C:\Users\Farhan\minikube-data\darmok-metrics
+mkdir C:\minikube-data\darmok-metrics
 ```
 
 This directory is mounted into the minikube VM at `/mnt/darmok-metrics` via the `minikube start --mount-string` branch in `sheep-dog-ops/infra/minikube/setup-cluster-local.bat`. If minikube is already running without that mount, `minikube delete` and rerun `setup-cluster-local.bat` to pick it up.
 
 **Per-run** (cmd):
 ```bat
-set LOG_PATH=C:\Users\Farhan\minikube-data\darmok-metrics
+set LOG_PATH=C:\minikube-data\darmok-metrics
 mvn org.farhan:darmok-maven-plugin:gen-from-existing
 ```
 

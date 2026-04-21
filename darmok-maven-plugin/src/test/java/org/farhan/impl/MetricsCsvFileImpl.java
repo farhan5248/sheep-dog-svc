@@ -7,7 +7,7 @@ import java.util.HashMap;
 
 import org.farhan.common.MavenTestObject;
 import org.farhan.mbt.maven.DarmokMojoMetrics;
-import org.farhan.objects.codeprj.target.darmok.MetricsCsvFile;
+import org.farhan.objects.codeprj.MetricsCsvFile;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -64,12 +64,10 @@ public class MetricsCsvFileImpl extends MavenTestObject implements MetricsCsvFil
 		if (cached != null) {
 			return cached;
 		}
-		Path logDir = (Path) getProperty("log.dir");
-		if (logDir == null) {
-			Path baseDir = (Path) getProperty(component + ".baseDir");
-			logDir = baseDir.resolve("target").resolve("darmok");
-		}
-		DarmokMojoMetrics fresh = new DarmokMojoMetrics(logDir.resolve("metrics.csv"));
+		// Metrics live under the project baseDir (DarmokMojo.resolveMetricsDir default),
+		// independent of the log.dir / LOG_PATH that controls log file location.
+		Path metricsDir = (Path) getProperty(component + ".baseDir");
+		DarmokMojoMetrics fresh = new DarmokMojoMetrics(metricsDir.resolve("metrics.csv"));
 		setProperty("metrics", fresh);
 		return fresh;
 	}

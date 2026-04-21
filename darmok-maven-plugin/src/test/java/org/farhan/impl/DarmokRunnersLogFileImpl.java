@@ -5,7 +5,7 @@ import static io.cucumber.spring.CucumberTestContext.SCOPE_CUCUMBER_GLUE;
 import java.util.HashMap;
 
 import org.farhan.common.MavenTestObject;
-import org.farhan.objects.codeprj.target.darmok.DarmokRunnersLogFile;
+import org.farhan.objects.codeprj.DarmokRunnersLogFile;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -29,11 +29,6 @@ public class DarmokRunnersLogFileImpl extends MavenTestObject implements DarmokR
 		if ("won't be".equals(stateType)) {
 			return null;
 		}
-		return getFileState(getDarmokMojoLog("darmok.runners").getLogFile());
-	}
-
-	@Override
-	public String getState(HashMap<String, String> keyMap) {
 		return getFileState(getDarmokMojoLog("darmok.runners").getLogFile());
 	}
 

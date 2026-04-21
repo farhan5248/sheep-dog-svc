@@ -23,19 +23,19 @@ Feature: Run RGR With Missing Asciidoc File
             Scenario: User logs in successfully
               Tag: loginHappyPath
           """
-      And The code-prj project target/darmok/darmok.mojo.log file will be as follows
+      And The code-prj project darmok.mojo.log file will be as follows
           | Level | Category | Content                                                                       |
           | INFO  | mojo     | RGR Automation Plugin (gen-from-existing)                                     |
           | INFO  | mojo     | Processing Scenario: ProcessDarmok/User logs in successfully [loginHappyPath] |
           | WARN  | mojo     | File not found: ProcessDarmok.asciidoc                                        |
           | INFO  | mojo     | Red: Running maven...                                                         |
-      And The code-prj project target/darmok/darmok.mojo.log file won't be as follows
+      And The code-prj project darmok.mojo.log file won't be as follows
           | Level | Category | Content                  |
           | INFO  | mojo     | Red: Completed maven     |
           | INFO  | mojo     | Green: Running...        |
           | INFO  | mojo     | Refactor: Running...     |
           | INFO  | mojo     | RGR Automation Complete! |
-      And The code-prj project target/darmok/darmok.runners.log file will be as follows
+      And The code-prj project darmok.runners.log file will be as follows
           | Level | Category | Content                                                                                                                               |
           | DEBUG | runner   | Running: mvn org.farhan:sheep-dog-svc-maven-plugin:asciidoctor-to-uml -Dtags=loginHappyPath -Dhost=dev.sheepdog.io -DonlyChanges=true |
 
