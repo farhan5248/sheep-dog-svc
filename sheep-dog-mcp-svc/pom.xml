@@ -10,7 +10,7 @@
 
 	<groupId>org.farhan</groupId>
 	<artifactId>sheep-dog-mcp-svc</artifactId>
-	<version>1.19</version>
+	<version>1.20-SNAPSHOT</version>
 
 	<name>Sheep Dog MCP Service</name>
 	<description>MCP server providing development tools for the Sheep Dog ecosystem</description>
