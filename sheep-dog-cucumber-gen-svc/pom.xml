@@ -9,14 +9,14 @@
 	</parent>
 	<groupId>org.farhan</groupId>
 	<artifactId>sheep-dog-cucumber-gen-svc</artifactId>
-	<version>1.19-SNAPSHOT</version>
+	<version>1.19</version>
 	<name>Sheep Dog Cucumber Gen Service</name>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<java.version>21</java.version>
-		<sheep-dog-asciidoc-api.version>1.14-SNAPSHOT</sheep-dog-asciidoc-api.version>
-		<sheep-dog-cucumber-gen.version>1.13-SNAPSHOT</sheep-dog-cucumber-gen.version>
+		<sheep-dog-asciidoc-api.version>1.13</sheep-dog-asciidoc-api.version>
+		<sheep-dog-cucumber-gen.version>1.12</sheep-dog-cucumber-gen.version>
 		<docker.registry>nexus-docker.sheepdog.io</docker.registry>
 		<!-- ghcr.io mirror target — only pushed when the `qa` profile is
 		     active (see <profiles> at end of pom). Prod on EKS can't reach
