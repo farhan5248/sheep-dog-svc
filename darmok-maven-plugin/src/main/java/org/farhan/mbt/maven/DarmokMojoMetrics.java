@@ -16,7 +16,7 @@ import java.util.Map;
 public class DarmokMojoMetrics {
 
 	private static final String HEADER =
-		"timestamp,commit,scenario,phase_red_ms,phase_green_ms,phase_refactor_ms,phase_total_ms";
+		"timestamp,git_branch,commit,scenario,phase_red_ms,phase_green_ms,phase_refactor_ms,phase_total_ms";
 
 	private static final DateTimeFormatter TIMESTAMP =
 		DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS");
@@ -37,13 +37,14 @@ public class DarmokMojoMetrics {
 		return file;
 	}
 
-	public void append(String commit, String scenario,
+	public void append(String gitBranch, String commit, String scenario,
 			long redMs, long greenMs, long refactorMs, long totalMs) throws IOException {
 		Files.createDirectories(file.getParent());
 		if (!Files.exists(file)) {
 			Files.writeString(file, HEADER + "\n", StandardCharsets.UTF_8);
 		}
 		String row = LocalDateTime.now().format(TIMESTAMP) + ","
+			+ gitBranch + ","
 			+ commit + ","
 			+ escape(scenario) + ","
 			+ redMs + "," + greenMs + "," + refactorMs + "," + totalMs + "\n";
@@ -64,6 +65,10 @@ public class DarmokMojoMetrics {
 
 	public String matchAndGetTimestamp(HashMap<String, String> keyMap) {
 		return column(keyMap, "timestamp");
+	}
+
+	public String matchAndGetGitBranch(HashMap<String, String> keyMap) {
+		return column(keyMap, "git_branch");
 	}
 
 	public String matchAndGetCommit(HashMap<String, String> keyMap) {

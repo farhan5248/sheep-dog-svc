@@ -28,4 +28,8 @@ public class GitRunner extends ProcessRunner {
 	public String getCurrentCommit(String workingDirectory) throws Exception {
 		return capture(workingDirectory, "rev-parse", "HEAD");
 	}
+
+	public String getCurrentBranch(String workingDirectory) throws Exception {
+		return capture(workingDirectory, "rev-parse", "--abbrev-ref", "HEAD");
+	}
 }

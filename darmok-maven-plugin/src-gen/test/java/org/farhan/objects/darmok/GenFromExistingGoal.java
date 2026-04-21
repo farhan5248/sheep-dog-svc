@@ -20,11 +20,17 @@ public interface GenFromExistingGoal {
 
     public void setClaudeRgrRefactorCommandPattern(HashMap<String, String> keyMap);
 
+    public void setGitCommandExecutedToReportTheCurrentBranch(HashMap<String, String> keyMap);
+
+    public void setGitCommandGitBranch(HashMap<String, String> keyMap);
+
     public void setGitCommandExecutedToVerifyTheWorkspaceIsClean(HashMap<String, String> keyMap);
 
     public void setExecuted(HashMap<String, String> keyMap);
 
     public void setExecutedWith(HashMap<String, String> keyMap);
+
+    public void setGitBranch(HashMap<String, String> keyMap);
 
     public void setStage(HashMap<String, String> keyMap);
 

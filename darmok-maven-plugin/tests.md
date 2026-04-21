@@ -27,6 +27,15 @@ execute(goal)
 ├── init() — sets up two CategoryLog files under target/darmok/ (or $LOG_PATH)
 │              darmok.mojo.<date>.log   (mojo-level orchestration lines)
 │              darmok.runners.<date>.log (subprocess command + stdout capture)
+│          — verifies the `gitBranch` parameter against the git HEAD
+│              (all failures log ERROR to mojo.log before throwing MojoExecutionException,
+│               so the log line is the observable contract; the exception message matches it verbatim)
+│              ├── gitBranch param unset/empty       → log ERROR "gitBranch parameter is required", abort
+│              ├── git rev-parse --abbrev-ref HEAD   → actualBranch
+│              │     └── detached HEAD returns "HEAD" (treated as mismatch)
+│              ├── gitBranch != actualBranch         → log ERROR "Darmok configured for branch '<gitBranch>'
+│              │                                             but current HEAD is on '<actualBranch>'. Aborting.", abort
+│              └── gitBranch == actualBranch         → proceed; value flows to the git_branch column on every metrics row
 ├── runCleanUp()
 │   ├── deleteNulFiles(../..)           → logs count
 │   └── deleteDirectory(target/)        → logs "Deleted target directory"
@@ -99,6 +108,7 @@ Parameters that change observable behavior:
 
 | Dimension | Values |
 |---|---|
+| `gitBranch` parameter | unset · matches current HEAD · mismatches current HEAD · detached HEAD |
 | `scenariosFile` (state of scenarios-list.txt) | absent · empty · has N entries |
 | `scenario.tag` | `NoTag` · regular tag |
 | asciidoc file state (per entry) | missing · target tag present · other tag line present · no tag line |
@@ -117,6 +127,68 @@ Observably distinct paths grouped below.
 ## Paths
 
 Each path is one scenario processed (unless labeled "no-scenarios" or "comparison"). Some pre-processing paths (cleanup, addTag variations) apply to every run. They're listed once at the top; scenario-processing paths assume they've already executed successfully.
+
+### Preamble: branch verification (every run, fail-fast before any work)
+
+Each Darmok run must declare which branch it was configured for. The branch name
+becomes the `git_branch` column on every row of `metrics.csv` so the SPC dashboard
+can colour and filter points by run. The init-time check also prevents a
+misconfigured Darmok from silently producing commits on the wrong branch.
+
+Order in `init()` is: resolve baseDir → open logs → verify gitBranch → return. The
+branch check fires before `runCleanUp`, so on failure no subprocess runs and no
+`target/` state is touched.
+
+#### Path BV-1 — gitBranch parameter is unset → abort
+
+- Given the `gitBranch` parameter is not supplied (no `-DgitBranch=...`, no `<gitBranch>` in the POM)
+- When the `darmok:gen-from-existing` goal is executed
+- Then the darmok-prj project `target/darmok/darmok.mojo.<date>.log` file contains
+  ```
+  | Level | Category | Content                         |
+  | ERROR | mojo     | gitBranch parameter is required |
+  ```
+- And the darmok-prj project `target/darmok/darmok.runners.<date>.log` file is Empty
+  (no `git rev-parse --abbrev-ref HEAD` was called — the null-check short-circuits first)
+- And the darmok-prj project `metrics.csv` file is Absent (run never reached processScenario)
+
+#### Path BV-2 — gitBranch mismatches the current HEAD → abort
+
+- Given the `gitBranch` parameter is `Rebuild30`
+- And `git rev-parse --abbrev-ref HEAD` returns `main`
+- When the `darmok:gen-from-existing` goal is executed
+- Then the darmok-prj project `target/darmok/darmok.mojo.<date>.log` file contains
+  ```
+  | Level | Category | Content                                                                           |
+  | ERROR | mojo     | Darmok configured for branch 'Rebuild30' but current HEAD is on 'main'. Aborting. |
+  ```
+- And the darmok-prj project `target/darmok/darmok.runners.<date>.log` file contains
+  exactly one line:
+  ```
+  | Level | Category | Content                                  |
+  | DEBUG | runner   | Running: git rev-parse --abbrev-ref HEAD |
+  ```
+- And the darmok-prj project `metrics.csv` file is Absent
+
+#### Path BV-3 — detached HEAD → abort
+
+- Given the `gitBranch` parameter is `Rebuild30`
+- And `git rev-parse --abbrev-ref HEAD` returns the literal string `HEAD` (detached state)
+- When the `darmok:gen-from-existing` goal is executed
+- Then the mojo log contains the same mismatch ERROR line as BV-2 with `actualBranch=HEAD`
+- (Detached HEAD is not a separate code path; it collapses into the `gitBranch != actualBranch`
+  branch of the check. Documented as its own row because it's the failure mode users hit
+  most often when running Darmok from a sub-repository in the middle of a rebase.)
+
+#### Path BV-4 — gitBranch matches current HEAD → proceed
+
+- Given the `gitBranch` parameter is `Rebuild30`
+- And `git rev-parse --abbrev-ref HEAD` returns `Rebuild30`
+- When the `darmok:gen-from-existing` goal is executed
+- Then init returns cleanly, control passes to `runCleanUp` (see Path 0a / 0b)
+- And every row subsequently appended to `metrics.csv` has `git_branch=Rebuild30`
+
+---
 
 ### Preamble: init + runCleanUp (every run)
 
@@ -437,6 +509,7 @@ The comparison goal runs a `/rgr-gen-from-comparison` skill before each scenario
 3. **`commitIfChanged` behavior** — `git diff --cached --quiet` is run before every commit. If nothing is staged, the commit is skipped. That's a nuance the current tests don't cover; it needs its own path (e.g., "green phase produced no changes — no green commit made").
 4. **Pipeline parameter** (`forward` / `reverse`) only affects the refactor prompt string. Probably one path per pipeline value suffices; the observable diff is only in `claude command was executed with` args.
 5. **Metrics lines** — every successful scenario emits four METRIC lines. These are consumed by the PBC report skill (`pbc-report-plantuml`), so their format is part of the contract.
+5a. **git_branch column** — `metrics.csv` gains a `git_branch` column populated with the value of the `gitBranch` parameter. The column is stable for the whole run (every row has the same value) and the branch is validated against git HEAD at init time, so `git_branch` is always the name of the branch that produced the commits recorded alongside it. The SPC dashboard joins on this column to overlay runs.
 6. **`LOG_PATH` env var** — if set, logs land elsewhere. A single path covering "LOG_PATH set" is enough; the rest of the behavior is identical.
 7. **Refactor-only path missing** — there's no code path that runs refactor without green. The tree shape is Red → (Green → Refactor) or Red alone.
 

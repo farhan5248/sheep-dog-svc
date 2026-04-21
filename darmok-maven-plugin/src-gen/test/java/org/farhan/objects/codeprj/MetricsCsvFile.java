@@ -4,9 +4,13 @@ import java.util.HashMap;
 
 public interface MetricsCsvFile {
 
+    public String getAbsent(HashMap<String, String> keyMap);
+
     public String getAsFollows(HashMap<String, String> keyMap);
 
     public String getTimestamp(HashMap<String, String> keyMap);
+
+    public String getGitBranch(HashMap<String, String> keyMap);
 
     public String getCommit(HashMap<String, String> keyMap);
 

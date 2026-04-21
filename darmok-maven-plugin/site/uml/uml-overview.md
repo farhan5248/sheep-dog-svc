@@ -43,5 +43,5 @@ Pattern variables used in UML files to represent families of classes following s
    - Case variants: `{objectType}` (camelCase), `{OBJECT_TYPE}` (UPPER_SNAKE_CASE)
 
 8. **{MetricColumn}** - DarmokMojoMetrics CSV column names exposed for row-level assertions
-   - Values: `(Timestamp|Commit|Scenario|PhaseRedMs|PhaseGreenMs|PhaseRefactorMs|PhaseTotalMs)`
+   - Values: `(Timestamp|GitBranch|Commit|Scenario|PhaseRedMs|PhaseGreenMs|PhaseRefactorMs|PhaseTotalMs)`
    - Used in: matchAndGet{MetricColumn}()

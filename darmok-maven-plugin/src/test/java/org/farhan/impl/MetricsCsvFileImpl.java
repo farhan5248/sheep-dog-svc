@@ -30,8 +30,18 @@ public class MetricsCsvFileImpl extends MavenTestObject implements MetricsCsvFil
 	}
 
 	@Override
+	public String getGitBranch(HashMap<String, String> keyMap) {
+		return metrics().matchAndGetGitBranch(keyMap);
+	}
+
+	@Override
 	public String getCommit(HashMap<String, String> keyMap) {
 		return metrics().matchAndGetCommit(keyMap);
+	}
+
+	@Override
+	public String getAbsent(HashMap<String, String> keyMap) {
+		return getFileState(metrics().getFile());
 	}
 
 	@Override

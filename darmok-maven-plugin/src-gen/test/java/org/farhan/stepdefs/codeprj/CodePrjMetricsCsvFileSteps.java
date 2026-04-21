@@ -11,6 +11,11 @@ public class CodePrjMetricsCsvFileSteps extends TestSteps {
         super(object, "code-prj", "metrics.csv");
     }
 
+    @Given("^The code-prj project metrics.csv file will be absent$")
+    public void willBeAbsent() {
+        object.assertVertexStep("", "", "will be", "absent");
+    }
+
     @Given("^The code-prj project metrics.csv file will be as follows$")
     public void willBeAsFollows(DataTable dataTable) {
         object.assertVertexStep("", "", "will be", "as follows", dataTable);

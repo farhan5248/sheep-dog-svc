@@ -32,9 +32,9 @@ Feature: Run RGR Multiple Scenarios
           | INFO  | mojo     | RGR Automation Complete!                                                        |
           | INFO  | mojo     | Total scenarios processed: 2                                                    |
       And The code-prj project darmok.runners.log file will be as follows
-          | Level | Category | Content                                                       |
-          | DEBUG | runner   | Running: mvn test -Dtest=loginHappyPathTest                   |
-          | DEBUG | runner   | Running: git commit -m run-rgr User logs in successfully      |
-          | DEBUG | runner   | Running: mvn test -Dtest=logoutHappyPathTest                  |
-          | DEBUG | runner   | Running: git commit -m run-rgr User logs out successfully     |
+          | Level | Category | Content                                                   |
+          | DEBUG | runner   | Running: mvn test -Dtest=loginHappyPathTest               |
+          | DEBUG | runner   | Running: git commit -m run-rgr User logs in successfully  |
+          | DEBUG | runner   | Running: mvn test -Dtest=logoutHappyPathTest              |
+          | DEBUG | runner   | Running: git commit -m run-rgr User logs out successfully |
 

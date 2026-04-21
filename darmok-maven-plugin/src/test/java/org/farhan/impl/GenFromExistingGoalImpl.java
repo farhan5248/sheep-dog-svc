@@ -130,5 +130,26 @@ public class GenFromExistingGoalImpl extends MavenTestObject implements GenFromE
 	public void setModelRefactor(HashMap<String, String> keyMap) {
 		setProperty("modelRefactor", keyMap.get("ModelRefactor"));
 	}
-	
+
+	@Override
+	public void setGitCommandExecutedToReportTheCurrentBranch(HashMap<String, String> keyMap) {
+		// Marker step; the canned branch value is seeded via setGitCommandGitBranch.
+	}
+
+	@Override
+	public void setGitCommandGitBranch(HashMap<String, String> keyMap) {
+		setProperty("gitBranchCanned", keyMap.get("GitBranch"));
+	}
+
+	@Override
+	public void setGitBranch(HashMap<String, String> keyMap) {
+		String value = keyMap.get("GitBranch");
+		// "Empty" is the DSL sentinel for an unset value; the init-time check
+		// treats null/empty identically and fails with "gitBranch parameter is required".
+		if ("Empty".equals(value)) {
+			value = "";
+		}
+		setProperty("gitBranch", value);
+	}
+
 }

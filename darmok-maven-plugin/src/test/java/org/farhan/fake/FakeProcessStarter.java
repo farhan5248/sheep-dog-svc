@@ -38,6 +38,7 @@ public class FakeProcessStarter implements ProcessStarter {
 	private final String claudeRefactorMode;
 	private final String claudeRefactorPattern;
 	private final String gitWorkspaceState;
+	private final String gitBranchCanned;
 	private final String mvnAsciidoctorMode;
 	private final int mvnAsciidoctorExit;
 	private final String mvnAsciidoctorOutput;
@@ -60,6 +61,10 @@ public class FakeProcessStarter implements ProcessStarter {
 		this.claudeRefactorMode = string(properties, "claudeRefactorMode");
 		this.claudeRefactorPattern = string(properties, "claudeRefactorPattern");
 		this.gitWorkspaceState = string(properties, "gitWorkspaceState");
+		// Default matches mojo-defaults.properties gitBranch=main so specs that don't
+		// configure either side still pass the init-time branch check.
+		String cannedBranch = string(properties, "gitBranchCanned");
+		this.gitBranchCanned = cannedBranch == null || cannedBranch.isEmpty() ? "main" : cannedBranch;
 		this.mvnAsciidoctorMode = string(properties, "mvnAsciidoctorMode");
 		this.mvnAsciidoctorExit = intOrZero(properties, "mvnAsciidoctorExit");
 		this.mvnAsciidoctorOutput = string(properties, "mvnAsciidoctorOutput");
@@ -83,6 +88,10 @@ public class FakeProcessStarter implements ProcessStarter {
 				return new FakeProcess("", 0);
 			}
 			return new FakeProcess("", 1);
+		}
+
+		if (joined.contains("rev-parse") && joined.contains("--abbrev-ref") && joined.contains("HEAD")) {
+			return new FakeProcess(gitBranchCanned, 0);
 		}
 
 		if (joined.contains("rev-parse") && joined.contains("HEAD")) {

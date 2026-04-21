@@ -74,3 +74,16 @@ Specialized process runner that extends ProcessRunner with tool-specific command
 
 **Examples**:
  - `public String getCurrentCommit(String workingDirectory)` (GitRunner)
+
+## getCurrentBranch
+
+**Desc**: GitRunner convenience method that captures the current branch name via `git rev-parse --abbrev-ref HEAD`. Used by DarmokMojo's init-time check to verify the declared `gitBranch` parameter matches the actual git HEAD. A detached HEAD returns the literal string `HEAD`, which the caller treats as a mismatch.
+
+**Rule**: SOME method names follow getCurrentBranch pattern.
+ - **Name**: `^getCurrentBranch$`
+ - **Return**: `^String$`
+ - **Parameters**: `^\(String\s+\w+\)$`
+ - **Modifier**: `^public$`
+
+**Examples**:
+ - `public String getCurrentBranch(String workingDirectory)` (GitRunner)

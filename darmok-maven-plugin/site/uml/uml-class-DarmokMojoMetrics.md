@@ -31,16 +31,16 @@ Per-scenario metrics emitter. Writes cycle-time measurements to a CSV file and r
 
 ## append
 
-**Desc**: Appends one data row to the CSV. Writes the header on the first call if the file does not yet exist. Scenario names containing commas, quotes, or newlines are CSV-escaped.
+**Desc**: Appends one data row to the CSV. Writes the header on the first call if the file does not yet exist. The first argument is the git branch this run was configured for, stored verbatim in the `git_branch` column so SPC dashboards can group by run. Scenario names containing commas, quotes, or newlines are CSV-escaped.
 
 **Rule**: ONE method name follows append pattern.
  - **Name**: `^append$`
  - **Return**: `^void$`
- - **Parameters**: `^\(String\s+\w+,\s*String\s+\w+,\s*long\s+\w+,\s*long\s+\w+,\s*long\s+\w+,\s*long\s+\w+\)$`
+ - **Parameters**: `^\(String\s+\w+,\s*String\s+\w+,\s*String\s+\w+,\s*long\s+\w+,\s*long\s+\w+,\s*long\s+\w+,\s*long\s+\w+\)$`
  - **Modifier**: `^public$`
 
 **Examples**:
- - `public void append(String commit, String scenario, long redMs, long greenMs, long refactorMs, long totalMs)`
+ - `public void append(String gitBranch, String commit, String scenario, long redMs, long greenMs, long refactorMs, long totalMs)`
 
 ## matchAndGet{MetricColumn}
 
@@ -54,6 +54,7 @@ Per-scenario metrics emitter. Writes cycle-time measurements to a CSV file and r
 
 **Examples**:
  - `public String matchAndGetTimestamp(HashMap<String, String> keyMap)`
+ - `public String matchAndGetGitBranch(HashMap<String, String> keyMap)`
  - `public String matchAndGetCommit(HashMap<String, String> keyMap)`
  - `public String matchAndGetScenario(HashMap<String, String> keyMap)`
  - `public String matchAndGetPhaseRedMs(HashMap<String, String> keyMap)`

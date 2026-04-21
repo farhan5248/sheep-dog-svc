@@ -57,6 +57,12 @@ public abstract class DarmokMojo extends AbstractMojo {
 	@Parameter(property = "stage", defaultValue = "true")
 	public boolean stage;
 
+	// Branch this Darmok run was configured for. Stored on every metrics row as
+	// `git_branch` so SPC dashboards can overlay runs. No default — verified at
+	// init-time against the actual git HEAD; mismatch or absence aborts the run.
+	@Parameter(property = "gitBranch")
+	public String gitBranch;
+
 	// Metrics CSV output directory. Separate from LOG_PATH (which is shared with other
 	// log-collecting processes and must stay their property) so metrics can be routed
 	// independently — e.g. into the Grafana-readable hostPath for SPC dashboards.
@@ -91,6 +97,7 @@ public abstract class DarmokMojo extends AbstractMojo {
 		}
 		initLogs();
 		git = gitRunnerFactory.create(runnerLog);
+		verifyGitBranch();
 		MavenRunner maven = mavenRunnerFactory.create(runnerLog);
 		String sheepDogRoot = baseDir + "/../..";
 		String artifactId = project.getArtifactId();
@@ -121,6 +128,21 @@ public abstract class DarmokMojo extends AbstractMojo {
 	/** Test-only setter. Substitutes a mock ClaudeRunner factory; default is {@code ClaudeRunner::new}. */
 	public void setClaudeRunnerFactory(ClaudeRunnerFactory factory) {
 		this.claudeRunnerFactory = factory;
+	}
+
+	private void verifyGitBranch() throws MojoExecutionException, Exception {
+		if (gitBranch == null || gitBranch.isEmpty()) {
+			String msg = "gitBranch parameter is required";
+			mojoLog.error(msg);
+			throw new MojoExecutionException(msg);
+		}
+		String actualBranch = git.getCurrentBranch(baseDir);
+		if (!gitBranch.equals(actualBranch)) {
+			String msg = "Darmok configured for branch '" + gitBranch
+				+ "' but current HEAD is on '" + actualBranch + "'. Aborting.";
+			mojoLog.error(msg);
+			throw new MojoExecutionException(msg);
+		}
 	}
 
 	void cleanup() {
@@ -245,7 +267,7 @@ public abstract class DarmokMojo extends AbstractMojo {
 		mojoLog.info("  Commit: " + commit);
 
 		long totalDuration = System.currentTimeMillis() - totalStart;
-		metrics.append(commit, scenarioName,
+		metrics.append(gitBranch, commit, scenarioName,
 			redResult.durationMs(), greenDuration, refactorDuration, totalDuration);
 	}
 

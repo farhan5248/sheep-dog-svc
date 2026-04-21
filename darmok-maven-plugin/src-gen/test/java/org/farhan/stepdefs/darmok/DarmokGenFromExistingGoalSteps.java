@@ -31,6 +31,11 @@ public class DarmokGenFromExistingGoalSteps extends TestSteps {
         object.doEdgeStep("claude /rgr-refactor", "command", "is", "executed and successful after retries", dataTable);
     }
 
+    @Given("^The darmok plugin gen-from-existing goal git command is executed to report the current branch$")
+    public void gitCommandIsExecutedToReportTheCurrentBranch(DataTable dataTable) {
+        object.doEdgeStep("git", "command", "is", "executed to report the current branch", dataTable);
+    }
+
     @Given("^The darmok plugin gen-from-existing goal git command is executed to verify the workspace is clean$")
     public void gitCommandIsExecutedToVerifyTheWorkspaceIsClean() {
         object.doEdgeStep("git", "command", "is", "executed to verify the workspace is clean");
