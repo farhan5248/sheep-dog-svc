@@ -20,10 +20,10 @@ Abstract base Mojo providing shared lifecycle, scenario iteration, RGR phase orc
 
 ## @Parameter
 
-**Desc**: Maven plugin configuration parameters with default values. Covers path properties (specsDir, asciidocDir, scenariosFile, metricsDir), server properties (host), Claude CLI properties (modelRed, modelGreen, modelRefactor, coAuthor, maxRetries, retryWaitSeconds), behavior flags (onlyChanges, stage), and run identity (gitBranch — the branch this Darmok run is configured for; verified against git HEAD at init-time and written to every metrics.csv row as `git_branch`).
+**Desc**: Maven plugin configuration parameters with default values. Covers path properties (specsDir, asciidocDir, scenariosFile, metricsDir), server properties (host), Claude CLI properties (modelRed, modelGreen, modelRefactor, coAuthor, maxRetries, retryWaitSeconds), phase-verify policy (maxVerifyAttempts — cap on `mvn clean verify` + `claude --resume` cycles inside each of GreenPhase and RefactorPhase before the phase aborts), behavior flags (onlyChanges, stage), and run identity (gitBranch — the branch this Darmok run is configured for; verified against git HEAD at init-time and written to every metrics.csv row as `git_branch`).
 
 **Rule**: SOME attribute matches @Parameter pattern.
- - **Name**: `^(specsDir|asciidocDir|scenariosFile|metricsDir|host|modelRed|modelGreen|modelRefactor|coAuthor|maxRetries|retryWaitSeconds|onlyChanges|stage|gitBranch)$`
+ - **Name**: `^(specsDir|asciidocDir|scenariosFile|metricsDir|host|modelRed|modelGreen|modelRefactor|coAuthor|maxRetries|maxVerifyAttempts|retryWaitSeconds|onlyChanges|stage|gitBranch)$`
  - **Return**: `^(String|int|boolean)$`
  - **Modifier**: `^public$`
 
@@ -38,6 +38,7 @@ Abstract base Mojo providing shared lifecycle, scenario iteration, RGR phase orc
  - `public String modelRefactor`
  - `public String coAuthor`
  - `public int maxRetries`
+ - `public int maxVerifyAttempts`
  - `public int retryWaitSeconds`
  - `public boolean onlyChanges`
  - `public boolean stage`

@@ -91,7 +91,7 @@ public void setBaseDir(String baseDir) {
 
 ### init
 
-Initializes baseDir, creates MojoLog instances, instantiates runners via their factories, and constructs the three RGR phase classes.
+Initializes baseDir, creates MojoLog instances, instantiates runners via their factories, and constructs the three RGR phase classes. The same MavenRunner instance is shared between RedPhase (for red-phase maven goals) and GreenPhase / RefactorPhase (for the `mvn clean verify` sub-step inside each phase's verify loop).
 
 **Example: init method body**
 ```java
@@ -101,16 +101,17 @@ void init() throws Exception {
     }
     initLogs();
     git = gitRunnerFactory.create(runnerLog);
+    verifyGitBranch();
     MavenRunner maven = mavenRunnerFactory.create(runnerLog);
     String sheepDogRoot = baseDir + "/../..";
     String artifactId = project.getArtifactId();
     redPhase = new RedPhase(maven, mojoLog, baseDir, specsDir, host, onlyChanges);
     greenPhase = new GreenPhase(
         claudeRunnerFactory.create(runnerLog, modelGreen, maxRetries, retryWaitSeconds),
-        sheepDogRoot, artifactId);
+        maven, mojoLog, sheepDogRoot, baseDir, artifactId, maxVerifyAttempts);
     refactorPhase = new RefactorPhase(
         claudeRunnerFactory.create(runnerLog, modelRefactor, maxRetries, retryWaitSeconds),
-        sheepDogRoot, artifactId);
+        maven, mojoLog, sheepDogRoot, baseDir, artifactId, maxVerifyAttempts);
 }
 ```
 
@@ -289,17 +290,48 @@ String generateRunnerClassContent(String pattern, String runnerClassName) {
 
 ### run
 
-Invokes the Claude `/rgr-green` skill for the current scenario tag. Logs start/complete markers, times the work, returns a PhaseResult with the ClaudeRunner exit code and duration.
+Invokes the Claude `/rgr-green` skill for the current scenario tag, then runs the inner verify loop (`mvn clean verify` + `claude --resume` retries up to `maxVerifyAttempts`). Logs start/complete markers, times the whole phase, returns a PhaseResult. A non-zero claude exit short-circuits before verify runs and returns that exit code; a verify-loop exhaustion throws with a message naming the phase and attempt count.
 
 **Example: run method body**
 ```java
 public PhaseResult run(String pattern) throws Exception {
     mojoLog.info("  Green: Running...");
     long start = System.currentTimeMillis();
-    int exitCode = claude.run(workingDir, "/rgr-green " + artifactId + " " + pattern);
-    long duration = System.currentTimeMillis() - start;
-    mojoLog.info("  Green: Completed (" + PhaseResult.formatDuration(duration) + ")");
-    return new PhaseResult(exitCode, duration);
+    int claudeExit = claude.run(workingDir, "/rgr-green " + artifactId + " " + pattern);
+    long claudeDuration = System.currentTimeMillis() - start;
+    mojoLog.info("  Green: Completed (" + PhaseResult.formatDuration(claudeDuration) + ")");
+    if (claudeExit != 0) {
+        return new PhaseResult(claudeExit, claudeDuration);
+    }
+    runVerifyLoop();
+    long totalDuration = System.currentTimeMillis() - start;
+    return new PhaseResult(0, totalDuration);
+}
+```
+
+### runVerifyLoop
+
+Verify sub-step of the green phase. Runs `mvn clean verify` against the target project; on non-zero exit, invokes `claude --resume` with the literal continuation message `"mvn clean verify failures should be fixed"` and re-runs verify. Bounded by `maxVerifyAttempts`. Logs `Verify running...` / `Verify passed (<duration>)` on success, `Verify failed (attempt N/M), resuming claude...` on recoverable failure, and `Verify failed after M attempts, aborting` + throws on exhaustion.
+
+**Example: runVerifyLoop method body**
+```java
+private void runVerifyLoop() throws Exception {
+    for (int attempt = 1; attempt <= maxVerifyAttempts; attempt++) {
+        mojoLog.info("  Green: Verify running...");
+        long verifyStart = System.currentTimeMillis();
+        int verifyExit = maven.run(targetDir, "clean", "verify");
+        long verifyDuration = System.currentTimeMillis() - verifyStart;
+        if (verifyExit == 0) {
+            mojoLog.info("  Green: Verify passed (" + PhaseResult.formatDuration(verifyDuration) + ")");
+            return;
+        }
+        if (attempt < maxVerifyAttempts) {
+            mojoLog.warn("  Green: Verify failed (attempt " + attempt + "/" + maxVerifyAttempts + "), resuming claude...");
+            claude.resume(workingDir, VERIFY_RESUME_MESSAGE);
+        }
+    }
+    mojoLog.error("  Green: Verify failed after " + maxVerifyAttempts + " attempts, aborting");
+    throw new Exception("rgr-green verify failed after " + maxVerifyAttempts + " attempts");
 }
 ```
 
@@ -307,17 +339,22 @@ public PhaseResult run(String pattern) throws Exception {
 
 ### run
 
-Invokes the Claude `/rgr-refactor forward` skill for the current scenario. Logs start/complete markers, times the work, returns a PhaseResult with the ClaudeRunner exit code and duration.
+Invokes the Claude `/rgr-refactor forward` skill for the current scenario, then runs the same verify loop as GreenPhase. Logs start/complete markers, times the whole phase, returns a PhaseResult. A verify-loop exhaustion throws with `"rgr-refactor verify failed after <N> attempts"`.
 
 **Example: run method body**
 ```java
 public PhaseResult run() throws Exception {
     mojoLog.info("  Refactor: Running...");
     long start = System.currentTimeMillis();
-    int exitCode = claude.run(workingDir, "/rgr-refactor forward " + artifactId);
-    long duration = System.currentTimeMillis() - start;
-    mojoLog.info("  Refactor: Completed (" + PhaseResult.formatDuration(duration) + ")");
-    return new PhaseResult(exitCode, duration);
+    int claudeExit = claude.run(workingDir, "/rgr-refactor forward " + artifactId);
+    long claudeDuration = System.currentTimeMillis() - start;
+    mojoLog.info("  Refactor: Completed (" + PhaseResult.formatDuration(claudeDuration) + ")");
+    if (claudeExit != 0) {
+        return new PhaseResult(claudeExit, claudeDuration);
+    }
+    runVerifyLoop();
+    long totalDuration = System.currentTimeMillis() - start;
+    return new PhaseResult(0, totalDuration);
 }
 ```
 
@@ -474,6 +511,30 @@ public int run(String workingDirectory, String... args) throws Exception {
             break;
         }
     }
+    return exitCode;
+}
+```
+
+### resume
+
+ClaudeRunner-only. Single-shot invocation of `claude --resume` with a continuation message; the most recent claude session gets the message and the caller's outer verify loop decides whether to retry. No internal retry loop — different failure domain from `run`'s API-error retries.
+
+**Example: ClaudeRunner.resume method body**
+```java
+public int resume(String workingDirectory, String message) throws Exception {
+    List<String> command = new ArrayList<>();
+    command.add(isWindows() ? "claude.cmd" : "claude");
+    command.add("--resume");
+    command.add("--print");
+    command.add("--dangerously-skip-permissions");
+    if (model != null && !model.isEmpty()) {
+        command.add("--model");
+        command.add(model);
+    }
+    command.add(message);
+    Log log = getLog();
+    log.debug("Executing: " + String.join(" ", command));
+    // ... run process, stream output, return exit code ...
     return exitCode;
 }
 ```

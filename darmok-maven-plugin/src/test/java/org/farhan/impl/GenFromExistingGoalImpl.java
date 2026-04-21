@@ -152,4 +152,23 @@ public class GenFromExistingGoalImpl extends MavenTestObject implements GenFromE
 		setProperty("gitBranch", value);
 	}
 
+	@Override
+	public void setMvnCleanVerifyCommandPhase(HashMap<String, String> keyMap) {
+		setProperty("mvnVerifyPhase", keyMap.get("Phase"));
+	}
+
+	@Override
+	public void setMvnCleanVerifyCommandExecutedButFailsOnceThenSucceeds(HashMap<String, String> keyMap) {
+		String key = "Refactor".equalsIgnoreCase((String) getProperty("mvnVerifyPhase"))
+			? "mvnVerifyModeRefactor" : "mvnVerifyModeGreen";
+		setProperty(key, "fail-once");
+	}
+
+	@Override
+	public void setMvnCleanVerifyCommandExecutedButFailsForAllAttempts(HashMap<String, String> keyMap) {
+		String key = "Refactor".equalsIgnoreCase((String) getProperty("mvnVerifyPhase"))
+			? "mvnVerifyModeRefactor" : "mvnVerifyModeGreen";
+		setProperty(key, "fail-all");
+	}
+
 }

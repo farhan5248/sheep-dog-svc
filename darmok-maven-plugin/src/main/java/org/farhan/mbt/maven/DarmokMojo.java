@@ -48,6 +48,9 @@ public abstract class DarmokMojo extends AbstractMojo {
 	@Parameter(property = "maxRetries", defaultValue = "3")
 	public int maxRetries;
 
+	@Parameter(property = "maxVerifyAttempts", defaultValue = "3")
+	public int maxVerifyAttempts;
+
 	@Parameter(property = "retryWaitSeconds", defaultValue = "30")
 	public int retryWaitSeconds;
 
@@ -104,10 +107,10 @@ public abstract class DarmokMojo extends AbstractMojo {
 		redPhase = new RedPhase(maven, mojoLog, baseDir, specsDir, host, onlyChanges);
 		greenPhase = new GreenPhase(
 			claudeRunnerFactory.create(runnerLog, modelGreen, maxRetries, retryWaitSeconds),
-			mojoLog, sheepDogRoot, artifactId);
+			maven, mojoLog, sheepDogRoot, baseDir, artifactId, maxVerifyAttempts);
 		refactorPhase = new RefactorPhase(
 			claudeRunnerFactory.create(runnerLog, modelRefactor, maxRetries, retryWaitSeconds),
-			mojoLog, sheepDogRoot, artifactId);
+			maven, mojoLog, sheepDogRoot, baseDir, artifactId, maxVerifyAttempts);
 	}
 
 	/** Test-only setter. Lets tests pre-seed baseDir before execute() so init() skips the MavenProject path. */

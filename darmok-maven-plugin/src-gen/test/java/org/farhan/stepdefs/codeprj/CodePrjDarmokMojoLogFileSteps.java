@@ -25,4 +25,9 @@ public class CodePrjDarmokMojoLogFileSteps extends TestSteps {
     public void wontBeAsFollows(DataTable dataTable) {
         object.assertVertexStep("", "", "won't be", "as follows", dataTable);
     }
+
+    @Given("^The code-prj project darmok.mojo.log file will be as follows with this failure$")
+    public void willBeAsFollowsWithThisFailure(DataTable dataTable) {
+        object.assertVertexStep("", "", "will be", "as follows with this failure", dataTable);
+    }
 }

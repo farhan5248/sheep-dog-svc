@@ -55,4 +55,10 @@ public interface GenFromExistingGoal {
     public void setMvnUmlToCucumberGuiceCommandExit(HashMap<String, String> keyMap);
 
     public void setMvnUmlToCucumberGuiceCommandOutput(HashMap<String, String> keyMap);
+
+    public void setMvnCleanVerifyCommandExecutedButFailsForAllAttempts(HashMap<String, String> keyMap);
+
+    public void setMvnCleanVerifyCommandPhase(HashMap<String, String> keyMap);
+
+    public void setMvnCleanVerifyCommandExecutedButFailsOnceThenSucceeds(HashMap<String, String> keyMap);
 }

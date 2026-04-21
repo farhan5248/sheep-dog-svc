@@ -13,4 +13,6 @@ public interface DarmokMojoLogFile {
     public String getContent(HashMap<String, String> keyMap);
 
     public String getPresent(HashMap<String, String> keyMap);
+
+    public String getAsFollowsWithThisFailure(HashMap<String, String> keyMap);
 }

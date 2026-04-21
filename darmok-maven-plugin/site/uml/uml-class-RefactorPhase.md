@@ -6,15 +6,15 @@ Third RGR phase. Invokes the Claude CLI `/rgr-refactor forward` skill to refacto
 
 ## RefactorPhase
 
-**Desc**: Constructs a RefactorPhase with its ClaudeRunner collaborator (pre-configured with the refactor-phase model), a DarmokMojoLog for phase start/complete markers, the working directory Claude runs in, and the maven artifact id passed as the skill's project argument.
+**Desc**: Constructs a RefactorPhase with its ClaudeRunner collaborator (pre-configured with the refactor-phase model), a MavenRunner used for `mvn clean verify` in the inner verify loop, a DarmokMojoLog for phase start/complete markers, the working directory Claude runs in, the target project directory `mvn clean verify` runs in, the maven artifact id passed as the skill's project argument, and the maximum number of verify attempts before aborting the phase.
 
 **Rule**: ONE constructor matches RefactorPhase pattern.
  - **Name**: `^RefactorPhase$`
- - **Parameters**: `^\(ClaudeRunner\s+\w+,\s*DarmokMojoLog\s+\w+,\s*String\s+\w+,\s*String\s+\w+\)$`
+ - **Parameters**: `^\(ClaudeRunner\s+\w+,\s*MavenRunner\s+\w+,\s*DarmokMojoLog\s+\w+,\s*String\s+\w+,\s*String\s+\w+,\s*String\s+\w+,\s*int\s+\w+\)$`
  - **Modifier**: `^public$`
 
 **Examples**:
- - `public RefactorPhase(ClaudeRunner claude, DarmokMojoLog mojoLog, String workingDir, String artifactId)`
+ - `public RefactorPhase(ClaudeRunner claude, MavenRunner maven, DarmokMojoLog mojoLog, String workingDir, String targetDir, String artifactId, int maxVerifyAttempts)`
 
 ## run
 

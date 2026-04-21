@@ -118,4 +118,37 @@ public class ClaudeRunner extends ProcessRunner {
 		}
 		return null;
 	}
+
+	public int resume(String workingDirectory, String message) throws Exception {
+		List<String> command = new ArrayList<>();
+		command.add(isWindows() ? "claude.cmd" : "claude");
+		command.add("--resume");
+		command.add("--print");
+		command.add("--dangerously-skip-permissions");
+		if (model != null && !model.isEmpty()) {
+			command.add("--model");
+			command.add(model);
+		}
+		command.add(message);
+
+		Log log = getLog();
+		log.debug("Executing: " + String.join(" ", command));
+		log.debug("-------------------------------------------");
+		ProcessBuilder pb = new ProcessBuilder(command);
+		pb.directory(new File(workingDirectory));
+		pb.redirectErrorStream(true);
+		Process process = getStarter().start(pb);
+		process.getOutputStream().close();
+		try (BufferedReader reader = new BufferedReader(
+				new InputStreamReader(process.getInputStream()))) {
+			String line;
+			while ((line = reader.readLine()) != null) {
+				log.debug(line);
+			}
+		}
+		int exitCode = process.waitFor();
+		log.debug("-------------------------------------------");
+		log.debug("Claude CLI exited with code " + exitCode);
+		return exitCode;
+	}
 }

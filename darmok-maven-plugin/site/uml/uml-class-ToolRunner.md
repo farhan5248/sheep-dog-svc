@@ -62,6 +62,19 @@ Specialized process runner that extends ProcessRunner with tool-specific command
 **Examples**:
  - `public int run(String workingDirectory, String... args)` (ClaudeRunner — with retry logic)
 
+## resume
+
+**Desc**: ClaudeRunner-only. Invokes `claude --resume` with a continuation message so the most recent session can be nudged forward — used by GreenPhase and RefactorPhase when `mvn clean verify` fails and the claude-authored code needs another pass. Single-shot (no retry loop); the caller's outer verify loop controls retries.
+
+**Rule**: SOME method names follow resume pattern.
+ - **Name**: `^resume$`
+ - **Return**: `^int$`
+ - **Parameters**: `^\(String\s+\w+,\s*String\s+\w+\)$`
+ - **Modifier**: `^public$`
+
+**Examples**:
+ - `public int resume(String workingDirectory, String message)` (ClaudeRunner — for phase-verify recovery)
+
 ## getCurrentCommit
 
 **Desc**: GitRunner convenience method that captures the current HEAD commit SHA via `git rev-parse HEAD`. Used by DarmokMojo to tag per-scenario metrics rows with the commit responsible for that cycle-time point.

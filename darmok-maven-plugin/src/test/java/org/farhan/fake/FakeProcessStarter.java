@@ -48,10 +48,15 @@ public class FakeProcessStarter implements ProcessStarter {
 	private final String mvnTestMode;
 	private final int mvnTestExit;
 	private final String mvnTestOutput;
+	private final String mvnVerifyModeGreen;
+	private final String mvnVerifyModeRefactor;
 	private final Path codePrjBaseDir;
 
 	private int greenCalls = 0;
 	private int refactorCalls = 0;
+	private int greenVerifyCalls = 0;
+	private int refactorVerifyCalls = 0;
+	private String currentPhase;
 
 	public FakeProcessStarter(Map<String, Object> properties) {
 		this.claudeGreenMode = string(properties, "claudeGreenMode");
@@ -74,6 +79,8 @@ public class FakeProcessStarter implements ProcessStarter {
 		this.mvnTestMode = string(properties, "mvnTestMode");
 		this.mvnTestExit = intOrZero(properties, "mvnTestExit");
 		this.mvnTestOutput = string(properties, "mvnTestOutput");
+		this.mvnVerifyModeGreen = string(properties, "mvnVerifyModeGreen");
+		this.mvnVerifyModeRefactor = string(properties, "mvnVerifyModeRefactor");
 		Object baseDir = properties.get("code-prj.baseDir");
 		this.codePrjBaseDir = baseDir instanceof Path ? (Path) baseDir : null;
 	}
@@ -100,6 +107,7 @@ public class FakeProcessStarter implements ProcessStarter {
 
 		if (joined.contains("claude") && cmd.stream().anyMatch(a -> a.startsWith("/rgr-green"))) {
 			greenCalls++;
+			currentPhase = "green";
 			if ("retry-success".equals(claudeGreenMode)) {
 				return greenCalls == 1 ? new FakeProcess(orEmpty(claudeGreenPattern), 1) : new FakeProcess("", 0);
 			}
@@ -114,9 +122,14 @@ public class FakeProcessStarter implements ProcessStarter {
 
 		if (joined.contains("claude") && cmd.stream().anyMatch(a -> a.startsWith("/rgr-refactor"))) {
 			refactorCalls++;
+			currentPhase = "refactor";
 			if ("retry-success".equals(claudeRefactorMode)) {
 				return refactorCalls == 1 ? new FakeProcess(orEmpty(claudeRefactorPattern), 1) : new FakeProcess("", 0);
 			}
+			return new FakeProcess("", 0);
+		}
+
+		if (joined.contains("claude") && joined.contains("--resume")) {
 			return new FakeProcess("", 0);
 		}
 
@@ -140,6 +153,19 @@ public class FakeProcessStarter implements ProcessStarter {
 			}
 			if (!implFileExists(cmd)) {
 				return new FakeProcess("tests failing: impl class missing", 1);
+			}
+			return new FakeProcess("", 0);
+		}
+
+		if (cmd.size() >= 3 && cmd.get(0).toLowerCase().startsWith("mvn")
+				&& cmd.contains("clean") && cmd.contains("verify")) {
+			String mode = "green".equals(currentPhase) ? mvnVerifyModeGreen : mvnVerifyModeRefactor;
+			int count = "green".equals(currentPhase) ? ++greenVerifyCalls : ++refactorVerifyCalls;
+			if ("fail-once".equals(mode)) {
+				return count == 1 ? new FakeProcess("", 1) : new FakeProcess("", 0);
+			}
+			if ("fail-all".equals(mode)) {
+				return new FakeProcess("", 1);
 			}
 			return new FakeProcess("", 0);
 		}

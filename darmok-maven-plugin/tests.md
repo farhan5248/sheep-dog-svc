@@ -452,6 +452,116 @@ All assume: exactly one scenario in the list with a regular tag; the asciidoc fi
 
 ---
 
+### Phase verification (#155 — deterministic verify inside green and refactor)
+
+Both green and refactor phases run `mvn clean verify` in the target project after the
+claude invocation succeeds. A failing verify is treated as "claude left the code in an
+incomplete state"; darmok resumes the same claude session with the literal message
+`"mvn clean verify failures should be fixed"` and re-runs verify, bounded by a new
+`maxVerifyAttempts` parameter (default 3). Verify is part of the phase — it runs before
+the phase's commit, so a verify failure never produces a green or refactor commit.
+
+Verify is deterministic (pure maven); the claude `--resume` call it wraps is not. The
+retry count for `--resume` is decoupled from `maxRetries` (which governs the retryable-500/529
+pattern on the initial claude call) — verify-resume runs up to `maxVerifyAttempts - 1` times
+regardless of whether claude itself hit a transient error.
+
+New observable signals:
+- Mojo log gains `INFO [mojo]   Green: Verify running...` / `Green: Verify passed (<duration>)`
+  lines between `Green: Completed` and `Green: Committing`, and the symmetric refactor pair.
+- On failure, mojo log gets `WARN [mojo]   Green: Verify failed (attempt N/M), resuming claude...`
+  followed by another `Green: Verify running...` block for the retry, and on exhaustion
+  `ERROR [mojo]   Green: Verify failed after M attempts, aborting`.
+- Runner log gains `DEBUG [runner] Running: mvn clean verify` per verify attempt, and
+  `DEBUG [runner] Executing: claude --resume --print --dangerously-skip-permissions --model <m> "mvn clean verify failures should be fixed"`
+  per resume attempt.
+
+Ordering inside the green phase (refactor is symmetric): `claude /rgr-green` → loop { `mvn clean verify`; if 0 break; if attempts-remaining `claude --resume`; else abort } → commit.
+
+#### Path 18 — Green: verify passes on first attempt (new default happy path)
+
+- Preconditions match Path 9 (red fails, green succeeds, stage=false), plus claude `/rgr-green` produced an impl that compiles and tests pass
+- When the `darmok:gen-from-existing` goal is executed
+- Then `mvn clean verify` was invoked exactly once on the darmok-prj project
+- And the observable outcome matches Path 9 with the mojo log additionally containing between the existing Green/Refactor blocks
+  ```
+  | Level | Category | Content                                  |
+  | INFO  | mojo     |   Green: Verify running...               |
+  | INFO  | mojo     |   Green: Verify passed (<any>)           |
+  | ...                                                          |
+  | INFO  | mojo     |   Refactor: Verify running...            |
+  | INFO  | mojo     |   Refactor: Verify passed (<any>)        |
+  ```
+- And the runner log additionally contains two `mvn clean verify` lines (one per phase)
+
+#### Path 19 — Green: verify fails, resume recovers
+
+- Preconditions match Path 18 up through claude `/rgr-green` returning 0
+- And the first `mvn clean verify` invocation returns exit 1 (e.g. an assertion in the generated impl is wrong)
+- And the subsequent `claude --resume "mvn clean verify failures should be fixed"` produces a fix
+- And the second `mvn clean verify` invocation returns 0
+- When the `darmok:gen-from-existing` goal is executed
+- Then the observable outcome matches Path 9 (refactor proceeds and scenario completes) with the mojo log additionally containing
+  ```
+  | Level | Category | Content                                                |
+  | INFO  | mojo     |   Green: Verify running...                             |
+  | WARN  | mojo     |   Green: Verify failed (attempt 1/3), resuming claude...|
+  | INFO  | mojo     |   Green: Verify running...                             |
+  | INFO  | mojo     |   Green: Verify passed (<any>)                         |
+  ```
+- And the runner log contains, in order
+  ```
+  | Level | Category | Content                                                                                                                         |
+  | DEBUG | runner   | Running: mvn clean verify                                                                                                       |
+  | DEBUG | runner   | Executing: claude --resume --print --dangerously-skip-permissions --model sonnet "mvn clean verify failures should be fixed"    |
+  | DEBUG | runner   | Running: mvn clean verify                                                                                                       |
+  ```
+- And exactly one green commit is made (the fix from the resumed session is included in it)
+
+#### Path 20 — Green: verify fails on every attempt up to maxVerifyAttempts
+
+- Preconditions match Path 19 but every `mvn clean verify` invocation returns exit 1
+- When the `darmok:gen-from-existing` goal is executed with default `maxVerifyAttempts=3`
+- Then the goal fails with `MojoExecutionException`: `rgr-green verify failed after 3 attempts`
+- And `mvn clean verify` was invoked exactly 3 times
+- And `claude --resume ...` was invoked exactly 2 times (not 3 — we don't resume after the final failing verify)
+- And the mojo log ends the green phase with
+  ```
+  | Level | Category | Content                                                 |
+  | ERROR | mojo     |   Green: Verify failed after 3 attempts, aborting       |
+  ```
+- And no green commit was made (the verify-failure happens before `commitIfChanged`)
+- And red was already committed (stage=false)
+- And the mojo log will not contain `Refactor: Running...` (refactor phase is never reached)
+
+#### Path 21 — Refactor: verify passes on first attempt (matches Path 18)
+
+Symmetric with Path 18 for the refactor phase. Already covered by the Path 18 log assertions;
+this entry exists as the explicit acknowledgment that the verify sub-step is applied to both
+phases, not green alone.
+
+#### Path 22 — Refactor: verify fails, resume recovers
+
+- Preconditions match Path 18 up through claude `/rgr-refactor` returning 0
+- And the first `mvn clean verify` in the refactor phase returns exit 1
+- And the subsequent `claude --resume "mvn clean verify failures should be fixed"` produces a fix
+- And the second `mvn clean verify` returns 0
+- When the `darmok:gen-from-existing` goal is executed
+- Then the observable outcome matches Path 9 (scenario completes cleanly) with the mojo log containing the refactor-phase equivalents of the Path 19 lines
+- And exactly one refactor commit is made with the resumed fix included
+
+#### Path 23 — Refactor: verify fails on every attempt up to maxVerifyAttempts
+
+- Preconditions match Path 22 but every `mvn clean verify` in the refactor phase returns exit 1
+- When the `darmok:gen-from-existing` goal is executed with default `maxVerifyAttempts=3`
+- Then the goal fails with `MojoExecutionException`: `rgr-refactor verify failed after 3 attempts`
+- And `mvn clean verify` was invoked exactly 3 times in the refactor phase (plus 1 successful one in green)
+- And `claude --resume ...` was invoked exactly 2 times in the refactor phase
+- And no refactor commit was made
+- And the green commit from this scenario remains in git history (stage=false)
+
+---
+
 ### gen-from-comparison specific
 
 The comparison goal runs a `/rgr-gen-from-comparison` skill before each scenario-processing iteration.
@@ -512,6 +622,7 @@ The comparison goal runs a `/rgr-gen-from-comparison` skill before each scenario
 5a. **git_branch column** — `metrics.csv` gains a `git_branch` column populated with the value of the `gitBranch` parameter. The column is stable for the whole run (every row has the same value) and the branch is validated against git HEAD at init time, so `git_branch` is always the name of the branch that produced the commits recorded alongside it. The SPC dashboard joins on this column to overlay runs.
 6. **`LOG_PATH` env var** — if set, logs land elsewhere. A single path covering "LOG_PATH set" is enough; the rest of the behavior is identical.
 7. **Refactor-only path missing** — there's no code path that runs refactor without green. The tree shape is Red → (Green → Refactor) or Red alone.
+8. **Verify is a sub-step, not a phase** (#155) — verify lives inside green and inside refactor, not beside them. Paths 9, 10, and 12 (all the "green succeeds … refactor succeeds" flows) gained `Green: Verify running/passed` and `Refactor: Verify running/passed` lines as a side-effect of #155; the original path text does not call them out because the verify sub-step is documented once under Paths 18–23. When re-reading Paths 9–12, treat Path 18 as the canonical assertion template for the phase-verify lines.
 
 ---
 

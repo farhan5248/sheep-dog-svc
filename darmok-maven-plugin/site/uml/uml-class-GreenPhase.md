@@ -6,15 +6,15 @@ Second RGR phase. Invokes the Claude CLI `/rgr-green` skill to implement code th
 
 ## GreenPhase
 
-**Desc**: Constructs a GreenPhase with its ClaudeRunner collaborator (pre-configured with the green-phase model), a DarmokMojoLog for phase start/complete markers, the working directory Claude runs in, and the maven artifact id passed as the skill's project argument.
+**Desc**: Constructs a GreenPhase with its ClaudeRunner collaborator (pre-configured with the green-phase model), a MavenRunner used for `mvn clean verify` in the inner verify loop, a DarmokMojoLog for phase start/complete markers, the working directory Claude runs in, the target project directory `mvn clean verify` runs in, the maven artifact id passed as the skill's project argument, and the maximum number of verify attempts before aborting the phase.
 
 **Rule**: ONE constructor matches GreenPhase pattern.
  - **Name**: `^GreenPhase$`
- - **Parameters**: `^\(ClaudeRunner\s+\w+,\s*DarmokMojoLog\s+\w+,\s*String\s+\w+,\s*String\s+\w+\)$`
+ - **Parameters**: `^\(ClaudeRunner\s+\w+,\s*MavenRunner\s+\w+,\s*DarmokMojoLog\s+\w+,\s*String\s+\w+,\s*String\s+\w+,\s*String\s+\w+,\s*int\s+\w+\)$`
  - **Modifier**: `^public$`
 
 **Examples**:
- - `public GreenPhase(ClaudeRunner claude, DarmokMojoLog mojoLog, String workingDir, String artifactId)`
+ - `public GreenPhase(ClaudeRunner claude, MavenRunner maven, DarmokMojoLog mojoLog, String workingDir, String targetDir, String artifactId, int maxVerifyAttempts)`
 
 ## run
 
