@@ -189,9 +189,6 @@ public abstract class DarmokMojo extends AbstractMojo {
 			return;
 		}
 
-		String commit = git.getCurrentCommit(baseDir);
-		mojoLog.info("  Commit: " + commit);
-
 		// Add tag to asciidoc file
 		addTagToAsciidoc(fileName, scenarioName, tag);
 
@@ -204,11 +201,12 @@ public abstract class DarmokMojo extends AbstractMojo {
 		long refactorDuration = 0;
 
 		if (redResult.exitCode() == 100) {
-			// Tests already passing — include scenario removal in red commit
+			// Tests already passing — no green/refactor phase runs, so the commit
+			// message omits the phase suffix (matches the stage=true combined case).
 			mojoLog.info("  Green: Skipped (tests already passing)");
 			removeFirstScenarioFromFile();
 			git.run(baseDir, "add", ".");
-			commitIfChanged("run-rgr red " + scenarioName, "Red");
+			commitIfChanged("run-rgr " + scenarioName, "Red");
 		} else {
 			// Tests failing — commit red, then run green and refactor
 			git.run(baseDir, "add", ".");
@@ -238,6 +236,13 @@ public abstract class DarmokMojo extends AbstractMojo {
 			String commitMessage = stage ? "run-rgr " + scenarioName : "run-rgr refactor " + scenarioName;
 			commitIfChanged(commitMessage, "Refactor");
 		}
+
+		// Capture the HEAD commit AFTER all scenario commits have been made.
+		// This is the commit this scenario produced (stage=true single commit,
+		// stage=false refactor commit, or the skip-path red commit). The metric
+		// row is attributable to this commit.
+		String commit = git.getCurrentCommit(baseDir);
+		mojoLog.info("  Commit: " + commit);
 
 		long totalDuration = System.currentTimeMillis() - totalStart;
 		metrics.append(commit, scenarioName,

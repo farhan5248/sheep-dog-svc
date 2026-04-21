@@ -34,7 +34,7 @@ Feature: Run RGR Multiple Scenarios
       And The code-prj project darmok.runners.log file will be as follows
           | Level | Category | Content                                                       |
           | DEBUG | runner   | Running: mvn test -Dtest=loginHappyPathTest                   |
-          | DEBUG | runner   | Running: git commit -m run-rgr red User logs in successfully  |
+          | DEBUG | runner   | Running: git commit -m run-rgr User logs in successfully      |
           | DEBUG | runner   | Running: mvn test -Dtest=logoutHappyPathTest                  |
-          | DEBUG | runner   | Running: git commit -m run-rgr red User logs out successfully |
+          | DEBUG | runner   | Running: git commit -m run-rgr User logs out successfully     |
 
