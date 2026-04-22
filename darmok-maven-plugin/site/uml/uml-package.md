@@ -25,7 +25,7 @@
 
 ### ProcessRunner
 
-**Desc**: Base class for executing external processes with output streaming and logging. Separates process lifecycle management from command-specific argument construction.
+**Desc**: Abstract base class that owns the external-process lifecycle — stream stdout to log, capture stdout to string, return exit code. Concrete `{Tool}Runner` subclasses provide command-building. Cannot be instantiated directly.
 
 **Rule**: ONE class matches ProcessRunner pattern
 
@@ -54,59 +54,62 @@
  - `GitRunnerFactory`
  - `MavenRunnerFactory`
 
-### DarmokMojoLog
+### DarmokMojoFile
 
-**Desc**: Logging decorator that implements Maven's Log interface, delegating to a wrapped Log while simultaneously writing timestamped, categorized entries to a file. Separates structured file logging from Maven's console logging.
+**Desc**: Abstract base class for files that Darmok writes during a run and tests inspect row-by-row. Owns the file path, lazy parse, cursor, and identity-cached `keyMap` matching template. Concrete subclasses (`DarmokMojoLog`, `DarmokMojoMetrics`) define the row record type, parse format, and `findNext` semantics.
 
-**Rule**: ONE class matches DarmokMojoLog pattern
+**Rule**: ONE class matches DarmokMojoFile pattern
 
-**Regex**: `^DarmokMojoLog$`
+**Regex**: `^DarmokMojoFile$`
+ - `DarmokMojoFile`
+
+### DarmokMojo{DataFileType}
+
+**Desc**: Concrete `DarmokMojoFile` subclass for one storage format. `DarmokMojoLog` decorates Maven's `Log` interface and writes timestamped lines (parses back into `LogEntry` records, filters by Level/Category/Content). `DarmokMojoMetrics` writes one CSV row per scenario (parses back into column-keyed maps, one row per keyMap).
+
+**Rule**: SOME class matches DarmokMojo{DataFileType} pattern
+
+**Regex**: `^DarmokMojo{DataFileType}$`
  - `DarmokMojoLog`
-
-### DarmokMojoMetrics
-
-**Desc**: Per-scenario metrics emitter. Writes cycle-time measurements (Red / Green / Refactor / Total durations) tagged with scenario name, git commit SHA, and configured git branch to a CSV file for downstream SPC analysis, and reads them back for test verification. Storage format is CSV today; future revisions may push to a central time-series store without changing the class boundary.
-
-**Rule**: ONE class matches DarmokMojoMetrics pattern
-
-**Regex**: `^DarmokMojoMetrics$`
  - `DarmokMojoMetrics`
 
-### RedPhase
+### RgrPhase
 
-**Desc**: RGR Red phase — generates failing test artifacts by running the sheep-dog-svc-maven-plugin asciidoctor-to-uml + uml-to-cucumber-guice goals, then executing mvn test to verify the generated tests fail.
+**Desc**: Abstract base for the three RGR phases. Owns the public `run(DarmokMojoState)` template, the verify loop (`mvn clean verify` + `claude --resume "mvn clean verify failures should be fixed"`), and the timeout-recovery loop (`mvn clean install` + `claude --resume "pls continue"`). Concrete `{RgrPhase}Phase` subclasses provide the phase-specific work via `executeClaudeOrMaven` and declare whether they need verify via `requiresVerifyLoop`. Cannot be instantiated directly.
 
-**Rule**: ONE class matches RedPhase pattern
+**Rule**: ONE class matches RgrPhase pattern
 
-**Regex**: `^RedPhase$`
+**Regex**: `^RgrPhase$`
+ - `RgrPhase`
+
+### {RgrPhase}Phase
+
+**Desc**: Concrete RGR phase. `RedPhase` runs sheep-dog-svc-maven-plugin goals + `mvn test` (no claude, no verify loop). `GreenPhase` invokes `/rgr-green` then verifies. `RefactorPhase` invokes `/rgr-refactor forward` then verifies.
+
+**Rule**: SOME class matches {RgrPhase}Phase pattern
+
+**Regex**: `^{RgrPhase}Phase$`
  - `RedPhase`
-
-### GreenPhase
-
-**Desc**: RGR Green phase — invokes the Claude /rgr-green skill to implement code that makes the red-phase tests pass, then runs deterministic sub-steps (timeout recovery via `mvn clean install` + `claude --resume "pls continue"`, then a verify loop via `mvn clean verify` + `claude --resume "mvn clean verify failures should be fixed"`) that keep the resulting code buildable and test-passing.
-
-**Rule**: ONE class matches GreenPhase pattern
-
-**Regex**: `^GreenPhase$`
  - `GreenPhase`
-
-### RefactorPhase
-
-**Desc**: RGR Refactor phase — invokes the Claude `/rgr-refactor forward` skill to refactor the freshly-green code, wrapped in the same timeout-recovery + verify loops as GreenPhase.
-
-**Rule**: ONE class matches RefactorPhase pattern
-
-**Regex**: `^RefactorPhase$`
  - `RefactorPhase`
 
-### PhaseResult
+### Phase
 
-**Desc**: Value record capturing the exit code and elapsed duration of an RGR phase execution.
+**Desc**: Enum identifying which RGR phase a `DarmokMojoState.setDuration`/`getDuration` call refers to.
 
-**Rule**: ONE class matches PhaseResult pattern
+**Rule**: ONE class matches Phase pattern
 
-**Regex**: `^PhaseResult$`
- - `PhaseResult`
+**Regex**: `^Phase$`
+ - `Phase`
+
+### DarmokMojoState
+
+**Desc**: Mutable per-scenario state object threaded through all three phases. Carries inputs (scenarioName, gitBranch, tag), accumulating phase durations (via `setDuration(Phase, long)`), the current `exitCode` for branching, and post-scenario fields (`commit`, `totalDurationMs`) populated by the orchestrator. Replaces the old `PhaseResult` record.
+
+**Rule**: ONE class matches DarmokMojoState pattern
+
+**Regex**: `^DarmokMojoState$`
+ - `DarmokMojoState`
 
 ## src/test/java/org/farhan/impl
 

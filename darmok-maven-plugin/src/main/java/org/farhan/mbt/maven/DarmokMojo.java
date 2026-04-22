@@ -108,7 +108,7 @@ public abstract class DarmokMojo extends AbstractMojo {
 	// Lifecycle
 	// =========================================================================
 
-	void init() throws Exception {
+	protected void init() throws Exception {
 		if (baseDir == null) {
 			baseDir = project.getBasedir().getAbsolutePath();
 		}
@@ -162,7 +162,7 @@ public abstract class DarmokMojo extends AbstractMojo {
 		}
 	}
 
-	void cleanup() {
+	protected void cleanup() {
 		closeLogs();
 	}
 
@@ -204,7 +204,7 @@ public abstract class DarmokMojo extends AbstractMojo {
 	// Scenario Iterator and Processor
 	// =========================================================================
 
-	ScenarioEntry getNextScenario() throws Exception {
+	protected ScenarioEntry getNextScenario() throws Exception {
 		Path scenariosPath = Path.of(baseDir, scenariosFile);
 		if (!Files.exists(scenariosPath)) {
 			return null;
@@ -216,7 +216,7 @@ public abstract class DarmokMojo extends AbstractMojo {
 		return scenarios.get(0);
 	}
 
-	void processScenario(ScenarioEntry entry) throws MojoExecutionException, Exception {
+	protected void processScenario(ScenarioEntry entry) throws MojoExecutionException, Exception {
 		String scenarioName = entry.scenario();
 		String tag = entry.tag();
 		String fileName = entry.file();
@@ -231,15 +231,14 @@ public abstract class DarmokMojo extends AbstractMojo {
 		// Add tag to asciidoc file
 		addTagToAsciidoc(fileName, scenarioName, tag);
 
-		PhaseResult redResult = redPhase.run(tag);
-		if (redResult.exitCode() != 0 && redResult.exitCode() != 100) {
-			throw new MojoExecutionException("rgr-red failed with exit code " + redResult.exitCode());
+		DarmokMojoState state = new DarmokMojoState(scenarioName, gitBranch, tag);
+
+		state = redPhase.run(state);
+		if (state.exitCode != 0 && state.exitCode != 100) {
+			throw new MojoExecutionException("rgr-red failed with exit code " + state.exitCode);
 		}
 
-		long greenDuration = 0;
-		long refactorDuration = 0;
-
-		if (redResult.exitCode() == 100) {
+		if (state.exitCode == 100) {
 			// Tests already passing — no green/refactor phase runs, so the commit
 			// message omits the phase suffix (matches the stage=true combined case).
 			mojoLog.info("  Green: Skipped (tests already passing)");
@@ -253,10 +252,9 @@ public abstract class DarmokMojo extends AbstractMojo {
 				commitIfChanged("run-rgr red " + scenarioName, "Red");
 			}
 
-			PhaseResult greenResult = greenPhase.run(tag);
-			greenDuration = greenResult.durationMs();
-			if (greenResult.exitCode() != 0) {
-				throw new MojoExecutionException("rgr-green failed with exit code " + greenResult.exitCode());
+			state = greenPhase.run(state);
+			if (state.exitCode != 0) {
+				throw new MojoExecutionException("rgr-green failed with exit code " + state.exitCode);
 			}
 
 			removeFirstScenarioFromFile();
@@ -265,10 +263,9 @@ public abstract class DarmokMojo extends AbstractMojo {
 				commitIfChanged("run-rgr green " + scenarioName, "Green");
 			}
 
-			PhaseResult refactorResult = refactorPhase.run();
-			refactorDuration = refactorResult.durationMs();
-			if (refactorResult.exitCode() != 0) {
-				throw new MojoExecutionException("rgr-refactor failed with exit code " + refactorResult.exitCode());
+			state = refactorPhase.run(state);
+			if (state.exitCode != 0) {
+				throw new MojoExecutionException("rgr-refactor failed with exit code " + state.exitCode);
 			}
 
 			git.run(baseDir, "add", ".");
@@ -280,12 +277,11 @@ public abstract class DarmokMojo extends AbstractMojo {
 		// This is the commit this scenario produced (stage=true single commit,
 		// stage=false refactor commit, or the skip-path red commit). The metric
 		// row is attributable to this commit.
-		String commit = git.getCurrentCommit(baseDir);
-		mojoLog.info("  Commit: " + commit);
+		state.commit = git.getCurrentCommit(baseDir);
+		mojoLog.info("  Commit: " + state.commit);
 
-		long totalDuration = System.currentTimeMillis() - totalStart;
-		metrics.append(gitBranch, commit, scenarioName,
-			redResult.durationMs(), greenDuration, refactorDuration, totalDuration);
+		state.totalDurationMs = System.currentTimeMillis() - totalStart;
+		metrics.append(state);
 	}
 
 	private void commitIfChanged(String message, String phase) throws Exception {
@@ -297,7 +293,7 @@ public abstract class DarmokMojo extends AbstractMojo {
 		}
 	}
 
-	void removeFirstScenarioFromFile() throws Exception {
+	private void removeFirstScenarioFromFile() throws Exception {
 		Path scenariosPath = Path.of(baseDir, scenariosFile);
 		List<String> lines = Files.readAllLines(scenariosPath, StandardCharsets.UTF_8);
 
@@ -350,7 +346,7 @@ public abstract class DarmokMojo extends AbstractMojo {
 	// Scenario Parsing
 	// =========================================================================
 
-	List<ScenarioEntry> parseScenarios(String scenariosFilePath) throws Exception {
+	private List<ScenarioEntry> parseScenarios(String scenariosFilePath) throws Exception {
 		List<String> lines = Files.readAllLines(Path.of(scenariosFilePath), StandardCharsets.UTF_8);
 		List<ScenarioEntry> result = new ArrayList<>();
 		String currentFile = "";
@@ -373,7 +369,7 @@ public abstract class DarmokMojo extends AbstractMojo {
 	// AsciiDoc Tag Insertion
 	// =========================================================================
 
-	boolean addTagToAsciidoc(String fileName, String scenarioName, String tag) throws Exception {
+	private boolean addTagToAsciidoc(String fileName, String scenarioName, String tag) throws Exception {
 		String filePath = baseDir + "/" + asciidocDir + "/" + fileName + ".asciidoc";
 		File file = new File(filePath);
 		if (!file.exists()) {
@@ -444,7 +440,7 @@ public abstract class DarmokMojo extends AbstractMojo {
 		return false;
 	}
 
-	int runCleanUp() throws Exception {
+	protected int runCleanUp() throws Exception {
 		Path sheepDogMain = Path.of(baseDir, "../..").normalize();
 
 		int deleted = deleteNulFiles(sheepDogMain);
@@ -455,7 +451,7 @@ public abstract class DarmokMojo extends AbstractMojo {
 		return 0;
 	}
 
-	int deleteNulFiles(Path root) throws Exception {
+	private int deleteNulFiles(Path root) throws Exception {
 		int[] count = { 0 };
 		Files.walk(root)
 			.filter(Files::isRegularFile)
@@ -475,7 +471,7 @@ public abstract class DarmokMojo extends AbstractMojo {
 		return count[0];
 	}
 
-	void deleteDirectory(Path dir) throws Exception {
+	private void deleteDirectory(Path dir) throws Exception {
 		if (!Files.exists(dir)) {
 			return;
 		}
@@ -494,7 +490,7 @@ public abstract class DarmokMojo extends AbstractMojo {
 	// File I/O Helpers
 	// =========================================================================
 
-	void writeFileWithLF(String filePath, List<String> lines) throws Exception {
+	private void writeFileWithLF(String filePath, List<String> lines) throws Exception {
 		String content = String.join("\n", lines) + "\n";
 		Files.writeString(Path.of(filePath), content, StandardCharsets.UTF_8);
 	}

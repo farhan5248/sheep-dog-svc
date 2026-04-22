@@ -9,7 +9,7 @@ import java.util.List;
 
 import org.apache.maven.plugin.logging.Log;
 
-public class ProcessRunner {
+public abstract class ProcessRunner {
 
 	/**
 	 * Test seam: abstraction over {@link ProcessBuilder#start()} so tests can
@@ -65,7 +65,7 @@ public class ProcessRunner {
 		return process.waitFor();
 	}
 
-	public String capture(String workingDirectory, String... args) throws Exception {
+	protected String capture(String workingDirectory, String... args) throws Exception {
 		List<String> command = buildCommand(args);
 
 		ProcessBuilder pb = new ProcessBuilder(command);

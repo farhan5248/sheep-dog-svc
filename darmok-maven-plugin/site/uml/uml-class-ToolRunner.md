@@ -4,7 +4,7 @@
 
 **Extends**: ProcessRunner
 
-Specialized process runner that extends ProcessRunner with tool-specific command construction. Separates tool-specific command building from shared process execution logic.
+Concrete subclasses of `ProcessRunner` that prepend a tool-specific executable to each command. This file describes the **subclass layer** (per-tool command construction); the parent file `uml-class-ProcessRunner.md` describes the **base-class layer** (process I/O lifecycle). Three subclasses today: `GitRunner`, `MavenRunner`, `ClaudeRunner`. Two of them (`Maven`, `Claude`) are platform-aware via the inherited `isWindows()` helper.
 
 ## {Tool}Runner
 

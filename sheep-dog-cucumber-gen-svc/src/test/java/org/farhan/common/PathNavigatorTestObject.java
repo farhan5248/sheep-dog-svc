@@ -16,6 +16,7 @@ import org.farhan.dsl.grammar.IStepParameters;
 import org.farhan.dsl.grammar.ITable;
 import org.farhan.dsl.grammar.ITestCase;
 import org.farhan.dsl.grammar.ITestData;
+import org.farhan.dsl.grammar.ITestDocument;
 import org.farhan.dsl.grammar.ITestProject;
 import org.farhan.dsl.grammar.ITestStep;
 import org.farhan.dsl.grammar.ITestStepContainer;
@@ -37,7 +38,7 @@ public abstract class PathNavigatorTestObject extends TestObject {
     public boolean createNodeDependencies(String path) {
         try {
             EObject document = (EObject) SheepDogUtility
-                    .getTestDocumentParent((EObject) getProperty("cursor"));
+                    .getAncestor(getProperty("cursor"), ITestDocument.class);
             Resource resource = document.eResource();
             StringBuilder fragment = new StringBuilder(resource.getURIFragment(document));
             Object current = document;
@@ -62,8 +63,10 @@ public abstract class PathNavigatorTestObject extends TestObject {
     }
 
     public void navigateToDocument(String fullName) {
-        setProperty("cursor", SheepDogUtility.getTestDocument(
-                (ITestProject) getProperty("workspace"), fullName));
+        ITestProject workspace = (ITestProject) getProperty("workspace");
+        setProperty("cursor", workspace.getTestDocumentList().stream()
+                .filter(td -> td.getFullName().contentEquals(fullName))
+                .findFirst().orElse(null));
     }
 
     public void navigateToDocument() {
@@ -77,7 +80,7 @@ public abstract class PathNavigatorTestObject extends TestObject {
     public boolean navigateToNode(String path, boolean fallback) {
         try {
             EObject document = (EObject) SheepDogUtility
-                    .getTestDocumentParent((EObject) getProperty("cursor"));
+                    .getAncestor(getProperty("cursor"), ITestDocument.class);
             if (document == null) {
                 setProperty("cursor", null);
                 return true;
@@ -119,7 +122,7 @@ public abstract class PathNavigatorTestObject extends TestObject {
     protected void addCellWithName(String name) {
         Object cursor = getProperty("cursor");
         if (cursor instanceof ICell) {
-            cursor = SheepDogUtility.getRowParent(cursor);
+            cursor = SheepDogUtility.getAncestor(cursor, IRow.class);
         }
         setProperty("cursor", SheepDogBuilder.createCell((IRow) cursor, name));
     }
@@ -127,7 +130,7 @@ public abstract class PathNavigatorTestObject extends TestObject {
     protected void addLineWithContent(String content) {
         Object cursor = getProperty("cursor");
         if (cursor instanceof ILine) {
-            cursor = SheepDogUtility.getDescriptionParent(cursor);
+            cursor = SheepDogUtility.getAncestor(cursor, IDescription.class);
         }
         setProperty("cursor", SheepDogBuilder.createLine((IDescription) cursor, content));
     }
@@ -135,7 +138,7 @@ public abstract class PathNavigatorTestObject extends TestObject {
     protected void addRowWithContent(String content) {
         Object cursor = getProperty("cursor");
         if (cursor instanceof IRow) {
-            cursor = SheepDogUtility.getTableParent(cursor);
+            cursor = SheepDogUtility.getAncestor(cursor, ITable.class);
         }
         IRow row = SheepDogBuilder.createRow((ITable) cursor);
         SheepDogBuilder.createCell(row, content);
@@ -145,7 +148,7 @@ public abstract class PathNavigatorTestObject extends TestObject {
     protected void addStepDefinitionWithName(String name) {
         Object cursor = getProperty("cursor");
         if (cursor instanceof IStepDefinition) {
-            cursor = SheepDogUtility.getStepObjectParent(cursor);
+            cursor = SheepDogUtility.getAncestor(cursor, IStepObject.class);
         }
         setProperty("cursor", SheepDogBuilder.createStepDefinition((IStepObject) cursor, name));
     }
@@ -153,7 +156,7 @@ public abstract class PathNavigatorTestObject extends TestObject {
     protected void addStepObjectWithFullName(String stepObjectName) {
         Object cursor = getProperty("cursor");
         if (cursor instanceof IStepObject) {
-            cursor = SheepDogUtility.getTestProjectParent(cursor);
+            cursor = SheepDogUtility.getAncestor(cursor, ITestProject.class);
         }
         setProperty("cursor",
                 SheepDogBuilder.createStepObject((ITestProject) getProperty("workspace"), stepObjectName));
@@ -162,7 +165,7 @@ public abstract class PathNavigatorTestObject extends TestObject {
     protected void addStepParametersWithName(String name) {
         Object cursor = getProperty("cursor");
         if (cursor instanceof IStepParameters) {
-            cursor = SheepDogUtility.getStepDefinitionParent(cursor);
+            cursor = SheepDogUtility.getAncestor(cursor, IStepDefinition.class);
         }
         setProperty("cursor", SheepDogBuilder.createStepParameters((IStepDefinition) cursor, name));
     }
@@ -179,7 +182,7 @@ public abstract class PathNavigatorTestObject extends TestObject {
     protected void addTestCaseWithName(String testStepContainerName) {
         Object cursor = getProperty("cursor");
         if (cursor instanceof ITestCase) {
-            cursor = SheepDogUtility.getTestSuiteParent(cursor);
+            cursor = SheepDogUtility.getAncestor(cursor, ITestSuite.class);
         }
         setProperty("cursor", SheepDogBuilder.createTestCase((ITestSuite) cursor, testStepContainerName));
     }
@@ -187,7 +190,7 @@ public abstract class PathNavigatorTestObject extends TestObject {
     protected void addTestDataWithName(String name) {
         Object cursor = getProperty("cursor");
         if (cursor instanceof ITestData) {
-            cursor = SheepDogUtility.getTestCaseParent(cursor);
+            cursor = SheepDogUtility.getAncestor(cursor, ITestCase.class);
         }
         setProperty("cursor", SheepDogBuilder.createTestData((ITestCase) cursor, name));
     }
@@ -195,7 +198,7 @@ public abstract class PathNavigatorTestObject extends TestObject {
     protected void addTestSetupWithName(String testSetupName) {
         Object cursor = getProperty("cursor");
         if (cursor instanceof ITestStepContainer) {
-            cursor = SheepDogUtility.getTestSuiteParent(cursor);
+            cursor = SheepDogUtility.getAncestor(cursor, ITestSuite.class);
         }
         setProperty("cursor", SheepDogBuilder.createTestSetup((ITestSuite) cursor, testSetupName));
     }
@@ -203,7 +206,7 @@ public abstract class PathNavigatorTestObject extends TestObject {
     protected void addTestStepWithFullName(String stepName) {
         Object cursor = getProperty("cursor");
         if (cursor instanceof ITestStep) {
-            cursor = SheepDogUtility.getTestStepContainerParent(cursor);
+            cursor = SheepDogUtility.getAncestor(cursor, ITestStepContainer.class);
         }
         setProperty("cursor",
                 SheepDogBuilder.createTestStep((ITestStepContainer) cursor,
@@ -214,7 +217,7 @@ public abstract class PathNavigatorTestObject extends TestObject {
     protected void addTestSuiteWithFullName(String testSuiteFullName) {
         Object cursor = getProperty("cursor");
         if (cursor instanceof ITestSuite) {
-            cursor = SheepDogUtility.getTestProjectParent(cursor);
+            cursor = SheepDogUtility.getAncestor(cursor, ITestProject.class);
         }
         setProperty("cursor",
                 SheepDogBuilder.createTestSuite((ITestProject) getProperty("workspace"), testSuiteFullName));
@@ -261,9 +264,11 @@ public abstract class PathNavigatorTestObject extends TestObject {
         if (cursor instanceof ICell) {
             return ((ICell) cursor).getName();
         } else {
-            Object cell = SheepDogUtility.getCell((IRow) cursor, name);
+            ICell cell = ((IRow) cursor).getCellList().stream()
+                    .filter(c -> c.getName().contentEquals(name))
+                    .findFirst().orElse(null);
             setProperty("cursor", cell);
-            return cell == null ? null : ((ICell) cell).getName();
+            return cell == null ? null : cell.getName();
         }
     }
 
@@ -272,16 +277,20 @@ public abstract class PathNavigatorTestObject extends TestObject {
         if (cursor instanceof ILine) {
             return ((ILine) cursor).getContent();
         } else {
-            Object line = SheepDogUtility.getLine((IDescription) cursor, content);
+            ILine line = ((IDescription) cursor).getLineList().stream()
+                    .filter(l -> l.getContent().equals(content))
+                    .findFirst().orElse(null);
             setProperty("cursor", line);
-            return line == null ? null : ((ILine) line).getContent();
+            return line == null ? null : line.getContent();
         }
     }
 
     protected String assertRowContent(String content) {
-        Object cell = SheepDogUtility.getCell((IRow) getProperty("cursor"), content);
+        ICell cell = ((IRow) getProperty("cursor")).getCellList().stream()
+                .filter(c -> c.getName().contentEquals(content))
+                .findFirst().orElse(null);
         setProperty("cursor", cell);
-        return cell == null ? null : ((ICell) cell).getName();
+        return cell == null ? null : cell.getName();
     }
 
     protected String assertStepDefinitionName(String name) {
@@ -289,9 +298,11 @@ public abstract class PathNavigatorTestObject extends TestObject {
         if (cursor instanceof IStepDefinition) {
             return ((IStepDefinition) cursor).getName();
         } else {
-            Object sd = SheepDogUtility.getStepDefinition((IStepObject) cursor, name);
+            IStepDefinition sd = ((IStepObject) cursor).getStepDefinitionList().stream()
+                    .filter(s -> s.getName().contentEquals(name))
+                    .findFirst().orElse(null);
             setProperty("cursor", sd);
-            return sd == null ? null : ((IStepDefinition) sd).getName();
+            return sd == null ? null : sd.getName();
         }
     }
 
@@ -304,9 +315,11 @@ public abstract class PathNavigatorTestObject extends TestObject {
         if (cursor instanceof IStepParameters) {
             return ((IStepParameters) cursor).getName();
         } else {
-            Object sp = SheepDogUtility.getStepParameters((IStepDefinition) cursor, name);
+            IStepParameters sp = ((IStepDefinition) cursor).getStepParametersList().stream()
+                    .filter(p -> name.contentEquals(p.getName()))
+                    .findFirst().orElse(null);
             setProperty("cursor", sp);
-            return sp == null ? null : ((IStepParameters) sp).getName();
+            return sp == null ? null : sp.getName();
         }
     }
 
@@ -315,9 +328,11 @@ public abstract class PathNavigatorTestObject extends TestObject {
         if (cursor instanceof ITestData) {
             return ((ITestData) cursor).getName();
         } else {
-            Object td = SheepDogUtility.getTestData((ITestCase) cursor, name);
+            ITestData td = ((ITestCase) cursor).getTestDataList().stream()
+                    .filter(d -> d.getName().contentEquals(name))
+                    .findFirst().orElse(null);
             setProperty("cursor", td);
-            return td == null ? null : ((ITestData) td).getName();
+            return td == null ? null : td.getName();
         }
     }
 
@@ -326,9 +341,11 @@ public abstract class PathNavigatorTestObject extends TestObject {
         if (cursor instanceof ITestStepContainer) {
             return ((ITestStepContainer) cursor).getName();
         } else {
-            Object tsc = SheepDogUtility.getTestStepContainer((ITestSuite) cursor, name);
+            ITestStepContainer tsc = ((ITestSuite) cursor).getTestStepContainerList().stream()
+                    .filter(c -> c.getName().contentEquals(name))
+                    .findFirst().orElse(null);
             setProperty("cursor", tsc);
-            return tsc == null ? null : ((ITestStepContainer) tsc).getName();
+            return tsc == null ? null : tsc.getName();
         }
     }
 

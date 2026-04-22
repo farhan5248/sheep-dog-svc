@@ -2,7 +2,7 @@
 
 **Directory**: `src/main/java/org/farhan/mbt/maven`
 
-Base class for executing external processes with output streaming and logging. Separates process lifecycle management from command-specific argument construction.
+Abstract base class that owns the external-process lifecycle — stream stdout to log, capture stdout to string, return exit code. The concrete `{Tool}Runner` subclasses (see `uml-class-ToolRunner.md`) provide the command-building. This file describes the **base-class layer** (process I/O); the sibling file describes the **subclass layer** (per-tool command construction). Cannot be instantiated directly.
 
 ## ProcessRunner
 
@@ -62,10 +62,10 @@ Base class for executing external processes with output streaming and logging. S
  - **Name**: `^capture$`
  - **Return**: `^String$`
  - **Parameters**: `^\(String\s+\w+,\s*String\.\.\.\s+\w+\)$`
- - **Modifier**: `^public$`
+ - **Modifier**: `^protected$`
 
 **Examples**:
- - `public String capture(String workingDirectory, String... args)`
+ - `protected String capture(String workingDirectory, String... args)`
 
 ## getLog
 

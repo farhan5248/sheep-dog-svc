@@ -20,7 +20,7 @@ public class DarmokRunnersLogFileImpl extends MavenTestObject implements DarmokR
 		if ("won't be".equals(stateType)) {
 			return null;
 		}
-		return getFileState(getDarmokMojoLog("darmok.runners").getLogFile());
+		return getFileState(getDarmokMojoLog("darmok.runners").getFile());
 	}
 
 	@Override
@@ -29,12 +29,12 @@ public class DarmokRunnersLogFileImpl extends MavenTestObject implements DarmokR
 		if ("won't be".equals(stateType)) {
 			return null;
 		}
-		return getFileState(getDarmokMojoLog("darmok.runners").getLogFile());
+		return getFileState(getDarmokMojoLog("darmok.runners").getFile());
 	}
 
 	@Override
 	public String getEmpty(HashMap<String, String> keyMap) {
-		return getFileState(getDarmokMojoLog("darmok.runners").getLogFile());
+		return getFileState(getDarmokMojoLog("darmok.runners").getFile());
 	}
 
 	@Override

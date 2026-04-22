@@ -13,7 +13,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-public class DarmokMojoMetrics {
+public class DarmokMojoMetrics extends DarmokMojoFile<Map<String, String>> {
 
 	private static final String HEADER =
 		"timestamp,git_branch,commit,scenario,phase_red_ms,phase_green_ms,phase_refactor_ms,phase_total_ms";
@@ -21,33 +21,23 @@ public class DarmokMojoMetrics {
 	private static final DateTimeFormatter TIMESTAMP =
 		DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS");
 
-	private final Path file;
-
-	// Read-side state
-	private List<Map<String, String>> rows;
-	private int cursor = 0;
-	private HashMap<String, String> lastKeyMap;
-	private Map<String, String> lastRow;
-
 	public DarmokMojoMetrics(Path file) {
-		this.file = file;
+		super(file);
 	}
 
-	public Path getFile() {
-		return file;
-	}
-
-	public void append(String gitBranch, String commit, String scenario,
-			long redMs, long greenMs, long refactorMs, long totalMs) throws IOException {
+	public void append(DarmokMojoState state) throws IOException {
 		Files.createDirectories(file.getParent());
 		if (!Files.exists(file)) {
 			Files.writeString(file, HEADER + "\n", StandardCharsets.UTF_8);
 		}
 		String row = LocalDateTime.now().format(TIMESTAMP) + ","
-			+ gitBranch + ","
-			+ commit + ","
-			+ escape(scenario) + ","
-			+ redMs + "," + greenMs + "," + refactorMs + "," + totalMs + "\n";
+			+ state.gitBranch + ","
+			+ state.commit + ","
+			+ escape(state.scenarioName) + ","
+			+ state.getDuration(Phase.RED) + ","
+			+ state.getDuration(Phase.GREEN) + ","
+			+ state.getDuration(Phase.REFACTOR) + ","
+			+ state.totalDurationMs + "\n";
 		Files.writeString(file, row, StandardCharsets.UTF_8,
 			StandardOpenOption.CREATE, StandardOpenOption.APPEND);
 	}
@@ -97,26 +87,21 @@ public class DarmokMojoMetrics {
 
 	private String column(HashMap<String, String> keyMap, String columnName) {
 		ensureMatched(keyMap);
-		return lastRow == null ? null : lastRow.get(columnName);
+		return lastMatch == null ? null : lastMatch.get(columnName);
 	}
 
-	private void ensureMatched(HashMap<String, String> keyMap) {
-		if (rows == null) {
-			rows = parse(file);
+	@Override
+	protected Map<String, String> findNext(HashMap<String, String> keyMap) {
+		if (cursor() < entries().size()) {
+			Map<String, String> row = entries().get(cursor());
+			advanceCursor();
+			return row;
 		}
-		if (keyMap == lastKeyMap) {
-			return;
-		}
-		lastKeyMap = keyMap;
-		if (cursor < rows.size()) {
-			lastRow = rows.get(cursor);
-			cursor++;
-		} else {
-			lastRow = null;
-		}
+		return null;
 	}
 
-	private static List<Map<String, String>> parse(Path file) {
+	@Override
+	protected List<Map<String, String>> parse(Path file) {
 		List<Map<String, String>> result = new ArrayList<>();
 		if (file == null || !Files.exists(file)) {
 			return result;

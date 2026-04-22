@@ -4,28 +4,34 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-public class RedPhase {
+public class RedPhase extends RgrPhase {
 
-	private final MavenRunner maven;
-	private final DarmokMojoLog mojoLog;
 	private final String baseDir;
 	private final String specsDir;
 	private final String host;
 	private final boolean onlyChanges;
 
 	public RedPhase(MavenRunner maven, DarmokMojoLog mojoLog, String baseDir, String specsDir, String host, boolean onlyChanges) {
-		this.maven = maven;
-		this.mojoLog = mojoLog;
+		super(null, maven, mojoLog, null, null, null, 0, 0, 0);
 		this.baseDir = baseDir;
 		this.specsDir = specsDir;
 		this.host = host;
 		this.onlyChanges = onlyChanges;
 	}
 
-	public PhaseResult run(String pattern) throws Exception {
-		mojoLog.info("  Red: Running maven...");
-		long start = System.currentTimeMillis();
+	@Override
+	protected Phase phase() {
+		return Phase.RED;
+	}
 
+	@Override
+	protected boolean requiresVerifyLoop() {
+		return false;
+	}
+
+	@Override
+	protected int executeClaudeOrMaven(DarmokMojoState state) throws Exception {
+		String pattern = state.tag;
 		String runnerClassName = pattern + "Test";
 
 		String specsDirAbsolute = Path.of(baseDir, specsDir).normalize().toString();
@@ -44,21 +50,15 @@ public class RedPhase {
 
 		int testExitCode = maven.run(baseDir, "test", "-Dtest=" + runnerClassName);
 
-		int exitCode;
 		if (testExitCode == 0) {
 			mojoLog.debug("  Tests are PASSING - no failing tests to fix (returning 100)");
-			exitCode = 100;
-		} else {
-			mojoLog.debug("  Tests are FAILING - ready for green phase (returning 0)");
-			exitCode = 0;
+			return 100;
 		}
-
-		long duration = System.currentTimeMillis() - start;
-		mojoLog.info("  Red: Completed maven (" + PhaseResult.formatDuration(duration) + ")");
-		return new PhaseResult(exitCode, duration);
+		mojoLog.debug("  Tests are FAILING - ready for green phase (returning 0)");
+		return 0;
 	}
 
-	String generateRunnerClassContent(String pattern, String runnerClassName) {
+	private String generateRunnerClassContent(String pattern, String runnerClassName) {
 		return "package org.farhan.suites;\n"
 			+ "\n"
 			+ "import org.junit.platform.suite.api.ConfigurationParameter;\n"

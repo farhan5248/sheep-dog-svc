@@ -15,7 +15,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.maven.plugin.logging.Log;
-public class DarmokMojoLog implements Log, Closeable {
+
+public class DarmokMojoLog extends DarmokMojoFile<DarmokMojoLog.LogEntry> implements Log, Closeable {
 
 	private static final DateTimeFormatter TIMESTAMP = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
 
@@ -27,32 +28,21 @@ public class DarmokMojoLog implements Log, Closeable {
 	private final Log delegate;
 	private final PrintWriter writer;
 	private final String category;
-	private final Path logFile;
-
-	// Read-side state
-	private List<LogEntry> entries;
-	private int cursor = 0;
-	private HashMap<String, String> lastKeyMap;
-	private LogEntry lastMatch;
 
 	public DarmokMojoLog(Log delegate, String category, Path logFile) throws IOException {
+		super(logFile);
 		this.delegate = delegate;
 		this.category = category;
-		this.logFile = logFile;
 		Files.createDirectories(logFile.getParent());
 		this.writer = new PrintWriter(new FileWriter(logFile.toFile(), true), true);
 	}
 
 	/** Read-only constructor for log inspection (no writing). */
 	public DarmokMojoLog(Path logFile) {
+		super(logFile);
 		this.delegate = null;
 		this.category = null;
-		this.logFile = logFile;
 		this.writer = null;
-	}
-
-	public Path getLogFile() {
-		return logFile;
 	}
 
 	public static Path findDatedLog(Path logDir, String prefix) {
@@ -197,25 +187,15 @@ public class DarmokMojoLog implements Log, Closeable {
 		return lastMatch != null ? normalizeCommandExtensions(lastMatch.content()) : null;
 	}
 
-	private void ensureMatched(HashMap<String, String> keyMap) {
-		if (entries == null) {
-			entries = parse(logFile);
-		}
-		if (keyMap == lastKeyMap) {
-			return;
-		}
-		lastKeyMap = keyMap;
-		lastMatch = findNext(keyMap);
-	}
-
-	private LogEntry findNext(HashMap<String, String> keyMap) {
+	@Override
+	protected LogEntry findNext(HashMap<String, String> keyMap) {
 		String expectedLevel = keyMap.get("Level");
 		String expectedCategory = keyMap.get("Category");
 		String expectedContent = keyMap.get("Content");
 
-		while (cursor < entries.size()) {
-			LogEntry entry = entries.get(cursor);
-			cursor++;
+		while (cursor() < entries().size()) {
+			LogEntry entry = entries().get(cursor());
+			advanceCursor();
 			if (matches(expectedLevel, entry.level())
 				&& matches(expectedCategory, entry.category())
 				&& matches(expectedContent, entry.content())) {
@@ -237,7 +217,8 @@ public class DarmokMojoLog implements Log, Closeable {
 			.replace("claude.cmd", "claude");
 	}
 
-	private static List<LogEntry> parse(Path logFile) {
+	@Override
+	protected List<LogEntry> parse(Path logFile) {
 		List<LogEntry> result = new ArrayList<>();
 		if (logFile == null || !Files.exists(logFile)) {
 			return result;

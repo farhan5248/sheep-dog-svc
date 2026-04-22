@@ -1,86 +1,27 @@
 package org.farhan.mbt.maven;
 
-public class RefactorPhase {
-
-	private final ClaudeRunner claude;
-	private final MavenRunner maven;
-	private final DarmokMojoLog mojoLog;
-	private final String workingDir;
-	private final String targetDir;
-	private final String artifactId;
-	private final int maxVerifyAttempts;
-	private final int maxTimeoutAttempts;
-	private final int maxClaudeSeconds;
+public class RefactorPhase extends RgrPhase {
 
 	public RefactorPhase(ClaudeRunner claude, MavenRunner maven, DarmokMojoLog mojoLog,
 			String workingDir, String targetDir, String artifactId,
 			int maxVerifyAttempts, int maxTimeoutAttempts, int maxClaudeSeconds) {
-		this.claude = claude;
-		this.maven = maven;
-		this.mojoLog = mojoLog;
-		this.workingDir = workingDir;
-		this.targetDir = targetDir;
-		this.artifactId = artifactId;
-		this.maxVerifyAttempts = maxVerifyAttempts;
-		this.maxTimeoutAttempts = maxTimeoutAttempts;
-		this.maxClaudeSeconds = maxClaudeSeconds;
+		super(claude, maven, mojoLog, workingDir, targetDir, artifactId,
+			maxVerifyAttempts, maxTimeoutAttempts, maxClaudeSeconds);
 	}
 
-	public PhaseResult run() throws Exception {
-		mojoLog.info("  Refactor: Running...");
-		long start = System.currentTimeMillis();
+	@Override
+	protected Phase phase() {
+		return Phase.REFACTOR;
+	}
+
+	@Override
+	protected boolean requiresVerifyLoop() {
+		return true;
+	}
+
+	@Override
+	protected int executeClaudeOrMaven(DarmokMojoState state) throws Exception {
 		int claudeExit = claude.run(workingDir, "/rgr-refactor forward " + artifactId);
-		claudeExit = runTimeoutRecoveryLoop(claudeExit);
-		long claudeDuration = System.currentTimeMillis() - start;
-		mojoLog.info("  Refactor: Completed (" + PhaseResult.formatDuration(claudeDuration) + ")");
-		if (claudeExit != 0) {
-			return new PhaseResult(claudeExit, claudeDuration);
-		}
-		runVerifyLoop();
-		long totalDuration = System.currentTimeMillis() - start;
-		return new PhaseResult(0, totalDuration);
-	}
-
-	private int runTimeoutRecoveryLoop(int claudeExit) throws Exception {
-		if (claudeExit != ClaudeRunner.TIMEOUT_EXIT_CODE) {
-			return claudeExit;
-		}
-		mojoLog.warn("  Refactor: Claude timed out after " + maxClaudeSeconds + "s, killing...");
-		int attempt = 1;
-		while (true) {
-			mojoLog.info("  Refactor: Running mvn clean install to check phase state...");
-			int installExit = maven.run(targetDir, "clean", "install");
-			if (installExit == 0) {
-				mojoLog.info("  Refactor: Install passed, proceeding");
-				return 0;
-			}
-			if (attempt >= maxTimeoutAttempts) {
-				mojoLog.error("  Refactor: Timeout exhausted after " + maxTimeoutAttempts + " attempts");
-				throw new Exception("rgr-refactor timed out after " + maxTimeoutAttempts + " attempts");
-			}
-			attempt++;
-			mojoLog.info("  Refactor: Install failed, resuming claude (attempt " + attempt
-				+ " of " + maxTimeoutAttempts + ")...");
-			claude.resume(workingDir, GreenPhase.TIMEOUT_RESUME_MESSAGE);
-		}
-	}
-
-	private void runVerifyLoop() throws Exception {
-		for (int attempt = 1; attempt <= maxVerifyAttempts; attempt++) {
-			mojoLog.info("  Refactor: Verify running...");
-			long verifyStart = System.currentTimeMillis();
-			int verifyExit = maven.run(targetDir, "clean", "verify");
-			long verifyDuration = System.currentTimeMillis() - verifyStart;
-			if (verifyExit == 0) {
-				mojoLog.info("  Refactor: Verify passed (" + PhaseResult.formatDuration(verifyDuration) + ")");
-				return;
-			}
-			if (attempt < maxVerifyAttempts) {
-				mojoLog.warn("  Refactor: Verify failed (attempt " + attempt + "/" + maxVerifyAttempts + "), resuming claude...");
-				claude.resume(workingDir, GreenPhase.VERIFY_RESUME_MESSAGE);
-			}
-		}
-		mojoLog.error("  Refactor: Verify failed after " + maxVerifyAttempts + " attempts, aborting");
-		throw new Exception("rgr-refactor verify failed after " + maxVerifyAttempts + " attempts");
+		return runTimeoutRecoveryLoop(claudeExit);
 	}
 }

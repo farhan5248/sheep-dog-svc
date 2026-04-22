@@ -32,8 +32,8 @@ Pattern variables used in UML files to represent families of classes following s
    - Values: `.+` (e.g., DarmokMojoLog, DarmokRunnersLog, ScenariosListTxt, ProcessDarmokAsciidoc, LoginHappyPathJava, LogoutHappyPathJava)
    - Used in: {ObjectName}{ObjectType}Impl
 
-6. **{Field}** - Log entry field names returned by LogFileHelper
-   - Values: `(Level|Category|Content)`
+6. **{Field}** - Per-row field names exposed for assertions by `DarmokMojoFile` subclasses (`DarmokMojoLog`, `DarmokMojoMetrics`)
+   - Values: `(Level|Category|Content|Timestamp|GitBranch|Commit|Scenario|PhaseRedMs|PhaseGreenMs|PhaseRefactorMs|PhaseTotalMs)` — Log rows expose Level/Category/Content; Metrics rows expose the eight CSV columns
    - Used in: matchAndGet{Field}()
    - Case variants: `{field}` (camelCase), `{FIELD}` (UPPER_SNAKE_CASE)
 
@@ -42,6 +42,6 @@ Pattern variables used in UML files to represent families of classes following s
    - Used in: {ObjectName}{ObjectType}Impl
    - Case variants: `{objectType}` (camelCase), `{OBJECT_TYPE}` (UPPER_SNAKE_CASE)
 
-8. **{MetricColumn}** - DarmokMojoMetrics CSV column names exposed for row-level assertions
-   - Values: `(Timestamp|GitBranch|Commit|Scenario|PhaseRedMs|PhaseGreenMs|PhaseRefactorMs|PhaseTotalMs)`
-   - Used in: matchAndGet{MetricColumn}()
+8. **{DataFileType}** - DarmokMojoFile subclass discriminator
+   - Values: `(Log|Metrics)`
+   - Used in: DarmokMojo{DataFileType}

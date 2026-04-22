@@ -82,10 +82,10 @@ Abstract base Mojo providing shared lifecycle, scenario iteration, RGR phase orc
  - **Name**: `^init$`
  - **Return**: `^void$`
  - **Parameters**: `^\(\)$`
- - **Modifier**: `^(default|package-private)$`
+ - **Modifier**: `^protected$`
 
 **Examples**:
- - `void init()`
+ - `protected void init()`
 
 ## cleanup
 
@@ -95,10 +95,10 @@ Abstract base Mojo providing shared lifecycle, scenario iteration, RGR phase orc
  - **Name**: `^cleanup$`
  - **Return**: `^void$`
  - **Parameters**: `^\(\)$`
- - **Modifier**: `^(default|package-private)$`
+ - **Modifier**: `^protected$`
 
 **Examples**:
- - `void cleanup()`
+ - `protected void cleanup()`
 
 ## getNextScenario
 
@@ -108,10 +108,10 @@ Abstract base Mojo providing shared lifecycle, scenario iteration, RGR phase orc
  - **Name**: `^getNextScenario$`
  - **Return**: `^ScenarioEntry$`
  - **Parameters**: `^\(\)$`
- - **Modifier**: `^(default|package-private)$`
+ - **Modifier**: `^protected$`
 
 **Examples**:
- - `ScenarioEntry getNextScenario()`
+ - `protected ScenarioEntry getNextScenario()`
 
 ## processScenario
 
@@ -121,73 +121,21 @@ Abstract base Mojo providing shared lifecycle, scenario iteration, RGR phase orc
  - **Name**: `^processScenario$`
  - **Return**: `^void$`
  - **Parameters**: `^\(ScenarioEntry\s+\w+\)$`
- - **Modifier**: `^(default|package-private)$`
+ - **Modifier**: `^protected$`
 
 **Examples**:
- - `void processScenario(ScenarioEntry entry)`
-
-## removeFirstScenarioFromFile
-
-**Desc**: Removes the first scenario entry (File + Scenario + Tag block) from the scenarios file, preserving the File header if subsequent scenarios share it.
-
-**Rule**: ONE method name follows removeFirstScenarioFromFile pattern.
- - **Name**: `^removeFirstScenarioFromFile$`
- - **Return**: `^void$`
- - **Parameters**: `^\(\)$`
- - **Modifier**: `^(default|package-private)$`
-
-**Examples**:
- - `void removeFirstScenarioFromFile()`
-
-## parseScenarios
-
-**Desc**: Parses a scenarios file into a list of ScenarioEntry records (file, scenario, tag).
-
-**Rule**: ONE method name follows parseScenarios pattern.
- - **Name**: `^parseScenarios$`
- - **Return**: `^List<ScenarioEntry>$`
- - **Parameters**: `^\(String\s+\w+\)$`
- - **Modifier**: `^(default|package-private)$`
-
-**Examples**:
- - `List<ScenarioEntry> parseScenarios(String scenariosFilePath)`
-
-## addTagToAsciidoc
-
-**Desc**: Inserts a tag annotation into an AsciiDoc file after the matching Test-Case header. Appends to existing tag line or creates a new one. Returns true if the tag was added.
-
-**Rule**: ONE method name follows addTagToAsciidoc pattern.
- - **Name**: `^addTagToAsciidoc$`
- - **Return**: `^boolean$`
- - **Parameters**: `^\(String\s+\w+,\s*String\s+\w+,\s*String\s+\w+\)$`
- - **Modifier**: `^(default|package-private)$`
-
-**Examples**:
- - `boolean addTagToAsciidoc(String fileName, String scenarioName, String tag)`
+ - `protected void processScenario(ScenarioEntry entry)`
 
 ## runCleanUp
 
-**Desc**: Deletes stale NUL files from the project tree and removes the target directory.
+**Desc**: Deletes stale NUL files from the project tree and removes the target directory. Called by `{Goal}Mojo.execute` subclasses before scenario iteration.
 
 **Rule**: ONE method name follows runCleanUp pattern.
  - **Name**: `^runCleanUp$`
  - **Return**: `^int$`
  - **Parameters**: `^\(\)$`
- - **Modifier**: `^(default|package-private)$`
+ - **Modifier**: `^protected$`
 
 **Examples**:
- - `int runCleanUp()`
-
-## writeFileWithLF
-
-**Desc**: Writes lines to a file joined with LF line endings.
-
-**Rule**: ONE method name follows writeFileWithLF pattern.
- - **Name**: `^writeFileWithLF$`
- - **Return**: `^void$`
- - **Parameters**: `^\(String\s+\w+,\s*List<String>\s+\w+\)$`
- - **Modifier**: `^(default|package-private)$`
-
-**Examples**:
- - `void writeFileWithLF(String filePath, List<String> lines)`
+ - `protected int runCleanUp()`
 

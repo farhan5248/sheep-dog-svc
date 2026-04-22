@@ -12,13 +12,13 @@ This pattern covers the full lifecycle of a Darmok Maven goal invocation: initia
 |---|---|---|
 | 1 | [{Goal}Mojo](uml-class-GoalMojo.md) | Entry point. Calls inherited lifecycle and scenario methods. |
 | 2 | [DarmokMojo](uml-class-DarmokMojo.md) | Lifecycle, scenario iteration, and RGR phase orchestration. |
-| 3 | [RedPhase](uml-class-RedPhase.md) | Drives maven goals + runner class generation + `mvn test`. Returns PhaseResult. |
-| 4 | [GreenPhase](uml-class-GreenPhase.md) | Invokes the Claude `/rgr-green` skill, recovers from a timed-out claude via `mvn clean install` + `claude --resume "pls continue"`, then runs `mvn clean verify` with `claude --resume` recovery. Returns PhaseResult. |
-| 5 | [RefactorPhase](uml-class-RefactorPhase.md) | Invokes the Claude `/rgr-refactor forward` skill with the same timeout-recovery + verify loops as GreenPhase. Returns PhaseResult. |
-| 6 | [PhaseResult](uml-class-PhaseResult.md) | Record carrying exit code + duration from each phase, plus static duration formatter. |
+| 3 | [RgrPhase](uml-class-RgrPhase.md) | Abstract base. Owns the public `run(state)` template, `runVerifyLoop`, and `runTimeoutRecoveryLoop`. |
+| 4 | [{RgrPhase}Phase](uml-class-RgrPhasePhase.md) | Concrete RGR phases — `RedPhase` drives maven goals + runner class generation + `mvn test`; `GreenPhase` invokes `/rgr-green` then verifies; `RefactorPhase` invokes `/rgr-refactor forward` then verifies. |
+| 5 | [DarmokMojoState](uml-class-DarmokMojoState.md) | Mutable per-scenario state threaded through all three phases. Carries exit code, per-phase durations, scenario/branch/tag, and post-scenario commit. |
+| 6 | [Phase](uml-class-Phase.md) | Enum keying `DarmokMojoState`'s duration map. |
 | 7 | [ProcessRunner](uml-class-ProcessRunner.md) | Process lifecycle and output streaming. |
 | 8 | [{Tool}Runner](uml-class-ToolRunner.md) | Tool-specific command construction. ClaudeRunner adds API-retry logic plus a per-invocation timeout (`waitFor(maxClaudeSeconds, SECONDS)` + `destroyForcibly()` → sentinel exit code) that surfaces to the phase. |
-| 9 | [DarmokMojoLog](uml-class-DarmokMojoLog.md) | Structured logging to console and dated log files. |
+| 9 | [DarmokMojo{DataFileType}](uml-class-DarmokMojoDataFileType.md) | Structured per-row file emitter. `DarmokMojoLog` writes timestamped log lines; `DarmokMojoMetrics` writes per-scenario CSV rows. |
 
 ### Sequence
 

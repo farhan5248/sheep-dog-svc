@@ -20,7 +20,7 @@ public class DarmokMojoLogFileImpl extends MavenTestObject implements DarmokMojo
 		if ("won't be".equals(stateType)) {
 			return null;
 		}
-		return getFileState(getDarmokMojoLog("darmok.mojo").getLogFile());
+		return getFileState(getDarmokMojoLog("darmok.mojo").getFile());
 	}
 
 	@Override
@@ -29,12 +29,12 @@ public class DarmokMojoLogFileImpl extends MavenTestObject implements DarmokMojo
 		if ("won't be".equals(stateType)) {
 			return null;
 		}
-		return getFileState(getDarmokMojoLog("darmok.mojo").getLogFile());
+		return getFileState(getDarmokMojoLog("darmok.mojo").getFile());
 	}
 
 	@Override
 	public String getPresent(HashMap<String, String> keyMap) {
-		return getFileState(getDarmokMojoLog("darmok.mojo").getLogFile());
+		return getFileState(getDarmokMojoLog("darmok.mojo").getFile());
 	}
 
 	@Override

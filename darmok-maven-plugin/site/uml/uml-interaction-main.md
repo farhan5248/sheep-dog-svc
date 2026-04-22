@@ -45,726 +45,282 @@ public void execute() throws MojoExecutionException {
 
 ### execute
 
-Maven goal entry point. Calls init(), runs cleanup, iterates scenarios, and calls cleanup() in finally block.
+Maven goal entry point — invoked by the Maven framework via the `@Mojo(name = ...)` annotation. Tests exercise it through `MavenTestObject.executeMojo`, which constructs the mojo, wires the project + test seams, and calls `execute()`.
 
-**Example: Goal execution**
+**Example: test-side invocation in `MavenTestObject.executeMojo`** (`src/test/java/org/farhan/common/MavenTestObject.java`)
 ```java
-public void execute() throws MojoExecutionException {
-    try {
-        init();
-        mojoLog.info("RGR Automation Plugin (gen-from-existing)");
-        int cleanUpExit = runCleanUp();
-        if (cleanUpExit != 0) {
-            throw new MojoExecutionException("Clean up failed with exit code " + cleanUpExit);
-        }
-        int totalProcessed = 0;
-        ScenarioEntry entry;
-        while ((entry = getNextScenario()) != null) {
-            mojoLog.info("Processing Scenario: " + entry.file() + "/" + entry.scenario() + " [" + entry.tag() + "]");
-            processScenario(entry);
-            totalProcessed++;
-        }
-        mojoLog.info("RGR Automation Complete!");
-        mojoLog.info("Total scenarios processed: " + totalProcessed);
-    } catch (MojoExecutionException e) {
-        throw e;
-    } catch (Exception e) {
-        throw new MojoExecutionException(e.getMessage(), e);
-    } finally {
-        cleanup();
-    }
-}
+DarmokMojo mojo = mojoClass.getConstructor().newInstance();
+MavenProject project = new MavenProject();
+project.setArtifactId("code-prj");
+mojo.project = project;
+mojo.setBaseDir(codePrjDir.toString());
+// ... wire runner factories with FakeProcessStarter, populate @Parameter fields ...
+mojo.execute();
 ```
 
 ## DarmokMojo
 
+The same `MavenTestObject.executeMojo` snippet shown under `{Goal}Mojo.execute` exercises every public method in `DarmokMojo` (the `@Parameter` fields, `setBaseDir`, and the three runner-factory setters). Each section below points back to that snippet and shows the relevant call line.
+
 ### setBaseDir
 
-Test-only setter that pre-seeds baseDir so init() skips the MavenProject path.
+Test-only setter that pre-seeds `baseDir` so `init()` skips the `MavenProject` path. Called by the test harness before `execute()`.
 
-**Example: setBaseDir method body**
+**Example: pre-seed baseDir in `MavenTestObject.executeMojo`**
 ```java
-public void setBaseDir(String baseDir) {
-    this.baseDir = baseDir;
-}
+mojo.setBaseDir(codePrjDir.toString());
 ```
 
-### init
+### set{Tool}RunnerFactory
 
-Initializes baseDir, creates MojoLog instances, instantiates runners via their factories, and constructs the three RGR phase classes. The same MavenRunner instance is shared between RedPhase (for red-phase maven goals) and GreenPhase / RefactorPhase (for the `mvn clean verify` sub-step inside each phase's verify loop).
+Test-only setters that swap the production runner factories (`{Tool}Runner::new`) for lambdas that bind a `FakeProcessStarter`. Called by `MavenTestObject.executeMojo` so no real subprocesses are spawned. Three setters: `setGitRunnerFactory`, `setMavenRunnerFactory`, `setClaudeRunnerFactory`.
 
-**Example: init method body**
+**Example: factory wiring in `MavenTestObject.executeMojo`**
 ```java
-void init() throws Exception {
-    if (baseDir == null) {
-        baseDir = project.getBasedir().getAbsolutePath();
-    }
-    initLogs();
-    git = gitRunnerFactory.create(runnerLog);
-    verifyGitBranch();
-    MavenRunner maven = mavenRunnerFactory.create(runnerLog);
-    String sheepDogRoot = baseDir + "/../..";
-    String artifactId = project.getArtifactId();
-    redPhase = new RedPhase(maven, mojoLog, baseDir, specsDir, host, onlyChanges);
-    greenPhase = new GreenPhase(
-        claudeRunnerFactory.create(runnerLog, modelGreen, maxRetries, retryWaitSeconds, maxClaudeSeconds),
-        maven, mojoLog, sheepDogRoot, baseDir, artifactId, maxVerifyAttempts, maxTimeoutAttempts, maxClaudeSeconds);
-    refactorPhase = new RefactorPhase(
-        claudeRunnerFactory.create(runnerLog, modelRefactor, maxRetries, retryWaitSeconds, maxClaudeSeconds),
-        maven, mojoLog, sheepDogRoot, baseDir, artifactId, maxVerifyAttempts, maxTimeoutAttempts, maxClaudeSeconds);
-}
+ProcessStarter starter = (ProcessStarter) getProperty("processStarter");
+mojo.setGitRunnerFactory(log -> new GitRunner(log, starter));
+mojo.setMavenRunnerFactory(log -> new MavenRunner(log, starter));
+mojo.setClaudeRunnerFactory((log, model, retries, wait, maxSeconds) ->
+    new ClaudeRunner(log, model, retries, wait, maxSeconds, starter));
 ```
 
-### cleanup
-
-Closes MojoLog instances.
-
-**Example: cleanup method body**
-```java
-void cleanup() {
-    if (mojoLog != null) mojoLog.close();
-    if (runnerLog != null) runnerLog.close();
-}
-```
-
-### getNextScenario
-
-Reads the scenarios file and returns the first entry, or null if empty or missing.
-
-**Example: getNextScenario method body**
-```java
-ScenarioEntry getNextScenario() throws Exception {
-    Path scenariosPath = Path.of(baseDir, scenariosFile);
-    if (!Files.exists(scenariosPath)) {
-        return null;
-    }
-    List<ScenarioEntry> scenarios = parseScenarios(scenariosPath.toString());
-    if (scenarios.isEmpty()) {
-        return null;
-    }
-    return scenarios.get(0);
-}
-```
-
-### processScenario
-
-Orchestrates the RGR cycle for a single scenario. Delegates each phase to its phase class (which owns its own start/complete log markers and timing), branches on the returned PhaseResult, handles git staging + commit policy, captures the post-scenario HEAD commit, and appends a row to the metrics.csv file carrying the configured gitBranch, the captured commit, the scenario name, and the four phase durations.
-
-**Example: Phase delegation shape**
-```java
-void processScenario(ScenarioEntry entry) throws MojoExecutionException, Exception {
-    String scenarioName = entry.scenario();
-    String tag = entry.tag();
-    long totalStart = System.currentTimeMillis();
-    // ... addTagToAsciidoc ...
-    PhaseResult redResult = redPhase.run(tag);
-    if (redResult.exitCode() != 0 && redResult.exitCode() != 100) { /* throw */ }
-    // ... branch on red.exitCode(), run green+refactor, commit per stage policy ...
-
-    String commit = git.getCurrentCommit(baseDir);
-    mojoLog.info("  Commit: " + commit);
-    long totalDuration = System.currentTimeMillis() - totalStart;
-    metrics.append(gitBranch, commit, scenarioName,
-        redResult.durationMs(), greenDuration, refactorDuration, totalDuration);
-}
-```
-
-### removeFirstScenarioFromFile
-
-Removes the first scenario entry from the scenarios file, preserving the File header if subsequent scenarios share it.
-
-**Example: removeFirstScenarioFromFile method body**
-```java
-void removeFirstScenarioFromFile() throws Exception {
-    Path scenariosPath = Path.of(baseDir, scenariosFile);
-    List<String> lines = Files.readAllLines(scenariosPath, StandardCharsets.UTF_8);
-    // Find end of first File/Scenario/Tag block, write remaining
-    if (remaining.isEmpty()) {
-        Files.writeString(scenariosPath, "", StandardCharsets.UTF_8);
-    } else {
-        writeFileWithLF(scenariosPath.toString(), remaining);
-    }
-}
-```
-
-### addTagToAsciidoc
-
-Reads an AsciiDoc file, finds the matching Test-Case header, and inserts or appends a tag annotation.
-
-**Example: addTagToAsciidoc method body**
-```java
-boolean addTagToAsciidoc(String fileName, String scenarioName, String tag) throws Exception {
-    String filePath = baseDir + "/" + asciidocDir + "/" + fileName + ".asciidoc";
-    File file = new File(filePath);
-    if (!file.exists()) {
-        mojoLog.warn("File not found: " + fileName + ".asciidoc");
-        return false;
-    }
-    // Read content, find Test-Case header, insert/append tag
-    return true;
-}
-```
-
-### parseScenarios
-
-Parses the indented File/Scenario/Tag format into ScenarioEntry records.
-
-**Example: parseScenarios method body**
-```java
-List<ScenarioEntry> parseScenarios(String scenariosFilePath) throws Exception {
-    List<String> lines = Files.readAllLines(Path.of(scenariosFilePath), StandardCharsets.UTF_8);
-    List<ScenarioEntry> result = new ArrayList<>();
-    String currentFile = "";
-    String currentScenario = "";
-    for (String line : lines) {
-        if (line.startsWith("File: ")) {
-            currentFile = line.substring("File: ".length());
-        } else if (line.startsWith("  Scenario: ")) {
-            currentScenario = line.substring("  Scenario: ".length());
-        } else if (line.startsWith("    Tag: ")) {
-            String tag = line.substring("    Tag: ".length());
-            result.add(new ScenarioEntry(currentFile, currentScenario, tag));
-        }
-    }
-    return result;
-}
-```
-
-### runCleanUp
-
-Deletes stale NUL files and the target directory.
-
-**Example: runCleanUp method body**
-```java
-int runCleanUp() throws Exception {
-    Path sheepDogMain = Path.of(baseDir, "../..").normalize();
-    int deleted = deleteNulFiles(sheepDogMain);
-    mojoLog.debug("  Cleanup: Deleted " + deleted + " NUL files");
-    deleteDirectory(Path.of(baseDir, "target"));
-    mojoLog.debug("  Cleanup: Deleted target directory");
-    return 0;
-}
-```
-
-### writeFileWithLF
-
-Writes lines joined with LF line endings.
-
-**Example: writeFileWithLF method body**
-```java
-void writeFileWithLF(String filePath, List<String> lines) throws Exception {
-    String content = String.join("\n", lines) + "\n";
-    Files.writeString(Path.of(filePath), content, StandardCharsets.UTF_8);
-}
-```
-
-## RedPhase
+## RgrPhase
 
 ### run
 
-Runs the red-phase workflow: invoke upstream maven goals, generate the cucumber runner class, run `mvn test`. Logs phase start/complete markers, times the work, returns a PhaseResult whose exit code is 100 if tests already pass, 0 if they fail.
+Public template invoked by `DarmokMojo.processScenario`. The template times `executeClaudeOrMaven`, optionally invokes `runVerifyLoop`, writes `exitCode` and the per-phase duration onto `state`, and returns it. Sample usage from the orchestrator's perspective:
 
-**Example: run method body**
+**Example: phase chaining in `DarmokMojo.processScenario`** (`src/main/java/org/farhan/mbt/maven/DarmokMojo.java`)
 ```java
-public PhaseResult run(String pattern) throws Exception {
-    mojoLog.info("  Red: Running maven...");
-    long start = System.currentTimeMillis();
-    // asciidoctor-to-uml, uml-to-cucumber-guice, generate runner class, mvn test ...
-    int exitCode = testExitCode == 0 ? 100 : 0;
-    long duration = System.currentTimeMillis() - start;
-    mojoLog.info("  Red: Completed maven (" + PhaseResult.formatDuration(duration) + ")");
-    return new PhaseResult(exitCode, duration);
+DarmokMojoState state = new DarmokMojoState(scenarioName, gitBranch, tag);
+
+state = redPhase.run(state);
+if (state.exitCode != 0 && state.exitCode != 100) {
+    throw new MojoExecutionException("rgr-red failed with exit code " + state.exitCode);
 }
-```
-
-### generateRunnerClassContent
-
-Generates Java source for a Cucumber suite runner class filtered by tag.
-
-**Example: generateRunnerClassContent method body**
-```java
-String generateRunnerClassContent(String pattern, String runnerClassName) {
-    return "package org.farhan.suites;\n"
-        + "import org.junit.platform.suite.api.*;\n"
-        + "@Suite\n@IncludeEngines(\"cucumber\")\n"
-        + "@IncludeTags(\"" + pattern + "\")\n"
-        + "public class " + runnerClassName + " {\n}";
-}
-```
-
-## GreenPhase
-
-### run
-
-Invokes the Claude `/rgr-green` skill for the current scenario tag. If the claude call times out (returns `ClaudeRunner.TIMEOUT_EXIT_CODE`), delegates to `runTimeoutRecoveryLoop` which calls `mvn clean install` and, on failure, resumes the session with `"pls continue"` — bounded by `maxTimeoutAttempts`. On successful recovery (or normal exit 0), then runs the inner verify loop (`mvn clean verify` + `claude --resume "mvn clean verify failures should be fixed"` retries up to `maxVerifyAttempts`). Logs start/complete markers, times the whole phase, returns a PhaseResult. A non-zero non-timeout claude exit short-circuits before verify runs; verify-loop or timeout-loop exhaustion throws with a message naming the phase and attempt count.
-
-**Example: run method body**
-```java
-public PhaseResult run(String pattern) throws Exception {
-    mojoLog.info("  Green: Running...");
-    long start = System.currentTimeMillis();
-    int claudeExit = claude.run(workingDir, "/rgr-green " + artifactId + " " + pattern);
-    claudeExit = runTimeoutRecoveryLoop(claudeExit);
-    long claudeDuration = System.currentTimeMillis() - start;
-    mojoLog.info("  Green: Completed (" + PhaseResult.formatDuration(claudeDuration) + ")");
-    if (claudeExit != 0) {
-        return new PhaseResult(claudeExit, claudeDuration);
-    }
-    runVerifyLoop();
-    long totalDuration = System.currentTimeMillis() - start;
-    return new PhaseResult(0, totalDuration);
-}
-```
-
-### runTimeoutRecoveryLoop
-
-Timeout-recovery sub-step of the green phase. No-op unless `claude.run` returned the sentinel `ClaudeRunner.TIMEOUT_EXIT_CODE`. Logs a single `Claude timed out after <N>s, killing...` (WARN) on entry; then loops running `mvn clean install` against the target project. Install exit 0 → log `Install passed, proceeding` and return 0 (phase continues into the verify loop as though claude had returned 0). Install non-zero → log `Install failed, resuming claude (attempt N of M)...` and call `claude.resume(workingDir, "pls continue")` — the resume's exit code is intentionally ignored; the next install check is authoritative. Bounded by `maxTimeoutAttempts`; on exhaustion logs `Timeout exhausted after M attempts` (ERROR) and throws `"rgr-green timed out after M attempts"`.
-
-**Example: runTimeoutRecoveryLoop method body**
-```java
-private int runTimeoutRecoveryLoop(int claudeExit) throws Exception {
-    if (claudeExit != ClaudeRunner.TIMEOUT_EXIT_CODE) {
-        return claudeExit;
-    }
-    mojoLog.warn("  Green: Claude timed out after " + maxClaudeSeconds + "s, killing...");
-    int attempt = 1;
-    while (true) {
-        mojoLog.info("  Green: Running mvn clean install to check phase state...");
-        int installExit = maven.run(targetDir, "clean", "install");
-        if (installExit == 0) {
-            mojoLog.info("  Green: Install passed, proceeding");
-            return 0;
-        }
-        if (attempt >= maxTimeoutAttempts) {
-            mojoLog.error("  Green: Timeout exhausted after " + maxTimeoutAttempts + " attempts");
-            throw new Exception("rgr-green timed out after " + maxTimeoutAttempts + " attempts");
-        }
-        attempt++;
-        mojoLog.info("  Green: Install failed, resuming claude (attempt " + attempt
-            + " of " + maxTimeoutAttempts + ")...");
-        claude.resume(workingDir, TIMEOUT_RESUME_MESSAGE);
-    }
-}
-```
-
-### runVerifyLoop
-
-Verify sub-step of the green phase. Runs `mvn clean verify` against the target project; on non-zero exit, invokes `claude --resume` with the literal continuation message `"mvn clean verify failures should be fixed"` and re-runs verify. Bounded by `maxVerifyAttempts`. Logs `Verify running...` / `Verify passed (<duration>)` on success, `Verify failed (attempt N/M), resuming claude...` on recoverable failure, and `Verify failed after M attempts, aborting` + throws on exhaustion.
-
-**Example: runVerifyLoop method body**
-```java
-private void runVerifyLoop() throws Exception {
-    for (int attempt = 1; attempt <= maxVerifyAttempts; attempt++) {
-        mojoLog.info("  Green: Verify running...");
-        long verifyStart = System.currentTimeMillis();
-        int verifyExit = maven.run(targetDir, "clean", "verify");
-        long verifyDuration = System.currentTimeMillis() - verifyStart;
-        if (verifyExit == 0) {
-            mojoLog.info("  Green: Verify passed (" + PhaseResult.formatDuration(verifyDuration) + ")");
-            return;
-        }
-        if (attempt < maxVerifyAttempts) {
-            mojoLog.warn("  Green: Verify failed (attempt " + attempt + "/" + maxVerifyAttempts + "), resuming claude...");
-            claude.resume(workingDir, VERIFY_RESUME_MESSAGE);
-        }
-    }
-    mojoLog.error("  Green: Verify failed after " + maxVerifyAttempts + " attempts, aborting");
-    throw new Exception("rgr-green verify failed after " + maxVerifyAttempts + " attempts");
-}
-```
-
-## RefactorPhase
-
-### run
-
-Invokes the Claude `/rgr-refactor forward` skill for the current scenario, then runs the same timeout-recovery + verify loops as GreenPhase. Logs start/complete markers, times the whole phase, returns a PhaseResult. Timeout-loop exhaustion throws `"rgr-refactor timed out after <N> attempts"`; verify-loop exhaustion throws `"rgr-refactor verify failed after <N> attempts"`.
-
-**Example: run method body**
-```java
-public PhaseResult run() throws Exception {
-    mojoLog.info("  Refactor: Running...");
-    long start = System.currentTimeMillis();
-    int claudeExit = claude.run(workingDir, "/rgr-refactor forward " + artifactId);
-    claudeExit = runTimeoutRecoveryLoop(claudeExit);
-    long claudeDuration = System.currentTimeMillis() - start;
-    mojoLog.info("  Refactor: Completed (" + PhaseResult.formatDuration(claudeDuration) + ")");
-    if (claudeExit != 0) {
-        return new PhaseResult(claudeExit, claudeDuration);
-    }
-    runVerifyLoop();
-    long totalDuration = System.currentTimeMillis() - start;
-    return new PhaseResult(0, totalDuration);
-}
-```
-
-### runTimeoutRecoveryLoop
-
-Symmetric with GreenPhase.runTimeoutRecoveryLoop — see that entry for the full log/flow contract. Differences: log category prefix is `Refactor:`, shared `TIMEOUT_RESUME_MESSAGE` constant (`GreenPhase.TIMEOUT_RESUME_MESSAGE = "pls continue"`), exhaustion message is `"rgr-refactor timed out after M attempts"`.
-
-## PhaseResult
-
-### formatDuration
-
-Formats milliseconds as HH:MM:SS.
-
-**Example: formatDuration method body**
-```java
-public static String formatDuration(long millis) {
-    long seconds = millis / 1000;
-    long hours = seconds / 3600;
-    long minutes = (seconds % 3600) / 60;
-    long secs = seconds % 60;
-    return String.format("%02d:%02d:%02d", hours, minutes, secs);
+if (state.exitCode != 100) {
+    state = greenPhase.run(state);
+    if (state.exitCode != 0) throw new MojoExecutionException(...);
+    state = refactorPhase.run(state);
+    if (state.exitCode != 0) throw new MojoExecutionException(...);
 }
 ```
 
 ## ProcessRunner
 
-### buildCommand
-
-Constructs the command list from arguments. Base implementation passes args through.
-
-**Example: buildCommand method body**
-```java
-protected List<String> buildCommand(String... args) {
-    List<String> command = new ArrayList<>();
-    for (String arg : args) {
-        command.add(arg);
-    }
-    return command;
-}
-```
-
 ### run
 
-Starts process via ProcessStarter seam, streams output to log, returns exit code.
+Public entry point shared by all `{Tool}Runner` subclasses (Claude overrides; Git/Maven inherit unchanged). Callers pass a working directory and command arguments; the runner returns the subprocess exit code with stdout streamed to the wrapped `Log`.
 
-**Example: run method body**
+**Example: maven goal invocation in `RgrPhase.runVerifyLoop`** (`src/main/java/org/farhan/mbt/maven/RgrPhase.java`)
 ```java
-public int run(String workingDirectory, String... args) throws Exception {
-    List<String> command = buildCommand(args);
-    ProcessBuilder pb = new ProcessBuilder(command);
-    pb.directory(new File(workingDirectory));
-    pb.redirectErrorStream(true);
-    log.debug("Running: " + String.join(" ", command));
-    Process process = starter.start(pb);
-    process.getOutputStream().close();
-    try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
-        String line;
-        while ((line = reader.readLine()) != null) {
-            log.debug(line);
-        }
-    }
-    return process.waitFor();
-}
+int verifyExit = maven.run(targetDir, "clean", "verify");
 ```
 
-### capture
-
-Builds the command, starts the process, reads stdout to a string, and returns the trimmed output. Throws IOException on non-zero exit. Used by runners that need the subprocess's output as a value rather than streamed to the log.
-
-**Example: capture method body**
+**Example: git invocation in `DarmokMojo.commitIfChanged`** (`src/main/java/org/farhan/mbt/maven/DarmokMojo.java`)
 ```java
-public String capture(String workingDirectory, String... args) throws Exception {
-    List<String> command = buildCommand(args);
-    ProcessBuilder pb = new ProcessBuilder(command);
-    pb.directory(new File(workingDirectory));
-    pb.redirectErrorStream(true);
-    log.debug("Running: " + String.join(" ", command));
-    Process process = starter.start(pb);
-    process.getOutputStream().close();
-    StringBuilder output = new StringBuilder();
-    try (BufferedReader reader = new BufferedReader(
-            new InputStreamReader(process.getInputStream()))) {
-        String line;
-        while ((line = reader.readLine()) != null) {
-            output.append(line).append("\n");
-        }
-    }
-    int exit = process.waitFor();
-    if (exit != 0) {
-        throw new IOException("Command failed (exit " + exit + "): " + String.join(" ", command));
-    }
-    return output.toString().trim();
-}
-```
-
-### getLog
-
-Returns the Maven Log instance.
-
-**Example: getLog method body**
-```java
-protected Log getLog() {
-    return log;
-}
-```
-
-### isWindows
-
-Returns true if the OS is Windows.
-
-**Example: isWindows method body**
-```java
-protected static boolean isWindows() {
-    return System.getProperty("os.name").toLowerCase().contains("win");
-}
+git.run(baseDir, "add", ".");
+int diffQuietExit = git.run(baseDir, "diff", "--cached", "--quiet");
+git.run(baseDir, "commit", "-m", commitMsg);
 ```
 
 ## {Tool}Runner
 
-### buildCommand
-
-Each runner prepends its tool executable. Platform-aware runners check isWindows() for .cmd extension.
-
-**Example: Simple runner (GitRunner)**
-```java
-@Override
-protected List<String> buildCommand(String... args) {
-    List<String> command = new ArrayList<>();
-    command.add("git");
-    for (String arg : args) {
-        command.add(arg);
-    }
-    return command;
-}
-```
-
 ### run
 
-ClaudeRunner overrides run() to add (a) an API-retry loop on known transient error patterns (500/529/overloaded) and (b) a per-invocation timeout via `executeCommand`, which wraps each attempt in `waitFor(maxClaudeSeconds, SECONDS)` with a background stdout reader. On timeout the subprocess is destroyed and the sentinel `TIMEOUT_EXIT_CODE` is returned immediately — no API-retry is attempted, because the caller (GreenPhase/RefactorPhase) owns timeout recovery. GitRunner and MavenRunner inherit ProcessRunner.run unchanged.
+`ClaudeRunner` overrides `ProcessRunner.run` to add an API-retry loop (500/529/overloaded patterns) and a per-invocation `maxClaudeSeconds` timeout that returns the sentinel `TIMEOUT_EXIT_CODE` on expiry. Phases call it via the polymorphic interface; the timeout sentinel is what triggers phase-side recovery.
 
-**Example: ClaudeRunner retry + timeout loop**
+**Example: claude invocation in `GreenPhase.executeClaudeOrMaven`** (`src/main/java/org/farhan/mbt/maven/GreenPhase.java`)
 ```java
-@Override
-public int run(String workingDirectory, String... args) throws Exception {
-    List<String> command = buildCommand(args);
-    int attempt = 0;
-    int exitCode = -1;
-    while (attempt < maxRetries) {
-        attempt++;
-        List<String> outputLines = new ArrayList<>();
-        exitCode = executeCommand(command, workingDirectory, outputLines);
-        if (exitCode == TIMEOUT_EXIT_CODE) return TIMEOUT_EXIT_CODE;  // phase owns recovery
-        if (exitCode == 0) break;
-        String matchedPattern = findRetryableError(outputLines);
-        if (matchedPattern != null && attempt < maxRetries) {
-            Thread.sleep(retryWaitSeconds * 1000L);
-        } else {
-            break;
-        }
-    }
-    return exitCode;
-}
+int claudeExit = claude.run(workingDir, "/rgr-green " + artifactId + " " + pattern);
+return runTimeoutRecoveryLoop(claudeExit);
+```
+
+**Example: claude invocation in `RefactorPhase.executeClaudeOrMaven`** (`src/main/java/org/farhan/mbt/maven/RefactorPhase.java`)
+```java
+int claudeExit = claude.run(workingDir, "/rgr-refactor forward " + artifactId);
+return runTimeoutRecoveryLoop(claudeExit);
 ```
 
 ### resume
 
-ClaudeRunner-only. Single-shot invocation of `claude --resume` with a continuation message; the most recent claude session gets the message and the caller's outer loop (verify loop for `"mvn clean verify failures should be fixed"`, timeout loop for `"pls continue"`) decides whether to retry. Bounded by the same `maxClaudeSeconds` timeout as `run`; returns `TIMEOUT_EXIT_CODE` on timeout. No API-retry loop — different failure domain from `run`'s API-error retries.
+`ClaudeRunner`-only. Single-shot `claude --resume <message>` that nudges the latest claude session forward. Called by the verify and timeout-recovery loops; the resume's exit code is intentionally ignored (the next `mvn clean install` / `mvn clean verify` is the authoritative signal).
 
-**Example: ClaudeRunner.resume method body**
+**Example: verify-failure recovery in `RgrPhase.runVerifyLoop`** (`src/main/java/org/farhan/mbt/maven/RgrPhase.java`)
 ```java
-public int resume(String workingDirectory, String message) throws Exception {
-    List<String> command = new ArrayList<>();
-    command.add(isWindows() ? "claude.cmd" : "claude");
-    command.add("--resume");
-    command.add("--print");
-    command.add("--dangerously-skip-permissions");
-    if (model != null && !model.isEmpty()) {
-        command.add("--model");
-        command.add(model);
-    }
-    command.add(message);
-    List<String> outputLines = new ArrayList<>();
-    int exitCode = executeCommand(command, workingDirectory, outputLines);
-    if (exitCode == TIMEOUT_EXIT_CODE) return TIMEOUT_EXIT_CODE;
-    getLog().debug("Claude CLI exited with code " + exitCode);
-    return exitCode;
-}
+claude.resume(workingDir, VERIFY_RESUME_MESSAGE);  // "mvn clean verify failures should be fixed"
 ```
 
-### executeCommand
-
-Private helper shared by `run` and `resume` that owns the subprocess lifecycle: starts the process, streams stdout on a background daemon thread (so a hung claude can't block the main thread's `waitFor(timeout)`), calls `waitFor(maxClaudeSeconds, SECONDS)`, and on timeout calls `destroyForcibly()` + reaps + joins the reader thread before returning `TIMEOUT_EXIT_CODE`. The background reader is why stdout-based retryable-error detection still works: `outputLines` is populated as the process writes, and `readerThread.join()` before returning the exit code ensures the list is complete.
-
-**Example: executeCommand body shape**
+**Example: timeout recovery in `RgrPhase.runTimeoutRecoveryLoop`** (`src/main/java/org/farhan/mbt/maven/RgrPhase.java`)
 ```java
-private int executeCommand(List<String> command, String workingDirectory,
-        List<String> outputLines) throws Exception {
-    ProcessBuilder pb = new ProcessBuilder(command);
-    pb.directory(new File(workingDirectory));
-    pb.redirectErrorStream(true);
-    Process process = getStarter().start(pb);
-    process.getOutputStream().close();
-
-    Thread readerThread = new Thread(() -> {
-        try (BufferedReader reader = new BufferedReader(
-                new InputStreamReader(process.getInputStream()))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                synchronized (outputLines) { outputLines.add(line); }
-            }
-        } catch (Exception ignored) {}
-    });
-    readerThread.setDaemon(true);
-    readerThread.start();
-
-    boolean completed = process.waitFor(maxClaudeSeconds, TimeUnit.SECONDS);
-    if (!completed) {
-        process.destroyForcibly();
-        process.waitFor(5, TimeUnit.SECONDS);
-        readerThread.join(5000);
-        return TIMEOUT_EXIT_CODE;
-    }
-    readerThread.join();
-    return process.exitValue();
-}
+claude.resume(workingDir, TIMEOUT_RESUME_MESSAGE);  // "pls continue"
 ```
 
 ### getCurrentCommit
 
-GitRunner convenience method that captures the current HEAD commit SHA via `git rev-parse HEAD`. Used by DarmokMojo to tag per-scenario metrics rows with the commit responsible for that cycle-time point.
+`GitRunner`-only. Captures the HEAD commit SHA via `git rev-parse HEAD`. Called once per scenario after all commits are made, to tag the metrics row with the responsible commit.
 
-**Example: GitRunner.getCurrentCommit method body**
+**Example: per-scenario commit capture in `DarmokMojo.processScenario`** (`src/main/java/org/farhan/mbt/maven/DarmokMojo.java`)
 ```java
-public String getCurrentCommit(String workingDirectory) throws Exception {
-    return capture(workingDirectory, "rev-parse", "HEAD");
+state.commit = git.getCurrentCommit(baseDir);
+mojoLog.info("  Commit: " + state.commit);
+```
+
+### getCurrentBranch
+
+`GitRunner`-only. Captures the current branch name via `git rev-parse --abbrev-ref HEAD`. Called by `DarmokMojo.verifyGitBranch` (init-time) to confirm the configured `gitBranch` parameter matches the actual git HEAD.
+
+**Example: init-time branch verification in `DarmokMojo.verifyGitBranch`** (`src/main/java/org/farhan/mbt/maven/DarmokMojo.java`)
+```java
+String actualBranch = git.getCurrentBranch(baseDir);
+if (!gitBranch.equals(actualBranch)) {
+    throw new MojoExecutionException("Darmok configured for branch '" + gitBranch
+        + "' but current HEAD is on '" + actualBranch + "'. Aborting.");
 }
 ```
 
-## DarmokMojoLog
+## DarmokMojoState
 
-### getLogFile
+### setDuration
 
-Returns the log file path for this DarmokMojoLog instance.
+Called by `RgrPhase.run` template at the end of every phase to record the elapsed milliseconds for that phase.
 
-**Example: getLogFile method body**
+**Example: phase template recording its slot in `RgrPhase.run`** (`src/main/java/org/farhan/mbt/maven/RgrPhase.java`)
 ```java
-public Path getLogFile() {
-    return logFile;
-}
+state.exitCode = exitCode;
+state.setDuration(phase(), duration);
+return state;
 ```
+
+### getDuration
+
+Called by `DarmokMojoMetrics.append` to read each phase's duration into the CSV row.
+
+**Example: per-phase column read in `DarmokMojoMetrics.append`** (`src/main/java/org/farhan/mbt/maven/DarmokMojoMetrics.java`)
+```java
++ state.getDuration(Phase.RED) + ","
++ state.getDuration(Phase.GREEN) + ","
++ state.getDuration(Phase.REFACTOR) + ","
+```
+
+### formatDuration
+
+Static helper used to format millisecond counts as HH:MM:SS for log lines. Called by `RgrPhase.run` (phase completion) and `RgrPhase.runVerifyLoop` (verify completion).
+
+**Example: phase-completion log line in `RgrPhase.run`** (`src/main/java/org/farhan/mbt/maven/RgrPhase.java`)
+```java
+mojoLog.info("  " + name + ": Completed (" + DarmokMojoState.formatDuration(duration) + ")");
+```
+
+## DarmokMojoFile
+
+### getFile
+
+Returns the target file path. Inherited by both subclasses; called by test impls to feed `getFileState`.
+
+**Example: file-state read in `DarmokMojoLogFileImpl`** (`src/test/java/org/farhan/impl/DarmokMojoLogFileImpl.java`)
+```java
+return getFileState(getDarmokMojoLog("darmok.mojo").getFile());
+```
+
+## DarmokMojo{DataFileType}
 
 ### findDatedLog
 
-Finds a dated log file by prefix in a directory.
+`DarmokMojoLog`-only static helper. Resolves a dated log file by prefix in a directory.
 
-**Example: findDatedLog method body**
+**Example: log discovery in `MavenTestObject.getDarmokMojoLog`** (`src/test/java/org/farhan/common/MavenTestObject.java`)
 ```java
-public static Path findDatedLog(Path logDir, String prefix) {
-    if (!Files.isDirectory(logDir)) {
-        return logDir.resolve(prefix + ".log");
-    }
-    try (var stream = Files.list(logDir)) {
-        return stream
-            .filter(p -> {
-                String name = p.getFileName().toString();
-                return name.startsWith(prefix + ".") && name.endsWith(".log");
-            })
-            .findFirst()
-            .orElse(logDir.resolve(prefix + ".log"));
-    } catch (IOException e) {
-        return logDir.resolve(prefix + ".log");
-    }
-}
+DarmokMojoLog mojoLog = new DarmokMojoLog(DarmokMojoLog.findDatedLog(logDir, prefix));
 ```
 
 ### is{LogLevel}Enabled
 
-Delegates to the wrapped Log instance.
+`DarmokMojoLog`-only. Delegates to the wrapped `Log`. Used by Maven's logging machinery to skip computing log-line content when the level is disabled.
 
-**Example: Delegation**
+**Example: level-gated logging (called by Maven framework)**
 ```java
-@Override
-public boolean isDebugEnabled() {
-    return delegate.isDebugEnabled();
+if (mojoLog.isDebugEnabled()) {
+    mojoLog.debug("expensive: " + computeDetail());
 }
 ```
 
 ### {logLevel}(CharSequence)
 
-Forwards to wrapped Log, then writes timestamped line to file.
+`DarmokMojoLog`-only. Forwards to the wrapped `Log` and writes a timestamped line to the log file. Called by every phase to log progress markers.
 
-**Example: Delegation pattern**
+**Example: phase progress logging in `RgrPhase.run`** (`src/main/java/org/farhan/mbt/maven/RgrPhase.java`)
 ```java
-@Override
-public void info(CharSequence content) {
-    delegate.info(content);
-    writeLine("INFO ", content);
-}
+mojoLog.info("  " + name + ": Running...");
+mojoLog.info("  " + name + ": Completed (" + DarmokMojoState.formatDuration(duration) + ")");
+mojoLog.warn("  " + name + ": Verify failed (attempt " + attempt + "/" + maxVerifyAttempts + "), resuming claude...");
+mojoLog.error("  " + name + ": Verify failed after " + maxVerifyAttempts + " attempts, aborting");
 ```
 
 ### {logLevel}(CharSequence, Throwable)
 
-Forwards to wrapped Log, then writes timestamped line plus stack trace to file.
+`DarmokMojoLog`-only. Forwards to the wrapped `Log` and writes timestamped line plus stack trace.
 
-**Example: Delegation with throwable**
+**Example: contextual error log**
 ```java
-@Override
-public void info(CharSequence content, Throwable error) {
-    delegate.info(content, error);
-    writeLine("INFO ", content, error);
-}
+mojoLog.error("Failed in checkTestStep for : " + e.getMessage(), e);
 ```
 
 ### {logLevel}(Throwable)
 
-Forwards to wrapped Log, then writes stack trace to file.
+`DarmokMojoLog`-only. Forwards to the wrapped `Log` and writes the stack trace.
 
-**Example: Delegation with throwable only**
+**Example: bare-throwable error log**
 ```java
-@Override
-public void info(Throwable error) {
-    delegate.info(error);
-    writeLine("INFO ", "", error);
-}
+mojoLog.error(e);
 ```
 
 ### close
 
-Closes the underlying PrintWriter.
+`DarmokMojoLog`-only. Closes the underlying `PrintWriter`. Called by `DarmokMojo.cleanup` for both logs.
 
-**Example: close method body**
+**Example: lifecycle close in `DarmokMojo.cleanup`** (`src/main/java/org/farhan/mbt/maven/DarmokMojo.java`)
 ```java
-@Override
-public void close() {
-    writer.close();
+if (mojoLog != null) mojoLog.close();
+if (runnerLog != null) runnerLog.close();
+```
+
+### matchAndGet{Field}
+
+Inherits `ensureMatched` from `DarmokMojoFile`. Each subclass exposes its own field set — `DarmokMojoLog` returns Level/Category/Content from the matched `LogEntry`; `DarmokMojoMetrics` returns one of the eight CSV columns from the matched row map. Test impls dispatch the cucumber row's `keyMap` to the right column accessor.
+
+**Example: log-row inspection in `DarmokMojoLogFileImpl`** (`src/test/java/org/farhan/impl/DarmokMojoLogFileImpl.java`)
+```java
+@Override public String getLevel(HashMap<String, String> keyMap) {
+    return getDarmokMojoLog("darmok.mojo").matchAndGetLevel(keyMap);
+}
+@Override public String getCategory(HashMap<String, String> keyMap) {
+    return getDarmokMojoLog("darmok.mojo").matchAndGetCategory(keyMap);
+}
+@Override public String getContent(HashMap<String, String> keyMap) {
+    return getDarmokMojoLog("darmok.mojo").matchAndGetContent(keyMap);
 }
 ```
 
-## DarmokMojoMetrics
-
-### getFile
-
-Returns the target file path for this metrics instance.
-
-**Example: getFile method body**
+**Example: metrics-row inspection in `MetricsCsvFileImpl`** (`src/test/java/org/farhan/impl/MetricsCsvFileImpl.java`)
 ```java
-public Path getFile() {
-    return file;
+@Override public String getCommit(HashMap<String, String> keyMap) {
+    return metrics().matchAndGetCommit(keyMap);
+}
+@Override public String getPhaseRedMs(HashMap<String, String> keyMap) {
+    return metrics().matchAndGetPhaseRedMs(keyMap);
 }
 ```
 
 ### append
 
-Appends one data row to the CSV. Writes the header on the first call if the file does not yet exist. The gitBranch argument is stored verbatim in the `git_branch` column so SPC dashboards can group by run. Scenario names containing commas, quotes, or newlines are CSV-escaped.
+`DarmokMojoMetrics`-only. Called once per scenario by `DarmokMojo.processScenario` to write the cycle-time row.
 
-**Example: append method body**
+**Example: per-scenario metrics row in `DarmokMojo.processScenario`** (`src/main/java/org/farhan/mbt/maven/DarmokMojo.java`)
 ```java
-public void append(String gitBranch, String commit, String scenario,
-        long redMs, long greenMs, long refactorMs, long totalMs) throws IOException {
-    Files.createDirectories(file.getParent());
-    if (!Files.exists(file)) {
-        Files.writeString(file, HEADER + "\n", StandardCharsets.UTF_8);
-    }
-    String row = LocalDateTime.now().format(TIMESTAMP) + ","
-        + gitBranch + ","
-        + commit + ","
-        + escape(scenario) + ","
-        + redMs + "," + greenMs + "," + refactorMs + "," + totalMs + "\n";
-    Files.writeString(file, row, StandardCharsets.UTF_8,
-        StandardOpenOption.CREATE, StandardOpenOption.APPEND);
-}
+state.commit = git.getCurrentCommit(baseDir);
+state.totalDurationMs = System.currentTimeMillis() - totalStart;
+metrics.append(state);
 ```
 
 ## {Tool}RunnerFactory
