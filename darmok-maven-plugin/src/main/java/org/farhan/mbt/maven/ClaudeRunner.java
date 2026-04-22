@@ -168,7 +168,18 @@ public class ClaudeRunner extends ProcessRunner {
 			return TIMEOUT_EXIT_CODE;
 		}
 
-		readerThread.join();
+		// Bound the reader half of the budget too. On Windows, claude.cmd can exit
+		// cleanly (waitFor returned true) while a grandchild node keeps the stdout
+		// pipe open silent — without this bound we'd sit in readerThread.join() past
+		// maxClaudeSeconds. See issue 290.
+		readerThread.join(maxClaudeSeconds * 1000L);
+		if (readerThread.isAlive()) {
+			log.warn("Claude CLI timed out after " + maxClaudeSeconds + "s, killing...");
+			process.destroyForcibly();
+			readerThread.join(5000);
+			log.debug("-------------------------------------------");
+			return TIMEOUT_EXIT_CODE;
+		}
 		log.debug("-------------------------------------------");
 		return process.exitValue();
 	}

@@ -120,4 +120,9 @@ public class DarmokGenFromExistingGoalSteps extends TestSteps {
     public void mvnCleanInstallCommandIsExecutedAndFailsThenPassesInTheRefactorPhase(DataTable dataTable) {
         object.doEdgeStep("mvn clean install", "command", "is", "executed and fails then passes in the refactor phase", dataTable);
     }
+
+    @Given("^The darmok plugin gen-from-existing goal claude /rgr-green command is exited but its stdout stays open$")
+    public void claudeRgrGreenCommandIsExitedButItsStdoutStaysOpen() {
+        object.doEdgeStep("claude /rgr-green", "command", "is", "exited but its stdout stays open");
+    }
 }

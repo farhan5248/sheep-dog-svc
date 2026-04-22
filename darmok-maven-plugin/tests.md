@@ -592,6 +592,15 @@ The timeout is a separate axis from the existing API-error retry loop
 (500/529/overloaded) — timeouts are not API errors and don't consume
 `maxRetries`.
 
+The budget applies to the whole `executeCommand` call, not just the process-handle
+wait. `executeCommand` has two serial wait points — `waitFor(maxClaudeSeconds,
+SECONDS)` on the process handle and `readerThread.join(maxClaudeSeconds * 1000L)`
+on the stdout-reader thread — and the phase treats either hitting its bound as a
+timeout (drops into the install-check recovery). This covers the Windows failure
+mode observed in 290: `claude.cmd` parent can exit cleanly while a grandchild
+`node` keeps the stdout pipe open silently, and without the reader-side bound
+the main thread would sit in `readerThread.join()` past the budget.
+
 New observable signals:
 - Mojo log gains `WARN [mojo]   Green: Claude timed out after <N>s, killing...`
   when the timer fires, then `INFO [mojo]   Green: Running mvn clean install to check phase state...`,
@@ -684,6 +693,22 @@ Symmetric with Path 26 — substitute `Refactor` for `Green` in all log lines an
 
 Symmetric with Path 27 — exception message becomes `rgr-refactor timed out after 2 attempts`.
 The green commit from this scenario remains in git history (stage=false); no refactor commit is made.
+
+#### Path 31 — Reader half of the budget: claude exits but stdout stays open (290)
+
+- Given `maxClaudeSeconds` is 1
+- And the claude `/rgr-green` process handle signals exit promptly (`process.waitFor` returns true within the first phase of the budget)
+- And the stdout pipe stays open past `maxClaudeSeconds` (simulating a grandchild `node` holding the inherited pipe silent)
+- And the first `mvn clean install` in the green phase returns 0
+- When the `darmok:gen-from-existing` goal is executed
+- Then the observable outcome matches Path 25 — Claude is force-killed, install check passes, phase proceeds
+- And the mojo log contains
+  ```
+  | Level | Category | Content
+  | WARN  | mojo     | Green: Claude timed out after 1s, killing...
+  | INFO  | mojo     | Green: Install passed, proceeding
+  ```
+- And `executeCommand` spent at most ~1s on the reader-side wait (not the real 77-minute stall from 290)
 
 ---
 

@@ -33,9 +33,6 @@ public abstract class DarmokMojo extends AbstractMojo {
 	public String host;
 
 	// Claude CLI properties
-	@Parameter(property = "modelRed", defaultValue = "sonnet")
-	public String modelRed;
-
 	@Parameter(property = "modelGreen", defaultValue = "sonnet")
 	public String modelGreen;
 

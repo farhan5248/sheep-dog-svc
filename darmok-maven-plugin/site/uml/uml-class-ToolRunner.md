@@ -51,7 +51,7 @@ Concrete subclasses of `ProcessRunner` that prepend a tool-specific executable t
 
 ## run
 
-**Desc**: ClaudeRunner overrides run to add retry logic with configurable max retries and wait seconds. Retries on known API error patterns (500, 529, overloaded). Each invocation is bounded by maxClaudeSeconds via `waitFor(timeout, unit)`; on timeout the subprocess is destroyed and the sentinel `TIMEOUT_EXIT_CODE` is returned so the calling phase can enter timeout recovery. GitRunner and MavenRunner inherit ProcessRunner.run unchanged.
+**Desc**: ClaudeRunner overrides run to add retry logic with configurable max retries and wait seconds. Retries on known API error patterns (500, 529, overloaded). Each invocation is bounded by maxClaudeSeconds via a two-phase timeout — `waitFor(maxClaudeSeconds, SECONDS)` on the process handle followed by `readerThread.join(maxClaudeSeconds * 1000L)` on the stdout-reader thread. Hitting either bound triggers `destroyForcibly()` on the subprocess and returns the sentinel `TIMEOUT_EXIT_CODE` so the calling phase can enter timeout recovery. The reader-side bound covers the Windows failure mode (issue 290) where `claude.cmd` parent exits cleanly but a grandchild `node` keeps the stdout pipe open silently — without it the main thread would sit in `readerThread.join()` past the budget. GitRunner and MavenRunner inherit ProcessRunner.run unchanged.
 
 **Rule**: SOME method names follow run pattern.
  - **Name**: `^run$`

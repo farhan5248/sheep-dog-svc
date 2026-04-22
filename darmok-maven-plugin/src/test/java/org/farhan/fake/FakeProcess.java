@@ -2,10 +2,12 @@ package org.farhan.fake;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -30,6 +32,8 @@ public class FakeProcess extends Process {
 	private Duration delay = Duration.ZERO;
 	private boolean hangs;
 	private boolean destroyed;
+	private boolean blocksReader;
+	private final CountDownLatch readerRelease = new CountDownLatch(1);
 
 	public FakeProcess(String stdoutText, int exitCode) {
 		this.stdout = new ByteArrayInputStream(stdoutText.getBytes(StandardCharsets.UTF_8));
@@ -46,6 +50,17 @@ public class FakeProcess extends Process {
 		return this;
 	}
 
+	/**
+	 * Marks this FakeProcess as one whose stdout pipe stays open past waitFor
+	 * returning — models the issue 290 failure mode where claude.cmd parent
+	 * exits but a grandchild keeps the inherited pipe alive silently. The
+	 * blocking read releases once {@link #destroyForcibly()} is called.
+	 */
+	public FakeProcess withBlockedReader() {
+		this.blocksReader = true;
+		return this;
+	}
+
 	@Override
 	public OutputStream getOutputStream() {
 		return stdin;
@@ -53,6 +68,20 @@ public class FakeProcess extends Process {
 
 	@Override
 	public InputStream getInputStream() {
+		if (blocksReader) {
+			return new InputStream() {
+				@Override
+				public int read() throws IOException {
+					try {
+						readerRelease.await();
+					} catch (InterruptedException e) {
+						Thread.currentThread().interrupt();
+						throw new IOException(e);
+					}
+					return -1; // EOF once released
+				}
+			};
+		}
 		return stdout;
 	}
 
@@ -96,11 +125,13 @@ public class FakeProcess extends Process {
 	@Override
 	public void destroy() {
 		destroyed = true;
+		readerRelease.countDown();
 	}
 
 	@Override
 	public Process destroyForcibly() {
 		destroyed = true;
+		readerRelease.countDown();
 		return this;
 	}
 }

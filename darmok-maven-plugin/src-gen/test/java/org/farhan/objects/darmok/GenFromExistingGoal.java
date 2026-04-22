@@ -87,4 +87,6 @@ public interface GenFromExistingGoal {
     public void setMvnCleanInstallCommandExit(HashMap<String, String> keyMap);
 
     public void setMvnCleanInstallCommandExecutedAndFailsThenPassesInTheRefactorPhase(HashMap<String, String> keyMap);
+
+    public void setClaudeRgrGreenCommandExitedButItsStdoutStaysOpen(HashMap<String, String> keyMap);
 }

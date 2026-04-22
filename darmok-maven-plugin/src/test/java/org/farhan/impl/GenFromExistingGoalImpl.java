@@ -191,6 +191,11 @@ public class GenFromExistingGoalImpl extends MavenTestObject implements GenFromE
 	}
 
 	@Override
+	public void setClaudeRgrGreenCommandExitedButItsStdoutStaysOpen(HashMap<String, String> keyMap) {
+		setProperty("claudeGreenHangMode", "exits-reader-blocked");
+	}
+
+	@Override
 	public void setClaudeRgrRefactorCommandHungOnFirstCallThenCompletedOnResume(HashMap<String, String> keyMap) {
 		setProperty("claudeRefactorHangMode", "hung-first");
 	}

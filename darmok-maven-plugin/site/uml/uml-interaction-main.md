@@ -128,7 +128,7 @@ git.run(baseDir, "commit", "-m", commitMsg);
 
 ### run
 
-`ClaudeRunner` overrides `ProcessRunner.run` to add an API-retry loop (500/529/overloaded patterns) and a per-invocation `maxClaudeSeconds` timeout that returns the sentinel `TIMEOUT_EXIT_CODE` on expiry. Phases call it via the polymorphic interface; the timeout sentinel is what triggers phase-side recovery.
+`ClaudeRunner` overrides `ProcessRunner.run` to add an API-retry loop (500/529/overloaded patterns) and a per-invocation `maxClaudeSeconds` timeout that returns the sentinel `TIMEOUT_EXIT_CODE` on expiry. The timeout is two-phase: `waitFor(maxClaudeSeconds, SECONDS)` on the process handle, then `readerThread.join(maxClaudeSeconds * 1000L)` on the stdout reader. Hitting either bound forces `destroyForcibly()` on the subprocess (which also releases the reader's blocking read) and returns the sentinel. The reader-half bound is what prevents the issue 290 failure mode — parent `claude.cmd` exits cleanly while a grandchild holds stdout open silent — from blocking the main thread past the budget. Phases call `run` via the polymorphic interface; the timeout sentinel is what triggers phase-side recovery.
 
 **Example: claude invocation in `GreenPhase.executeClaudeOrMaven`** (`src/main/java/org/farhan/mbt/maven/GreenPhase.java`)
 ```java

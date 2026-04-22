@@ -17,7 +17,7 @@ This pattern covers the full lifecycle of a Darmok Maven goal invocation: initia
 | 5 | [DarmokMojoState](uml-class-DarmokMojoState.md) | Mutable per-scenario state threaded through all three phases. Carries exit code, per-phase durations, scenario/branch/tag, and post-scenario commit. |
 | 6 | [Phase](uml-class-Phase.md) | Enum keying `DarmokMojoState`'s duration map. |
 | 7 | [ProcessRunner](uml-class-ProcessRunner.md) | Process lifecycle and output streaming. |
-| 8 | [{Tool}Runner](uml-class-ToolRunner.md) | Tool-specific command construction. ClaudeRunner adds API-retry logic plus a per-invocation timeout (`waitFor(maxClaudeSeconds, SECONDS)` + `destroyForcibly()` → sentinel exit code) that surfaces to the phase. |
+| 8 | [{Tool}Runner](uml-class-ToolRunner.md) | Tool-specific command construction. ClaudeRunner adds API-retry logic plus a per-invocation timeout — bounded `waitFor(maxClaudeSeconds, SECONDS)` on the process handle AND bounded `readerThread.join(maxClaudeSeconds * 1000L)` on the stdout reader — hitting either bound → `destroyForcibly()` → sentinel exit code that surfaces to the phase. |
 | 9 | [DarmokMojo{DataFileType}](uml-class-DarmokMojoDataFileType.md) | Structured per-row file emitter. `DarmokMojoLog` writes timestamped log lines; `DarmokMojoMetrics` writes per-scenario CSV rows. |
 
 ### Sequence
