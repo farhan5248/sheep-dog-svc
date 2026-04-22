@@ -28,10 +28,10 @@ Feature: Commit Behavior Process Charts
           Some description
           """
       And The code-prj project src/main/java/org/farhan/objects/LoginHappyPath.java file isn't created
-      And The darmok plugin gen-from-existing goal git command is executed to report the current branch
-          | GitBranch |
-          | Rebuild30 |
-     When The darmok plugin gen-from-existing goal is executed with
+      And The darmok plugin gen-from-existing goal git command is executed and succeeds with
+          | Command Parameters          | GitBranch |
+          | rev-parse --abbrev-ref HEAD | Rebuild30 |
+     When The darmok plugin gen-from-existing goal is executed and succeeds with
           | GitBranch |
           | Rebuild30 |
      Then The code-prj project darmok.mojo.log file will be as follows

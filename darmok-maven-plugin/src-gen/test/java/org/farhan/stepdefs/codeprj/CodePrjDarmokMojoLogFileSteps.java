@@ -16,6 +16,11 @@ public class CodePrjDarmokMojoLogFileSteps extends TestSteps {
         object.assertVertexStep("", "", "will be", "as follows", dataTable);
     }
 
+    @Given("^The code-prj project darmok.mojo.log file will be as follows with this failure$")
+    public void willBeAsFollowsWithThisFailure(DataTable dataTable) {
+        object.assertVertexStep("", "", "will be", "as follows with this failure", dataTable);
+    }
+
     @Given("^The code-prj project darmok.mojo.log file will be present$")
     public void willBePresent() {
         object.assertVertexStep("", "", "will be", "present");
@@ -24,10 +29,5 @@ public class CodePrjDarmokMojoLogFileSteps extends TestSteps {
     @Given("^The code-prj project darmok.mojo.log file won't be as follows$")
     public void wontBeAsFollows(DataTable dataTable) {
         object.assertVertexStep("", "", "won't be", "as follows", dataTable);
-    }
-
-    @Given("^The code-prj project darmok.mojo.log file will be as follows with this failure$")
-    public void willBeAsFollowsWithThisFailure(DataTable dataTable) {
-        object.assertVertexStep("", "", "will be", "as follows with this failure", dataTable);
     }
 }

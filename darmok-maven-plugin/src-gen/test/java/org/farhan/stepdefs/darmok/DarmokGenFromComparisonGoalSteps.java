@@ -11,8 +11,8 @@ public class DarmokGenFromComparisonGoalSteps extends TestSteps {
         super(object, "darmok", "gen-from-comparison");
     }
 
-    @Given("^The darmok plugin gen-from-comparison goal is executed with$")
-    public void isExecutedWith(DataTable dataTable) {
-        object.doEdgeStep("", "", "is", "executed with", dataTable);
+    @Given("^The darmok plugin gen-from-comparison goal is executed and succeeds with$")
+    public void isExecutedAndSucceedsWith(DataTable dataTable) {
+        object.doEdgeStep("", "", "is", "executed and succeeds with", dataTable);
     }
 }

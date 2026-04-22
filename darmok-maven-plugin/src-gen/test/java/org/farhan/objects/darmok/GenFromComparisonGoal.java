@@ -4,7 +4,7 @@ import java.util.HashMap;
 
 public interface GenFromComparisonGoal {
 
-    public void setExecutedWith(HashMap<String, String> keyMap);
+    public void setExecutedAndSucceedsWith(HashMap<String, String> keyMap);
 
     public void setModelComparison(HashMap<String, String> keyMap);
 

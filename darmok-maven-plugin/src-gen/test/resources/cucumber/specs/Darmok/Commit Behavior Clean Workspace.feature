@@ -21,13 +21,15 @@ Feature: Commit Behavior Clean Workspace
           Some description
           """
       And The code-prj project src/main/java/org/farhan/objects/LoginHappyPath.java file is created
-      And The darmok plugin gen-from-existing goal git command is executed to verify the workspace is clean
+      And The darmok plugin gen-from-existing goal git command is executed and succeeds with
+          | Command Parameters    |
+          | diff --cached --quiet |
 
   Scenario: Red commit is skipped when nothing is staged
 
     The red phase's `mvn test` exits 0 (impl already present), so the special return code 100 sends control directly to the commit step. With `git diff --cached --quiet` reporting clean, commitIfChanged observes there is nothing to record and skips the commit rather than creating an empty one. The scenarios-list entry is still removed so the queue advances.
 
-     When The darmok plugin gen-from-existing goal is executed
+     When The darmok plugin gen-from-existing goal is executed and succeeds
      Then The code-prj project src/main/java/org/farhan/objects/LoginHappyPath.java file will be present
       And The code-prj project scenarios-list.txt file will be empty
       And The code-prj project darmok.mojo.log file will be as follows

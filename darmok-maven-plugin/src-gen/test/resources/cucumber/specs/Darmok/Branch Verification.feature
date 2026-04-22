@@ -15,7 +15,7 @@ Feature: Branch Verification
             Scenario: User logs in successfully
               Tag: loginHappyPath
           """
-     When The darmok plugin gen-from-existing goal is executed with
+     When The darmok plugin gen-from-existing goal is executed but fails with
           | GitBranch |
           | Empty     |
      Then The code-prj project darmok.mojo.log file will be as follows
@@ -34,10 +34,10 @@ Feature: Branch Verification
             Scenario: User logs in successfully
               Tag: loginHappyPath
           """
-      And The darmok plugin gen-from-existing goal git command is executed to report the current branch
-          | GitBranch |
-          | main      |
-     When The darmok plugin gen-from-existing goal is executed with
+      And The darmok plugin gen-from-existing goal git command is executed and succeeds with
+          | Command Parameters          | GitBranch |
+          | rev-parse --abbrev-ref HEAD | main      |
+     When The darmok plugin gen-from-existing goal is executed but fails with
           | GitBranch |
           | Rebuild30 |
      Then The code-prj project darmok.mojo.log file will be as follows

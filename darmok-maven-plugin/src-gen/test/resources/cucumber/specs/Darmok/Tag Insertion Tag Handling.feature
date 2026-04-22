@@ -31,7 +31,7 @@ Feature: Tag Insertion Tag Handling
           @loginHappyPath
           Some description
           """
-     When The darmok plugin gen-from-existing goal is executed
+     When The darmok plugin gen-from-existing goal is executed and succeeds
      Then The spec-prj project src/test/resources/asciidoc/specs/ProcessDarmok.asciidoc file will be created as follows
           """
           = Test-Suite: Login
@@ -63,7 +63,7 @@ Feature: Tag Insertion Tag Handling
           @otherTag
           Some description
           """
-     When The darmok plugin gen-from-existing goal is executed
+     When The darmok plugin gen-from-existing goal is executed and succeeds
      Then The spec-prj project src/test/resources/asciidoc/specs/ProcessDarmok.asciidoc file will be created as follows
           """
           = Test-Suite: Login
@@ -94,7 +94,7 @@ Feature: Tag Insertion Tag Handling
           
           Some description
           """
-     When The darmok plugin gen-from-existing goal is executed
+     When The darmok plugin gen-from-existing goal is executed and succeeds
      Then The spec-prj project src/test/resources/asciidoc/specs/ProcessDarmok.asciidoc file will be created as follows
           """
           = Test-Suite: Login

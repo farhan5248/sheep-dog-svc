@@ -15,18 +15,23 @@ import org.springframework.stereotype.Component;
 public class GenFromExistingGoalImpl extends MavenTestObject implements GenFromExistingGoal {
 
 	@Override
-	public void setClaudeRgrGreenCommandExecutedAndSuccessfulAfterRetries(HashMap<String, String> keyMap) {
+	public void setClaudeRgrGreenCommandExecutedAndSucceedsWith(HashMap<String, String> keyMap) {
 		setProperty("claudeGreenMode", "retry-success");
 	}
 
 	@Override
-	public void setClaudeRgrGreenCommandExecutedButFailsAfterReachingRetryLimit(HashMap<String, String> keyMap) {
-		setProperty("claudeGreenMode", "retry-exhaust");
+	public void setClaudeRgrGreenCommandExecutedButFailsWith(HashMap<String, String> keyMap) {
+		// Pattern column present → retry-exhaust; Exit column present → non-retryable
+		if (getProperty("claudeGreenPattern") != null) {
+			setProperty("claudeGreenMode", "retry-exhaust");
+		} else {
+			setProperty("claudeGreenMode", "non-retryable");
+		}
 	}
 
 	@Override
-	public void setClaudeRgrGreenCommandExecutedButFailedNonRetryably(HashMap<String, String> keyMap) {
-		setProperty("claudeGreenMode", "non-retryable");
+	public void setClaudeRgrRefactorCommandExecutedAndSucceedsWith(HashMap<String, String> keyMap) {
+		setProperty("claudeRefactorMode", "retry-success");
 	}
 
 	@Override
@@ -45,18 +50,8 @@ public class GenFromExistingGoalImpl extends MavenTestObject implements GenFromE
 	}
 
 	@Override
-	public void setClaudeRgrRefactorCommandExecutedAndSuccessfulAfterRetries(HashMap<String, String> keyMap) {
-		setProperty("claudeRefactorMode", "retry-success");
-	}
-
-	@Override
 	public void setClaudeRgrRefactorCommandPattern(HashMap<String, String> keyMap) {
 		setProperty("claudeRefactorPattern", keyMap.get("Pattern"));
-	}
-
-	@Override
-	public void setGitCommandExecutedToVerifyTheWorkspaceIsClean(HashMap<String, String> keyMap) {
-		setProperty("gitWorkspaceState", "clean");
 	}
 
 	@Override
@@ -105,15 +100,41 @@ public class GenFromExistingGoalImpl extends MavenTestObject implements GenFromE
 	}
 
 	@Override
-	public void setExecuted(HashMap<String, String> keyMap) {
+	public void setExecutedAndSucceeds(HashMap<String, String> keyMap) {
 		setProperty("processStarter", new FakeProcessStarter(properties));
 		executeMojo(GenFromExistingMojo.class);
 	}
 
 	@Override
-	public void setExecutedWith(HashMap<String, String> keyMap) {
+	public void setExecutedButFails(HashMap<String, String> keyMap) {
 		setProperty("processStarter", new FakeProcessStarter(properties));
 		executeMojo(GenFromExistingMojo.class);
+	}
+
+	@Override
+	public void setExecutedAndSucceedsWith(HashMap<String, String> keyMap) {
+		setProperty("processStarter", new FakeProcessStarter(properties));
+		executeMojo(GenFromExistingMojo.class);
+	}
+
+	@Override
+	public void setExecutedButFailsWith(HashMap<String, String> keyMap) {
+		setProperty("processStarter", new FakeProcessStarter(properties));
+		executeMojo(GenFromExistingMojo.class);
+	}
+
+	@Override
+	public void setGitCommandExecutedAndSucceedsWith(HashMap<String, String> keyMap) {
+		// Marker step; the canned branch value is seeded via setGitCommandGitBranch.
+	}
+
+	@Override
+	public void setGitCommandCommandParameters(HashMap<String, String> keyMap) {
+		String cmd = keyMap.get("Command Parameters");
+		if ("diff --cached --quiet".equals(cmd)) {
+			setProperty("gitWorkspaceState", "clean");
+		}
+		// rev-parse --abbrev-ref HEAD: GitBranch column setter primes gitBranchCanned.
 	}
 
 	@Override
@@ -129,11 +150,6 @@ public class GenFromExistingGoalImpl extends MavenTestObject implements GenFromE
 	@Override
 	public void setModelRefactor(HashMap<String, String> keyMap) {
 		setProperty("modelRefactor", keyMap.get("ModelRefactor"));
-	}
-
-	@Override
-	public void setGitCommandExecutedToReportTheCurrentBranch(HashMap<String, String> keyMap) {
-		// Marker step; the canned branch value is seeded via setGitCommandGitBranch.
 	}
 
 	@Override

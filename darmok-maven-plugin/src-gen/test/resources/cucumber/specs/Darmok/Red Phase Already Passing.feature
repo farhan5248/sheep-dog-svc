@@ -29,7 +29,7 @@ Feature: Red Phase Already Passing
     In this case the red-phase `mvn test` exits 0 on the first try, which Darmok interprets via the special return code 100 as "nothing to do here."
     Green and Refactor are skipped to avoid Claude spinning on a problem that doesn't exist, but a red commit is still made so git history marks the scenario as processed and the scenarios-list entry is removed so the queue advances.
 
-     When The darmok plugin gen-from-existing goal is executed
+     When The darmok plugin gen-from-existing goal is executed and succeeds
      Then The code-prj project src/main/java/org/farhan/objects/LoginHappyPath.java file will be present
       And The code-prj project scenarios-list.txt file will be empty
       And The code-prj project darmok.mojo.log file will be as follows

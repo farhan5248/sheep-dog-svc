@@ -12,7 +12,7 @@ Feature: Scenario Loop No Scenarios
     The goal prints the banner, cleans up, finds no entries, and completes with zero scenarios processed.
 
     Given The code-prj project scenarios-list.txt file isn't created
-     When The darmok plugin gen-from-existing goal is executed
+     When The darmok plugin gen-from-existing goal is executed and succeeds
      Then The code-prj project scenarios-list.txt file will be absent
       And The code-prj project darmok.mojo.log file will be present
       And The code-prj project darmok.runners.log file will be as follows
@@ -26,7 +26,7 @@ Feature: Scenario Loop No Scenarios
     This keeps re-runs idempotent once the backlog drains.
 
     Given The code-prj project scenarios-list.txt file is created without any scenarios
-     When The darmok plugin gen-from-existing goal is executed
+     When The darmok plugin gen-from-existing goal is executed and succeeds
      Then The code-prj project scenarios-list.txt file will be empty
       And The code-prj project darmok.mojo.log file will be as follows
           | Level | Category | Content                                   |
@@ -48,7 +48,7 @@ Feature: Scenario Loop No Scenarios
             Scenario: User logs in successfully
               Tag: NoTag
           """
-     When The darmok plugin gen-from-existing goal is executed
+     When The darmok plugin gen-from-existing goal is executed and succeeds
      Then The code-prj project scenarios-list.txt file will be empty
       And The code-prj project darmok.mojo.log file will be as follows
           | Level | Category | Content                                                              |

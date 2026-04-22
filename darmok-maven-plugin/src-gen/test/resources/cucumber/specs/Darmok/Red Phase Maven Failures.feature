@@ -28,7 +28,7 @@ Feature: Red Phase Maven Failures
     Given The darmok plugin gen-from-existing goal mvn asciidoctor-to-uml command is executed but failed
           | Exit | Output                              |
           | 1    | svc unreachable: connection refused |
-     When The darmok plugin gen-from-existing goal is executed
+     When The darmok plugin gen-from-existing goal is executed but fails
      Then The code-prj project darmok.runners.log file will be as follows with this failure
           | Level | Category | Content                             |
           | DEBUG | runner   | svc unreachable: connection refused |
@@ -40,7 +40,7 @@ Feature: Red Phase Maven Failures
     Given The darmok plugin gen-from-existing goal mvn uml-to-cucumber-guice command is executed but failed
           | Exit | Output                               |
           | 1    | TooManyRequests: upstream rate limit |
-     When The darmok plugin gen-from-existing goal is executed
+     When The darmok plugin gen-from-existing goal is executed but fails
      Then The code-prj project darmok.runners.log file will be as follows with this failure
           | Level | Category | Content                              |
           | DEBUG | runner   | TooManyRequests: upstream rate limit |
@@ -52,7 +52,7 @@ Feature: Red Phase Maven Failures
     Given The darmok plugin gen-from-existing goal mvn test command is executed but failed
           | Exit | Output                                                                               |
           | 1    | COMPILATION ERROR : [ERROR] /suites/loginHappyPathTest.java:[3,1] cannot find symbol |
-     When The darmok plugin gen-from-existing goal is executed
+     When The darmok plugin gen-from-existing goal is executed but fails
      Then The code-prj project darmok.runners.log file will be as follows with this failure
           | Level | Category | Content                                                                              |
           | DEBUG | runner   | COMPILATION ERROR : [ERROR] /suites/loginHappyPathTest.java:[3,1] cannot find symbol |

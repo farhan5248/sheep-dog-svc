@@ -26,10 +26,10 @@ Feature: Claude Retry Loop Retryable
 
     On the first invocation claude emits `API Error: 500` and exits non-zero; the retry loop detects the known pattern, waits, retries, and the second invocation succeeds. The runners log records the retry detection at WARN (not ERROR, since recovery followed).
 
-    Given The darmok plugin gen-from-existing goal claude /rgr-green command is executed and successful after retries
+    Given The darmok plugin gen-from-existing goal claude /rgr-green command is executed and succeeds with
           | Pattern        |
           | API Error: 500 |
-     When The darmok plugin gen-from-existing goal is executed
+     When The darmok plugin gen-from-existing goal is executed and succeeds
      Then The code-prj project darmok.runners.log file will be as follows
           | Level | Category | Content                                  |
           | WARN  | runner   | Retryable error detected: API Error: 500 |
@@ -40,10 +40,10 @@ Feature: Claude Retry Loop Retryable
 
     Same retry shape, different pattern. Verifies the detector matches `API Error: 529` as well as 500.
 
-    Given The darmok plugin gen-from-existing goal claude /rgr-green command is executed and successful after retries
+    Given The darmok plugin gen-from-existing goal claude /rgr-green command is executed and succeeds with
           | Pattern        |
           | API Error: 529 |
-     When The darmok plugin gen-from-existing goal is executed
+     When The darmok plugin gen-from-existing goal is executed and succeeds
      Then The code-prj project darmok.runners.log file will be as follows
           | Level | Category | Content                                  |
           | WARN  | runner   | Retryable error detected: API Error: 529 |
@@ -54,10 +54,10 @@ Feature: Claude Retry Loop Retryable
 
     Same retry shape, different pattern. Catches the generic upstream message where the API returned a 500-class error without the literal "API Error:" prefix.
 
-    Given The darmok plugin gen-from-existing goal claude /rgr-green command is executed and successful after retries
+    Given The darmok plugin gen-from-existing goal claude /rgr-green command is executed and succeeds with
           | Pattern               |
           | Internal server error |
-     When The darmok plugin gen-from-existing goal is executed
+     When The darmok plugin gen-from-existing goal is executed and succeeds
      Then The code-prj project darmok.runners.log file will be as follows
           | Level | Category | Content                                         |
           | WARN  | runner   | Retryable error detected: Internal server error |
@@ -68,10 +68,10 @@ Feature: Claude Retry Loop Retryable
 
     Same retry shape, different pattern. Catches the upstream-overload message.
 
-    Given The darmok plugin gen-from-existing goal claude /rgr-green command is executed and successful after retries
+    Given The darmok plugin gen-from-existing goal claude /rgr-green command is executed and succeeds with
           | Pattern    |
           | overloaded |
-     When The darmok plugin gen-from-existing goal is executed
+     When The darmok plugin gen-from-existing goal is executed and succeeds
      Then The code-prj project darmok.runners.log file will be as follows
           | Level | Category | Content                              |
           | WARN  | runner   | Retryable error detected: overloaded |
@@ -82,10 +82,10 @@ Feature: Claude Retry Loop Retryable
 
     Every attempt (up to maxRetries) returns the same retryable pattern. The retry loop logs each detection, the final attempt escalates to ERROR with `Max retries exhausted`, and the goal fails with `rgr-green failed`.
 
-    Given The darmok plugin gen-from-existing goal claude /rgr-green command is executed but fails after reaching retry limit
+    Given The darmok plugin gen-from-existing goal claude /rgr-green command is executed but fails with
           | Pattern        |
           | API Error: 500 |
-     When The darmok plugin gen-from-existing goal is executed
+     When The darmok plugin gen-from-existing goal is executed but fails
      Then The code-prj project darmok.runners.log file will be as follows with this failure
           | Level | Category | Content                                  |
           | ERROR | runner   | Retryable error detected: API Error: 500 |
@@ -96,10 +96,10 @@ Feature: Claude Retry Loop Retryable
 
     Same exhaustion shape, different pattern.
 
-    Given The darmok plugin gen-from-existing goal claude /rgr-green command is executed but fails after reaching retry limit
+    Given The darmok plugin gen-from-existing goal claude /rgr-green command is executed but fails with
           | Pattern        |
           | API Error: 529 |
-     When The darmok plugin gen-from-existing goal is executed
+     When The darmok plugin gen-from-existing goal is executed but fails
      Then The code-prj project darmok.runners.log file will be as follows with this failure
           | Level | Category | Content                                  |
           | ERROR | runner   | Retryable error detected: API Error: 529 |
@@ -110,10 +110,10 @@ Feature: Claude Retry Loop Retryable
 
     Same exhaustion shape, different pattern.
 
-    Given The darmok plugin gen-from-existing goal claude /rgr-green command is executed but fails after reaching retry limit
+    Given The darmok plugin gen-from-existing goal claude /rgr-green command is executed but fails with
           | Pattern               |
           | Internal server error |
-     When The darmok plugin gen-from-existing goal is executed
+     When The darmok plugin gen-from-existing goal is executed but fails
      Then The code-prj project darmok.runners.log file will be as follows with this failure
           | Level | Category | Content                                         |
           | ERROR | runner   | Retryable error detected: Internal server error |
@@ -124,10 +124,10 @@ Feature: Claude Retry Loop Retryable
 
     Same exhaustion shape, different pattern.
 
-    Given The darmok plugin gen-from-existing goal claude /rgr-green command is executed but fails after reaching retry limit
+    Given The darmok plugin gen-from-existing goal claude /rgr-green command is executed but fails with
           | Pattern    |
           | overloaded |
-     When The darmok plugin gen-from-existing goal is executed
+     When The darmok plugin gen-from-existing goal is executed but fails
      Then The code-prj project darmok.runners.log file will be as follows with this failure
           | Level | Category | Content                              |
           | ERROR | runner   | Retryable error detected: overloaded |
@@ -138,10 +138,10 @@ Feature: Claude Retry Loop Retryable
 
     The retry loop lives inside ClaudeRunner, so it applies identically to the green-phase and refactor-phase claude invocations. This Test-Case proves the contract isn't accidentally bound to the green prompt ? with green succeeding normally, the refactor invocation surfaces a retryable pattern on its first attempt and recovers on the second.
 
-    Given The darmok plugin gen-from-existing goal claude /rgr-refactor command is executed and successful after retries
+    Given The darmok plugin gen-from-existing goal claude /rgr-refactor command is executed and succeeds with
           | Pattern        |
           | API Error: 500 |
-     When The darmok plugin gen-from-existing goal is executed
+     When The darmok plugin gen-from-existing goal is executed and succeeds
      Then The code-prj project darmok.runners.log file will be as follows
           | Level | Category | Content                                  |
           | WARN  | runner   | Retryable error detected: API Error: 500 |

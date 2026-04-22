@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 public class GenFromComparisonGoalImpl extends MavenTestObject implements GenFromComparisonGoal {
 
 	@Override
-	public void setExecutedWith(HashMap<String, String> keyMap) {
+	public void setExecutedAndSucceedsWith(HashMap<String, String> keyMap) {
 		executeMojo(GenFromComparisonMojo.class);
 	}
 

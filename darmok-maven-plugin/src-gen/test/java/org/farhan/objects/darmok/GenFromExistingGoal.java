@@ -4,63 +4,17 @@ import java.util.HashMap;
 
 public interface GenFromExistingGoal {
 
-    public void setClaudeRgrGreenCommandExecutedAndSuccessfulAfterRetries(HashMap<String, String> keyMap);
+    public void setClaudeRgrGreenCommandExecutedAndSucceedsWith(HashMap<String, String> keyMap);
 
     public void setClaudeRgrGreenCommandPattern(HashMap<String, String> keyMap);
 
-    public void setClaudeRgrGreenCommandExecutedButFailedNonRetryably(HashMap<String, String> keyMap);
+    public void setClaudeRgrGreenCommandExecutedButFailsWith(HashMap<String, String> keyMap);
 
     public void setClaudeRgrGreenCommandExit(HashMap<String, String> keyMap);
 
     public void setClaudeRgrGreenCommandOutput(HashMap<String, String> keyMap);
 
-    public void setClaudeRgrGreenCommandExecutedButFailsAfterReachingRetryLimit(HashMap<String, String> keyMap);
-
-    public void setClaudeRgrRefactorCommandExecutedAndSuccessfulAfterRetries(HashMap<String, String> keyMap);
-
-    public void setClaudeRgrRefactorCommandPattern(HashMap<String, String> keyMap);
-
-    public void setGitCommandExecutedToReportTheCurrentBranch(HashMap<String, String> keyMap);
-
-    public void setGitCommandGitBranch(HashMap<String, String> keyMap);
-
-    public void setGitCommandExecutedToVerifyTheWorkspaceIsClean(HashMap<String, String> keyMap);
-
-    public void setExecuted(HashMap<String, String> keyMap);
-
-    public void setExecutedWith(HashMap<String, String> keyMap);
-
-    public void setGitBranch(HashMap<String, String> keyMap);
-
-    public void setStage(HashMap<String, String> keyMap);
-
-    public void setModelGreen(HashMap<String, String> keyMap);
-
-    public void setModelRefactor(HashMap<String, String> keyMap);
-
-    public void setMvnAsciidoctorToUmlCommandExecutedButFailed(HashMap<String, String> keyMap);
-
-    public void setMvnAsciidoctorToUmlCommandExit(HashMap<String, String> keyMap);
-
-    public void setMvnAsciidoctorToUmlCommandOutput(HashMap<String, String> keyMap);
-
-    public void setMvnTestCommandExecutedButFailed(HashMap<String, String> keyMap);
-
-    public void setMvnTestCommandExit(HashMap<String, String> keyMap);
-
-    public void setMvnTestCommandOutput(HashMap<String, String> keyMap);
-
-    public void setMvnUmlToCucumberGuiceCommandExecutedButFailed(HashMap<String, String> keyMap);
-
-    public void setMvnUmlToCucumberGuiceCommandExit(HashMap<String, String> keyMap);
-
-    public void setMvnUmlToCucumberGuiceCommandOutput(HashMap<String, String> keyMap);
-
-    public void setMvnCleanVerifyCommandExecutedButFailsForAllAttempts(HashMap<String, String> keyMap);
-
-    public void setMvnCleanVerifyCommandPhase(HashMap<String, String> keyMap);
-
-    public void setMvnCleanVerifyCommandExecutedButFailsOnceThenSucceeds(HashMap<String, String> keyMap);
+    public void setClaudeRgrGreenCommandExitedButItsStdoutStaysOpen(HashMap<String, String> keyMap);
 
     public void setClaudeRgrGreenCommandHungOnEveryCall(HashMap<String, String> keyMap);
 
@@ -68,13 +22,45 @@ public interface GenFromExistingGoal {
 
     public void setClaudeRgrGreenCommandHungUntilKilled(HashMap<String, String> keyMap);
 
+    public void setClaudeRgrRefactorCommandExecutedAndSucceedsWith(HashMap<String, String> keyMap);
+
+    public void setClaudeRgrRefactorCommandPattern(HashMap<String, String> keyMap);
+
     public void setClaudeRgrRefactorCommandHungOnEveryCall(HashMap<String, String> keyMap);
 
     public void setClaudeRgrRefactorCommandHungOnFirstCallThenCompletedOnResume(HashMap<String, String> keyMap);
 
+    public void setGitCommandExecutedAndSucceedsWith(HashMap<String, String> keyMap);
+
+    public void setGitCommandCommandParameters(HashMap<String, String> keyMap);
+
+    public void setGitCommandGitBranch(HashMap<String, String> keyMap);
+
+    public void setExecutedAndSucceeds(HashMap<String, String> keyMap);
+
+    public void setExecutedAndSucceedsWith(HashMap<String, String> keyMap);
+
+    public void setGitBranch(HashMap<String, String> keyMap);
+
     public void setMaxClaudeSeconds(HashMap<String, String> keyMap);
 
     public void setMaxTimeoutAttempts(HashMap<String, String> keyMap);
+
+    public void setStage(HashMap<String, String> keyMap);
+
+    public void setModelGreen(HashMap<String, String> keyMap);
+
+    public void setModelRefactor(HashMap<String, String> keyMap);
+
+    public void setExecutedButFails(HashMap<String, String> keyMap);
+
+    public void setExecutedButFailsWith(HashMap<String, String> keyMap);
+
+    public void setMvnAsciidoctorToUmlCommandExecutedButFailed(HashMap<String, String> keyMap);
+
+    public void setMvnAsciidoctorToUmlCommandExit(HashMap<String, String> keyMap);
+
+    public void setMvnAsciidoctorToUmlCommandOutput(HashMap<String, String> keyMap);
 
     public void setMvnCleanInstallCommandExecutedAndFailsOnEveryCallInTheGreenPhase(HashMap<String, String> keyMap);
 
@@ -88,5 +74,21 @@ public interface GenFromExistingGoal {
 
     public void setMvnCleanInstallCommandExecutedAndFailsThenPassesInTheRefactorPhase(HashMap<String, String> keyMap);
 
-    public void setClaudeRgrGreenCommandExitedButItsStdoutStaysOpen(HashMap<String, String> keyMap);
+    public void setMvnCleanVerifyCommandExecutedButFailsForAllAttempts(HashMap<String, String> keyMap);
+
+    public void setMvnCleanVerifyCommandPhase(HashMap<String, String> keyMap);
+
+    public void setMvnCleanVerifyCommandExecutedButFailsOnceThenSucceeds(HashMap<String, String> keyMap);
+
+    public void setMvnTestCommandExecutedButFailed(HashMap<String, String> keyMap);
+
+    public void setMvnTestCommandExit(HashMap<String, String> keyMap);
+
+    public void setMvnTestCommandOutput(HashMap<String, String> keyMap);
+
+    public void setMvnUmlToCucumberGuiceCommandExecutedButFailed(HashMap<String, String> keyMap);
+
+    public void setMvnUmlToCucumberGuiceCommandExit(HashMap<String, String> keyMap);
+
+    public void setMvnUmlToCucumberGuiceCommandOutput(HashMap<String, String> keyMap);
 }

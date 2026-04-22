@@ -29,7 +29,7 @@ Feature: Phase Timeout
     The first claude invocation hangs past the 1-second timeout and gets destroyed. The killed session happens to have produced working code, so the first `mvn clean install` returns 0 and Darmok treats the phase as complete ? no resume is needed, and control flows into the 155 verify loop exactly as if claude had returned 0. Refactor runs its normal claude call within the timeout.
 
     Given The darmok plugin gen-from-existing goal claude /rgr-green command is hung until killed
-     When The darmok plugin gen-from-existing goal is executed with
+     When The darmok plugin gen-from-existing goal is executed and succeeds with
           | MaxClaudeSeconds | MaxTimeoutAttempts |
           | 1                | 2                  |
      Then The code-prj project darmok.mojo.log file will be as follows
@@ -54,7 +54,7 @@ Feature: Phase Timeout
           | Attempt | Exit |
           | 1       | 1    |
           | 2       | 0    |
-     When The darmok plugin gen-from-existing goal is executed with
+     When The darmok plugin gen-from-existing goal is executed and succeeds with
           | MaxClaudeSeconds | MaxTimeoutAttempts |
           | 1                | 2                  |
      Then The code-prj project darmok.mojo.log file will be as follows
@@ -76,7 +76,7 @@ Feature: Phase Timeout
 
     Given The darmok plugin gen-from-existing goal claude /rgr-green command is hung on every call
     Given The darmok plugin gen-from-existing goal mvn clean install command is executed and fails on every call in the green phase
-     When The darmok plugin gen-from-existing goal is executed with
+     When The darmok plugin gen-from-existing goal is executed but fails with
           | MaxClaudeSeconds | MaxTimeoutAttempts |
           | 1                | 2                  |
      Then The code-prj project src/main/java/org/farhan/objects/LoginHappyPath.java file will be absent
@@ -94,7 +94,7 @@ Feature: Phase Timeout
           | Attempt | Exit |
           | 1       | 1    |
           | 2       | 0    |
-     When The darmok plugin gen-from-existing goal is executed with
+     When The darmok plugin gen-from-existing goal is executed and succeeds with
           | MaxClaudeSeconds | MaxTimeoutAttempts |
           | 1                | 2                  |
      Then The code-prj project darmok.mojo.log file will be as follows
@@ -117,7 +117,7 @@ Feature: Phase Timeout
 
     Given The darmok plugin gen-from-existing goal claude /rgr-refactor command is hung on every call
     Given The darmok plugin gen-from-existing goal mvn clean install command is executed and fails on every call in the refactor phase
-     When The darmok plugin gen-from-existing goal is executed with
+     When The darmok plugin gen-from-existing goal is executed but fails with
           | MaxClaudeSeconds | MaxTimeoutAttempts |
           | 1                | 2                  |
      Then The code-prj project darmok.mojo.log file will be as follows with this failure
@@ -130,7 +130,7 @@ Feature: Phase Timeout
     Covers issue 290. The claude subprocess signals exit promptly (`process.waitFor` returns true within the budget) but a grandchild keeps the stdout pipe open past `maxClaudeSeconds`. Without a bounded wait on the stdout-reader thread, the main thread would sit in `readerThread.join()` for the grandchild's full runtime. The bounded `readerThread.join(maxClaudeSeconds * 1000L)` forces the reader half of `executeCommand` to honour the same budget as the process-handle half ? on timeout we `destroyForcibly()` to release the pipe and treat the call as a timeout, so the phase runs the normal install-check recovery.
 
     Given The darmok plugin gen-from-existing goal claude /rgr-green command is exited but its stdout stays open
-     When The darmok plugin gen-from-existing goal is executed with
+     When The darmok plugin gen-from-existing goal is executed and succeeds with
           | MaxClaudeSeconds | MaxTimeoutAttempts |
           | 1                | 2                  |
      Then The code-prj project darmok.mojo.log file will be as follows

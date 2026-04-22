@@ -26,7 +26,7 @@ Feature: Phase Verification
 
     Default happy path for the green phase. Claude generates a correct impl, `mvn clean verify` passes on the first try, and the scenario proceeds into refactor. Pins down the new `Green: Verify running` log line and the `mvn clean verify` subprocess so a regression that drops the verify sub-step is caught explicitly, not just implied by Run RGR Full Cycle's phase-level assertions.
 
-     When The darmok plugin gen-from-existing goal is executed
+     When The darmok plugin gen-from-existing goal is executed and succeeds
      Then The code-prj project darmok.mojo.log file will be as follows
           | Level | Category | Content                  |
           | INFO  | mojo     | Green: Running...        |
@@ -41,7 +41,7 @@ Feature: Phase Verification
 
     Symmetric with the green-verify happy-path case. Confirms verify runs inside refactor too ? the sub-step is not accidentally bound to green.
 
-     When The darmok plugin gen-from-existing goal is executed
+     When The darmok plugin gen-from-existing goal is executed and succeeds
      Then The code-prj project darmok.mojo.log file will be as follows
           | Level | Category | Content                     |
           | INFO  | mojo     | Refactor: Running...        |
@@ -59,7 +59,7 @@ Feature: Phase Verification
     Given The darmok plugin gen-from-existing goal mvn clean verify command is executed but fails once then succeeds
           | Phase |
           | Green |
-     When The darmok plugin gen-from-existing goal is executed
+     When The darmok plugin gen-from-existing goal is executed and succeeds
      Then The code-prj project darmok.mojo.log file will be as follows
           | Level | Category | Content                                                |
           | INFO  | mojo     | Green: Verify running...                               |
@@ -79,7 +79,7 @@ Feature: Phase Verification
     Given The darmok plugin gen-from-existing goal mvn clean verify command is executed but fails for all attempts
           | Phase |
           | Green |
-     When The darmok plugin gen-from-existing goal is executed
+     When The darmok plugin gen-from-existing goal is executed but fails
      Then The code-prj project darmok.mojo.log file will be as follows with this failure
           | Level | Category | Content                                                |
           | INFO  | mojo     | Green: Verify running...                               |
@@ -96,7 +96,7 @@ Feature: Phase Verification
     Given The darmok plugin gen-from-existing goal mvn clean verify command is executed but fails once then succeeds
           | Phase    |
           | Refactor |
-     When The darmok plugin gen-from-existing goal is executed
+     When The darmok plugin gen-from-existing goal is executed and succeeds
      Then The code-prj project darmok.mojo.log file will be as follows
           | Level | Category | Content                                                   |
           | INFO  | mojo     | Refactor: Verify running...                               |
@@ -116,7 +116,7 @@ Feature: Phase Verification
     Given The darmok plugin gen-from-existing goal mvn clean verify command is executed but fails for all attempts
           | Phase    |
           | Refactor |
-     When The darmok plugin gen-from-existing goal is executed
+     When The darmok plugin gen-from-existing goal is executed but fails
      Then The code-prj project darmok.mojo.log file will be as follows with this failure
           | Level | Category | Content                                                   |
           | INFO  | mojo     | Refactor: Verify running...                               |
