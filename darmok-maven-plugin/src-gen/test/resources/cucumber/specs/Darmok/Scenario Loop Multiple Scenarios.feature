@@ -1,5 +1,5 @@
 @darmok-maven-plugin
-Feature: Run RGR Multiple Scenarios
+Feature: Scenario Loop Multiple Scenarios
 
   \@darmok-maven-plugin
   The scenarios-list can hold multiple entries, and Darmok processes them one at a time in file order.

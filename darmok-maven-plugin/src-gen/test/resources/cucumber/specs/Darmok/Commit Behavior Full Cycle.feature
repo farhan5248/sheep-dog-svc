@@ -1,5 +1,5 @@
 @darmok-maven-plugin
-Feature: Run RGR Full Cycle
+Feature: Commit Behavior Full Cycle
 
   \@darmok-maven-plugin
   The full red / green / refactor cycle on a single scenario with stage false, producing three separate commits.

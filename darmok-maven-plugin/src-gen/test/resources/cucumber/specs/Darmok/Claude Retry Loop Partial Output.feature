@@ -1,5 +1,5 @@
 @darmok-maven-plugin
-Feature: Run RGR With Partial Claude Output
+Feature: Claude Retry Loop Partial Output
 
   \@darmok-maven-plugin
   ClaudeRunner mirrors subprocess stdout to the runner log even when the subprocess then exits non-zero. Streamed reading doesn't drop data just because the exit was a failure ? the partial output that preceded the failure is preserved, followed by the failure marker. This preserves diagnostic context when investigating claude failures after the fact. (Multi-line order preservation is not verified here because asciidoc Given-table rows each trigger one setter call and the Output setter overwrites; a multi-row-accumulating setter or explicit text-block Given would be needed to assert order.)

@@ -1,5 +1,5 @@
 @darmok-maven-plugin
-Feature: Run RGR With Tag Handling
+Feature: Tag Insertion Tag Handling
 
   \@darmok-maven-plugin
   Before the Red phase, Darmok inserts the scenario's tag into the target asciidoc file's `Test-Case` block.

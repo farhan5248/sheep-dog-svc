@@ -1,5 +1,5 @@
 @darmok-maven-plugin
-Feature: Run RGR With Claude Failure
+Feature: Claude Retry Loop Non-Retryable
 
   \@darmok-maven-plugin
   When the claude command exits non-zero with output that does not match any RETRYABLE_PATTERN, ClaudeRunner treats the failure as non-retryable: a single attempt, no sleep, no retry markers, the failing exit code propagated. Three variants are documented ? an exit-1 that looks retryable-ish but doesn't match (e.g. "500 Server Error" without the "API Error:" prefix), and the two common process-signal exits (137 SIGKILL, 130 SIGINT).

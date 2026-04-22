@@ -1,5 +1,5 @@
 @darmok-maven-plugin
-Feature: Run RGR With Missing Asciidoc File
+Feature: Tag Insertion Missing File
 
   \@darmok-maven-plugin
   The scenarios-list references an asciidoc file by path, and Darmok assumes that file exists on disk before the Red phase runs.

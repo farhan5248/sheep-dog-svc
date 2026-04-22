@@ -1,5 +1,5 @@
 @darmok-maven-plugin
-Feature: Run RGR With Phase Verification
+Feature: Phase Verification
 
   \@darmok-maven-plugin
   Verify is the deterministic sub-step that guards each non-deterministic claude phase. After claude `/rgr-green` returns 0 darmok runs `mvn clean verify` on the target project; if it fails, darmok resumes the same claude session with the literal message `mvn clean verify failures should be fixed` and re-runs verify, bounded by `maxVerifyAttempts` (default 3). The refactor phase carries the same verify + resume loop. These Test-Cases pin down the observable contract of that loop ? the new phase-verify log lines, the `claude --resume` subprocess, and the failure message when the loop exhausts. Refactor-phase cases are symmetric with green-phase cases and prove the loop is phase-parametric, not bolted to green.

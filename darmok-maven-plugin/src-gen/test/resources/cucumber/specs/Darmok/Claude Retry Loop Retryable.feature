@@ -1,5 +1,5 @@
 @darmok-maven-plugin
-Feature: Run RGR With Claude Retries
+Feature: Claude Retry Loop Retryable
 
   \@darmok-maven-plugin
   Claude's subprocess-level retry loop activates when stdout matches one of four known transient-failure patterns: `API Error: 500`, `API Error: 529`, `Internal server error`, `overloaded`. Each pattern is covered twice ? once where a later retry recovers, once where all attempts exhaust ? plus one variant proving the same retry loop applies to the refactor-phase claude invocation, not just the green-phase one.

@@ -11,9 +11,9 @@ import org.junit.platform.suite.api.Suite;
 
 @Suite
 @IncludeEngines("cucumber")
-@SelectClasspathResource("cucumber/specs/Darmok/Run RGR With Claude Retries.feature")
+@SelectClasspathResource("cucumber/specs/Darmok/Red Phase Already Passing.feature")
 @ConfigurationParameter(key = PLUGIN_PROPERTY_NAME, value = "pretty")
 @ConfigurationParameter(key = GLUE_PROPERTY_NAME, value = "org.farhan")
 @IncludeTags("darmok-maven-plugin")
-public class RunRgrWithClaudeRetriesTest {
+public class RedPhaseAlreadyPassingTest {
 }

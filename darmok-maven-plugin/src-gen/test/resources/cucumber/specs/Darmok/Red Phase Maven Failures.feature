@@ -1,5 +1,5 @@
 @darmok-maven-plugin
-Feature: Run RGR With Maven Failures
+Feature: Red Phase Maven Failures
 
   \@darmok-maven-plugin
   During the red phase Darmok invokes three maven commands in sequence: `asciidoctor-to-uml`, `uml-to-cucumber-guice`, and `test`. Today only the final `mvn test` exit code drives the red-phase return value. Non-zero exits from the earlier two commands are captured in the runner log but don't halt red ? the failure is visible, just not acted on. This Test-Suite pins that current behavior across the three failure points so a future change to halt on intermediate failures surfaces as an expected test break.

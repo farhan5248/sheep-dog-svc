@@ -11,9 +11,9 @@ import org.junit.platform.suite.api.Suite;
 
 @Suite
 @IncludeEngines("cucumber")
-@SelectClasspathResource("cucumber/specs/Darmok/Run RGR With Claude Failure.feature")
+@SelectClasspathResource("cucumber/specs/Darmok/Tag Insertion Missing File.feature")
 @ConfigurationParameter(key = PLUGIN_PROPERTY_NAME, value = "pretty")
 @ConfigurationParameter(key = GLUE_PROPERTY_NAME, value = "org.farhan")
 @IncludeTags("darmok-maven-plugin")
-public class RunRgrWithClaudeFailureTest {
+public class TagInsertionMissingFileTest {
 }

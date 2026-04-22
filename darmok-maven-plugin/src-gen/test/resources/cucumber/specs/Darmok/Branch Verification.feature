@@ -1,5 +1,5 @@
 @darmok-maven-plugin
-Feature: Run RGR With Branch Verification
+Feature: Branch Verification
 
   \@darmok-maven-plugin
   Each Darmok run declares which branch it was configured for via the `gitBranch` parameter. That name is written to the `git_branch` column of every `metrics.csv` row the run produces, so the SPC dashboard can colour and filter points by run. Init verifies the declared branch against the current git HEAD before any scenario work begins: if the parameter is unset, or if it disagrees with `git rev-parse --abbrev-ref HEAD`, the goal logs an ERROR to the mojo log and aborts. This makes it impossible to silently produce commits on the wrong branch and pollute the SPC dataset with mislabelled points.

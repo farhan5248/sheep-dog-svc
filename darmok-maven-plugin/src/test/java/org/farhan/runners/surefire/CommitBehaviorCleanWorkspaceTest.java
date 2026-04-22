@@ -11,9 +11,9 @@ import org.junit.platform.suite.api.Suite;
 
 @Suite
 @IncludeEngines("cucumber")
-@SelectClasspathResource("cucumber/specs/Darmok/Run RGR With Missing Asciidoc File.feature")
+@SelectClasspathResource("cucumber/specs/Darmok/Commit Behavior Clean Workspace.feature")
 @ConfigurationParameter(key = PLUGIN_PROPERTY_NAME, value = "pretty")
 @ConfigurationParameter(key = GLUE_PROPERTY_NAME, value = "org.farhan")
 @IncludeTags("darmok-maven-plugin")
-public class RunRgrWithMissingAsciidocFileTest {
+public class CommitBehaviorCleanWorkspaceTest {
 }

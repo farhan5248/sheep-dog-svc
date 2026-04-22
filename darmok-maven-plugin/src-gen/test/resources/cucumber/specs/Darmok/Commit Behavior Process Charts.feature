@@ -1,5 +1,5 @@
 @darmok-maven-plugin
-Feature: Run RGR For Process Charts
+Feature: Commit Behavior Process Charts
 
   \@darmok-maven-plugin
   Darmok runs are governed by process behaviour charts (Shewhart / XmR). The cycle time of each scenario becomes one data point on the chart; the chart surfaces whether a slow or fast run sits within the process's natural variation (common cause) or outside it (special cause, demanding investigation).

@@ -1,5 +1,5 @@
 @darmok-maven-plugin
-Feature: Run RGR Multiple Runs Same Day
+Feature: Init and Cleanup
 
   \@darmok-maven-plugin
   Each Darmok invocation writes to the same dated log file (`darmok.mojo.<date>.log` / `darmok.runners.<date>.log`).

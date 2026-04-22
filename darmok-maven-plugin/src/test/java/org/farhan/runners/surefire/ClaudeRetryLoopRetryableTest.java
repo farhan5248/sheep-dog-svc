@@ -11,9 +11,9 @@ import org.junit.platform.suite.api.Suite;
 
 @Suite
 @IncludeEngines("cucumber")
-@SelectClasspathResource("cucumber/specs/Darmok/Run RGR Multiple Scenarios.feature")
+@SelectClasspathResource("cucumber/specs/Darmok/Claude Retry Loop Retryable.feature")
 @ConfigurationParameter(key = PLUGIN_PROPERTY_NAME, value = "pretty")
 @ConfigurationParameter(key = GLUE_PROPERTY_NAME, value = "org.farhan")
 @IncludeTags("darmok-maven-plugin")
-public class RunRgrMultipleScenariosTest {
+public class ClaudeRetryLoopRetryableTest {
 }

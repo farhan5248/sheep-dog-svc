@@ -1,5 +1,5 @@
 @darmok-maven-plugin
-Feature: Run RGR With Phase Timeout
+Feature: Phase Timeout
 
   \@darmok-maven-plugin
   Each claude call inside the green and refactor phases is bounded by maxClaudeSeconds (default 720, i.e. 12 min ? the number comes from the UCL of the per-scenario runtime distribution on the SPC dashboard). When the timer fires, Darmok destroys the subprocess, then runs `mvn clean install` on the target project to decide whether the killed session produced usable code: install passing means the claude call is treated as having completed cleanly; install failing means the session is resumed with the literal message `pls continue` and install is re-checked. The loop is bounded by maxTimeoutAttempts (default 2). Timeout recovery sits between the claude call and the 155 verify loop, so a recovered phase still runs verify on top.

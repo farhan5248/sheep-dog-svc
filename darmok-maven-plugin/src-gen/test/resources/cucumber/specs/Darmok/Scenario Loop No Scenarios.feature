@@ -1,5 +1,5 @@
 @darmok-maven-plugin
-Feature: Run RGR With No Scenarios
+Feature: Scenario Loop No Scenarios
 
   \@darmok-maven-plugin
   When Darmok is invoked against a project where no work is queued, the goal completes without entering the Red / Green / Refactor loop.

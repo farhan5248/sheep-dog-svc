@@ -11,9 +11,9 @@ import org.junit.platform.suite.api.Suite;
 
 @Suite
 @IncludeEngines("cucumber")
-@SelectClasspathResource("cucumber/specs/Darmok/Run RGR With Clean Workspace.feature")
+@SelectClasspathResource("cucumber/specs/Darmok/Scenario Loop Multiple Scenarios.feature")
 @ConfigurationParameter(key = PLUGIN_PROPERTY_NAME, value = "pretty")
 @ConfigurationParameter(key = GLUE_PROPERTY_NAME, value = "org.farhan")
 @IncludeTags("darmok-maven-plugin")
-public class RunRgrWithCleanWorkspaceTest {
+public class ScenarioLoopMultipleScenariosTest {
 }

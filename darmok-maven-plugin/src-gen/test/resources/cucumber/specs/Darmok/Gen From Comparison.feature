@@ -1,5 +1,5 @@
 @darmok-maven-plugin
-Feature: Run Gen From Comparison
+Feature: Gen From Comparison
 
   \@darmok-maven-plugin
   The `gen-from-comparison` goal invokes the `/rgr-gen-from-comparison` Claude skill before each scenario-processing iteration.
