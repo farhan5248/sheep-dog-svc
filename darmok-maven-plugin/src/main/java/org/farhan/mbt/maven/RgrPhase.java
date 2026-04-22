@@ -35,13 +35,23 @@ public abstract class RgrPhase {
 
 	protected abstract boolean requiresVerifyLoop();
 
+	/**
+	 * Suffix appended to the "Running"/"Completed" log lines naming what the phase is
+	 * driving — Red drives maven, so its log lines say "Red: Running maven...". Green
+	 * and Refactor drive claude with no extra suffix.
+	 */
+	protected String workSuffix() {
+		return "";
+	}
+
 	public DarmokMojoState run(DarmokMojoState state) throws Exception {
 		String name = phase().displayName;
-		mojoLog.info("  " + name + ": Running...");
+		String suffix = workSuffix();
+		mojoLog.info("  " + name + ": Running" + suffix + "...");
 		long start = System.currentTimeMillis();
 		int exitCode = executeClaudeOrMaven(state);
 		long duration = System.currentTimeMillis() - start;
-		mojoLog.info("  " + name + ": Completed (" + DarmokMojoState.formatDuration(duration) + ")");
+		mojoLog.info("  " + name + ": Completed" + suffix + " (" + DarmokMojoState.formatDuration(duration) + ")");
 		if (exitCode == 0 && requiresVerifyLoop()) {
 			runVerifyLoop();
 			duration = System.currentTimeMillis() - start;

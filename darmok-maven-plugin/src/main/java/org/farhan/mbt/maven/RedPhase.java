@@ -30,6 +30,11 @@ public class RedPhase extends RgrPhase {
 	}
 
 	@Override
+	protected String workSuffix() {
+		return " maven";
+	}
+
+	@Override
 	protected int executeClaudeOrMaven(DarmokMojoState state) throws Exception {
 		String pattern = state.tag;
 		String runnerClassName = pattern + "Test";
