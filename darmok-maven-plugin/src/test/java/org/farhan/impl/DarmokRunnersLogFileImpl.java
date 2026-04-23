@@ -39,16 +39,36 @@ public class DarmokRunnersLogFileImpl extends MavenTestObject implements DarmokR
 
 	@Override
 	public String getLevel(HashMap<String, String> keyMap) {
-		return getDarmokMojoLog("darmok.runners").matchAndGetLevel(keyMap);
+		String uuid = this.toString();
+		setUuidProperty(uuid, "default", getDarmokMojoLog("darmok.runners").matchAndGetLevel(keyMap));
+		if (isInvocationRow(keyMap)) {
+			setUuidProperty(uuid, "eventlog", getDarmokMojoLog("mojo.event").matchAndGetLevel(keyMap));
+		}
+		return uuid;
 	}
 
 	@Override
 	public String getCategory(HashMap<String, String> keyMap) {
-		return getDarmokMojoLog("darmok.runners").matchAndGetCategory(keyMap);
+		String uuid = this.toString();
+		setUuidProperty(uuid, "default", getDarmokMojoLog("darmok.runners").matchAndGetCategory(keyMap));
+		if (isInvocationRow(keyMap)) {
+			setUuidProperty(uuid, "eventlog", getDarmokMojoLog("mojo.event").matchAndGetCategory(keyMap));
+		}
+		return uuid;
 	}
 
 	@Override
 	public String getContent(HashMap<String, String> keyMap) {
-		return getDarmokMojoLog("darmok.runners").matchAndGetContent(keyMap);
+		String uuid = this.toString();
+		setUuidProperty(uuid, "default", getDarmokMojoLog("darmok.runners").matchAndGetContent(keyMap));
+		if (isInvocationRow(keyMap)) {
+			setUuidProperty(uuid, "eventlog", getDarmokMojoLog("mojo.event").matchAndGetContent(keyMap));
+		}
+		return uuid;
+	}
+
+	private static boolean isInvocationRow(HashMap<String, String> keyMap) {
+		String content = keyMap.get("Content");
+		return content != null && content.startsWith("Running:");
 	}
 }

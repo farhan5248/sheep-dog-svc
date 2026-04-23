@@ -1,7 +1,13 @@
 package org.farhan.fake;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -64,6 +70,8 @@ public class FakeProcessStarter implements ProcessStarter {
 	private final String mvnInstallModeGreen;
 	private final String mvnInstallModeRefactor;
 	private final Path codePrjBaseDir;
+	private final Path eventLogPath;
+	private static final DateTimeFormatter EVENT_LOG_TS = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
 
 	private int greenCalls = 0;
 	private int refactorCalls = 0;
@@ -102,12 +110,15 @@ public class FakeProcessStarter implements ProcessStarter {
 		this.mvnInstallModeRefactor = string(properties, "mvnInstallModeRefactor");
 		Object baseDir = properties.get("code-prj.baseDir");
 		this.codePrjBaseDir = baseDir instanceof Path ? (Path) baseDir : null;
+		Object logDir = properties.get("log.dir");
+		this.eventLogPath = logDir instanceof Path p ? p.resolve("mojo.event.log") : null;
 	}
 
 	@Override
 	public Process start(ProcessBuilder pb) {
 		List<String> cmd = pb.command();
 		String joined = String.join(" ", cmd);
+		appendEventLog(joined);
 
 		if (joined.contains("diff") && joined.contains("--cached") && joined.contains("--quiet")) {
 			if ("clean".equals(gitWorkspaceState)) {
@@ -219,6 +230,19 @@ public class FakeProcessStarter implements ProcessStarter {
 		}
 
 		return new FakeProcess("", 0);
+	}
+
+	private void appendEventLog(String joinedCmd) {
+		if (eventLogPath == null) return;
+		String line = LocalDateTime.now().format(EVENT_LOG_TS)
+			+ " DEBUG [runner] Running: " + joinedCmd + System.lineSeparator();
+		try {
+			Files.createDirectories(eventLogPath.getParent());
+			Files.writeString(eventLogPath, line, StandardCharsets.UTF_8,
+				StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+		} catch (IOException e) {
+			throw new UncheckedIOException(e);
+		}
 	}
 
 	private static boolean shouldHangInitialCall(String hangMode) {

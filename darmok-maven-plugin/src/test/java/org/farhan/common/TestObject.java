@@ -3,7 +3,9 @@ package org.farhan.common;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.lang.reflect.Field;
 import java.time.format.DateTimeFormatter;
 import java.util.Set;
@@ -204,39 +206,41 @@ public abstract class TestObject {
                         if (TestState.Any.name().equals(expectedValue)) {
                             continue;
                         }
-                        String actual = returnValue == null ? null : returnValue.toString();
-                        if (TestState.Timestamp.name().equals(expectedValue)) {
-                            try {
-                                DateTimeFormatter.ofPattern(TestState.Timestamp.value()).parse(actual);
-                            } catch (Exception e) {
-                                Assertions.fail("Expected Timestamp format but got: " + actual);
+                        Map<String, String> actualByStore = toStoreMap(returnValue);
+                        for (String actual : actualByStore.values()) {
+                            if (TestState.Timestamp.name().equals(expectedValue)) {
+                                try {
+                                    DateTimeFormatter.ofPattern(TestState.Timestamp.value()).parse(actual);
+                                } catch (Exception e) {
+                                    Assertions.fail("Expected Timestamp format but got: " + actual);
+                                }
+                                continue;
                             }
-                            continue;
-                        }
-                        if (TestState.Milliseconds.name().equals(expectedValue)) {
-                            if (actual == null || !actual.matches(TestState.Milliseconds.value())) {
-                                Assertions.fail("Expected Milliseconds format but got: " + actual);
+                            if (TestState.Milliseconds.name().equals(expectedValue)) {
+                                if (actual == null || !actual.matches(TestState.Milliseconds.value())) {
+                                    Assertions.fail("Expected Milliseconds format but got: " + actual);
+                                }
+                                continue;
                             }
-                            continue;
-                        }
-                        if (fieldName.equals("State") && TestState.contains(expectedValue)) {
-                            String mappedActual;
-                            if (actual == null)
-                                mappedActual = TestState.Absent.name();
-                            else if (actual.isEmpty())
-                                mappedActual = TestState.Empty.name();
-                            else
-                                mappedActual = TestState.Present.name();
-                            if (negativeTest) {
-                                Assertions.assertNotEquals(expectedValue, mappedActual);
+                            if (fieldName.equals("State") && TestState.contains(expectedValue)) {
+                                String mappedActual;
+                                if (actual == null)
+                                    mappedActual = TestState.Absent.name();
+                                else if (actual.isEmpty())
+                                    mappedActual = TestState.Empty.name();
+                                else
+                                    mappedActual = TestState.Present.name();
+                                if (negativeTest) {
+                                    Assertions.assertNotEquals(expectedValue, mappedActual);
+                                } else {
+                                    Assertions.assertEquals(expectedValue, mappedActual);
+                                }
                             } else {
-                                Assertions.assertEquals(expectedValue, mappedActual);
-                            }
-                        } else {
-                            if (negativeTest) {
-                                Assertions.assertNotEquals(expectedValue, actual);
-                            } else {
-                                Assertions.assertEquals(expectedValue, actual);
+                                if (negativeTest) {
+                                    Assertions.assertNotEquals(expectedValue, actual);
+                                } else {
+                                    Assertions.assertEquals(expectedValue, actual);
+                                }
                             }
                         }
                     }
@@ -274,6 +278,30 @@ public abstract class TestObject {
         } catch (Exception e) {
             Assertions.fail(e);
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    private static Map<String, String> toStoreMap(Object returnValue) {
+        if (returnValue instanceof String key) {
+            Object maybeStores = properties.get(key);
+            if (maybeStores instanceof Map<?, ?>) {
+                properties.remove(key);
+                return (Map<String, String>) maybeStores;
+            }
+        }
+        Map<String, String> stores = new LinkedHashMap<>();
+        stores.put("default", returnValue == null ? null : returnValue.toString());
+        return stores;
+    }
+
+    @SuppressWarnings("unchecked")
+    protected static void setUuidProperty(String uuid, String store, String value) {
+        Map<String, String> stores = (Map<String, String>) properties.get(uuid);
+        if (stores == null) {
+            stores = new LinkedHashMap<>();
+            properties.put(uuid, stores);
+        }
+        stores.put(store, value);
     }
 
     private static String replaceKeyword(String value) {
