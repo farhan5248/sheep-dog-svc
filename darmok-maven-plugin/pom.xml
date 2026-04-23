@@ -272,6 +272,11 @@
 				<artifactId>sheep-dog-mgmt-maven-plugin</artifactId>
 				<version>1.43</version>
 			</plugin>
+			<plugin>
+				<groupId>org.farhan</groupId>
+				<artifactId>darmok-maven-plugin</artifactId>
+				<version>1.25-SNAPSHOT</version>
+			</plugin>
 		</plugins>
 	</build>
 </project>
