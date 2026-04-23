@@ -146,7 +146,11 @@ public class FakeProcessStarter implements ProcessStarter {
 				return new FakeProcess("", 0).withHang();
 			}
 			if ("retry-success".equals(claudeGreenMode)) {
-				return greenCalls == 1 ? new FakeProcess(orEmpty(claudeGreenPattern), 1) : new FakeProcess("", 0);
+				if (greenCalls == 1) {
+					return new FakeProcess(orEmpty(claudeGreenPattern), 1);
+				}
+				createImplFile(cmd);
+				return new FakeProcess("", 0);
 			}
 			if ("retry-exhaust".equals(claudeGreenMode)) {
 				return new FakeProcess(orEmpty(claudeGreenPattern), 1);
@@ -154,6 +158,7 @@ public class FakeProcessStarter implements ProcessStarter {
 			if ("non-retryable".equals(claudeGreenMode)) {
 				return new FakeProcess(orEmpty(claudeGreenOutput), claudeGreenExit);
 			}
+			createImplFile(cmd);
 			return new FakeProcess("", 0);
 		}
 
@@ -240,6 +245,25 @@ public class FakeProcessStarter implements ProcessStarter {
 			Files.createDirectories(eventLogPath.getParent());
 			Files.writeString(eventLogPath, line, StandardCharsets.UTF_8,
 				StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+		} catch (IOException e) {
+			throw new UncheckedIOException(e);
+		}
+	}
+
+	private void createImplFile(List<String> cmd) {
+		if (codePrjBaseDir == null) return;
+		String rgrGreenArg = cmd.stream()
+			.filter(a -> a.startsWith("/rgr-green"))
+			.findFirst()
+			.orElse("");
+		String[] parts = rgrGreenArg.split(" ");
+		if (parts.length < 3) return;
+		String tag = parts[parts.length - 1];
+		String titleCaseTag = Character.toUpperCase(tag.charAt(0)) + tag.substring(1);
+		Path implFile = codePrjBaseDir.resolve("src/main/java/org/farhan/objects/" + titleCaseTag + ".java");
+		try {
+			Files.createDirectories(implFile.getParent());
+			Files.writeString(implFile, "placeholder", StandardCharsets.UTF_8);
 		} catch (IOException e) {
 			throw new UncheckedIOException(e);
 		}

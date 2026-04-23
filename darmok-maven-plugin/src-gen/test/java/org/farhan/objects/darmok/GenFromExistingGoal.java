@@ -91,4 +91,12 @@ public interface GenFromExistingGoal {
     public void setMvnUmlToCucumberGuiceCommandExit(HashMap<String, String> keyMap);
 
     public void setMvnUmlToCucumberGuiceCommandOutput(HashMap<String, String> keyMap);
+
+    public void setClaudeCommandExecutedAndSucceedsWith(HashMap<String, String> keyMap);
+
+    public void setClaudeCommandCommandParameters(HashMap<String, String> keyMap);
+
+    public void setClaudeCommandAttempt(HashMap<String, String> keyMap);
+
+    public void setClaudeCommandPath(HashMap<String, String> keyMap);
 }

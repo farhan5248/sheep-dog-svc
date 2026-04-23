@@ -1,4 +1,4 @@
-package org.farhan.runners.surefire;
+package org.farhan.impl;
 
 import java.io.IOException;
 import java.nio.file.Files;

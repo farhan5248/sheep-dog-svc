@@ -81,6 +81,9 @@ public abstract class DarmokMojo extends AbstractMojo {
 	// log-collecting processes and must stay their property) so metrics can be routed
 	// independently — e.g. into the Grafana-readable hostPath for SPC dashboards.
 	// Default: project baseDir, so metrics.csv survives `runCleanUp` out of the box.
+	@Parameter(property = "targetProject")
+	public String targetProject;
+
 	@Parameter(property = "metricsDir")
 	public String metricsDir;
 
@@ -114,7 +117,8 @@ public abstract class DarmokMojo extends AbstractMojo {
 		verifyGitBranch();
 		MavenRunner maven = mavenRunnerFactory.create(runnerLog);
 		String sheepDogRoot = baseDir + "/../..";
-		String artifactId = project.getArtifactId();
+		String artifactId = targetProject != null && !targetProject.isEmpty()
+			? targetProject : project.getArtifactId();
 		redPhase = new RedPhase(maven, mojoLog, baseDir, specsDir, host, onlyChanges);
 		greenPhase = new GreenPhase(
 			claudeRunnerFactory.create(runnerLog, modelGreen, maxRetries, retryWaitSeconds, maxClaudeSeconds),
@@ -245,7 +249,9 @@ public abstract class DarmokMojo extends AbstractMojo {
 		} else {
 			// Tests failing — commit red, then run green and refactor
 			git.run(baseDir, "add", ".");
-			if (!stage) {
+			if (stage) {
+				commitIfChanged("run-rgr " + scenarioName, "Red");
+			} else {
 				commitIfChanged("run-rgr red " + scenarioName, "Red");
 			}
 
@@ -266,8 +272,11 @@ public abstract class DarmokMojo extends AbstractMojo {
 			}
 
 			git.run(baseDir, "add", ".");
-			String commitMessage = stage ? "run-rgr " + scenarioName : "run-rgr refactor " + scenarioName;
-			commitIfChanged(commitMessage, "Refactor");
+			if (stage) {
+				amendIfChanged("Refactor");
+			} else {
+				commitIfChanged("run-rgr refactor " + scenarioName, "Refactor");
+			}
 		}
 
 		// Capture the HEAD commit AFTER all scenario commits have been made.
@@ -287,6 +296,14 @@ public abstract class DarmokMojo extends AbstractMojo {
 			String commitMsg = message + "\n\nCo-Authored-By: " + coAuthor;
 			mojoLog.info("  " + phase + ": Committing");
 			git.run(baseDir, "commit", "-m", commitMsg);
+		}
+	}
+
+	private void amendIfChanged(String phase) throws Exception {
+		int diffQuietExit = git.run(baseDir, "diff", "--cached", "--quiet");
+		if (diffQuietExit != 0) {
+			mojoLog.info("  " + phase + ": Committing");
+			git.run(baseDir, "commit", "--amend", "--no-edit");
 		}
 	}
 

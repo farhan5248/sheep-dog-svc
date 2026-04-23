@@ -1,3 +1,0 @@
-File: Darmok/Commit Behavior Full Cycle
-  Scenario: Red fails, green and refactor succeed, single combined commit
-    Tag: GH141

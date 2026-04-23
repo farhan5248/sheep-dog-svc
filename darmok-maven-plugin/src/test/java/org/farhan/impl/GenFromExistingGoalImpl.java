@@ -140,6 +140,7 @@ public class GenFromExistingGoalImpl extends MavenTestObject implements GenFromE
 	@Override
 	public void setStage(HashMap<String, String> keyMap) {
 		setProperty("stage", keyMap.get("Stage"));
+		setProperty("targetProject", "darmok-prj");
 	}
 
 	@Override
