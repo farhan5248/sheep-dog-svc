@@ -38,6 +38,7 @@ public abstract class TestObject {
     public enum TestState {
         Absent(null), Empty(""), Present(null), Any(null),
         Timestamp("yyyy-MM-dd'T'HH:mm:ss.SSS"),
+        TimestampTz("yyyy-MM-dd'T'HH:mm:ss.SSSXXX"),
         Milliseconds("[0-9]+");
 
         private final String value;
@@ -213,6 +214,14 @@ public abstract class TestObject {
                                     DateTimeFormatter.ofPattern(TestState.Timestamp.value()).parse(actual);
                                 } catch (Exception e) {
                                     Assertions.fail("Expected Timestamp format but got: " + actual);
+                                }
+                                continue;
+                            }
+                            if (TestState.TimestampTz.name().equals(expectedValue)) {
+                                try {
+                                    DateTimeFormatter.ofPattern(TestState.TimestampTz.value()).parse(actual);
+                                } catch (Exception e) {
+                                    Assertions.fail("Expected TimestampTz format but got: " + actual);
                                 }
                                 continue;
                             }
