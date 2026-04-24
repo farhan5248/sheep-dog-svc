@@ -39,3 +39,22 @@ Feature: Claude Retry Loop Session ID
           | Level | Category | Content                                                                                                                                                      |
           | DEBUG | runner   | Executing: claude --print --session-id 00000000-0000-0000-0000-000000000001 --dangerously-skip-permissions --model sonnet /rgr-green code-prj loginHappyPath |
 
+  @GH311
+  Scenario: Green verify-fail resume reuses the captured session ID
+
+    \@GH311
+    After a failed `mvn clean verify` the resume call carries `--resume <green-uuid>` where `<green-uuid>` matches the UUID emitted on the initial call ? same UUID across both commands, proving the runner captured and reused it rather than generating a fresh one.
+
+    Given The darmok plugin gen-from-existing goal mvn clean verify command is executed but fails once then succeeds
+          | Phase |
+          | Green |
+     When The darmok plugin gen-from-existing goal is executed and succeeds with
+          | ClaudeSessionIdEnabled |
+          | true                   |
+     Then The code-prj project darmok.runners.log file will be as follows
+          | Level | Category | Content                                                                                                                                                         |
+          | DEBUG | runner   | Executing: claude --print --session-id 00000000-0000-0000-0000-000000000001 --dangerously-skip-permissions --model sonnet /rgr-green code-prj loginHappyPath    |
+          | DEBUG | runner   | Running: mvn clean verify                                                                                                                                       |
+          | DEBUG | runner   | Executing: claude --resume 00000000-0000-0000-0000-000000000001 --print --dangerously-skip-permissions --model sonnet mvn clean verify failures should be fixed |
+          | DEBUG | runner   | Running: mvn clean verify                                                                                                                                       |
+
