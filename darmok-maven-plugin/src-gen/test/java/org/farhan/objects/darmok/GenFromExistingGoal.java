@@ -99,4 +99,6 @@ public interface GenFromExistingGoal {
     public void setClaudeCommandAttempt(HashMap<String, String> keyMap);
 
     public void setClaudeCommandPath(HashMap<String, String> keyMap);
+
+    public void setClaudeSessionIdEnabled(HashMap<String, String> keyMap);
 }

@@ -283,4 +283,9 @@ public class GenFromExistingGoalImpl extends MavenTestObject implements GenFromE
 		setProperty("maxTimeoutAttempts", keyMap.get("MaxTimeoutAttempts"));
 	}
 
+	@Override
+	public void setClaudeSessionIdEnabled(HashMap<String, String> keyMap) {
+		setProperty("claudeSessionIdEnabled", keyMap.get("ClaudeSessionIdEnabled"));
+	}
+
 }

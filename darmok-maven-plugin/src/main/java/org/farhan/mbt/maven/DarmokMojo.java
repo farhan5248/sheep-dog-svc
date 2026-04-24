@@ -8,6 +8,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.UUID;
 
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -72,6 +73,9 @@ public abstract class DarmokMojo extends AbstractMojo {
 	@Parameter(property = "onlyChanges", defaultValue = "true")
 	public boolean onlyChanges;
 
+	@Parameter(property = "claudeSessionIdEnabled", defaultValue = "false")
+	public boolean claudeSessionIdEnabled;
+
 	@Parameter(property = "stage", defaultValue = "true")
 	public boolean stage;
 
@@ -126,11 +130,13 @@ public abstract class DarmokMojo extends AbstractMojo {
 		GitRunner phaseGit = gitRunnerFactory.create(runnerLog);
 		redPhase = new RedPhase(maven, mojoLog, baseDir, specsDir, host, onlyChanges);
 		greenPhase = new GreenPhase(
-			claudeRunnerFactory.create(runnerLog, modelGreen, maxRetries, retryWaitSeconds, maxClaudeSeconds),
+			claudeRunnerFactory.create(runnerLog, modelGreen, maxRetries, retryWaitSeconds, maxClaudeSeconds,
+				claudeSessionIdEnabled, () -> UUID.randomUUID().toString()),
 			maven, phaseGit, mojoLog, sheepDogRoot, baseDir, artifactId, maxVerifyAttempts, maxTimeoutAttempts, maxClaudeSeconds,
 			maxAllowlistAttempts);
 		refactorPhase = new RefactorPhase(
-			claudeRunnerFactory.create(runnerLog, modelRefactor, maxRetries, retryWaitSeconds, maxClaudeSeconds),
+			claudeRunnerFactory.create(runnerLog, modelRefactor, maxRetries, retryWaitSeconds, maxClaudeSeconds,
+				claudeSessionIdEnabled, () -> UUID.randomUUID().toString()),
 			maven, phaseGit, mojoLog, sheepDogRoot, baseDir, artifactId, maxVerifyAttempts, maxTimeoutAttempts, maxClaudeSeconds,
 			maxAllowlistAttempts);
 	}

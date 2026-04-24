@@ -5,7 +5,9 @@ import java.io.File;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 
 import org.apache.maven.plugin.logging.Log;
 
@@ -29,18 +31,24 @@ public class ClaudeRunner extends ProcessRunner {
 	private int retryWaitSeconds;
 	private int maxClaudeSeconds;
 	private String model;
+	private boolean sessionIdEnabled;
+	private Supplier<String> uuidSupplier;
+	private String sessionId;
 
-	public ClaudeRunner(Log log, String model, int maxRetries, int retryWaitSeconds, int maxClaudeSeconds) {
-		this(log, model, maxRetries, retryWaitSeconds, maxClaudeSeconds, ProcessBuilder::start);
+	public ClaudeRunner(Log log, String model, int maxRetries, int retryWaitSeconds, int maxClaudeSeconds,
+			boolean sessionIdEnabled, Supplier<String> uuidSupplier) {
+		this(log, model, maxRetries, retryWaitSeconds, maxClaudeSeconds, sessionIdEnabled, uuidSupplier, ProcessBuilder::start);
 	}
 
 	public ClaudeRunner(Log log, String model, int maxRetries, int retryWaitSeconds, int maxClaudeSeconds,
-			ProcessStarter starter) {
+			boolean sessionIdEnabled, Supplier<String> uuidSupplier, ProcessStarter starter) {
 		super(log, starter);
 		this.model = model;
 		this.maxRetries = maxRetries;
 		this.retryWaitSeconds = retryWaitSeconds;
 		this.maxClaudeSeconds = maxClaudeSeconds;
+		this.sessionIdEnabled = sessionIdEnabled;
+		this.uuidSupplier = uuidSupplier;
 	}
 
 	@Override
@@ -48,6 +56,13 @@ public class ClaudeRunner extends ProcessRunner {
 		List<String> command = new ArrayList<>();
 		command.add(isWindows() ? "claude.cmd" : "claude");
 		command.add("--print");
+		if (sessionIdEnabled) {
+			if (sessionId == null) {
+				sessionId = uuidSupplier.get();
+			}
+			command.add("--session-id");
+			command.add(sessionId);
+		}
 		command.add("--dangerously-skip-permissions");
 		if (model != null && !model.isEmpty()) {
 			command.add("--model");
@@ -109,6 +124,9 @@ public class ClaudeRunner extends ProcessRunner {
 		List<String> command = new ArrayList<>();
 		command.add(isWindows() ? "claude.cmd" : "claude");
 		command.add("--resume");
+		if (sessionIdEnabled && sessionId != null) {
+			command.add(sessionId);
+		}
 		command.add("--print");
 		command.add("--dangerously-skip-permissions");
 		if (model != null && !model.isEmpty()) {

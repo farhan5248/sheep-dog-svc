@@ -1,5 +1,7 @@
 package org.farhan.mbt.maven;
 
+import java.util.UUID;
+
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
@@ -52,7 +54,8 @@ public class GenFromComparisonMojo extends DarmokMojo {
 	}
 
 	private int runGenFromComparison() throws Exception {
-		ClaudeRunner claude = claudeRunnerFactory.create(runnerLog, modelComparison, maxRetries, retryWaitSeconds, maxClaudeSeconds);
+		ClaudeRunner claude = claudeRunnerFactory.create(runnerLog, modelComparison, maxRetries, retryWaitSeconds, maxClaudeSeconds,
+			claudeSessionIdEnabled, () -> UUID.randomUUID().toString());
 		return claude.run(baseDir + "/../..", "/rgr-gen-from-comparison " + project.getArtifactId());
 	}
 }
