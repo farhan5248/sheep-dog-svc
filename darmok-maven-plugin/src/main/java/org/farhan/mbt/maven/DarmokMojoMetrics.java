@@ -6,6 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -21,8 +22,18 @@ public class DarmokMojoMetrics extends DarmokMojoFile<Map<String, String>> {
 	private static final DateTimeFormatter TIMESTAMP =
 		DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS");
 
+	private static final DateTimeFormatter TIMESTAMP_TZ =
+		DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
+
+	private final boolean tzAwareTimestampsEnabled;
+
 	public DarmokMojoMetrics(Path file) {
+		this(file, false);
+	}
+
+	public DarmokMojoMetrics(Path file, boolean tzAwareTimestampsEnabled) {
 		super(file);
+		this.tzAwareTimestampsEnabled = tzAwareTimestampsEnabled;
 	}
 
 	public void append(DarmokMojoState state) throws IOException {
@@ -30,7 +41,10 @@ public class DarmokMojoMetrics extends DarmokMojoFile<Map<String, String>> {
 		if (!Files.exists(file)) {
 			Files.writeString(file, HEADER + "\n", StandardCharsets.UTF_8);
 		}
-		String row = LocalDateTime.now().format(TIMESTAMP) + ","
+		String timestamp = tzAwareTimestampsEnabled
+			? OffsetDateTime.now().format(TIMESTAMP_TZ)
+			: LocalDateTime.now().format(TIMESTAMP);
+		String row = timestamp + ","
 			+ state.gitBranch + ","
 			+ state.commit + ","
 			+ escape(state.scenarioName) + ","

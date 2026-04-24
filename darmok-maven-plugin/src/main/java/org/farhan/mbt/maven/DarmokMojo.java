@@ -79,6 +79,9 @@ public abstract class DarmokMojo extends AbstractMojo {
 	@Parameter(property = "baselineVerifyEnabled", defaultValue = "false")
 	public boolean baselineVerifyEnabled;
 
+	@Parameter(property = "tzAwareTimestampsEnabled", defaultValue = "false")
+	public boolean tzAwareTimestampsEnabled;
+
 	@Parameter(property = "stage", defaultValue = "true")
 	public boolean stage;
 
@@ -249,7 +252,7 @@ public abstract class DarmokMojo extends AbstractMojo {
 		String date = LocalDate.now().toString();
 		mojoLog = new DarmokMojoLog(getLog(), "mojo", logDir.resolve("darmok.mojo." + date + ".log"));
 		runnerLog = new DarmokMojoLog(getLog(), "runner", logDir.resolve("darmok.runners." + date + ".log"));
-		metrics = new DarmokMojoMetrics(resolveMetricsDir().resolve("metrics.csv"));
+		metrics = new DarmokMojoMetrics(resolveMetricsDir().resolve("metrics.csv"), tzAwareTimestampsEnabled);
 	}
 
 	private void closeLogs() {

@@ -306,4 +306,9 @@ public class GenFromExistingGoalImpl extends MavenTestObject implements GenFromE
 		setProperty("mvnInstallPhase", keyMap.get("Phase"));
 	}
 
+	@Override
+	public void setTzAwareTimestampsEnabled(HashMap<String, String> keyMap) {
+		setProperty("tzAwareTimestampsEnabled", keyMap.get("TzAwareTimestampsEnabled"));
+	}
+
 }
