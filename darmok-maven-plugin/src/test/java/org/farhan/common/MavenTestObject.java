@@ -5,6 +5,8 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Properties;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Supplier;
 
 import org.apache.maven.project.MavenProject;
 import org.farhan.mbt.maven.ClaudeRunner;
@@ -49,10 +51,13 @@ public abstract class MavenTestObject extends TestObject {
 
             Object starterProp = getProperty("processStarter");
             if (starterProp instanceof ProcessStarter starter) {
+                AtomicInteger uuidCounter = new AtomicInteger(0);
+                Supplier<String> testUuidSupplier = () ->
+                    String.format("00000000-0000-0000-0000-%012d", uuidCounter.incrementAndGet());
                 mojo.setGitRunnerFactory(log -> new GitRunner(log, starter));
                 mojo.setMavenRunnerFactory(log -> new MavenRunner(log, starter));
-                mojo.setClaudeRunnerFactory((log, model, retries, wait, maxSeconds) ->
-                    new ClaudeRunner(log, model, retries, wait, maxSeconds, starter));
+                mojo.setClaudeRunnerFactory((log, model, retries, wait, maxSeconds, sessionEnabled, uuidSupplier) ->
+                    new ClaudeRunner(log, model, retries, wait, maxSeconds, sessionEnabled, testUuidSupplier, starter));
             }
 
             for (String key : mojoDefaults.stringPropertyNames()) {
