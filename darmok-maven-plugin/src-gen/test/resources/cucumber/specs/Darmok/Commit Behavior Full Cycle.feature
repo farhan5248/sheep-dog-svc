@@ -52,18 +52,18 @@ Feature: Commit Behavior Full Cycle
           | INFO  | mojo     | RGR Automation Complete!                                                      |
           | INFO  | mojo     | Total scenarios processed: 1                                                  |
       And The code-prj project darmok.runners.log file will be as follows
-          | Level | Category | Content                                                                                                                                  |
-          | DEBUG | runner   | Running: mvn org.farhan:sheep-dog-svc-maven-plugin:asciidoctor-to-uml -Dtags=loginHappyPath -Dhost=dev.sheepdog.io -DonlyChanges=true    |
-          | DEBUG | runner   | Running: mvn org.farhan:sheep-dog-svc-maven-plugin:uml-to-cucumber-guice -Dtags=loginHappyPath -Dhost=dev.sheepdog.io -DonlyChanges=true |
-          | DEBUG | runner   | Running: mvn test -Dtest=loginHappyPathTest                                                                                              |
-          | DEBUG | runner   | Running: git add .                                                                                                                       |
-          | DEBUG | runner   | Running: git commit -m run-rgr red User logs in successfully                                                                             |
-          | DEBUG | runner   | Executing: claude --print --dangerously-skip-permissions --model sonnet /rgr-green darmok-prj loginHappyPath                             |
-          | DEBUG | runner   | Running: git add .                                                                                                                       |
-          | DEBUG | runner   | Running: git commit -m run-rgr green User logs in successfully                                                                           |
-          | DEBUG | runner   | Executing: claude --print --dangerously-skip-permissions --model sonnet /rgr-refactor forward darmok-prj                                 |
-          | DEBUG | runner   | Running: git add .                                                                                                                       |
-          | DEBUG | runner   | Running: git commit -m run-rgr refactor User logs in successfully                                                                        |
+          | Level | Category | Content                                                                                                                                                        |
+          | DEBUG | runner   | Running: mvn org.farhan:sheep-dog-svc-maven-plugin:asciidoctor-to-uml -Dtags=loginHappyPath -Dhost=dev.sheepdog.io -DonlyChanges=true                          |
+          | DEBUG | runner   | Running: mvn org.farhan:sheep-dog-svc-maven-plugin:uml-to-cucumber-guice -Dtags=loginHappyPath -Dhost=dev.sheepdog.io -DonlyChanges=true                       |
+          | DEBUG | runner   | Running: mvn test -Dtest=loginHappyPathTest                                                                                                                    |
+          | DEBUG | runner   | Running: git add .                                                                                                                                             |
+          | DEBUG | runner   | Running: git commit -m run-rgr red User logs in successfully                                                                                                   |
+          | DEBUG | runner   | Executing: claude --print --session-id 00000000-0000-0000-0000-000000000001 --dangerously-skip-permissions --model sonnet /rgr-green darmok-prj loginHappyPath |
+          | DEBUG | runner   | Running: git add .                                                                                                                                             |
+          | DEBUG | runner   | Running: git commit -m run-rgr green User logs in successfully                                                                                                 |
+          | DEBUG | runner   | Executing: claude --print --session-id 00000000-0000-0000-0000-000000000002 --dangerously-skip-permissions --model sonnet /rgr-refactor forward darmok-prj     |
+          | DEBUG | runner   | Running: git add .                                                                                                                                             |
+          | DEBUG | runner   | Running: git commit -m run-rgr refactor User logs in successfully                                                                                              |
 
   Scenario: Red fails, green and refactor succeed, single combined commit
 
@@ -90,15 +90,15 @@ Feature: Commit Behavior Full Cycle
           | INFO  | mojo     | RGR Automation Complete!                                                      |
           | INFO  | mojo     | Total scenarios processed: 1                                                  |
       And The code-prj project darmok.runners.log file will be as follows
-          | Level | Category | Content                                                                                                                                  |
-          | DEBUG | runner   | Running: mvn org.farhan:sheep-dog-svc-maven-plugin:asciidoctor-to-uml -Dtags=loginHappyPath -Dhost=dev.sheepdog.io -DonlyChanges=true    |
-          | DEBUG | runner   | Running: mvn org.farhan:sheep-dog-svc-maven-plugin:uml-to-cucumber-guice -Dtags=loginHappyPath -Dhost=dev.sheepdog.io -DonlyChanges=true |
-          | DEBUG | runner   | Running: mvn test -Dtest=loginHappyPathTest                                                                                              |
-          | DEBUG | runner   | Running: git add .                                                                                                                       |
-          | DEBUG | runner   | Running: git commit -m run-rgr User logs in successfully                                                                                 |
-          | DEBUG | runner   | Executing: claude --print --dangerously-skip-permissions --model sonnet /rgr-green darmok-prj loginHappyPath                             |
-          | DEBUG | runner   | Running: git add .                                                                                                                       |
-          | DEBUG | runner   | Executing: claude --print --dangerously-skip-permissions --model sonnet /rgr-refactor forward darmok-prj                                 |
-          | DEBUG | runner   | Running: git add .                                                                                                                       |
-          | DEBUG | runner   | Running: git commit --amend --no-edit                                                                                                    |
+          | Level | Category | Content                                                                                                                                                        |
+          | DEBUG | runner   | Running: mvn org.farhan:sheep-dog-svc-maven-plugin:asciidoctor-to-uml -Dtags=loginHappyPath -Dhost=dev.sheepdog.io -DonlyChanges=true                          |
+          | DEBUG | runner   | Running: mvn org.farhan:sheep-dog-svc-maven-plugin:uml-to-cucumber-guice -Dtags=loginHappyPath -Dhost=dev.sheepdog.io -DonlyChanges=true                       |
+          | DEBUG | runner   | Running: mvn test -Dtest=loginHappyPathTest                                                                                                                    |
+          | DEBUG | runner   | Running: git add .                                                                                                                                             |
+          | DEBUG | runner   | Running: git commit -m run-rgr User logs in successfully                                                                                                       |
+          | DEBUG | runner   | Executing: claude --print --session-id 00000000-0000-0000-0000-000000000001 --dangerously-skip-permissions --model sonnet /rgr-green darmok-prj loginHappyPath |
+          | DEBUG | runner   | Running: git add .                                                                                                                                             |
+          | DEBUG | runner   | Executing: claude --print --session-id 00000000-0000-0000-0000-000000000002 --dangerously-skip-permissions --model sonnet /rgr-refactor forward darmok-prj     |
+          | DEBUG | runner   | Running: git add .                                                                                                                                             |
+          | DEBUG | runner   | Running: git commit --amend --no-edit                                                                                                                          |
 

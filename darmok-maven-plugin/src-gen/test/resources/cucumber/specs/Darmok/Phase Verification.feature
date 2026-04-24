@@ -33,9 +33,9 @@ Feature: Phase Verification
           | INFO  | mojo     | Green: Verify running... |
           | INFO  | mojo     | Refactor: Running...     |
       And The code-prj project darmok.runners.log file will be as follows
-          | Level | Category | Content                                                                                                    |
-          | DEBUG | runner   | Executing: claude --print --dangerously-skip-permissions --model sonnet /rgr-green code-prj loginHappyPath |
-          | DEBUG | runner   | Running: mvn clean verify                                                                                  |
+          | Level | Category | Content                                                                                                                                                      |
+          | DEBUG | runner   | Executing: claude --print --session-id 00000000-0000-0000-0000-000000000001 --dangerously-skip-permissions --model sonnet /rgr-green code-prj loginHappyPath |
+          | DEBUG | runner   | Running: mvn clean verify                                                                                                                                    |
 
   Scenario: Refactor verify passes on the first attempt
 
@@ -48,9 +48,9 @@ Feature: Phase Verification
           | INFO  | mojo     | Refactor: Verify running... |
           | INFO  | mojo     | Refactor: Committing        |
       And The code-prj project darmok.runners.log file will be as follows
-          | Level | Category | Content                                                                                                |
-          | DEBUG | runner   | Executing: claude --print --dangerously-skip-permissions --model sonnet /rgr-refactor forward code-prj |
-          | DEBUG | runner   | Running: mvn clean verify                                                                              |
+          | Level | Category | Content                                                                                                                                                  |
+          | DEBUG | runner   | Executing: claude --print --session-id 00000000-0000-0000-0000-000000000002 --dangerously-skip-permissions --model sonnet /rgr-refactor forward code-prj |
+          | DEBUG | runner   | Running: mvn clean verify                                                                                                                                |
 
   Scenario: Green verify fails once then succeeds after resume
 
@@ -67,10 +67,10 @@ Feature: Phase Verification
           | INFO  | mojo     | Green: Verify running...                               |
           | INFO  | mojo     | Refactor: Running...                                   |
       And The code-prj project darmok.runners.log file will be as follows
-          | Level | Category | Content                                                                                                                    |
-          | DEBUG | runner   | Running: mvn clean verify                                                                                                  |
-          | DEBUG | runner   | Executing: claude --resume --print --dangerously-skip-permissions --model sonnet mvn clean verify failures should be fixed |
-          | DEBUG | runner   | Running: mvn clean verify                                                                                                  |
+          | Level | Category | Content                                                                                                                                                         |
+          | DEBUG | runner   | Running: mvn clean verify                                                                                                                                       |
+          | DEBUG | runner   | Executing: claude --resume 00000000-0000-0000-0000-000000000001 --print --dangerously-skip-permissions --model sonnet mvn clean verify failures should be fixed |
+          | DEBUG | runner   | Running: mvn clean verify                                                                                                                                       |
 
   Scenario: Green verify fails for every attempt
 
@@ -104,10 +104,10 @@ Feature: Phase Verification
           | INFO  | mojo     | Refactor: Verify running...                               |
           | INFO  | mojo     | Refactor: Committing                                      |
       And The code-prj project darmok.runners.log file will be as follows
-          | Level | Category | Content                                                                                                                    |
-          | DEBUG | runner   | Running: mvn clean verify                                                                                                  |
-          | DEBUG | runner   | Executing: claude --resume --print --dangerously-skip-permissions --model sonnet mvn clean verify failures should be fixed |
-          | DEBUG | runner   | Running: mvn clean verify                                                                                                  |
+          | Level | Category | Content                                                                                                                                                         |
+          | DEBUG | runner   | Running: mvn clean verify                                                                                                                                       |
+          | DEBUG | runner   | Executing: claude --resume 00000000-0000-0000-0000-000000000002 --print --dangerously-skip-permissions --model sonnet mvn clean verify failures should be fixed |
+          | DEBUG | runner   | Running: mvn clean verify                                                                                                                                       |
 
   Scenario: Refactor verify fails for every attempt
 

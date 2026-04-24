@@ -73,7 +73,7 @@ public abstract class DarmokMojo extends AbstractMojo {
 	@Parameter(property = "onlyChanges", defaultValue = "true")
 	public boolean onlyChanges;
 
-	@Parameter(property = "claudeSessionIdEnabled", defaultValue = "false")
+	@Parameter(property = "claudeSessionIdEnabled", defaultValue = "true")
 	public boolean claudeSessionIdEnabled;
 
 	@Parameter(property = "stage", defaultValue = "true")

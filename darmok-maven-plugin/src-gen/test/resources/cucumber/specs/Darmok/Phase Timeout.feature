@@ -41,9 +41,9 @@ Feature: Phase Timeout
           | INFO  | mojo     | Green: Verify running...                                 |
           | INFO  | mojo     | Refactor: Running...                                     |
       And The code-prj project darmok.runners.log file will be as follows
-          | Level | Category | Content                                                                                                    |
-          | DEBUG | runner   | Executing: claude --print --dangerously-skip-permissions --model sonnet /rgr-green code-prj loginHappyPath |
-          | DEBUG | runner   | Running: mvn clean install                                                                                 |
+          | Level | Category | Content                                                                                                                                                      |
+          | DEBUG | runner   | Executing: claude --print --session-id 00000000-0000-0000-0000-000000000001 --dangerously-skip-permissions --model sonnet /rgr-green code-prj loginHappyPath |
+          | DEBUG | runner   | Running: mvn clean install                                                                                                                                   |
 
   Scenario: Green killed, install fails, resumed claude fixes it
 
@@ -64,11 +64,11 @@ Feature: Phase Timeout
           | INFO  | mojo     | Green: Install passed, proceeding                          |
           | INFO  | mojo     | Green: Verify running...                                   |
       And The code-prj project darmok.runners.log file will be as follows
-          | Level | Category | Content                                                                                                    |
-          | DEBUG | runner   | Executing: claude --print --dangerously-skip-permissions --model sonnet /rgr-green code-prj loginHappyPath |
-          | DEBUG | runner   | Running: mvn clean install                                                                                 |
-          | DEBUG | runner   | Executing: claude --resume --print --dangerously-skip-permissions --model sonnet pls continue              |
-          | DEBUG | runner   | Running: mvn clean install                                                                                 |
+          | Level | Category | Content                                                                                                                                                      |
+          | DEBUG | runner   | Executing: claude --print --session-id 00000000-0000-0000-0000-000000000001 --dangerously-skip-permissions --model sonnet /rgr-green code-prj loginHappyPath |
+          | DEBUG | runner   | Running: mvn clean install                                                                                                                                   |
+          | DEBUG | runner   | Executing: claude --resume 00000000-0000-0000-0000-000000000001 --print --dangerously-skip-permissions --model sonnet pls continue                           |
+          | DEBUG | runner   | Running: mvn clean install                                                                                                                                   |
 
   Scenario: Green timeouts exhaust max attempts
 
@@ -105,11 +105,11 @@ Feature: Phase Timeout
           | INFO  | mojo     | Refactor: Install passed, proceeding                          |
           | INFO  | mojo     | Refactor: Verify running...                                   |
       And The code-prj project darmok.runners.log file will be as follows
-          | Level | Category | Content                                                                                                |
-          | DEBUG | runner   | Executing: claude --print --dangerously-skip-permissions --model sonnet /rgr-refactor forward code-prj |
-          | DEBUG | runner   | Running: mvn clean install                                                                             |
-          | DEBUG | runner   | Executing: claude --resume --print --dangerously-skip-permissions --model sonnet pls continue          |
-          | DEBUG | runner   | Running: mvn clean install                                                                             |
+          | Level | Category | Content                                                                                                                                                  |
+          | DEBUG | runner   | Executing: claude --print --session-id 00000000-0000-0000-0000-000000000002 --dangerously-skip-permissions --model sonnet /rgr-refactor forward code-prj |
+          | DEBUG | runner   | Running: mvn clean install                                                                                                                               |
+          | DEBUG | runner   | Executing: claude --resume 00000000-0000-0000-0000-000000000002 --print --dangerously-skip-permissions --model sonnet pls continue                       |
+          | DEBUG | runner   | Running: mvn clean install                                                                                                                               |
 
   Scenario: Refactor timeouts exhaust max attempts
 

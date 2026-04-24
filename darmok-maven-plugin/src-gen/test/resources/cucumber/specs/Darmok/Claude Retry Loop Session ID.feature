@@ -3,7 +3,7 @@ Feature: Claude Retry Loop Session ID
 
   \@darmok-maven-plugin
   Every claude invocation darmok makes runs in `--print` mode, where the Claude CLI requires a valid session ID on every `--resume` call. To honour that, `ClaudeRunner` generates a fresh UUID on each initial call, passes it via `--session-id <uuid>`, captures it on the per-phase runner instance, and reuses it as `--resume <uuid> <message>` for every resume in that phase's downstream sub-machines (Phase Timeout, Directory Allowlist, Phase Verification). Green and refactor phases use separate `ClaudeRunner` instances and therefore separate UUIDs. These Test-Cases pin down the observable contract: the initial call emits `--session-id`, the resume reuses the same UUID within the phase, and the refactor UUID differs from the green one. See issue 311 for the motivation.
-  The behavior is gated behind a maven parameter `claudeSessionIdEnabled`, default `false` ? legacy behavior (no `--session-id` on initial, bare `--resume` on resume) ? so every existing spec keeps passing while the flag rolls out. These Test-Cases set the flag to `true` on the goal invocation; pass 2 of the rollout (post-#311) will flip the default to `true` and strip the flag from these Test-Cases.
+  The maven parameter `claudeSessionIdEnabled` defaults to `true` ? the new observable is always on in production and tests. The flag parameter stays in the code as a redundant knob for now (a follow-up cleanup can remove it entirely once there's no concern the CLI's `--resume` semantics might change again).
   The UUID supplier is an injected seam on `ClaudeRunner` (a `Supplier<String>`); production code uses `UUID.randomUUID().toString()`, tests inject a scripted supplier that returns fixed values so specs can assert against literal UUIDs. Test defaults:
   - Green phase UUID: `00000000-0000-0000-0000-000000000001`
   - Refactor phase UUID: `00000000-0000-0000-0000-000000000002`
@@ -32,9 +32,7 @@ Feature: Claude Retry Loop Session ID
     \@GH311
     The first claude call in the green phase emits `--session-id <green-uuid>` right after `--print`. Pins down the initial-call observable so a regression that drops the flag is caught explicitly.
 
-     When The darmok plugin gen-from-existing goal is executed and succeeds with
-          | ClaudeSessionIdEnabled |
-          | true                   |
+     When The darmok plugin gen-from-existing goal is executed and succeeds
      Then The code-prj project darmok.runners.log file will be as follows
           | Level | Category | Content                                                                                                                                                      |
           | DEBUG | runner   | Executing: claude --print --session-id 00000000-0000-0000-0000-000000000001 --dangerously-skip-permissions --model sonnet /rgr-green code-prj loginHappyPath |
@@ -48,9 +46,7 @@ Feature: Claude Retry Loop Session ID
     Given The darmok plugin gen-from-existing goal mvn clean verify command is executed but fails once then succeeds
           | Phase |
           | Green |
-     When The darmok plugin gen-from-existing goal is executed and succeeds with
-          | ClaudeSessionIdEnabled |
-          | true                   |
+     When The darmok plugin gen-from-existing goal is executed and succeeds
      Then The code-prj project darmok.runners.log file will be as follows
           | Level | Category | Content                                                                                                                                                         |
           | DEBUG | runner   | Executing: claude --print --session-id 00000000-0000-0000-0000-000000000001 --dangerously-skip-permissions --model sonnet /rgr-green code-prj loginHappyPath    |
@@ -64,9 +60,7 @@ Feature: Claude Retry Loop Session ID
     \@GH311
     The refactor phase uses a separate `ClaudeRunner` instance, and therefore a separate UUID. Proves the per-phase isolation: green's UUID is not reused for refactor, and vice versa.
 
-     When The darmok plugin gen-from-existing goal is executed and succeeds with
-          | ClaudeSessionIdEnabled |
-          | true                   |
+     When The darmok plugin gen-from-existing goal is executed and succeeds
      Then The code-prj project darmok.runners.log file will be as follows
           | Level | Category | Content                                                                                                                                                      |
           | DEBUG | runner   | Executing: claude --print --session-id 00000000-0000-0000-0000-000000000001 --dangerously-skip-permissions --model sonnet /rgr-green code-prj loginHappyPath |
