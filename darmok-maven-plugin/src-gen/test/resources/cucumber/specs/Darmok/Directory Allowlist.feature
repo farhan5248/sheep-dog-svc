@@ -2,7 +2,7 @@
 Feature: Directory Allowlist
 
   \@darmok-maven-plugin
-  Allowlist is the deterministic sub-step that guards each non-deterministic claude phase against writing outside the three permitted directories. After claude `/rgr-green` returns 0 (or a recovered timeout brings the phase back to the same gate) darmok runs `git status --porcelain` on the target project, classifies each changed path against the allowlist ? `src/main/java/`, `src/test/java/org/farhan/impl/`, `src/test/java/org/farhan/runners/` ? and either hands off to Phase Verification or reverts the offending paths with `git checkout HEAD -- <paths>` and resumes the same claude session with the literal message `only modify files under src/main/java, src/test/java/org/farhan/impl, or src/test/java/org/farhan/runners`. The loop is bounded by `maxAllowlistAttempts` (default 2). Refactor phase carries the same check with the same wiring. These Test-Cases pin down the observable contract: the new phase-allowlist log lines, the `git status` / `git checkout` / `claude --resume` subprocess sequence, and the failure message when the loop exhausts. Refactor-phase cases mirror green-phase cases and prove the gate is phase-parametric, not bolted to green. See issue 141 for the motivation.
+  Allowlist is the deterministic sub-step that guards each non-deterministic claude phase against writing outside the two permitted directories. After claude `/rgr-green` returns 0 (or a recovered timeout brings the phase back to the same gate) darmok runs `git status --porcelain` on the target project, classifies each changed path against the allowlist ? `src/main/java/` and `src/test/java/org/farhan/impl/` ? and either hands off to Phase Verification or reverts the offending paths with `git checkout HEAD -- <paths>` and resumes the same claude session with the literal message `only modify files under src/main/java or src/test/java/org/farhan/impl`. The loop is bounded by `maxAllowlistAttempts` (default 2). Refactor phase carries the same check with the same wiring. These Test-Cases pin down the observable contract: the new phase-allowlist log lines, the `git status` / `git checkout` / `claude --resume` subprocess sequence, and the failure message when the loop exhausts. Refactor-phase cases mirror green-phase cases and prove the gate is phase-parametric, not bolted to green. See issue 141 for the motivation.
 
   Background: A failing scenario that reaches the allowlist sub-step
 
@@ -22,8 +22,10 @@ Feature: Directory Allowlist
           """
       And The code-prj project src/main/java/org/farhan/objects/LoginHappyPath.java file isn't created
 
+  @GH141
   Scenario: Green allowlist passes on the first attempt
 
+    \@GH141
     Default happy path for the green phase. Claude writes only inside the allowlist (`src/main/java/...LoginHappyPath.java` and the matching impl under `src/test/java/org/farhan/impl/`), `git status --porcelain` reports zero out-of-allowlist paths, and the scenario proceeds into Phase Verification. Pins down the new `Green: Allowlist check running` log line and the `git status --porcelain` subprocess so a regression that drops the allowlist gate is caught explicitly.
 
      When The darmok plugin gen-from-existing goal is executed and succeeds
