@@ -109,4 +109,6 @@ public interface GenFromExistingGoal {
     public void setMvnCleanInstallCommandPhase(HashMap<String, String> keyMap);
 
     public void setTzAwareTimestampsEnabled(HashMap<String, String> keyMap);
+
+    public void setRefactorSessionMode(HashMap<String, String> keyMap);
 }

@@ -202,6 +202,14 @@ public class ClaudeRunner extends ProcessRunner {
 		return process.exitValue();
 	}
 
+	public String getSessionId() {
+		return sessionId;
+	}
+
+	public void setSessionId(String sessionId) {
+		this.sessionId = sessionId;
+	}
+
 	private String findRetryableError(List<String> outputLines) {
 		synchronized (outputLines) {
 			for (String line : outputLines) {

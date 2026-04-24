@@ -98,6 +98,9 @@ public abstract class DarmokMojo extends AbstractMojo {
 	@Parameter(property = "targetProject")
 	String targetProject;
 
+	@Parameter(property = "refactorSessionMode", defaultValue = "fresh")
+	public String refactorSessionMode;
+
 	@Parameter(property = "metricsDir")
 	public String metricsDir;
 
@@ -176,7 +179,7 @@ public abstract class DarmokMojo extends AbstractMojo {
 			claudeRunnerFactory.create(runnerLog, modelRefactor, maxRetries, retryWaitSeconds, maxClaudeSeconds,
 				claudeSessionIdEnabled, () -> UUID.randomUUID().toString()),
 			maven, phaseGit, mojoLog, sheepDogRoot, baseDir, artifactId, maxVerifyAttempts, maxTimeoutAttempts, maxClaudeSeconds,
-			maxAllowlistAttempts);
+			maxAllowlistAttempts, refactorSessionMode);
 	}
 
 	/** Test-only setter. Lets tests pre-seed baseDir before execute() so init() skips the MavenProject path. */
@@ -325,6 +328,9 @@ public abstract class DarmokMojo extends AbstractMojo {
 				commitIfChanged("run-rgr green " + scenarioName, "Green");
 			}
 
+			if ("continue".equals(refactorSessionMode)) {
+				refactorPhase.claude.setSessionId(greenPhase.claude.getSessionId());
+			}
 			state = refactorPhase.run(state);
 			if (state.exitCode != 0) {
 				throw new MojoExecutionException("rgr-refactor failed with exit code " + state.exitCode);
