@@ -40,8 +40,10 @@ Feature: Directory Allowlist
           | DEBUG | runner   | Executing: claude --print --dangerously-skip-permissions --model sonnet /rgr-green code-prj loginHappyPath |
           | DEBUG | runner   | Running: git status --porcelain                                                                            |
 
+  @GH141
   Scenario: Refactor allowlist passes on the first attempt
 
+    \@GH141
     Symmetric with the green-allowlist happy-path case. Confirms the allowlist check runs inside refactor too ? the sub-step is not accidentally bound to green.
 
      When The darmok plugin gen-from-existing goal is executed and succeeds
@@ -56,8 +58,10 @@ Feature: Directory Allowlist
           | DEBUG | runner   | Executing: claude --print --dangerously-skip-permissions --model sonnet /rgr-refactor forward code-prj |
           | DEBUG | runner   | Running: git status --porcelain                                                                        |
 
+  @GH141
   Scenario: Green allowlist fails once then succeeds after revert and resume
 
+    \@GH141
     The first claude call writes an out-of-allowlist path (`pom.xml`). Darmok logs a WARN, runs `git checkout HEAD -- pom.xml` to revert it, invokes `claude --resume` with the literal correction message, and re-runs `git status --porcelain`. The second inspection finds only allowlist-internal paths and the scenario proceeds into Phase Verification normally. Exactly one green commit is made ? it captures the allowlist-clean output from the resumed claude session.
 
     Given The darmok plugin gen-from-existing goal claude command is executed and succeeds with
@@ -72,15 +76,17 @@ Feature: Directory Allowlist
           | INFO  | mojo     | Green: Allowlist check passed, proceeding                                          |
           | INFO  | mojo     | Green: Verify running...                                                           |
       And The code-prj project darmok.runners.log file will be as follows
-          | Level | Category | Content                                                                                                                                                                                    |
-          | DEBUG | runner   | Executing: claude --print --dangerously-skip-permissions --model sonnet /rgr-green code-prj loginHappyPath                                                                                 |
-          | DEBUG | runner   | Running: git status --porcelain                                                                                                                                                            |
-          | DEBUG | runner   | Running: git checkout HEAD -- pom.xml                                                                                                                                                      |
-          | DEBUG | runner   | Executing: claude --resume --print --dangerously-skip-permissions --model sonnet only modify files under src/main/java, src/test/java/org/farhan/impl, or src/test/java/org/farhan/runners |
-          | DEBUG | runner   | Running: git status --porcelain                                                                                                                                                            |
+          | Level | Category | Content                                                                                                                                                 |
+          | DEBUG | runner   | Executing: claude --print --dangerously-skip-permissions --model sonnet /rgr-green code-prj loginHappyPath                                              |
+          | DEBUG | runner   | Running: git status --porcelain                                                                                                                         |
+          | DEBUG | runner   | Running: git checkout HEAD -- pom.xml                                                                                                                   |
+          | DEBUG | runner   | Executing: claude --resume --print --dangerously-skip-permissions --model sonnet only modify files under src/main/java or src/test/java/org/farhan/impl |
+          | DEBUG | runner   | Running: git status --porcelain                                                                                                                         |
 
+  @GH141
   Scenario: Green allowlist fails for every attempt
 
+    \@GH141
     Every `git status --porcelain` in the green phase finds an out-of-allowlist path. Darmok retries up to `maxAllowlistAttempts` (default 2), each retry preceded by a revert and a `claude --resume`, except the final attempt which aborts without another resume. The goal fails with an exception naming the phase and attempt count, the refactor phase is never reached, and no green commit is made.
 
     Given The darmok plugin gen-from-existing goal claude command is executed and succeeds with
@@ -94,8 +100,10 @@ Feature: Directory Allowlist
           | INFO  | mojo     | Green: Allowlist check running...                                                  |
           | ERROR | mojo     | Green: Allowlist check failed after 2 attempts, aborting                           |
 
+  @GH141
   Scenario: Refactor allowlist fails once then succeeds after revert and resume
 
+    \@GH141
     Symmetric with the green-phase recovery case. Proves the revert-and-resume loop is phase-parametric.
 
     Given The darmok plugin gen-from-existing goal claude command is executed and succeeds with
@@ -110,15 +118,17 @@ Feature: Directory Allowlist
           | INFO  | mojo     | Refactor: Allowlist check passed, proceeding                                          |
           | INFO  | mojo     | Refactor: Verify running...                                                           |
       And The code-prj project darmok.runners.log file will be as follows
-          | Level | Category | Content                                                                                                                                                                                    |
-          | DEBUG | runner   | Executing: claude --print --dangerously-skip-permissions --model sonnet /rgr-refactor forward code-prj                                                                                     |
-          | DEBUG | runner   | Running: git status --porcelain                                                                                                                                                            |
-          | DEBUG | runner   | Running: git checkout HEAD -- pom.xml                                                                                                                                                      |
-          | DEBUG | runner   | Executing: claude --resume --print --dangerously-skip-permissions --model sonnet only modify files under src/main/java, src/test/java/org/farhan/impl, or src/test/java/org/farhan/runners |
-          | DEBUG | runner   | Running: git status --porcelain                                                                                                                                                            |
+          | Level | Category | Content                                                                                                                                                 |
+          | DEBUG | runner   | Executing: claude --print --dangerously-skip-permissions --model sonnet /rgr-refactor forward code-prj                                                  |
+          | DEBUG | runner   | Running: git status --porcelain                                                                                                                         |
+          | DEBUG | runner   | Running: git checkout HEAD -- pom.xml                                                                                                                   |
+          | DEBUG | runner   | Executing: claude --resume --print --dangerously-skip-permissions --model sonnet only modify files under src/main/java or src/test/java/org/farhan/impl |
+          | DEBUG | runner   | Running: git status --porcelain                                                                                                                         |
 
+  @GH141
   Scenario: Refactor allowlist fails for every attempt
 
+    \@GH141
     Symmetric with the green-phase exhaustion case. No refactor commit is made; the green commit from this scenario remains in git history under `stage=false` (nothing is committed under `stage=true`).
 
     Given The darmok plugin gen-from-existing goal claude command is executed and succeeds with

@@ -2,11 +2,12 @@ package org.farhan.mbt.maven;
 
 public class GreenPhase extends RgrPhase {
 
-	public GreenPhase(ClaudeRunner claude, MavenRunner maven, DarmokMojoLog mojoLog,
+	public GreenPhase(ClaudeRunner claude, MavenRunner maven, GitRunner git, DarmokMojoLog mojoLog,
 			String workingDir, String targetDir, String artifactId,
-			int maxVerifyAttempts, int maxTimeoutAttempts, int maxClaudeSeconds) {
-		super(claude, maven, mojoLog, workingDir, targetDir, artifactId,
-			maxVerifyAttempts, maxTimeoutAttempts, maxClaudeSeconds);
+			int maxVerifyAttempts, int maxTimeoutAttempts, int maxClaudeSeconds,
+			int maxAllowlistAttempts) {
+		super(claude, maven, git, mojoLog, workingDir, targetDir, artifactId,
+			maxVerifyAttempts, maxTimeoutAttempts, maxClaudeSeconds, maxAllowlistAttempts);
 	}
 
 	@Override

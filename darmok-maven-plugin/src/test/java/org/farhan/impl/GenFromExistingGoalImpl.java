@@ -254,6 +254,26 @@ public class GenFromExistingGoalImpl extends MavenTestObject implements GenFromE
 	}
 
 	@Override
+	public void setClaudeCommandExecutedAndSucceedsWith(HashMap<String, String> keyMap) {
+		// Marker step; actual state is seeded via the column-specific setters below.
+	}
+
+	@Override
+	public void setClaudeCommandCommandParameters(HashMap<String, String> keyMap) {
+		setProperty("claudeCommandParameters", keyMap.get("Command Parameters"));
+	}
+
+	@Override
+	public void setClaudeCommandAttempt(HashMap<String, String> keyMap) {
+		setProperty("claudeCommandAttempt", keyMap.get("Attempt"));
+	}
+
+	@Override
+	public void setClaudeCommandPath(HashMap<String, String> keyMap) {
+		setProperty("claudeCommandPath", keyMap.get("Path"));
+	}
+
+	@Override
 	public void setMaxClaudeSeconds(HashMap<String, String> keyMap) {
 		setProperty("maxClaudeSeconds", keyMap.get("MaxClaudeSeconds"));
 	}

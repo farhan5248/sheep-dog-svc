@@ -69,6 +69,9 @@ public class FakeProcessStarter implements ProcessStarter {
 	private final String mvnVerifyModeRefactor;
 	private final String mvnInstallModeGreen;
 	private final String mvnInstallModeRefactor;
+	private final String claudeCommandPath;
+	private final String claudeCommandAttempt;
+	private final String claudeCommandPhase;
 	private final Path codePrjBaseDir;
 	private final Path eventLogPath;
 	private static final DateTimeFormatter EVENT_LOG_TS = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
@@ -79,6 +82,8 @@ public class FakeProcessStarter implements ProcessStarter {
 	private int refactorVerifyCalls = 0;
 	private int greenInstallCalls = 0;
 	private int refactorInstallCalls = 0;
+	private int greenAllowlistChecks = 0;
+	private int refactorAllowlistChecks = 0;
 	private String currentPhase;
 
 	public FakeProcessStarter(Map<String, Object> properties) {
@@ -108,6 +113,16 @@ public class FakeProcessStarter implements ProcessStarter {
 		this.mvnVerifyModeRefactor = string(properties, "mvnVerifyModeRefactor");
 		this.mvnInstallModeGreen = string(properties, "mvnInstallModeGreen");
 		this.mvnInstallModeRefactor = string(properties, "mvnInstallModeRefactor");
+		this.claudeCommandPath = string(properties, "claudeCommandPath");
+		this.claudeCommandAttempt = string(properties, "claudeCommandAttempt");
+		String params = string(properties, "claudeCommandParameters");
+		if (params != null && params.contains("/rgr-refactor")) {
+			this.claudeCommandPhase = "refactor";
+		} else if (params != null && params.contains("/rgr-green")) {
+			this.claudeCommandPhase = "green";
+		} else {
+			this.claudeCommandPhase = null;
+		}
 		Object baseDir = properties.get("code-prj.baseDir");
 		this.codePrjBaseDir = baseDir instanceof Path ? (Path) baseDir : null;
 		Object logDir = properties.get("log.dir");
@@ -133,6 +148,20 @@ public class FakeProcessStarter implements ProcessStarter {
 
 		if (joined.contains("rev-parse") && joined.contains("HEAD")) {
 			return new FakeProcess("abc1234567890abcdef1234567890abcdef12345", 0);
+		}
+
+		if (joined.contains("status") && joined.contains("--porcelain")) {
+			int count = "green".equals(currentPhase) ? ++greenAllowlistChecks : ++refactorAllowlistChecks;
+			if (claudeCommandPath != null
+					&& (claudeCommandPhase == null || claudeCommandPhase.equals(currentPhase))
+					&& (claudeCommandAttempt == null || String.valueOf(count).equals(claudeCommandAttempt))) {
+				return new FakeProcess(" M " + claudeCommandPath, 0);
+			}
+			return new FakeProcess("", 0);
+		}
+
+		if (joined.contains("checkout") && joined.contains("HEAD") && joined.contains("--")) {
+			return new FakeProcess("", 0);
 		}
 
 		if (joined.contains("claude") && cmd.stream().anyMatch(a -> a.startsWith("/rgr-green"))) {

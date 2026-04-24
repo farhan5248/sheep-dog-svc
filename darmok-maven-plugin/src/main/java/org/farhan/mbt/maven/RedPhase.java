@@ -12,7 +12,7 @@ public class RedPhase extends RgrPhase {
 	private final boolean onlyChanges;
 
 	public RedPhase(MavenRunner maven, DarmokMojoLog mojoLog, String baseDir, String specsDir, String host, boolean onlyChanges) {
-		super(null, maven, mojoLog, null, null, null, 0, 0, 0);
+		super(null, maven, null, mojoLog, null, null, null, 0, 0, 0, 0);
 		this.baseDir = baseDir;
 		this.specsDir = specsDir;
 		this.host = host;

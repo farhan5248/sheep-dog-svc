@@ -6,6 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import org.apache.maven.plugin.AbstractMojo;
@@ -65,6 +66,9 @@ public abstract class DarmokMojo extends AbstractMojo {
 	@Parameter(property = "maxTimeoutAttempts", defaultValue = "2")
 	public int maxTimeoutAttempts;
 
+	@Parameter(property = "maxAllowlistAttempts", defaultValue = "2")
+	public int maxAllowlistAttempts;
+
 	@Parameter(property = "onlyChanges", defaultValue = "true")
 	public boolean onlyChanges;
 
@@ -82,7 +86,7 @@ public abstract class DarmokMojo extends AbstractMojo {
 	// independently — e.g. into the Grafana-readable hostPath for SPC dashboards.
 	// Default: project baseDir, so metrics.csv survives `runCleanUp` out of the box.
 	@Parameter(property = "targetProject")
-	public String targetProject;
+	String targetProject;
 
 	@Parameter(property = "metricsDir")
 	public String metricsDir;
@@ -119,13 +123,16 @@ public abstract class DarmokMojo extends AbstractMojo {
 		String sheepDogRoot = baseDir + "/../..";
 		String artifactId = targetProject != null && !targetProject.isEmpty()
 			? targetProject : project.getArtifactId();
+		GitRunner phaseGit = gitRunnerFactory.create(runnerLog);
 		redPhase = new RedPhase(maven, mojoLog, baseDir, specsDir, host, onlyChanges);
 		greenPhase = new GreenPhase(
 			claudeRunnerFactory.create(runnerLog, modelGreen, maxRetries, retryWaitSeconds, maxClaudeSeconds),
-			maven, mojoLog, sheepDogRoot, baseDir, artifactId, maxVerifyAttempts, maxTimeoutAttempts, maxClaudeSeconds);
+			maven, phaseGit, mojoLog, sheepDogRoot, baseDir, artifactId, maxVerifyAttempts, maxTimeoutAttempts, maxClaudeSeconds,
+			maxAllowlistAttempts);
 		refactorPhase = new RefactorPhase(
 			claudeRunnerFactory.create(runnerLog, modelRefactor, maxRetries, retryWaitSeconds, maxClaudeSeconds),
-			maven, mojoLog, sheepDogRoot, baseDir, artifactId, maxVerifyAttempts, maxTimeoutAttempts, maxClaudeSeconds);
+			maven, phaseGit, mojoLog, sheepDogRoot, baseDir, artifactId, maxVerifyAttempts, maxTimeoutAttempts, maxClaudeSeconds,
+			maxAllowlistAttempts);
 	}
 
 	/** Test-only setter. Lets tests pre-seed baseDir before execute() so init() skips the MavenProject path. */
@@ -392,66 +399,46 @@ public abstract class DarmokMojo extends AbstractMojo {
 		}
 
 		List<String> content = Files.readAllLines(file.toPath(), StandardCharsets.UTF_8);
-		List<String> newContent = new ArrayList<>();
 
 		for (int i = 0; i < content.size(); i++) {
 			String line = content.get(i);
-			newContent.add(line);
-
-			if (line.matches("^== Test-Case: .+$")) {
-				String testCaseName = line.substring("== Test-Case: ".length());
-				if (testCaseName.equals(scenarioName)) {
-					// Find the first non-empty line after the Test-Case header
-					int nextLineIndex = i + 1;
-					while (nextLineIndex < content.size() && content.get(nextLineIndex).trim().isEmpty()) {
-						nextLineIndex++;
-					}
-
-					boolean hasTagLine = false;
-					boolean alreadyHasTag = false;
-					if (nextLineIndex < content.size()) {
-						String nextLine = content.get(nextLineIndex).trim();
-						if (nextLine.startsWith("@")) {
-							hasTagLine = true;
-							for (String existingTag : nextLine.split(" ")) {
-								if (existingTag.equals("@" + tag)) {
-									alreadyHasTag = true;
-									break;
-								}
-							}
-						}
-					}
-
-					if (!alreadyHasTag) {
-						if (hasTagLine) {
-							// Append tag to existing tag line
-							for (int k = i + 1; k < nextLineIndex; k++) {
-								newContent.add(content.get(k));
-							}
-							newContent.add(content.get(nextLineIndex).trim() + " @" + tag);
-							for (int j = nextLineIndex + 1; j < content.size(); j++) {
-								newContent.add(content.get(j));
-							}
-						} else {
-							newContent.add("");
-							newContent.add("@" + tag);
-							for (int j = i + 1; j < content.size(); j++) {
-								newContent.add(content.get(j));
-							}
-						}
-						mojoLog.debug("  Added tag @" + tag + " to file");
-						writeFileWithLF(filePath, newContent);
-						return true;
-					} else {
-						mojoLog.debug("  Tag @" + tag + " already present in file");
-						return false;
-					}
-				}
+			if (!line.matches("^== Test-Case: .+$")) {
+				continue;
 			}
+			String testCaseName = line.substring("== Test-Case: ".length());
+			if (!testCaseName.equals(scenarioName)) {
+				continue;
+			}
+			return insertTagAtTestCase(content, i, tag, filePath);
 		}
 
 		mojoLog.warn("Scenario not found in file: " + scenarioName);
 		return false;
+	}
+
+	private boolean insertTagAtTestCase(List<String> content, int headerIndex, String tag, String filePath) throws Exception {
+		int nextLineIndex = headerIndex + 1;
+		while (nextLineIndex < content.size() && content.get(nextLineIndex).trim().isEmpty()) {
+			nextLineIndex++;
+		}
+
+		if (nextLineIndex < content.size() && content.get(nextLineIndex).trim().startsWith("@")) {
+			String tagLine = content.get(nextLineIndex).trim();
+			for (String existingTag : tagLine.split(" ")) {
+				if (existingTag.equals("@" + tag)) {
+					mojoLog.debug("  Tag @" + tag + " already present in file");
+					return false;
+				}
+			}
+			content.set(nextLineIndex, tagLine + " @" + tag);
+		} else {
+			content.add(headerIndex + 1, "@" + tag);
+			content.add(headerIndex + 1, "");
+		}
+
+		mojoLog.debug("  Added tag @" + tag + " to file");
+		writeFileWithLF(filePath, content);
+		return true;
 	}
 
 	protected int runCleanUp() throws Exception {
@@ -490,7 +477,7 @@ public abstract class DarmokMojo extends AbstractMojo {
 			return;
 		}
 		Files.walk(dir)
-			.sorted(java.util.Comparator.reverseOrder())
+			.sorted(Comparator.reverseOrder())
 			.forEach(p -> {
 				try {
 					Files.delete(p);
