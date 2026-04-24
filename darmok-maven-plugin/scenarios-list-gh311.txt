@@ -1,3 +1,0 @@
-File: Darmok/Claude Retry Loop Session ID
-  Scenario: Refactor initial call carries a different session ID from green
-    Tag: GH311

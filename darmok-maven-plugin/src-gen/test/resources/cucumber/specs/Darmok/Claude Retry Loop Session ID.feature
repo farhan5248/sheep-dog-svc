@@ -58,3 +58,17 @@ Feature: Claude Retry Loop Session ID
           | DEBUG | runner   | Executing: claude --resume 00000000-0000-0000-0000-000000000001 --print --dangerously-skip-permissions --model sonnet mvn clean verify failures should be fixed |
           | DEBUG | runner   | Running: mvn clean verify                                                                                                                                       |
 
+  @GH311
+  Scenario: Refactor initial call carries a different session ID from green
+
+    \@GH311
+    The refactor phase uses a separate `ClaudeRunner` instance, and therefore a separate UUID. Proves the per-phase isolation: green's UUID is not reused for refactor, and vice versa.
+
+     When The darmok plugin gen-from-existing goal is executed and succeeds with
+          | ClaudeSessionIdEnabled |
+          | true                   |
+     Then The code-prj project darmok.runners.log file will be as follows
+          | Level | Category | Content                                                                                                                                                      |
+          | DEBUG | runner   | Executing: claude --print --session-id 00000000-0000-0000-0000-000000000001 --dangerously-skip-permissions --model sonnet /rgr-green code-prj loginHappyPath |
+          | DEBUG | runner   | Executing: claude --print --session-id 00000000-0000-0000-0000-000000000002 --dangerously-skip-permissions --model sonnet /rgr-refactor forward code-prj     |
+
