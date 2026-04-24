@@ -13,44 +13,31 @@ public class GenFromComparisonMojo extends DarmokMojo {
 	@Parameter(property = "modelComparison", defaultValue = "sonnet")
 	public String modelComparison;
 
-	public void execute() throws MojoExecutionException {
-		try {
-			init();
+	@Override
+	protected String goalName() {
+		return "gen-from-comparison";
+	}
 
-			mojoLog.info("RGR Automation Plugin (gen-from-comparison)");
-
-			int cleanUpExit = runCleanUp();
-			if (cleanUpExit != 0) {
-				throw new MojoExecutionException("Clean up failed with exit code " + cleanUpExit);
+	@Override
+	protected int doExecute() throws Exception {
+		int totalProcessed = 0;
+		while (true) {
+			int skillExit = runGenFromComparison();
+			if (skillExit != 0) {
+				throw new MojoExecutionException("rgr-gen-from-comparison failed with exit code " + skillExit);
 			}
 
-			int totalProcessed = 0;
-			while (true) {
-				int skillExit = runGenFromComparison();
-				if (skillExit != 0) {
-					throw new MojoExecutionException("rgr-gen-from-comparison failed with exit code " + skillExit);
-				}
-
-				ScenarioEntry entry = getNextScenario();
-				if (entry == null) {
-					break;
-				}
-
-				mojoLog.info("Processing Scenario: " + entry.file() + "/" + entry.scenario() + " [" + entry.tag() + "]");
-				processScenario(entry);
-				totalProcessed++;
-				mojoLog.info("");
+			ScenarioEntry entry = getNextScenario();
+			if (entry == null) {
+				break;
 			}
 
-			mojoLog.info("RGR Automation Complete!");
-			mojoLog.info("Total scenarios processed: " + totalProcessed);
-		} catch (MojoExecutionException e) {
-			throw e;
-		} catch (Exception e) {
-			throw new MojoExecutionException(e.getMessage(), e);
-		} finally {
-			cleanup();
+			mojoLog.info("Processing Scenario: " + entry.file() + "/" + entry.scenario() + " [" + entry.tag() + "]");
+			processScenario(entry);
+			totalProcessed++;
+			mojoLog.info("");
 		}
+		return totalProcessed;
 	}
 
 	private int runGenFromComparison() throws Exception {

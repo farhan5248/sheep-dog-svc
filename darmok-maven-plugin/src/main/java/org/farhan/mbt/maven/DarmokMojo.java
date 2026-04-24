@@ -76,6 +76,9 @@ public abstract class DarmokMojo extends AbstractMojo {
 	@Parameter(property = "claudeSessionIdEnabled", defaultValue = "true")
 	public boolean claudeSessionIdEnabled;
 
+	@Parameter(property = "baselineVerifyEnabled", defaultValue = "false")
+	public boolean baselineVerifyEnabled;
+
 	@Parameter(property = "stage", defaultValue = "true")
 	public boolean stage;
 
@@ -98,6 +101,7 @@ public abstract class DarmokMojo extends AbstractMojo {
 	// Instance fields
 	String baseDir;
 	private GitRunner git;
+	private MavenRunner maven;
 	DarmokMojoLog mojoLog;
 	DarmokMojoLog runnerLog;
 	DarmokMojoMetrics metrics;
@@ -116,14 +120,45 @@ public abstract class DarmokMojo extends AbstractMojo {
 	// Lifecycle
 	// =========================================================================
 
-	protected void init() throws Exception {
+	public final void execute() throws MojoExecutionException {
+		try {
+			init();
+			mojoLog.info("RGR Automation Plugin (" + goalName() + ")");
+
+			int cleanUpExit = cleanWorkspace();
+			if (cleanUpExit != 0) {
+				throw new MojoExecutionException("Clean up failed with exit code " + cleanUpExit);
+			}
+
+			verifyBaseline();
+
+			int totalProcessed = doExecute();
+
+			mojoLog.info("RGR Automation Complete!");
+			mojoLog.info("Total scenarios processed: " + totalProcessed);
+		} catch (MojoExecutionException e) {
+			throw e;
+		} catch (Exception e) {
+			throw new MojoExecutionException(e.getMessage(), e);
+		} finally {
+			closeLogs();
+		}
+	}
+
+	/** Goal-specific scenario iteration. Returns the number of scenarios processed. */
+	protected abstract int doExecute() throws Exception;
+
+	/** Short goal name for the "RGR Automation Plugin (&lt;name&gt;)" banner log line. */
+	protected abstract String goalName();
+
+	private void init() throws Exception {
 		if (baseDir == null) {
 			baseDir = project.getBasedir().getAbsolutePath();
 		}
 		initLogs();
 		git = gitRunnerFactory.create(runnerLog);
 		verifyGitBranch();
-		MavenRunner maven = mavenRunnerFactory.create(runnerLog);
+		maven = mavenRunnerFactory.create(runnerLog);
 		String sheepDogRoot = baseDir + "/../..";
 		String artifactId = targetProject != null && !targetProject.isEmpty()
 			? targetProject : project.getArtifactId();
@@ -176,8 +211,16 @@ public abstract class DarmokMojo extends AbstractMojo {
 		}
 	}
 
-	protected void cleanup() {
-		closeLogs();
+	private void verifyBaseline() throws MojoExecutionException, Exception {
+		if (!baselineVerifyEnabled) {
+			return;
+		}
+		int exit = maven.run(baseDir, "clean", "install");
+		if (exit != 0) {
+			String msg = "Baseline build failed. Aborting.";
+			mojoLog.error(msg);
+			throw new MojoExecutionException(msg);
+		}
 	}
 
 	private Path resolveLogDir() {
@@ -447,7 +490,7 @@ public abstract class DarmokMojo extends AbstractMojo {
 		return true;
 	}
 
-	protected int runCleanUp() throws Exception {
+	private int cleanWorkspace() throws Exception {
 		Path sheepDogMain = Path.of(baseDir, "../..").normalize();
 
 		int deleted = deleteNulFiles(sheepDogMain);

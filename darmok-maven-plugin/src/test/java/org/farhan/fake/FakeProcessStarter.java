@@ -39,8 +39,9 @@ import org.farhan.mbt.maven.ProcessRunner.ProcessStarter;
  *   <li><b>mvn clean verify</b> — dispatches on {@code mvnVerifyModeGreen} or
  *       {@code mvnVerifyModeRefactor} depending on current phase (fail-once / fail-all).</li>
  *   <li><b>mvn clean install</b> — same per-phase pattern via {@code mvnInstallModeGreen} /
- *       {@code mvnInstallModeRefactor} (fail-once-then-pass / fail-all); used by the
- *       #140 timeout-recovery check.</li>
+ *       {@code mvnInstallModeRefactor} / {@code mvnInstallModeBaseline} (fail-once-then-pass /
+ *       fail-all). The baseline mode applies when no claude phase is active yet — the #312
+ *       pre-scenario check. Also used by the #140 timeout-recovery check on the green/refactor side.</li>
  *   <li>Anything else — exit 0.</li>
  * </ul>
  */
@@ -69,6 +70,7 @@ public class FakeProcessStarter implements ProcessStarter {
 	private final String mvnVerifyModeRefactor;
 	private final String mvnInstallModeGreen;
 	private final String mvnInstallModeRefactor;
+	private final String mvnInstallModeBaseline;
 	private final String claudeCommandPath;
 	private final String claudeCommandAttempt;
 	private final String claudeCommandPhase;
@@ -82,6 +84,7 @@ public class FakeProcessStarter implements ProcessStarter {
 	private int refactorVerifyCalls = 0;
 	private int greenInstallCalls = 0;
 	private int refactorInstallCalls = 0;
+	private int baselineInstallCalls = 0;
 	private int greenAllowlistChecks = 0;
 	private int refactorAllowlistChecks = 0;
 	private String currentPhase;
@@ -113,6 +116,7 @@ public class FakeProcessStarter implements ProcessStarter {
 		this.mvnVerifyModeRefactor = string(properties, "mvnVerifyModeRefactor");
 		this.mvnInstallModeGreen = string(properties, "mvnInstallModeGreen");
 		this.mvnInstallModeRefactor = string(properties, "mvnInstallModeRefactor");
+		this.mvnInstallModeBaseline = string(properties, "mvnInstallModeBaseline");
 		this.claudeCommandPath = string(properties, "claudeCommandPath");
 		this.claudeCommandAttempt = string(properties, "claudeCommandAttempt");
 		String params = string(properties, "claudeCommandParameters");
@@ -239,8 +243,18 @@ public class FakeProcessStarter implements ProcessStarter {
 
 		if (cmd.size() >= 3 && cmd.get(0).toLowerCase().startsWith("mvn")
 				&& cmd.contains("clean") && cmd.contains("install")) {
-			String mode = "green".equals(currentPhase) ? mvnInstallModeGreen : mvnInstallModeRefactor;
-			int count = "green".equals(currentPhase) ? ++greenInstallCalls : ++refactorInstallCalls;
+			String mode;
+			int count;
+			if ("green".equals(currentPhase)) {
+				mode = mvnInstallModeGreen;
+				count = ++greenInstallCalls;
+			} else if ("refactor".equals(currentPhase)) {
+				mode = mvnInstallModeRefactor;
+				count = ++refactorInstallCalls;
+			} else {
+				mode = mvnInstallModeBaseline;
+				count = ++baselineInstallCalls;
+			}
 			if ("fail-once-then-pass".equals(mode)) {
 				return count == 1 ? new FakeProcess("", 1) : new FakeProcess("", 0);
 			}

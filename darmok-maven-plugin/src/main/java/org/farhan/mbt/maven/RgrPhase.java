@@ -51,8 +51,8 @@ public abstract class RgrPhase {
 	}
 
 	protected boolean isAllowlisted(String path) {
-		return path.startsWith("src/main/java/")
-			|| path.startsWith("src/test/java/org/farhan/impl/");
+		return path.contains("src/main/java/")
+			|| path.contains("src/test/java/org/farhan/impl/");
 	}
 
 	/**

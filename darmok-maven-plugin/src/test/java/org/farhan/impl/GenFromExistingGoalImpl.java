@@ -288,4 +288,22 @@ public class GenFromExistingGoalImpl extends MavenTestObject implements GenFromE
 		setProperty("claudeSessionIdEnabled", keyMap.get("ClaudeSessionIdEnabled"));
 	}
 
+	@Override
+	public void setBaselineVerifyEnabled(HashMap<String, String> keyMap) {
+		setProperty("baselineVerifyEnabled", keyMap.get("BaselineVerifyEnabled"));
+	}
+
+	@Override
+	public void setMvnCleanInstallCommandExecutedButFailsWith(HashMap<String, String> keyMap) {
+		String phase = (String) getProperty("mvnInstallPhase");
+		if ("Baseline".equalsIgnoreCase(phase)) {
+			setProperty("mvnInstallModeBaseline", "fail-all");
+		}
+	}
+
+	@Override
+	public void setMvnCleanInstallCommandPhase(HashMap<String, String> keyMap) {
+		setProperty("mvnInstallPhase", keyMap.get("Phase"));
+	}
+
 }

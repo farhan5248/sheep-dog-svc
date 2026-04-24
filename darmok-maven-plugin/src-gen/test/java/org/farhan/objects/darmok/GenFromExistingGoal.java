@@ -101,4 +101,10 @@ public interface GenFromExistingGoal {
     public void setClaudeCommandPath(HashMap<String, String> keyMap);
 
     public void setClaudeSessionIdEnabled(HashMap<String, String> keyMap);
+
+    public void setBaselineVerifyEnabled(HashMap<String, String> keyMap);
+
+    public void setMvnCleanInstallCommandExecutedButFailsWith(HashMap<String, String> keyMap);
+
+    public void setMvnCleanInstallCommandPhase(HashMap<String, String> keyMap);
 }
