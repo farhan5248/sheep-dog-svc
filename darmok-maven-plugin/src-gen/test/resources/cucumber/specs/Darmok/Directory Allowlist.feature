@@ -29,7 +29,8 @@ Feature: Directory Allowlist
   Scenario: Green allowlist passes on the first attempt
 
     \@GH141
-    Default happy path for the green phase. Claude writes only inside the allowlist (`src/main/java/...LoginHappyPath.java` and the matching impl under `src/test/java/org/farhan/impl/`), `git status --porcelain` reports zero out-of-allowlist paths, and the scenario proceeds into Phase Verification. Pins down the new `Green: Allowlist check running` log line and the `git status --porcelain` subprocess so a regression that drops the allowlist gate is caught explicitly.
+    Default happy path for the green phase. Claude writes only inside the allowlist (`src/main/java/...LoginHappyPath.java` and the matching impl under `src/test/java/org/farhan/impl/`), `git status --porcelain` reports zero out-of-allowlist paths, and the scenario proceeds into Phase Verification.
+    Pins down the new `Green: Allowlist check running` log line and the `git status --porcelain` subprocess so a regression that drops the allowlist gate is caught explicitly.
 
      When The darmok plugin gen-from-existing goal is executed and succeeds
      Then The code-prj project darmok.mojo.log file will be as follows
@@ -65,7 +66,9 @@ Feature: Directory Allowlist
   Scenario: Green allowlist fails once then succeeds after revert and resume
 
     \@GH141
-    The first claude call writes an out-of-allowlist path (`pom.xml`). Darmok logs a WARN, runs `git checkout HEAD -- pom.xml` to revert it, invokes `claude --resume` with the literal correction message, and re-runs `git status --porcelain`. The second inspection finds only allowlist-internal paths and the scenario proceeds into Phase Verification normally. Exactly one green commit is made ? it captures the allowlist-clean output from the resumed claude session.
+    The first claude call writes an out-of-allowlist path (`pom.xml`). Darmok logs a WARN, runs `git checkout HEAD -- pom.xml` to revert it, invokes `claude --resume` with the literal correction message, and re-runs `git status --porcelain`.
+    The second inspection finds only allowlist-internal paths and the scenario proceeds into Phase Verification normally.
+    Exactly one green commit is made ? it captures the allowlist-clean output from the resumed claude session.
 
     Given The darmok plugin gen-from-existing goal claude command is executed and succeeds with
           | Command Parameters                 | Attempt | Path    |
@@ -90,7 +93,8 @@ Feature: Directory Allowlist
   Scenario: Green allowlist fails for every attempt
 
     \@GH141
-    Every `git status --porcelain` in the green phase finds an out-of-allowlist path. Darmok retries up to `maxAllowlistAttempts` (default 2), each retry preceded by a revert and a `claude --resume`, except the final attempt which aborts without another resume. The goal fails with an exception naming the phase and attempt count, the refactor phase is never reached, and no green commit is made.
+    Every `git status --porcelain` in the green phase finds an out-of-allowlist path. Darmok retries up to `maxAllowlistAttempts` (default 2), each retry preceded by a revert and a `claude --resume`, except the final attempt which aborts without another resume.
+    The goal fails with an exception naming the phase and attempt count, the refactor phase is never reached, and no green commit is made.
 
     Given The darmok plugin gen-from-existing goal claude command is executed and succeeds with
           | Command Parameters                 | Path    |
@@ -145,10 +149,8 @@ Feature: Directory Allowlist
           | INFO  | mojo     | Refactor: Allowlist check running...                                                  |
           | ERROR | mojo     | Refactor: Allowlist check failed after 2 attempts, aborting                           |
 
-  @GH314
   Scenario: Green allowlist passes when an extra path is added via allowlistAdditionalPaths
 
-    \@GH314
     The base allowlist stays at its default (`src/main/java/`, `src/test/java/org/farhan/impl/`); the project extends it with `allowlistAdditionalPaths=src/test/resources/mojo-defaults.properties` so the green claude session can edit that one file too.
     The motivating case from issue 314: on issue 311 the new `claudeSessionIdEnabled` default value had to be added to `mojo-defaults.properties`, but that path was outside the legacy hardcoded allowlist and Darmok exhausted on the violation.
     With the additional path declared, the same write passes the allowlist gate first try ? no violation log line, no revert, no resume.
@@ -165,10 +167,8 @@ Feature: Directory Allowlist
           | INFO  | mojo     | Green: Allowlist check passed, proceeding |
           | INFO  | mojo     | Green: Verify running...                  |
 
-  @GH314
   Scenario: Green allowlist fails when allowlistBasePaths narrows below default
 
-    \@GH314
     The project tightens the base allowlist to `src/main/java/` only, dropping the `src/test/java/org/farhan/impl/` entry from the default.
     Claude's green call writes to a path that *was* allowed under the default base but is no longer ? the gate now flags it as a violation, reverts it, and resumes the session with the standard correction message.
     After the second attempt the same write recurs and the loop exhausts.

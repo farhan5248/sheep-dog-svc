@@ -48,6 +48,8 @@ public interface GenFromExistingGoal {
 
     public void setExecutedAndSucceedsWith(HashMap<String, String> keyMap);
 
+    public void setAllowlistAdditionalPaths(HashMap<String, String> keyMap);
+
     public void setBaselineVerifyEnabled(HashMap<String, String> keyMap);
 
     public void setClaudeSessionIdEnabled(HashMap<String, String> keyMap);
@@ -69,6 +71,8 @@ public interface GenFromExistingGoal {
     public void setExecutedButFails(HashMap<String, String> keyMap);
 
     public void setExecutedButFailsWith(HashMap<String, String> keyMap);
+
+    public void setAllowlistBasePaths(HashMap<String, String> keyMap);
 
     public void setMvnAsciidoctorToUmlCommandExecutedButFailed(HashMap<String, String> keyMap);
 
@@ -109,8 +113,4 @@ public interface GenFromExistingGoal {
     public void setMvnUmlToCucumberGuiceCommandExit(HashMap<String, String> keyMap);
 
     public void setMvnUmlToCucumberGuiceCommandOutput(HashMap<String, String> keyMap);
-
-    public void setAllowlistAdditionalPaths(HashMap<String, String> keyMap);
-
-    public void setAllowlistBasePaths(HashMap<String, String> keyMap);
 }

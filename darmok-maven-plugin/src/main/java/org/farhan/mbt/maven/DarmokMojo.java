@@ -196,23 +196,21 @@ public abstract class DarmokMojo extends AbstractMojo {
 
 	private List<String> parseAllowlist(String basePaths, String additionalPaths) {
 		List<String> result = new ArrayList<>();
-		if (basePaths != null && !basePaths.isEmpty()) {
-			for (String p : basePaths.split(",")) {
-				String trimmed = p.trim();
-				if (!trimmed.isEmpty()) {
-					result.add(trimmed);
-				}
-			}
-		}
-		if (additionalPaths != null && !additionalPaths.isEmpty()) {
-			for (String p : additionalPaths.split(",")) {
-				String trimmed = p.trim();
-				if (!trimmed.isEmpty()) {
-					result.add(trimmed);
-				}
-			}
-		}
+		appendCsv(result, basePaths);
+		appendCsv(result, additionalPaths);
 		return result;
+	}
+
+	private void appendCsv(List<String> result, String csv) {
+		if (csv == null || csv.isEmpty()) {
+			return;
+		}
+		for (String p : csv.split(",")) {
+			String trimmed = p.trim();
+			if (!trimmed.isEmpty()) {
+				result.add(trimmed);
+			}
+		}
 	}
 
 	/** Test-only setter. Lets tests pre-seed baseDir before execute() so init() skips the MavenProject path. */
@@ -355,7 +353,6 @@ public abstract class DarmokMojo extends AbstractMojo {
 				throw new MojoExecutionException("rgr-green failed with exit code " + state.exitCode);
 			}
 
-			removeFirstScenarioFromFile();
 			git.run(baseDir, "add", ".");
 			if (!stage) {
 				commitIfChanged("run-rgr green " + scenarioName, "Green");
@@ -367,6 +364,7 @@ public abstract class DarmokMojo extends AbstractMojo {
 				throw new MojoExecutionException("rgr-refactor failed with exit code " + state.exitCode);
 			}
 
+			removeFirstScenarioFromFile();
 			git.run(baseDir, "add", ".");
 			if (stage) {
 				amendIfChanged("Refactor");
