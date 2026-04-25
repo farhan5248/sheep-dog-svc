@@ -265,17 +265,17 @@
 			<plugin>
 				<groupId>org.farhan</groupId>
 				<artifactId>sheep-dog-svc-maven-plugin</artifactId>
-				<version>1.13</version>
+				<version>1.20</version>
 			</plugin>
 			<plugin>
 				<groupId>org.farhan</groupId>
 				<artifactId>sheep-dog-mgmt-maven-plugin</artifactId>
-				<version>1.43</version>
+				<version>1.45</version>
 			</plugin>
 			<plugin>
 				<groupId>org.farhan</groupId>
 				<artifactId>darmok-maven-plugin</artifactId>
-				<version>1.25-SNAPSHOT</version>
+				<version>1.25</version>
 			</plugin>
 		</plugins>
 	</build>
