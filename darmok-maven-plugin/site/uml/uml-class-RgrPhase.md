@@ -6,15 +6,15 @@ Abstract base for the three RGR phases. Owns the public `run(DarmokMojoState)` t
 
 ## RgrPhase
 
-**Desc**: Constructor that captures the shared collaborators and tunables needed by the allowlist, verify, and timeout-recovery loops. Subclasses pass these through their own constructors. Red passes `null` / `0` for the claude-side and git-side parameters since it never calls them.
+**Desc**: Constructor that captures the shared collaborators and tunables needed by the allowlist, verify, and timeout-recovery loops. Subclasses pass these through their own constructors. Red passes `null` / `0` / empty list for the claude-side, git-side, and allowlist parameters since it never calls them. The trailing `List<String> allowlistPaths` is the *effective* allowlist (`allowlistBasePaths` ∪ `allowlistAdditionalPaths`, parsed and merged by `DarmokMojo.init()` per issue #314); RgrPhase only walks it, it doesn't compose it.
 
 **Rule**: ONE constructor matches RgrPhase pattern.
  - **Name**: `^RgrPhase$`
- - **Parameters**: `^\(ClaudeRunner\s+\w+,\s*MavenRunner\s+\w+,\s*GitRunner\s+\w+,\s*DarmokMojoLog\s+\w+,\s*String\s+\w+,\s*String\s+\w+,\s*String\s+\w+,\s*int\s+\w+,\s*int\s+\w+,\s*int\s+\w+,\s*int\s+\w+\)$`
+ - **Parameters**: `^\(ClaudeRunner\s+\w+,\s*MavenRunner\s+\w+,\s*GitRunner\s+\w+,\s*DarmokMojoLog\s+\w+,\s*String\s+\w+,\s*String\s+\w+,\s*String\s+\w+,\s*int\s+\w+,\s*int\s+\w+,\s*int\s+\w+,\s*int\s+\w+,\s*List<String>\s+\w+\)$`
  - **Modifier**: `^protected$`
 
 **Examples**:
- - `protected RgrPhase(ClaudeRunner claude, MavenRunner maven, GitRunner git, DarmokMojoLog mojoLog, String workingDir, String targetDir, String artifactId, int maxVerifyAttempts, int maxTimeoutAttempts, int maxClaudeSeconds, int maxAllowlistAttempts)`
+ - `protected RgrPhase(ClaudeRunner claude, MavenRunner maven, GitRunner git, DarmokMojoLog mojoLog, String workingDir, String targetDir, String artifactId, int maxVerifyAttempts, int maxTimeoutAttempts, int maxClaudeSeconds, int maxAllowlistAttempts, List<String> allowlistPaths)`
 
 ## phase
 
@@ -109,7 +109,7 @@ Abstract base for the three RGR phases. Owns the public `run(DarmokMojoState)` t
 
 ## isAllowlisted
 
-**Desc**: Returns whether a path reported by `git status --porcelain` is permitted for claude to have modified. Default implementation matches the two allowed directories from issue #141; subclasses may override with a narrower or phase-specific rule.
+**Desc**: Returns whether a path reported by `git status --porcelain` is permitted for claude to have modified. Walks the `allowlistPaths` list passed at construction (the effective `allowlistBasePaths` ∪ `allowlistAdditionalPaths` per issue #314), returning true when any entry is a substring match. Default base list matches the two directories from issue #141; subclasses may override with a narrower or phase-specific rule.
 
 **Rule**: ONE method name follows isAllowlisted pattern.
  - **Name**: `^isAllowlisted$`
