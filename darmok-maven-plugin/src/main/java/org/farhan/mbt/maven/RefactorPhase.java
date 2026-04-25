@@ -1,5 +1,7 @@
 package org.farhan.mbt.maven;
 
+import java.util.List;
+
 public class RefactorPhase extends RgrPhase {
 
 	private final String refactorSessionMode;
@@ -7,9 +9,9 @@ public class RefactorPhase extends RgrPhase {
 	public RefactorPhase(ClaudeRunner claude, MavenRunner maven, GitRunner git, DarmokMojoLog mojoLog,
 			String workingDir, String targetDir, String artifactId,
 			int maxVerifyAttempts, int maxTimeoutAttempts, int maxClaudeSeconds,
-			int maxAllowlistAttempts, String refactorSessionMode) {
+			int maxAllowlistAttempts, List<String> allowlistPaths, String refactorSessionMode) {
 		super(claude, maven, git, mojoLog, workingDir, targetDir, artifactId,
-			maxVerifyAttempts, maxTimeoutAttempts, maxClaudeSeconds, maxAllowlistAttempts);
+			maxVerifyAttempts, maxTimeoutAttempts, maxClaudeSeconds, maxAllowlistAttempts, allowlistPaths);
 		this.refactorSessionMode = refactorSessionMode;
 	}
 

@@ -71,6 +71,12 @@ public abstract class DarmokMojo extends AbstractMojo {
 	@Parameter(property = "maxAllowlistAttempts", defaultValue = "2")
 	public int maxAllowlistAttempts;
 
+	@Parameter(property = "allowlistBasePaths", defaultValue = "src/main/java/,src/test/java/org/farhan/impl/")
+	public String allowlistBasePaths;
+
+	@Parameter(property = "allowlistAdditionalPaths", defaultValue = "")
+	public String allowlistAdditionalPaths;
+
 	@Parameter(property = "onlyChanges", defaultValue = "false")
 	public boolean onlyChanges;
 
@@ -170,21 +176,43 @@ public abstract class DarmokMojo extends AbstractMojo {
 		artifactId = targetProject != null && !targetProject.isEmpty()
 			? targetProject : project.getArtifactId();
 		uuidSupplier = () -> UUID.randomUUID().toString();
+		List<String> effectiveAllowlist = parseAllowlist(allowlistBasePaths, allowlistAdditionalPaths);
 		GitRunner phaseGit = gitRunnerFactory.create(runnerLog);
 		redPhase = new RedPhase(maven, mojoLog, baseDir, specsDir, host, onlyChanges);
 		greenPhase = new GreenPhase(
 			makeClaudeRunner(modelGreen),
 			maven, phaseGit, mojoLog, sheepDogRoot, baseDir, artifactId, maxVerifyAttempts, maxTimeoutAttempts, maxClaudeSeconds,
-			maxAllowlistAttempts);
+			maxAllowlistAttempts, effectiveAllowlist);
 		refactorPhase = new RefactorPhase(
 			makeClaudeRunner(modelRefactor),
 			maven, phaseGit, mojoLog, sheepDogRoot, baseDir, artifactId, maxVerifyAttempts, maxTimeoutAttempts, maxClaudeSeconds,
-			maxAllowlistAttempts, refactorSessionMode);
+			maxAllowlistAttempts, effectiveAllowlist, refactorSessionMode);
 	}
 
 	protected ClaudeRunner makeClaudeRunner(String model) {
 		return claudeRunnerFactory.create(runnerLog, model, maxRetries, retryWaitSeconds, maxClaudeSeconds,
 			claudeSessionIdEnabled, uuidSupplier);
+	}
+
+	private List<String> parseAllowlist(String basePaths, String additionalPaths) {
+		List<String> result = new ArrayList<>();
+		if (basePaths != null && !basePaths.isEmpty()) {
+			for (String p : basePaths.split(",")) {
+				String trimmed = p.trim();
+				if (!trimmed.isEmpty()) {
+					result.add(trimmed);
+				}
+			}
+		}
+		if (additionalPaths != null && !additionalPaths.isEmpty()) {
+			for (String p : additionalPaths.split(",")) {
+				String trimmed = p.trim();
+				if (!trimmed.isEmpty()) {
+					result.add(trimmed);
+				}
+			}
+		}
+		return result;
 	}
 
 	/** Test-only setter. Lets tests pre-seed baseDir before execute() so init() skips the MavenProject path. */

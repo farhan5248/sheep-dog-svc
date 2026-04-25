@@ -311,4 +311,9 @@ public class GenFromExistingGoalImpl extends MavenTestObject implements GenFromE
 		setProperty("refactorSessionMode", keyMap.get("RefactorSessionMode"));
 	}
 
+	@Override
+	public void setAllowlistAdditionalPaths(HashMap<String, String> keyMap) {
+		setProperty("allowlistAdditionalPaths", keyMap.get("AllowlistAdditionalPaths"));
+	}
+
 }

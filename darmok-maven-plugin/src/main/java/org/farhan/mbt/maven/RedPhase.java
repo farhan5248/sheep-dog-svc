@@ -3,6 +3,7 @@ package org.farhan.mbt.maven;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 
 public class RedPhase extends RgrPhase {
 
@@ -12,7 +13,7 @@ public class RedPhase extends RgrPhase {
 	private final boolean onlyChanges;
 
 	public RedPhase(MavenRunner maven, DarmokMojoLog mojoLog, String baseDir, String specsDir, String host, boolean onlyChanges) {
-		super(null, maven, null, mojoLog, null, null, null, 0, 0, 0, 0);
+		super(null, maven, null, mojoLog, null, null, null, 0, 0, 0, 0, List.of());
 		this.baseDir = baseDir;
 		this.specsDir = specsDir;
 		this.host = host;

@@ -1,6 +1,4 @@
 File: Darmok/Directory Allowlist
-  Scenario: Green allowlist passes when an extra path is added via allowlistAdditionalPaths
-    Tag: GH314
   Scenario: Green allowlist fails when allowlistBasePaths narrows below default
     Tag: GH314
 File: Darmok/Commit Behavior Full Cycle

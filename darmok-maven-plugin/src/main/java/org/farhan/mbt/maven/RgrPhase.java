@@ -22,11 +22,12 @@ public abstract class RgrPhase {
 	protected final int maxTimeoutAttempts;
 	protected final int maxClaudeSeconds;
 	protected final int maxAllowlistAttempts;
+	protected final List<String> allowlistPaths;
 
 	protected RgrPhase(ClaudeRunner claude, MavenRunner maven, GitRunner git, DarmokMojoLog mojoLog,
 			String workingDir, String targetDir, String artifactId,
 			int maxVerifyAttempts, int maxTimeoutAttempts, int maxClaudeSeconds,
-			int maxAllowlistAttempts) {
+			int maxAllowlistAttempts, List<String> allowlistPaths) {
 		this.claude = claude;
 		this.maven = maven;
 		this.git = git;
@@ -38,6 +39,7 @@ public abstract class RgrPhase {
 		this.maxTimeoutAttempts = maxTimeoutAttempts;
 		this.maxClaudeSeconds = maxClaudeSeconds;
 		this.maxAllowlistAttempts = maxAllowlistAttempts;
+		this.allowlistPaths = allowlistPaths;
 	}
 
 	protected abstract Phase phase();
@@ -51,8 +53,12 @@ public abstract class RgrPhase {
 	}
 
 	protected boolean isAllowlisted(String path) {
-		return path.contains("src/main/java/")
-			|| path.contains("src/test/java/org/farhan/impl/");
+		for (String allowed : allowlistPaths) {
+			if (path.contains(allowed)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
