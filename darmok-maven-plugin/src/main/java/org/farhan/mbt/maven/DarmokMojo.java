@@ -112,6 +112,9 @@ public abstract class DarmokMojo extends AbstractMojo {
 	RedPhase redPhase;
 	GreenPhase greenPhase;
 	RefactorPhase refactorPhase;
+	protected String artifactId;
+	protected String sheepDogRoot;
+	protected Supplier<String> uuidSupplier;
 
 	// Runner factories — default to production constructors; tests override via setters.
 	GitRunnerFactory gitRunnerFactory = GitRunner::new;
@@ -163,22 +166,25 @@ public abstract class DarmokMojo extends AbstractMojo {
 		git = gitRunnerFactory.create(runnerLog);
 		verifyGitBranch();
 		maven = mavenRunnerFactory.create(runnerLog);
-		String sheepDogRoot = baseDir + "/../..";
-		String artifactId = targetProject != null && !targetProject.isEmpty()
+		sheepDogRoot = baseDir + "/../..";
+		artifactId = targetProject != null && !targetProject.isEmpty()
 			? targetProject : project.getArtifactId();
+		uuidSupplier = () -> UUID.randomUUID().toString();
 		GitRunner phaseGit = gitRunnerFactory.create(runnerLog);
-		Supplier<String> uuidSupplier = () -> UUID.randomUUID().toString();
 		redPhase = new RedPhase(maven, mojoLog, baseDir, specsDir, host, onlyChanges);
 		greenPhase = new GreenPhase(
-			claudeRunnerFactory.create(runnerLog, modelGreen, maxRetries, retryWaitSeconds, maxClaudeSeconds,
-				claudeSessionIdEnabled, uuidSupplier),
+			makeClaudeRunner(modelGreen),
 			maven, phaseGit, mojoLog, sheepDogRoot, baseDir, artifactId, maxVerifyAttempts, maxTimeoutAttempts, maxClaudeSeconds,
 			maxAllowlistAttempts);
 		refactorPhase = new RefactorPhase(
-			claudeRunnerFactory.create(runnerLog, modelRefactor, maxRetries, retryWaitSeconds, maxClaudeSeconds,
-				claudeSessionIdEnabled, uuidSupplier),
+			makeClaudeRunner(modelRefactor),
 			maven, phaseGit, mojoLog, sheepDogRoot, baseDir, artifactId, maxVerifyAttempts, maxTimeoutAttempts, maxClaudeSeconds,
 			maxAllowlistAttempts, refactorSessionMode);
+	}
+
+	protected ClaudeRunner makeClaudeRunner(String model) {
+		return claudeRunnerFactory.create(runnerLog, model, maxRetries, retryWaitSeconds, maxClaudeSeconds,
+			claudeSessionIdEnabled, uuidSupplier);
 	}
 
 	/** Test-only setter. Lets tests pre-seed baseDir before execute() so init() skips the MavenProject path. */

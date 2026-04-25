@@ -37,12 +37,13 @@ Feature: Gen From Comparison
       And The code-prj project darmok.mojo.log file will be as follows
           | Level | Category | Content                                                                       |
           | INFO  | mojo     | RGR Automation Plugin (gen-from-comparison)                                   |
+          | DEBUG | mojo     | Cleanup: Deleted 0 NUL files                                                  |
+          | DEBUG | mojo     | Cleanup: Deleted target directory                                             |
           | INFO  | mojo     | Processing Scenario: ProcessDarmok/User logs in successfully [loginHappyPath] |
           | DEBUG | mojo     | Added tag @loginHappyPath to file                                             |
           | INFO  | mojo     | Red: Running maven...                                                         |
           | INFO  | mojo     | Red: Committing                                                               |
           | INFO  | mojo     | Green: Running...                                                             |
-          | INFO  | mojo     | Green: Committing                                                             |
           | INFO  | mojo     | Refactor: Running...                                                          |
           | INFO  | mojo     | Refactor: Committing                                                          |
           | INFO  | mojo     | RGR Automation Complete!                                                      |
