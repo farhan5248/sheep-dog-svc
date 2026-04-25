@@ -20,18 +20,16 @@ Feature: Baseline Verification
           | Level | Category | Content                    |
           | DEBUG | runner   | Running: mvn clean install |
 
-  @GH312
+  @GH312 @GH320
   Scenario: Baseline build failure aborts the run
 
-    \@GH312
+    \@GH312 \@GH320
     `mvn clean install` returns non-zero. `verifyBaseline` writes an ERROR line to the mojo log and throws `MojoExecutionException` before any scenario iteration begins. No `RGR Automation Complete!` line appears, and `metrics.csv` is never opened ? the abort is observable end-to-end.
 
     Given The darmok plugin gen-from-existing goal mvn clean install command is executed but fails with
           | Phase    |
           | Baseline |
-     When The darmok plugin gen-from-existing goal is executed but fails with
-          | BaselineVerifyEnabled |
-          | true                  |
+     When The darmok plugin gen-from-existing goal is executed but fails
      Then The code-prj project darmok.mojo.log file will be as follows
           | Level | Category | Content                          |
           | ERROR | mojo     | Baseline build failed. Aborting. |
