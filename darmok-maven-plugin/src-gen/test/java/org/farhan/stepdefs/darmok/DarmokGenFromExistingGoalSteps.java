@@ -56,6 +56,11 @@ public class DarmokGenFromExistingGoalSteps extends TestSteps {
         object.doEdgeStep("claude /rgr-refactor", "command", "is", "hung on first call then completed on resume");
     }
 
+    @Given("^The darmok plugin gen-from-existing goal claude command is executed and succeeds with$")
+    public void claudeCommandIsExecutedAndSucceedsWith(DataTable dataTable) {
+        object.doEdgeStep("claude", "command", "is", "executed and succeeds with", dataTable);
+    }
+
     @Given("^The darmok plugin gen-from-existing goal git command is executed and succeeds with$")
     public void gitCommandIsExecutedAndSucceedsWith(DataTable dataTable) {
         object.doEdgeStep("git", "command", "is", "executed and succeeds with", dataTable);
@@ -106,6 +111,11 @@ public class DarmokGenFromExistingGoalSteps extends TestSteps {
         object.doEdgeStep("mvn clean install", "command", "is", "executed and fails then passes in the refactor phase", dataTable);
     }
 
+    @Given("^The darmok plugin gen-from-existing goal mvn clean install command is executed but fails with$")
+    public void mvnCleanInstallCommandIsExecutedButFailsWith(DataTable dataTable) {
+        object.doEdgeStep("mvn clean install", "command", "is", "executed but fails with", dataTable);
+    }
+
     @Given("^The darmok plugin gen-from-existing goal mvn clean verify command is executed but fails for all attempts$")
     public void mvnCleanVerifyCommandIsExecutedButFailsForAllAttempts(DataTable dataTable) {
         object.doEdgeStep("mvn clean verify", "command", "is", "executed but fails for all attempts", dataTable);
@@ -124,15 +134,5 @@ public class DarmokGenFromExistingGoalSteps extends TestSteps {
     @Given("^The darmok plugin gen-from-existing goal mvn uml-to-cucumber-guice command is executed but failed$")
     public void mvnUmlToCucumberGuiceCommandIsExecutedButFailed(DataTable dataTable) {
         object.doEdgeStep("mvn uml-to-cucumber-guice", "command", "is", "executed but failed", dataTable);
-    }
-
-    @Given("^The darmok plugin gen-from-existing goal claude command is executed and succeeds with$")
-    public void claudeCommandIsExecutedAndSucceedsWith(DataTable dataTable) {
-        object.doEdgeStep("claude", "command", "is", "executed and succeeds with", dataTable);
-    }
-
-    @Given("^The darmok plugin gen-from-existing goal mvn clean install command is executed but fails with$")
-    public void mvnCleanInstallCommandIsExecutedButFailsWith(DataTable dataTable) {
-        object.doEdgeStep("mvn clean install", "command", "is", "executed but fails with", dataTable);
     }
 }

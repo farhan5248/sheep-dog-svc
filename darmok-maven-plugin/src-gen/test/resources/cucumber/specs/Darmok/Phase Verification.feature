@@ -48,9 +48,9 @@ Feature: Phase Verification
           | INFO  | mojo     | Refactor: Verify running... |
           | INFO  | mojo     | Refactor: Committing        |
       And The code-prj project darmok.runners.log file will be as follows
-          | Level | Category | Content                                                                                                                                                  |
-          | DEBUG | runner   | Executing: claude --print --session-id 00000000-0000-0000-0000-000000000002 --dangerously-skip-permissions --model sonnet /rgr-refactor forward code-prj |
-          | DEBUG | runner   | Running: mvn clean verify                                                                                                                                |
+          | Level | Category | Content                                                                                                                                              |
+          | DEBUG | runner   | Executing: claude --resume 00000000-0000-0000-0000-000000000001 --print --dangerously-skip-permissions --model sonnet /rgr-refactor forward code-prj |
+          | DEBUG | runner   | Running: mvn clean verify                                                                                                                            |
 
   Scenario: Green verify fails once then succeeds after resume
 
@@ -106,7 +106,7 @@ Feature: Phase Verification
       And The code-prj project darmok.runners.log file will be as follows
           | Level | Category | Content                                                                                                                                                         |
           | DEBUG | runner   | Running: mvn clean verify                                                                                                                                       |
-          | DEBUG | runner   | Executing: claude --resume 00000000-0000-0000-0000-000000000002 --print --dangerously-skip-permissions --model sonnet mvn clean verify failures should be fixed |
+          | DEBUG | runner   | Executing: claude --resume 00000000-0000-0000-0000-000000000001 --print --dangerously-skip-permissions --model sonnet mvn clean verify failures should be fixed |
           | DEBUG | runner   | Running: mvn clean verify                                                                                                                                       |
 
   Scenario: Refactor verify fails for every attempt

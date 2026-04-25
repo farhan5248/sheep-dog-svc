@@ -54,9 +54,9 @@ Feature: Directory Allowlist
           | INFO  | mojo     | Refactor: Allowlist check passed, proceeding |
           | INFO  | mojo     | Refactor: Verify running...                  |
       And The code-prj project darmok.runners.log file will be as follows
-          | Level | Category | Content                                                                                                                                                  |
-          | DEBUG | runner   | Executing: claude --print --session-id 00000000-0000-0000-0000-000000000002 --dangerously-skip-permissions --model sonnet /rgr-refactor forward code-prj |
-          | DEBUG | runner   | Running: git status --porcelain                                                                                                                          |
+          | Level | Category | Content                                                                                                                                              |
+          | DEBUG | runner   | Executing: claude --resume 00000000-0000-0000-0000-000000000001 --print --dangerously-skip-permissions --model sonnet /rgr-refactor forward code-prj |
+          | DEBUG | runner   | Running: git status --porcelain                                                                                                                      |
 
   @GH141
   Scenario: Green allowlist fails once then succeeds after revert and resume
@@ -119,10 +119,10 @@ Feature: Directory Allowlist
           | INFO  | mojo     | Refactor: Verify running...                                                           |
       And The code-prj project darmok.runners.log file will be as follows
           | Level | Category | Content                                                                                                                                                                                      |
-          | DEBUG | runner   | Executing: claude --print --session-id 00000000-0000-0000-0000-000000000002 --dangerously-skip-permissions --model sonnet /rgr-refactor forward code-prj                                     |
+          | DEBUG | runner   | Executing: claude --resume 00000000-0000-0000-0000-000000000001 --print --dangerously-skip-permissions --model sonnet /rgr-refactor forward code-prj                                         |
           | DEBUG | runner   | Running: git status --porcelain                                                                                                                                                              |
           | DEBUG | runner   | Running: git checkout HEAD -- pom.xml                                                                                                                                                        |
-          | DEBUG | runner   | Executing: claude --resume 00000000-0000-0000-0000-000000000002 --print --dangerously-skip-permissions --model sonnet only modify files under src/main/java or src/test/java/org/farhan/impl |
+          | DEBUG | runner   | Executing: claude --resume 00000000-0000-0000-0000-000000000001 --print --dangerously-skip-permissions --model sonnet only modify files under src/main/java or src/test/java/org/farhan/impl |
           | DEBUG | runner   | Running: git status --porcelain                                                                                                                                                              |
 
   @GH141

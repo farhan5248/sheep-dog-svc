@@ -76,7 +76,27 @@ public class ClaudeRunner extends ProcessRunner {
 
 	@Override
 	public int run(String workingDirectory, String... args) throws Exception {
-		List<String> command = buildCommand(args);
+		return runWithRetry(buildCommand(args), workingDirectory);
+	}
+
+	public int resume(String workingDirectory, String message) throws Exception {
+		List<String> command = new ArrayList<>();
+		command.add(isWindows() ? "claude.cmd" : "claude");
+		command.add("--resume");
+		if (sessionIdEnabled && sessionId != null) {
+			command.add(sessionId);
+		}
+		command.add("--print");
+		command.add("--dangerously-skip-permissions");
+		if (model != null && !model.isEmpty()) {
+			command.add("--model");
+			command.add(model);
+		}
+		command.add(message);
+		return runWithRetry(command, workingDirectory);
+	}
+
+	private int runWithRetry(List<String> command, String workingDirectory) throws Exception {
 		Log log = getLog();
 		int attempt = 0;
 		int exitCode = -1;
@@ -117,30 +137,6 @@ public class ClaudeRunner extends ProcessRunner {
 				break;
 			}
 		}
-		return exitCode;
-	}
-
-	public int resume(String workingDirectory, String message) throws Exception {
-		List<String> command = new ArrayList<>();
-		command.add(isWindows() ? "claude.cmd" : "claude");
-		command.add("--resume");
-		if (sessionIdEnabled && sessionId != null) {
-			command.add(sessionId);
-		}
-		command.add("--print");
-		command.add("--dangerously-skip-permissions");
-		if (model != null && !model.isEmpty()) {
-			command.add("--model");
-			command.add(model);
-		}
-		command.add(message);
-
-		List<String> outputLines = new ArrayList<>();
-		int exitCode = executeCommand(command, workingDirectory, outputLines);
-		if (exitCode == TIMEOUT_EXIT_CODE) {
-			return TIMEOUT_EXIT_CODE;
-		}
-		getLog().debug("Claude CLI exited with code " + exitCode);
 		return exitCode;
 	}
 

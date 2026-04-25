@@ -30,6 +30,14 @@ public interface GenFromExistingGoal {
 
     public void setClaudeRgrRefactorCommandHungOnFirstCallThenCompletedOnResume(HashMap<String, String> keyMap);
 
+    public void setClaudeCommandExecutedAndSucceedsWith(HashMap<String, String> keyMap);
+
+    public void setClaudeCommandCommandParameters(HashMap<String, String> keyMap);
+
+    public void setClaudeCommandAttempt(HashMap<String, String> keyMap);
+
+    public void setClaudeCommandPath(HashMap<String, String> keyMap);
+
     public void setGitCommandExecutedAndSucceedsWith(HashMap<String, String> keyMap);
 
     public void setGitCommandCommandParameters(HashMap<String, String> keyMap);
@@ -40,7 +48,13 @@ public interface GenFromExistingGoal {
 
     public void setExecutedAndSucceedsWith(HashMap<String, String> keyMap);
 
+    public void setBaselineVerifyEnabled(HashMap<String, String> keyMap);
+
+    public void setClaudeSessionIdEnabled(HashMap<String, String> keyMap);
+
     public void setGitBranch(HashMap<String, String> keyMap);
+
+    public void setTzAwareTimestampsEnabled(HashMap<String, String> keyMap);
 
     public void setMaxClaudeSeconds(HashMap<String, String> keyMap);
 
@@ -51,6 +65,8 @@ public interface GenFromExistingGoal {
     public void setModelGreen(HashMap<String, String> keyMap);
 
     public void setModelRefactor(HashMap<String, String> keyMap);
+
+    public void setRefactorSessionMode(HashMap<String, String> keyMap);
 
     public void setExecutedButFails(HashMap<String, String> keyMap);
 
@@ -74,6 +90,10 @@ public interface GenFromExistingGoal {
 
     public void setMvnCleanInstallCommandExecutedAndFailsThenPassesInTheRefactorPhase(HashMap<String, String> keyMap);
 
+    public void setMvnCleanInstallCommandExecutedButFailsWith(HashMap<String, String> keyMap);
+
+    public void setMvnCleanInstallCommandPhase(HashMap<String, String> keyMap);
+
     public void setMvnCleanVerifyCommandExecutedButFailsForAllAttempts(HashMap<String, String> keyMap);
 
     public void setMvnCleanVerifyCommandPhase(HashMap<String, String> keyMap);
@@ -91,24 +111,4 @@ public interface GenFromExistingGoal {
     public void setMvnUmlToCucumberGuiceCommandExit(HashMap<String, String> keyMap);
 
     public void setMvnUmlToCucumberGuiceCommandOutput(HashMap<String, String> keyMap);
-
-    public void setClaudeCommandExecutedAndSucceedsWith(HashMap<String, String> keyMap);
-
-    public void setClaudeCommandCommandParameters(HashMap<String, String> keyMap);
-
-    public void setClaudeCommandAttempt(HashMap<String, String> keyMap);
-
-    public void setClaudeCommandPath(HashMap<String, String> keyMap);
-
-    public void setClaudeSessionIdEnabled(HashMap<String, String> keyMap);
-
-    public void setBaselineVerifyEnabled(HashMap<String, String> keyMap);
-
-    public void setMvnCleanInstallCommandExecutedButFailsWith(HashMap<String, String> keyMap);
-
-    public void setMvnCleanInstallCommandPhase(HashMap<String, String> keyMap);
-
-    public void setTzAwareTimestampsEnabled(HashMap<String, String> keyMap);
-
-    public void setRefactorSessionMode(HashMap<String, String> keyMap);
 }

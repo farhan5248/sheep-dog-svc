@@ -2,11 +2,9 @@
 Feature: Claude Retry Loop Session ID
 
   \@darmok-maven-plugin
-  Every claude invocation darmok makes runs in `--print` mode, where the Claude CLI requires a valid session ID on every `--resume` call. To honour that, `ClaudeRunner` generates a fresh UUID on each initial call, passes it via `--session-id <uuid>`, captures it on the per-phase runner instance, and reuses it as `--resume <uuid> <message>` for every resume in that phase's downstream sub-machines (Phase Timeout, Directory Allowlist, Phase Verification). Green and refactor phases use separate `ClaudeRunner` instances and therefore separate UUIDs. These Test-Cases pin down the observable contract: the initial call emits `--session-id`, the resume reuses the same UUID within the phase, and the refactor UUID differs from the green one. See issue 311 for the motivation.
-  The maven parameter `claudeSessionIdEnabled` defaults to `true` ? the new observable is always on in production and tests. The flag parameter stays in the code as a redundant knob for now (a follow-up cleanup can remove it entirely once there's no concern the CLI's `--resume` semantics might change again).
-  The UUID supplier is an injected seam on `ClaudeRunner` (a `Supplier<String>`); production code uses `UUID.randomUUID().toString()`, tests inject a scripted supplier that returns fixed values so specs can assert against literal UUIDs. Test defaults:
+  Every claude invocation darmok makes runs in `--print` mode, where the Claude CLI requires a valid session ID on every `--resume` call. To honour that, `ClaudeRunner` generates a fresh UUID on each initial call, passes it via `--session-id <uuid>`, captures it on the runner instance, and reuses it as `--resume <uuid> <message>` for every resume in that phase's downstream sub-machines (Phase Timeout, Directory Allowlist, Phase Verification). These Test-Cases pin down the observable contract for the green phase: the initial call emits `--session-id`, and the resume reuses the same UUID. Refactor inherits green's UUID by default (issue The maven parameter `claudeSessionIdEnabled` defaults to `true` ? the new observable is always on in production and tests. The flag parameter stays in the code as a redundant knob for now (a follow-up cleanup can remove it entirely once there's no concern the CLI's `--resume` semantics might change again).
+  The UUID supplier is an injected seam on `ClaudeRunner` (a `Supplier<String>`); production code uses `UUID.randomUUID().toString()`, tests inject a scripted supplier that returns fixed values so specs can assert against literal UUIDs. Test default:
   - Green phase UUID: `00000000-0000-0000-0000-000000000001`
-  - Refactor phase UUID: `00000000-0000-0000-0000-000000000002`
 
   Background: A failing scenario that reaches both phases
 
@@ -53,16 +51,4 @@ Feature: Claude Retry Loop Session ID
           | DEBUG | runner   | Running: mvn clean verify                                                                                                                                       |
           | DEBUG | runner   | Executing: claude --resume 00000000-0000-0000-0000-000000000001 --print --dangerously-skip-permissions --model sonnet mvn clean verify failures should be fixed |
           | DEBUG | runner   | Running: mvn clean verify                                                                                                                                       |
-
-  @GH311
-  Scenario: Refactor initial call carries a different session ID from green
-
-    \@GH311
-    The refactor phase uses a separate `ClaudeRunner` instance, and therefore a separate UUID. Proves the per-phase isolation: green's UUID is not reused for refactor, and vice versa.
-
-     When The darmok plugin gen-from-existing goal is executed and succeeds
-     Then The code-prj project darmok.runners.log file will be as follows
-          | Level | Category | Content                                                                                                                                                      |
-          | DEBUG | runner   | Executing: claude --print --session-id 00000000-0000-0000-0000-000000000001 --dangerously-skip-permissions --model sonnet /rgr-green code-prj loginHappyPath |
-          | DEBUG | runner   | Executing: claude --print --session-id 00000000-0000-0000-0000-000000000002 --dangerously-skip-permissions --model sonnet /rgr-refactor forward code-prj     |
 

@@ -45,7 +45,7 @@ public void execute() throws MojoExecutionException {
 
 ### execute
 
-Maven goal entry point — invoked by the Maven framework via the `@Mojo(name = ...)` annotation. Tests exercise it through `MavenTestObject.executeMojo`, which constructs the mojo, wires the project + test seams, and calls `execute()`.
+Maven goal entry point — invoked by the Maven framework via the `@Mojo(name = ...)` annotation. Tests exercise it through `MavenTestObject.executeMojo`, which constructs the mojo, wires the project + test seams, and calls `execute()`. The actual implementation lives on `DarmokMojo` (final); see that class's `### execute` below.
 
 **Example: test-side invocation in `MavenTestObject.executeMojo`** (`src/test/java/org/farhan/common/MavenTestObject.java`)
 ```java
@@ -61,6 +61,26 @@ mojo.execute();
 ## DarmokMojo
 
 The same `MavenTestObject.executeMojo` snippet shown under `{Goal}Mojo.execute` exercises every public method in `DarmokMojo` (the `@Parameter` fields, `setBaseDir`, and the three runner-factory setters). Each section below points back to that snippet and shows the relevant call line.
+
+### execute
+
+Maven plugin lifecycle entry point. Marked `final` on `DarmokMojo` so concrete `{Goal}Mojo` subclasses contribute via `doExecute()` and `goalName()` rather than overriding `execute()`. The Maven framework calls `mojo.execute()` on the goal subclass; the polymorphic dispatch lands on `DarmokMojo`'s implementation, which wraps `init()` / `cleanWorkspace()` / `verifyBaseline()` / `doExecute()` / log close in the canonical try/finally.
+
+**Example: lifecycle wrapper in `DarmokMojo.execute`** (`src/main/java/org/farhan/mbt/maven/DarmokMojo.java`)
+```java
+public final void execute() throws MojoExecutionException {
+    try {
+        init();
+        // ... cleanWorkspace, verifyBaseline, doExecute, log totals ...
+    } catch (MojoExecutionException e) {
+        throw e;
+    } catch (Exception e) {
+        throw new MojoExecutionException(e.getMessage(), e);
+    } finally {
+        closeLogs();
+    }
+}
+```
 
 ### setBaseDir
 
@@ -80,8 +100,8 @@ Test-only setters that swap the production runner factories (`{Tool}Runner::new`
 ProcessStarter starter = (ProcessStarter) getProperty("processStarter");
 mojo.setGitRunnerFactory(log -> new GitRunner(log, starter));
 mojo.setMavenRunnerFactory(log -> new MavenRunner(log, starter));
-mojo.setClaudeRunnerFactory((log, model, retries, wait, maxSeconds) ->
-    new ClaudeRunner(log, model, retries, wait, maxSeconds, starter));
+mojo.setClaudeRunnerFactory((log, model, retries, wait, maxSeconds, sessionEnabled, uuidSupplier) ->
+    new ClaudeRunner(log, model, retries, wait, maxSeconds, sessionEnabled, testUuidSupplier, starter));
 ```
 
 ## RgrPhase
@@ -104,6 +124,18 @@ if (state.exitCode != 100) {
     state = refactorPhase.run(state);
     if (state.exitCode != 0) throw new MojoExecutionException(...);
 }
+```
+
+## {RgrPhase}Phase
+
+### prepareSession
+
+`RefactorPhase`-only. Pre-phase hook called by `DarmokMojo.processScenario` **before** `refactorPhase.run(state)` so the work it performs is excluded from the timed `phase_refactor_ms` window. No-op when `refactorSessionMode=fresh`. When `refactorSessionMode=continue` (issue #287) it copies green's UUID into refactor's `ClaudeRunner` and issues `claude --resume <green-uuid> /compact` to scope refactor's review to the files green just touched.
+
+**Example: untimed session inheritance in `DarmokMojo.processScenario`** (`src/main/java/org/farhan/mbt/maven/DarmokMojo.java`)
+```java
+refactorPhase.prepareSession(greenPhase.claude);
+state = refactorPhase.run(state);
 ```
 
 ## ProcessRunner
@@ -154,6 +186,30 @@ claude.resume(workingDir, VERIFY_RESUME_MESSAGE);  // "mvn clean verify failures
 **Example: timeout recovery in `RgrPhase.runTimeoutRecoveryLoop`** (`src/main/java/org/farhan/mbt/maven/RgrPhase.java`)
 ```java
 claude.resume(workingDir, TIMEOUT_RESUME_MESSAGE);  // "pls continue"
+```
+
+### getSessionId
+
+`ClaudeRunner`-only. Returns the UUID captured on the runner's first `--print` call. Read by `RefactorPhase.prepareSession` (issue #287) when `refactorSessionMode=continue` so refactor can inherit green's session.
+
+**Example: read green's UUID in `RefactorPhase.prepareSession`** (`src/main/java/org/farhan/mbt/maven/RefactorPhase.java`)
+```java
+claude.setSessionId(greenClaude.getSessionId());
+```
+
+### setSessionId
+
+`ClaudeRunner`-only. Overrides the captured UUID before the next claude call so a sibling phase can inherit an existing session. Called by `RefactorPhase.prepareSession` (issue #287) to copy green's UUID into refactor's runner; the next `claude --resume` (issued for `/compact` and then `/rgr-refactor`) carries the inherited UUID.
+
+**Example: inherit green's session in `RefactorPhase.prepareSession`** (`src/main/java/org/farhan/mbt/maven/RefactorPhase.java`)
+```java
+public void prepareSession(ClaudeRunner greenClaude) throws Exception {
+    if (!"continue".equals(refactorSessionMode)) {
+        return;
+    }
+    claude.setSessionId(greenClaude.getSessionId());
+    claude.resume(workingDir, "/compact");
+}
 ```
 
 ### getCurrentCommit

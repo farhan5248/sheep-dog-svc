@@ -51,5 +51,5 @@ Feature: Gen From Comparison
           | Level | Category | Content                                                                                                                                                        |
           | DEBUG | runner   | Executing: claude --print --session-id 00000000-0000-0000-0000-000000000001 --dangerously-skip-permissions --model sonnet /rgr-gen-from-comparison darmok-prj  |
           | DEBUG | runner   | Executing: claude --print --session-id 00000000-0000-0000-0000-000000000002 --dangerously-skip-permissions --model sonnet /rgr-green darmok-prj loginHappyPath |
-          | DEBUG | runner   | Executing: claude --print --session-id 00000000-0000-0000-0000-000000000003 --dangerously-skip-permissions --model sonnet /rgr-refactor forward darmok-prj     |
+          | DEBUG | runner   | Executing: claude --resume 00000000-0000-0000-0000-000000000002 --print --dangerously-skip-permissions --model sonnet /rgr-refactor forward darmok-prj         |
 

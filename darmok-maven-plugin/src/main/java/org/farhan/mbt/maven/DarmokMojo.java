@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Supplier;
 
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -98,7 +99,7 @@ public abstract class DarmokMojo extends AbstractMojo {
 	@Parameter(property = "targetProject")
 	String targetProject;
 
-	@Parameter(property = "refactorSessionMode", defaultValue = "fresh")
+	@Parameter(property = "refactorSessionMode", defaultValue = "continue")
 	public String refactorSessionMode;
 
 	@Parameter(property = "metricsDir")
@@ -169,15 +170,16 @@ public abstract class DarmokMojo extends AbstractMojo {
 		String artifactId = targetProject != null && !targetProject.isEmpty()
 			? targetProject : project.getArtifactId();
 		GitRunner phaseGit = gitRunnerFactory.create(runnerLog);
+		Supplier<String> uuidSupplier = () -> UUID.randomUUID().toString();
 		redPhase = new RedPhase(maven, mojoLog, baseDir, specsDir, host, onlyChanges);
 		greenPhase = new GreenPhase(
 			claudeRunnerFactory.create(runnerLog, modelGreen, maxRetries, retryWaitSeconds, maxClaudeSeconds,
-				claudeSessionIdEnabled, () -> UUID.randomUUID().toString()),
+				claudeSessionIdEnabled, uuidSupplier),
 			maven, phaseGit, mojoLog, sheepDogRoot, baseDir, artifactId, maxVerifyAttempts, maxTimeoutAttempts, maxClaudeSeconds,
 			maxAllowlistAttempts);
 		refactorPhase = new RefactorPhase(
 			claudeRunnerFactory.create(runnerLog, modelRefactor, maxRetries, retryWaitSeconds, maxClaudeSeconds,
-				claudeSessionIdEnabled, () -> UUID.randomUUID().toString()),
+				claudeSessionIdEnabled, uuidSupplier),
 			maven, phaseGit, mojoLog, sheepDogRoot, baseDir, artifactId, maxVerifyAttempts, maxTimeoutAttempts, maxClaudeSeconds,
 			maxAllowlistAttempts, refactorSessionMode);
 	}
@@ -328,9 +330,7 @@ public abstract class DarmokMojo extends AbstractMojo {
 				commitIfChanged("run-rgr green " + scenarioName, "Green");
 			}
 
-			if ("continue".equals(refactorSessionMode)) {
-				refactorPhase.claude.setSessionId(greenPhase.claude.getSessionId());
-			}
+			refactorPhase.prepareSession(greenPhase.claude);
 			state = refactorPhase.run(state);
 			if (state.exitCode != 0) {
 				throw new MojoExecutionException("rgr-refactor failed with exit code " + state.exitCode);

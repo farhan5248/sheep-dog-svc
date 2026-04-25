@@ -20,10 +20,10 @@ Abstract base Mojo providing shared lifecycle, scenario iteration, RGR phase orc
 
 ## @Parameter
 
-**Desc**: Maven plugin configuration parameters with default values. Covers path properties (specsDir, asciidocDir, scenariosFile, metricsDir), server properties (host), Claude CLI properties (modelGreen, modelRefactor, coAuthor, maxRetries, retryWaitSeconds), phase-verify policy (maxVerifyAttempts — cap on `mvn clean verify` + `claude --resume` cycles inside each of GreenPhase and RefactorPhase before the phase aborts), phase-timeout policy (maxClaudeSeconds — per-invocation bound on any claude subprocess; maxTimeoutAttempts — cap on `mvn clean install` + `claude --resume "pls continue"` cycles inside the phase's timeout-recovery loop), phase-allowlist policy (maxAllowlistAttempts — cap on `git status --porcelain` + revert + `claude --resume` cycles inside the phase's directory-allowlist loop; see issue #141), behavior flags (onlyChanges, stage), and run identity (gitBranch — the branch this Darmok run is configured for; verified against git HEAD at init-time and written to every metrics.csv row as `git_branch`).
+**Desc**: Maven plugin configuration parameters with default values. Covers path properties (specsDir, asciidocDir, scenariosFile, metricsDir), server properties (host), Claude CLI properties (modelGreen, modelRefactor, coAuthor, maxRetries, retryWaitSeconds), phase-verify policy (maxVerifyAttempts — cap on `mvn clean verify` + `claude --resume` cycles inside each of GreenPhase and RefactorPhase before the phase aborts), phase-timeout policy (maxClaudeSeconds — per-invocation bound on any claude subprocess; maxTimeoutAttempts — cap on `mvn clean install` + `claude --resume "pls continue"` cycles inside the phase's timeout-recovery loop), phase-allowlist policy (maxAllowlistAttempts — cap on `git status --porcelain` + revert + `claude --resume` cycles inside the phase's directory-allowlist loop; see issue #141), behavior flags (onlyChanges, stage), feature-rollout flags gated for two-pass migrations (claudeSessionIdEnabled — issue #311; baselineVerifyEnabled — issue #312; tzAwareTimestampsEnabled — issue #316; refactorSessionMode — issue #287, `fresh` or `continue`), and run identity (gitBranch — the branch this Darmok run is configured for; verified against git HEAD at init-time and written to every metrics.csv row as `git_branch`).
 
 **Rule**: SOME attribute matches @Parameter pattern.
- - **Name**: `^(specsDir|asciidocDir|scenariosFile|metricsDir|host|modelGreen|modelRefactor|coAuthor|maxRetries|maxVerifyAttempts|maxClaudeSeconds|maxTimeoutAttempts|maxAllowlistAttempts|retryWaitSeconds|onlyChanges|stage|gitBranch)$`
+ - **Name**: `^(specsDir|asciidocDir|scenariosFile|metricsDir|host|modelGreen|modelRefactor|coAuthor|maxRetries|maxVerifyAttempts|maxClaudeSeconds|maxTimeoutAttempts|maxAllowlistAttempts|retryWaitSeconds|onlyChanges|stage|gitBranch|claudeSessionIdEnabled|baselineVerifyEnabled|tzAwareTimestampsEnabled|refactorSessionMode)$`
  - **Return**: `^(String|int|boolean)$`
  - **Modifier**: `^public$`
 
@@ -45,6 +45,10 @@ Abstract base Mojo providing shared lifecycle, scenario iteration, RGR phase orc
  - `public boolean onlyChanges`
  - `public boolean stage`
  - `public String gitBranch`
+ - `public boolean claudeSessionIdEnabled`
+ - `public boolean baselineVerifyEnabled`
+ - `public boolean tzAwareTimestampsEnabled`
+ - `public String refactorSessionMode`
 
 ## setBaseDir
 
@@ -73,6 +77,19 @@ Abstract base Mojo providing shared lifecycle, scenario iteration, RGR phase orc
  - `public void setGitRunnerFactory(GitRunnerFactory factory)`
  - `public void setMavenRunnerFactory(MavenRunnerFactory factory)`
  - `public void setClaudeRunnerFactory(ClaudeRunnerFactory factory)`
+
+## execute
+
+**Desc**: AbstractMojo lifecycle entry point. Wraps the goal-specific scenario iteration: calls `init()`, runs `cleanWorkspace()`, calls `verifyBaseline()` (gated by `baselineVerifyEnabled`), invokes the abstract `doExecute()` (implemented by `{Goal}Mojo` subclasses for the goal-specific iteration), logs the completion totals, and closes logs in a `finally` block. Marked `final` so subclasses can only contribute via `doExecute()` and `goalName()` — they cannot override the lifecycle wrapper.
+
+**Rule**: ONE method name follows execute pattern.
+ - **Name**: `^execute$`
+ - **Return**: `^void$`
+ - **Parameters**: `^\(\)$`
+ - **Modifier**: `^public final$`
+
+**Examples**:
+ - `public final void execute()`
 
 ## init
 

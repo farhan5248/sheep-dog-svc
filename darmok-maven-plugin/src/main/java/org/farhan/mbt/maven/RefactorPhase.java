@@ -23,10 +23,17 @@ public class RefactorPhase extends RgrPhase {
 		return true;
 	}
 
+	public void prepareSession(ClaudeRunner greenClaude) throws Exception {
+		if (!"continue".equals(refactorSessionMode)) {
+			return;
+		}
+		claude.setSessionId(greenClaude.getSessionId());
+		claude.resume(workingDir, "/compact");
+	}
+
 	@Override
 	protected int executeClaudeOrMaven(DarmokMojoState state) throws Exception {
 		if ("continue".equals(refactorSessionMode)) {
-			claude.resume(workingDir, "/compact");
 			int claudeExit = claude.resume(workingDir, "/rgr-refactor forward " + artifactId);
 			return runTimeoutRecoveryLoop(claudeExit);
 		}

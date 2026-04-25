@@ -61,7 +61,7 @@ Feature: Commit Behavior Full Cycle
           | DEBUG | runner   | Executing: claude --print --session-id 00000000-0000-0000-0000-000000000001 --dangerously-skip-permissions --model sonnet /rgr-green darmok-prj loginHappyPath |
           | DEBUG | runner   | Running: git add .                                                                                                                                             |
           | DEBUG | runner   | Running: git commit -m run-rgr green User logs in successfully                                                                                                 |
-          | DEBUG | runner   | Executing: claude --print --session-id 00000000-0000-0000-0000-000000000002 --dangerously-skip-permissions --model sonnet /rgr-refactor forward darmok-prj     |
+          | DEBUG | runner   | Executing: claude --resume 00000000-0000-0000-0000-000000000001 --print --dangerously-skip-permissions --model sonnet /rgr-refactor forward darmok-prj         |
           | DEBUG | runner   | Running: git add .                                                                                                                                             |
           | DEBUG | runner   | Running: git commit -m run-rgr refactor User logs in successfully                                                                                              |
 
@@ -98,7 +98,7 @@ Feature: Commit Behavior Full Cycle
           | DEBUG | runner   | Running: git commit -m run-rgr User logs in successfully                                                                                                       |
           | DEBUG | runner   | Executing: claude --print --session-id 00000000-0000-0000-0000-000000000001 --dangerously-skip-permissions --model sonnet /rgr-green darmok-prj loginHappyPath |
           | DEBUG | runner   | Running: git add .                                                                                                                                             |
-          | DEBUG | runner   | Executing: claude --print --session-id 00000000-0000-0000-0000-000000000002 --dangerously-skip-permissions --model sonnet /rgr-refactor forward darmok-prj     |
+          | DEBUG | runner   | Executing: claude --resume 00000000-0000-0000-0000-000000000001 --print --dangerously-skip-permissions --model sonnet /rgr-refactor forward darmok-prj         |
           | DEBUG | runner   | Running: git add .                                                                                                                                             |
           | DEBUG | runner   | Running: git commit --amend --no-edit                                                                                                                          |
 

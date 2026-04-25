@@ -8,17 +8,17 @@ Concrete subclasses of `ProcessRunner` that prepend a tool-specific executable t
 
 ## {Tool}Runner
 
-**Desc**: Constructs a runner by passing the Log to the ProcessRunner superclass. ClaudeRunner additionally accepts model, retry, and wait parameters.
+**Desc**: Constructs a runner by passing the Log to the ProcessRunner superclass. ClaudeRunner additionally accepts model, retry, wait, session-id flag, and UUID supplier parameters (the latter two added in issue #311 to support `--session-id` on `--print` invocations).
 
 **Rule**: SOME constructor matches {Tool}Runner pattern.
  - **Name**: `^{Tool}Runner$`
- - **Parameters**: `^\(Log\s+\w+(,\s*(String|int)\s+\w+)*\)$`
+ - **Parameters**: `^\(Log\s+\w+(,\s*(String|int|boolean|Supplier<String>)\s+\w+)*\)$`
  - **Modifier**: `^public$`
 
 **Examples**:
  - `public GitRunner(Log log)`
  - `public MavenRunner(Log log)`
- - `public ClaudeRunner(Log log, String model, int maxRetries, int retryWaitSeconds, int maxClaudeSeconds)`
+ - `public ClaudeRunner(Log log, String model, int maxRetries, int retryWaitSeconds, int maxClaudeSeconds, boolean sessionIdEnabled, Supplier<String> uuidSupplier)`
 
 ## {Tool}Runner (test seam)
 
@@ -26,13 +26,13 @@ Concrete subclasses of `ProcessRunner` that prepend a tool-specific executable t
 
 **Rule**: SOME constructors match {Tool}Runner test seam pattern.
  - **Name**: `^{Tool}Runner$`
- - **Parameters**: `^\(Log\s+\w+(,\s*(String|int)\s+\w+)*,\s*ProcessStarter\s+\w+\)$`
+ - **Parameters**: `^\(Log\s+\w+(,\s*(String|int|boolean|Supplier<String>)\s+\w+)*,\s*ProcessStarter\s+\w+\)$`
  - **Modifier**: `^public$`
 
 **Examples**:
  - `public GitRunner(Log log, ProcessStarter starter)`
  - `public MavenRunner(Log log, ProcessStarter starter)`
- - `public ClaudeRunner(Log log, String model, int maxRetries, int retryWaitSeconds, int maxClaudeSeconds, ProcessStarter starter)`
+ - `public ClaudeRunner(Log log, String model, int maxRetries, int retryWaitSeconds, int maxClaudeSeconds, boolean sessionIdEnabled, Supplier<String> uuidSupplier, ProcessStarter starter)`
 
 ## buildCommand
 
@@ -74,6 +74,32 @@ Concrete subclasses of `ProcessRunner` that prepend a tool-specific executable t
 
 **Examples**:
  - `public int resume(String workingDirectory, String message)` (ClaudeRunner — for phase-verify recovery)
+
+## getSessionId
+
+**Desc**: ClaudeRunner-only. Public accessor returning the UUID captured on the runner's first `--print` call (or `null` until the first call). Used by `RefactorPhase.prepareSession` (issue #287) so refactor can inherit green's session: `refactorPhase.claude.setSessionId(greenPhase.claude.getSessionId())`.
+
+**Rule**: SOME method names follow getSessionId pattern.
+ - **Name**: `^getSessionId$`
+ - **Return**: `^String$`
+ - **Parameters**: `^\(\)$`
+ - **Modifier**: `^public$`
+
+**Examples**:
+ - `public String getSessionId()` (ClaudeRunner)
+
+## setSessionId
+
+**Desc**: ClaudeRunner-only. Public mutator that overrides the captured UUID before the next claude call so a sibling phase can inherit an existing session rather than generate a fresh one. The next `claude --resume` invocation will carry the overridden value. Used by `RefactorPhase.prepareSession` (issue #287) when `refactorSessionMode=continue` to copy green's UUID into refactor's runner.
+
+**Rule**: SOME method names follow setSessionId pattern.
+ - **Name**: `^setSessionId$`
+ - **Return**: `^void$`
+ - **Parameters**: `^\(String\s+\w+\)$`
+ - **Modifier**: `^public$`
+
+**Examples**:
+ - `public void setSessionId(String sessionId)` (ClaudeRunner)
 
 ## getCurrentCommit
 
