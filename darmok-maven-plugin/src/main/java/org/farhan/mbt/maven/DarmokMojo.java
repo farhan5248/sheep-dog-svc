@@ -381,11 +381,9 @@ public abstract class DarmokMojo extends AbstractMojo {
 
 		// Find the end of the first scenario entry (File + Scenario + Tag block)
 		int removeUntil = 0;
-		boolean foundScenario = false;
 		for (int i = 0; i < lines.size(); i++) {
 			String line = lines.get(i);
-			if (line.startsWith("    Tag: ") && !foundScenario) {
-				foundScenario = true;
+			if (line.startsWith("    Tag: ")) {
 				removeUntil = i + 1;
 				// Skip any blank lines after the tag
 				while (removeUntil < lines.size() && lines.get(removeUntil).trim().isEmpty()) {
@@ -395,26 +393,11 @@ public abstract class DarmokMojo extends AbstractMojo {
 			}
 		}
 
-		if (!foundScenario) {
-			// File has no valid entries, clear it
-			Files.writeString(scenariosPath, "", StandardCharsets.UTF_8);
-			return;
-		}
-
-		// Check if the next entry has a different File: header or another Scenario: under same file
 		List<String> remaining = new ArrayList<>(lines.subList(removeUntil, lines.size()));
 
-		// If next line is "  Scenario:" (same file), we need to keep the File: header
+		// If next line is "  Scenario:" (same file), re-prepend the File: header (always at lines.get(0))
 		if (!remaining.isEmpty() && remaining.get(0).startsWith("  Scenario: ")) {
-			// Re-add the File: header from the removed entry
-			String fileHeader = "";
-			for (String line : lines) {
-				if (line.startsWith("File: ")) {
-					fileHeader = line;
-					break;
-				}
-			}
-			remaining.add(0, fileHeader);
+			remaining.add(0, lines.get(0));
 		}
 
 		if (remaining.isEmpty()) {
