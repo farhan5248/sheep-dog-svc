@@ -307,11 +307,6 @@ public class GenFromExistingGoalImpl extends MavenTestObject implements GenFromE
 	}
 
 	@Override
-	public void setTzAwareTimestampsEnabled(HashMap<String, String> keyMap) {
-		setProperty("tzAwareTimestampsEnabled", keyMap.get("TzAwareTimestampsEnabled"));
-	}
-
-	@Override
 	public void setRefactorSessionMode(HashMap<String, String> keyMap) {
 		setProperty("refactorSessionMode", keyMap.get("RefactorSessionMode"));
 	}
