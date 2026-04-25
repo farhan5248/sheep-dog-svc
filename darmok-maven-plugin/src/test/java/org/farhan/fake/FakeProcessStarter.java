@@ -23,6 +23,14 @@ import org.farhan.mbt.maven.ProcessRunner.ProcessStarter;
  * <ul>
  *   <li><b>git diff --cached --quiet</b> — exit 0 when {@code gitWorkspaceState} is
  *       {@code "clean"}, exit 1 otherwise (matching TestConfig default of dirty workspace).</li>
+ *   <li><b>git status --porcelain</b> — synthesized from in-memory filesystem state:
+ *       reports {@code  M scenarios-list.txt} when current content differs from the
+ *       last-committed snapshot. Combined with the {@code claudeCommandPath} override
+ *       which forces a single-shot violation on a configured path. The constructor
+ *       snapshots scenarios-list.txt content; {@code git commit} refreshes the
+ *       snapshot; {@code git checkout HEAD -- scenarios-list.txt} restores from it.
+ *       Lets allowlist Test-Cases fail correctly when production code modifies
+ *       scenarios-list.txt before the gate runs (issue #322).</li>
  *   <li><b>claude /rgr-green</b> — dispatches on {@code claudeGreenMode} (retry-success /
  *       retry-exhaust / non-retryable / default success) then on {@code claudeGreenHangMode}
  *       (hung-until-killed / hung-first / hung-every).</li>
@@ -76,6 +84,7 @@ public class FakeProcessStarter implements ProcessStarter {
 	private final String claudeCommandPhase;
 	private final Path codePrjBaseDir;
 	private final Path eventLogPath;
+	private final Path scenariosListPath;
 	private static final DateTimeFormatter EVENT_LOG_TS = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
 
 	private int greenCalls = 0;
@@ -88,6 +97,7 @@ public class FakeProcessStarter implements ProcessStarter {
 	private int greenAllowlistChecks = 0;
 	private int refactorAllowlistChecks = 0;
 	private String currentPhase;
+	private String scenariosListSnapshot;
 
 	public FakeProcessStarter(Map<String, Object> properties) {
 		this.claudeGreenMode = string(properties, "claudeGreenMode");
@@ -131,6 +141,9 @@ public class FakeProcessStarter implements ProcessStarter {
 		this.codePrjBaseDir = baseDir instanceof Path ? (Path) baseDir : null;
 		Object logDir = properties.get("log.dir");
 		this.eventLogPath = logDir instanceof Path p ? p.resolve("mojo.event.log") : null;
+		this.scenariosListPath = this.codePrjBaseDir == null ? null
+			: this.codePrjBaseDir.resolve("scenarios-list.txt");
+		this.scenariosListSnapshot = readScenariosList();
 	}
 
 	@Override
@@ -156,15 +169,28 @@ public class FakeProcessStarter implements ProcessStarter {
 
 		if (joined.contains("status") && joined.contains("--porcelain")) {
 			int count = "green".equals(currentPhase) ? ++greenAllowlistChecks : ++refactorAllowlistChecks;
+			StringBuilder out = new StringBuilder();
 			if (claudeCommandPath != null
 					&& (claudeCommandPhase == null || claudeCommandPhase.equals(currentPhase))
 					&& (claudeCommandAttempt == null || String.valueOf(count).equals(claudeCommandAttempt))) {
-				return new FakeProcess(" M " + claudeCommandPath, 0);
+				out.append(" M ").append(claudeCommandPath);
+			}
+			if (scenariosListIsModified()) {
+				if (out.length() > 0) out.append("\n");
+				out.append(" M scenarios-list.txt");
+			}
+			return new FakeProcess(out.toString(), 0);
+		}
+
+		if (joined.contains("checkout") && joined.contains("HEAD") && joined.contains("--")) {
+			if (cmd.stream().anyMatch(a -> a.endsWith("scenarios-list.txt"))) {
+				restoreScenariosListFromSnapshot();
 			}
 			return new FakeProcess("", 0);
 		}
 
-		if (joined.contains("checkout") && joined.contains("HEAD") && joined.contains("--")) {
+		if (cmd.size() >= 2 && cmd.get(0).toLowerCase().startsWith("git") && "commit".equals(cmd.get(1))) {
+			scenariosListSnapshot = readScenariosList();
 			return new FakeProcess("", 0);
 		}
 
@@ -278,6 +304,35 @@ public class FakeProcessStarter implements ProcessStarter {
 		}
 
 		return new FakeProcess("", 0);
+	}
+
+	private String readScenariosList() {
+		if (scenariosListPath == null || !Files.exists(scenariosListPath)) return null;
+		try {
+			return Files.readString(scenariosListPath, StandardCharsets.UTF_8);
+		} catch (IOException e) {
+			throw new UncheckedIOException(e);
+		}
+	}
+
+	private boolean scenariosListIsModified() {
+		if (scenariosListPath == null) return false;
+		String current = readScenariosList();
+		return !java.util.Objects.equals(current, scenariosListSnapshot);
+	}
+
+	private void restoreScenariosListFromSnapshot() {
+		if (scenariosListPath == null) return;
+		try {
+			if (scenariosListSnapshot != null) {
+				Files.createDirectories(scenariosListPath.getParent());
+				Files.writeString(scenariosListPath, scenariosListSnapshot, StandardCharsets.UTF_8);
+			} else {
+				Files.deleteIfExists(scenariosListPath);
+			}
+		} catch (IOException e) {
+			throw new UncheckedIOException(e);
+		}
 	}
 
 	private void appendEventLog(String joinedCmd) {
