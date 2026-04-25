@@ -5,10 +5,8 @@ Feature: Baseline Verification
   Before any scenario work, Darmok verifies the target project builds cleanly with `mvn clean install`. A non-zero exit aborts the run with an ERROR line to `darmok.mojo.<date>.log` and a `MojoExecutionException`, so a red working tree can't silently accumulate scenario commits on top of itself ? the first failing test would otherwise be ambiguous between "my new change broke it" and "it was already broken". The check fires after `cleanWorkspace` (so `target/` is freshly gone) and before `scenarios-list.txt` is read.
   Gated by the `baselineVerifyEnabled` maven parameter, on by default (issue
 
-  @GH312 @GH320
   Scenario: Baseline build passes and scenario loop proceeds
 
-    \@GH312 \@GH320
     `mvn clean install` returns exit 0. `verifyBaseline` passes silently and control flows into the scenario loop. `scenarios-list.txt` is absent (nothing seeded in the Given), so the loop immediately prints its completion lines ? those completion lines are the observable proof that execution continued past `verifyBaseline`. The runner-log entry proves the subprocess actually fired.
 
      When The darmok plugin gen-from-existing goal is executed and succeeds
@@ -20,10 +18,8 @@ Feature: Baseline Verification
           | Level | Category | Content                    |
           | DEBUG | runner   | Running: mvn clean install |
 
-  @GH312 @GH320
   Scenario: Baseline build failure aborts the run
 
-    \@GH312 \@GH320
     `mvn clean install` returns non-zero. `verifyBaseline` writes an ERROR line to the mojo log and throws `MojoExecutionException` before any scenario iteration begins. No `RGR Automation Complete!` line appears, and `metrics.csv` is never opened ? the abort is observable end-to-end.
 
     Given The darmok plugin gen-from-existing goal mvn clean install command is executed but fails with
