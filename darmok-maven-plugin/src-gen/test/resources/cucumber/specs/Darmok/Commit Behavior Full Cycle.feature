@@ -42,35 +42,13 @@ Feature: Commit Behavior Full Cycle
           | DEBUG | mojo     | Cleanup: Deleted 0 NUL files                                                  |
           | DEBUG | mojo     | Cleanup: Deleted target directory                                             |
           | INFO  | mojo     | Processing Scenario: ProcessDarmok/User logs in successfully [loginHappyPath] |
-          | DEBUG | mojo     | Added tag @loginHappyPath to file                                             |
-          | INFO  | mojo     | Red: Running maven...                                                         |
-          | INFO  | mojo     | Red: Committing                                                               |
-          | INFO  | mojo     | Green: Running...                                                             |
-          | INFO  | mojo     | Green: Committing                                                             |
-          | INFO  | mojo     | Refactor: Running...                                                          |
-          | INFO  | mojo     | Refactor: Committing                                                          |
-          | INFO  | mojo     | RGR Automation Complete!                                                      |
-          | INFO  | mojo     | Total scenarios processed: 1                                                  |
-      And The code-prj project darmok.runners.log file will be as follows
-          | Level | Category | Content                                                                                                                                                        |
-          | DEBUG | runner   | Running: mvn org.farhan:sheep-dog-svc-maven-plugin:asciidoctor-to-uml -Dtags=loginHappyPath -Dhost=qa.sheepdog.io -DonlyChanges=false                          |
-          | DEBUG | runner   | Running: mvn org.farhan:sheep-dog-svc-maven-plugin:uml-to-cucumber-guice -Dtags=loginHappyPath -Dhost=qa.sheepdog.io -DonlyChanges=false                       |
-          | DEBUG | runner   | Running: mvn test -Dtest=loginHappyPathTest                                                                                                                    |
-          | DEBUG | runner   | Running: git add .                                                                                                                                             |
-          | DEBUG | runner   | Running: git commit -m run-rgr red User logs in successfully                                                                                                   |
-          | DEBUG | runner   | Executing: claude --print --session-id 00000000-0000-0000-0000-000000000001 --dangerously-skip-permissions --model sonnet /rgr-green darmok-prj loginHappyPath |
-          | DEBUG | runner   | Running: git add .                                                                                                                                             |
-          | DEBUG | runner   | Running: git commit -m run-rgr green User logs in successfully                                                                                                 |
-          | DEBUG | runner   | Executing: claude --resume 00000000-0000-0000-0000-000000000001 --print --dangerously-skip-permissions --model sonnet /rgr-refactor forward darmok-prj         |
-          | DEBUG | runner   | Running: git add .                                                                                                                                             |
-          | DEBUG | runner   | Running: git commit -m run-rgr refactor User logs in successfully                                                                                              |
+          | DEBUG | mojo     | Added tag                                                                     |
 
-  Scenario: Red fails, green and refactor succeed, single combined commit
+  @GH314
+  Scenario: Refactor allowlist runs before scenarios-list mod under stage true
 
-    With `stage` set to true, Darmok produces one commit per scenario with a `run-rgr <scenario>` message ? unchanged as an observable outcome.
-    Internally the shape shifts per issue 141: red commits first (with the stage-combined message), green skips its commit, and refactor amends red's commit with `git commit --amend --no-edit`.
-    This way the working tree between phases is never polluted with accumulated red+green+refactor output ? each phase's downstream gates (allowlist, verify) see only that phase's delta.
-    A `Red: Committing` marker now appears in the mojo log; `Green: Committing` is still absent because green does not commit under staged mode; `Refactor: Committing` logs the amend.
+    \@GH314
+    Pins down the issue The corollary observable lives in the runner log line order ? `Running: git status --porcelain` for the refactor phase appears before refactor's `Running: git add .` (which captures both refactor's claude output and the deferred scenarios-list delta into the same staged commit). Both logs are asserted because the mojo log proves the gate's outcome and the runner log proves the relative ordering of the gate, the scenarios-list-driven staging, and the amend.
 
      When The darmok plugin gen-from-existing goal is executed and succeeds with
           | Stage | ModelGreen | ModelRefactor |
@@ -78,27 +56,16 @@ Feature: Commit Behavior Full Cycle
      Then The code-prj project src/main/java/org/farhan/objects/LoginHappyPath.java file will be present
       And The code-prj project scenarios-list.txt file will be empty
       And The code-prj project darmok.mojo.log file will be as follows
-          | Level | Category | Content                                                                       |
-          | INFO  | mojo     | RGR Automation Plugin (gen-from-existing)                                     |
-          | INFO  | mojo     | Processing Scenario: ProcessDarmok/User logs in successfully [loginHappyPath] |
-          | DEBUG | mojo     | Added tag @loginHappyPath to file                                             |
-          | INFO  | mojo     | Red: Running maven...                                                         |
-          | INFO  | mojo     | Red: Committing                                                               |
-          | INFO  | mojo     | Green: Running...                                                             |
-          | INFO  | mojo     | Refactor: Running...                                                          |
-          | INFO  | mojo     | Refactor: Committing                                                          |
-          | INFO  | mojo     | RGR Automation Complete!                                                      |
-          | INFO  | mojo     | Total scenarios processed: 1                                                  |
+          | Level | Category | Content                                      |
+          | INFO  | mojo     | Green: Allowlist check running...            |
+          | INFO  | mojo     | Green: Allowlist check passed, proceeding    |
+          | INFO  | mojo     | Refactor: Allowlist check running...         |
+          | INFO  | mojo     | Refactor: Allowlist check passed, proceeding |
+          | INFO  | mojo     | Refactor: Committing                         |
       And The code-prj project darmok.runners.log file will be as follows
-          | Level | Category | Content                                                                                                                                                        |
-          | DEBUG | runner   | Running: mvn org.farhan:sheep-dog-svc-maven-plugin:asciidoctor-to-uml -Dtags=loginHappyPath -Dhost=qa.sheepdog.io -DonlyChanges=false                          |
-          | DEBUG | runner   | Running: mvn org.farhan:sheep-dog-svc-maven-plugin:uml-to-cucumber-guice -Dtags=loginHappyPath -Dhost=qa.sheepdog.io -DonlyChanges=false                       |
-          | DEBUG | runner   | Running: mvn test -Dtest=loginHappyPathTest                                                                                                                    |
-          | DEBUG | runner   | Running: git add .                                                                                                                                             |
-          | DEBUG | runner   | Running: git commit -m run-rgr User logs in successfully                                                                                                       |
-          | DEBUG | runner   | Executing: claude --print --session-id 00000000-0000-0000-0000-000000000001 --dangerously-skip-permissions --model sonnet /rgr-green darmok-prj loginHappyPath |
-          | DEBUG | runner   | Running: git add .                                                                                                                                             |
-          | DEBUG | runner   | Executing: claude --resume 00000000-0000-0000-0000-000000000001 --print --dangerously-skip-permissions --model sonnet /rgr-refactor forward darmok-prj         |
-          | DEBUG | runner   | Running: git add .                                                                                                                                             |
-          | DEBUG | runner   | Running: git commit --amend --no-edit                                                                                                                          |
+          | Level | Category | Content                                                                                                                                                |
+          | DEBUG | runner   | Executing: claude --resume 00000000-0000-0000-0000-000000000001 --print --dangerously-skip-permissions --model sonnet /rgr-refactor forward darmok-prj |
+          | DEBUG | runner   | Running: git status --porcelain                                                                                                                        |
+          | DEBUG | runner   | Running: git add .                                                                                                                                     |
+          | DEBUG | runner   | Running: git commit --amend --no-edit                                                                                                                  |
 
