@@ -41,3 +41,25 @@ Feature: Refactor Session Mode
           | DEBUG | runner   | Executing: claude --resume 00000000-0000-0000-0000-000000000001 --print --dangerously-skip-permissions --model sonnet /compact                               |
           | DEBUG | runner   | Executing: claude --resume 00000000-0000-0000-0000-000000000001 --print --dangerously-skip-permissions --model sonnet /rgr-refactor forward code-prj         |
 
+  @GH287
+  Scenario: Continue mode refactor verify-fail resume stays on green session
+
+    \@GH287
+    After a failed `mvn clean verify` during the refactor phase, the resume call carries `--resume <green-uuid>` ? the same UUID green used. Proves that the `continue`-mode capture flows through every downstream refactor sub-machine (Phase Verification here, transitively Phase Timeout and Directory Allowlist), not just the initial `/rgr-refactor` call.
+
+    Given The darmok plugin gen-from-existing goal mvn clean verify command is executed but fails once then succeeds
+          | Phase    |
+          | Refactor |
+     When The darmok plugin gen-from-existing goal is executed and succeeds with
+          | RefactorSessionMode |
+          | continue            |
+     Then The code-prj project darmok.runners.log file will be as follows
+          | Level | Category | Content                                                                                                                                                         |
+          | DEBUG | runner   | Executing: claude --print --session-id 00000000-0000-0000-0000-000000000001 --dangerously-skip-permissions --model sonnet /rgr-green code-prj loginHappyPath    |
+          | DEBUG | runner   | Running: mvn clean verify                                                                                                                                       |
+          | DEBUG | runner   | Executing: claude --resume 00000000-0000-0000-0000-000000000001 --print --dangerously-skip-permissions --model sonnet /compact                                  |
+          | DEBUG | runner   | Executing: claude --resume 00000000-0000-0000-0000-000000000001 --print --dangerously-skip-permissions --model sonnet /rgr-refactor forward code-prj            |
+          | DEBUG | runner   | Running: mvn clean verify                                                                                                                                       |
+          | DEBUG | runner   | Executing: claude --resume 00000000-0000-0000-0000-000000000001 --print --dangerously-skip-permissions --model sonnet mvn clean verify failures should be fixed |
+          | DEBUG | runner   | Running: mvn clean verify                                                                                                                                       |
+

@@ -1,3 +1,0 @@
-File: Darmok/Refactor Session Mode
-  Scenario: Continue mode refactor verify-fail resume stays on green session
-    Tag: GH287
