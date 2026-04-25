@@ -37,5 +37,5 @@ Feature: Tag Insertion Missing File
           | INFO  | mojo     | RGR Automation Complete! |
       And The code-prj project darmok.runners.log file will be as follows
           | Level | Category | Content                                                                                                                               |
-          | DEBUG | runner   | Running: mvn org.farhan:sheep-dog-svc-maven-plugin:asciidoctor-to-uml -Dtags=loginHappyPath -Dhost=dev.sheepdog.io -DonlyChanges=true |
+          | DEBUG | runner   | Running: mvn org.farhan:sheep-dog-svc-maven-plugin:asciidoctor-to-uml -Dtags=loginHappyPath -Dhost=qa.sheepdog.io -DonlyChanges=false |
 

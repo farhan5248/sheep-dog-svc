@@ -53,8 +53,8 @@ Feature: Commit Behavior Full Cycle
           | INFO  | mojo     | Total scenarios processed: 1                                                  |
       And The code-prj project darmok.runners.log file will be as follows
           | Level | Category | Content                                                                                                                                                        |
-          | DEBUG | runner   | Running: mvn org.farhan:sheep-dog-svc-maven-plugin:asciidoctor-to-uml -Dtags=loginHappyPath -Dhost=dev.sheepdog.io -DonlyChanges=true                          |
-          | DEBUG | runner   | Running: mvn org.farhan:sheep-dog-svc-maven-plugin:uml-to-cucumber-guice -Dtags=loginHappyPath -Dhost=dev.sheepdog.io -DonlyChanges=true                       |
+          | DEBUG | runner   | Running: mvn org.farhan:sheep-dog-svc-maven-plugin:asciidoctor-to-uml -Dtags=loginHappyPath -Dhost=qa.sheepdog.io -DonlyChanges=false                          |
+          | DEBUG | runner   | Running: mvn org.farhan:sheep-dog-svc-maven-plugin:uml-to-cucumber-guice -Dtags=loginHappyPath -Dhost=qa.sheepdog.io -DonlyChanges=false                       |
           | DEBUG | runner   | Running: mvn test -Dtest=loginHappyPathTest                                                                                                                    |
           | DEBUG | runner   | Running: git add .                                                                                                                                             |
           | DEBUG | runner   | Running: git commit -m run-rgr red User logs in successfully                                                                                                   |
@@ -91,8 +91,8 @@ Feature: Commit Behavior Full Cycle
           | INFO  | mojo     | Total scenarios processed: 1                                                  |
       And The code-prj project darmok.runners.log file will be as follows
           | Level | Category | Content                                                                                                                                                        |
-          | DEBUG | runner   | Running: mvn org.farhan:sheep-dog-svc-maven-plugin:asciidoctor-to-uml -Dtags=loginHappyPath -Dhost=dev.sheepdog.io -DonlyChanges=true                          |
-          | DEBUG | runner   | Running: mvn org.farhan:sheep-dog-svc-maven-plugin:uml-to-cucumber-guice -Dtags=loginHappyPath -Dhost=dev.sheepdog.io -DonlyChanges=true                       |
+          | DEBUG | runner   | Running: mvn org.farhan:sheep-dog-svc-maven-plugin:asciidoctor-to-uml -Dtags=loginHappyPath -Dhost=qa.sheepdog.io -DonlyChanges=false                          |
+          | DEBUG | runner   | Running: mvn org.farhan:sheep-dog-svc-maven-plugin:uml-to-cucumber-guice -Dtags=loginHappyPath -Dhost=qa.sheepdog.io -DonlyChanges=false                       |
           | DEBUG | runner   | Running: mvn test -Dtest=loginHappyPathTest                                                                                                                    |
           | DEBUG | runner   | Running: git add .                                                                                                                                             |
           | DEBUG | runner   | Running: git commit -m run-rgr User logs in successfully                                                                                                       |

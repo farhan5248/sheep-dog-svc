@@ -10,7 +10,7 @@ import org.apache.maven.plugins.annotations.Parameter;
 @Mojo(name = "gen-from-comparison", defaultPhase = LifecyclePhase.GENERATE_SOURCES)
 public class GenFromComparisonMojo extends DarmokMojo {
 
-	@Parameter(property = "modelComparison", defaultValue = "sonnet")
+	@Parameter(property = "modelComparison", defaultValue = "opus")
 	public String modelComparison;
 
 	@Override

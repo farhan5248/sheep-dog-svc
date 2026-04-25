@@ -6,14 +6,16 @@ REM retry budget), override here and the diff is self-documenting.
 
 cd ..
 call mvn org.farhan:darmok-maven-plugin:gen-from-existing ^
-    -DscenariosFile="scenarios-list.txt" ^
-    -Dhost="qa.sheepdog.io" ^
-    -DmodelGreen="sonnet" ^
-    -DmodelRefactor="sonnet" ^
-    -Dstage="true" ^
-    -DonlyChanges="false" ^
-    -DmaxClaudeSeconds="600" ^
-    -DmaxTimeoutAttempts="2" ^
     -DmetricsDir="C:\minikube-data\darmok-metrics" ^
-    -DgitBranch="main"
+    -DmaxRetries="3" ^
+    -DmaxVerifyAttempts="3" ^
+    -DretryWaitSeconds="30" ^
+    -DmaxTimeoutAttempts="2" ^
+    -DmaxAllowlistAttempts="2" ^
+    -DbaselineVerifyEnabled="true" ^
+    -DgitBranch="main" ^
+    -DmodelRefactor="opus" ^
+    -DmodelGreen="opus" ^
+    -DmaxClaudeSeconds="720" ^
+    -DscenariosFile="scenarios-list.txt"
 cd scripts

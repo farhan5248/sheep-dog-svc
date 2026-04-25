@@ -32,14 +32,14 @@ public abstract class DarmokMojo extends AbstractMojo {
 	public String scenariosFile;
 
 	// Server properties
-	@Parameter(property = "host", defaultValue = "dev.sheepdog.io")
+	@Parameter(property = "host", defaultValue = "qa.sheepdog.io")
 	public String host;
 
 	// Claude CLI properties
-	@Parameter(property = "modelGreen", defaultValue = "sonnet")
+	@Parameter(property = "modelGreen", defaultValue = "opus")
 	public String modelGreen;
 
-	@Parameter(property = "modelRefactor", defaultValue = "sonnet")
+	@Parameter(property = "modelRefactor", defaultValue = "opus")
 	public String modelRefactor;
 
 	@Parameter(property = "coAuthor", defaultValue = "Claude Sonnet 4.5 <noreply@anthropic.com>")
@@ -71,7 +71,7 @@ public abstract class DarmokMojo extends AbstractMojo {
 	@Parameter(property = "maxAllowlistAttempts", defaultValue = "2")
 	public int maxAllowlistAttempts;
 
-	@Parameter(property = "onlyChanges", defaultValue = "true")
+	@Parameter(property = "onlyChanges", defaultValue = "false")
 	public boolean onlyChanges;
 
 	@Parameter(property = "claudeSessionIdEnabled", defaultValue = "true")
