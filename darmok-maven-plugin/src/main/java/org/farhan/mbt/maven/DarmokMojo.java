@@ -83,7 +83,7 @@ public abstract class DarmokMojo extends AbstractMojo {
 	@Parameter(property = "claudeSessionIdEnabled", defaultValue = "true")
 	public boolean claudeSessionIdEnabled;
 
-	@Parameter(property = "baselineVerifyEnabled", defaultValue = "false")
+	@Parameter(property = "baselineVerifyEnabled", defaultValue = "true")
 	public boolean baselineVerifyEnabled;
 
 	@Parameter(property = "stage", defaultValue = "true")

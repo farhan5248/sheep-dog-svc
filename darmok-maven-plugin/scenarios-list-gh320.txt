@@ -1,0 +1,5 @@
+File: Darmok/Baseline Verification
+  Scenario: Baseline build passes and scenario loop proceeds
+    Tag: GH320
+  Scenario: Baseline build failure aborts the run
+    Tag: GH320
