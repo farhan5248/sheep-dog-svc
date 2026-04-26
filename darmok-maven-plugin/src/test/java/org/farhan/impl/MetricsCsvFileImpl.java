@@ -21,9 +21,9 @@ public class MetricsCsvFileImpl extends MavenTestObject implements MetricsCsvFil
 
 	@Override
 	public String getAsFollows(HashMap<String, String> keyMap) {
-		DarmokMojoMetrics metrics = new DarmokMojoMetrics(resolveFilePath());
+		DarmokMojoMetrics metrics = new DarmokMojoMetrics(resolveFullPath());
 		setProperty("metrics", metrics);
-		return getFileState(metrics.getFile());
+		return getFileState(relativize(metrics.getFile()));
 	}
 
 	@Override

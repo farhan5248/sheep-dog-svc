@@ -102,25 +102,25 @@ public class GenFromExistingGoalImpl extends MavenTestObject implements GenFromE
 	@Override
 	public void setExecutedAndSucceeds(HashMap<String, String> keyMap) {
 		setProperty("processStarter", new FakeProcessStarter(properties));
-		executeMojo(GenFromExistingMojo.class);
+		runGoal(GenFromExistingMojo.class, getProperty("code-prj.baseDir").toString());
 	}
 
 	@Override
 	public void setExecutedButFails(HashMap<String, String> keyMap) {
 		setProperty("processStarter", new FakeProcessStarter(properties));
-		executeMojo(GenFromExistingMojo.class);
+		runGoal(GenFromExistingMojo.class, getProperty("code-prj.baseDir").toString());
 	}
 
 	@Override
 	public void setExecutedAndSucceedsWith(HashMap<String, String> keyMap) {
 		setProperty("processStarter", new FakeProcessStarter(properties));
-		executeMojo(GenFromExistingMojo.class);
+		runGoal(GenFromExistingMojo.class, getProperty("code-prj.baseDir").toString());
 	}
 
 	@Override
 	public void setExecutedButFailsWith(HashMap<String, String> keyMap) {
 		setProperty("processStarter", new FakeProcessStarter(properties));
-		executeMojo(GenFromExistingMojo.class);
+		runGoal(GenFromExistingMojo.class, getProperty("code-prj.baseDir").toString());
 	}
 
 	@Override

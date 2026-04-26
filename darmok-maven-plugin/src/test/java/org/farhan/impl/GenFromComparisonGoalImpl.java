@@ -19,7 +19,7 @@ public class GenFromComparisonGoalImpl extends MavenTestObject implements GenFro
 	public void setExecutedAndSucceedsWith(HashMap<String, String> keyMap) {
 		setProperty("targetProject", "darmok-prj");
 		setProperty("processStarter", new FakeProcessStarter(properties));
-		executeMojo(GenFromComparisonMojo.class);
+		runGoal(GenFromComparisonMojo.class, getProperty("code-prj.baseDir").toString());
 	}
 
 	@Override

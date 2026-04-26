@@ -1,10 +1,10 @@
 package org.farhan.common;
 
 import java.io.IOException;
-import java.io.InputStream;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Properties;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
@@ -15,39 +15,28 @@ import org.farhan.mbt.maven.GitRunner;
 import org.farhan.mbt.maven.MavenRunner;
 import org.farhan.mbt.maven.DarmokMojoLog;
 import org.farhan.mbt.maven.ProcessRunner.ProcessStarter;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 
 /**
  * {@link TestObject} subclass that adds Maven plugin test scaffolding:
- * Mojo execution via reflection, properties-file-driven parameter defaults,
- * file I/O helpers, and dated-log inspection.
+ * Mojo execution via reflection, Spring-loaded parameter defaults
+ * (application.properties), file I/O helpers via {@link SourceFileRepository},
+ * and dated-log inspection.
  */
 public abstract class MavenTestObject extends TestObject {
 
-    private static final Properties mojoDefaults = new Properties();
+    @Autowired
+    private Environment env;
 
-    static {
-        try (InputStream is = MavenTestObject.class.getResourceAsStream("/mojo-defaults.properties")) {
-            if (is != null) {
-                mojoDefaults.load(is);
-            }
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to load mojo-defaults.properties", e);
-        }
-    }
-
-    protected final void executeMojo(Class<? extends DarmokMojo> mojoClass) {
-        Path codePrjDir = (Path) getProperty("code-prj.baseDir");
-        if (codePrjDir == null) {
-            throw new IllegalStateException("code-prj.baseDir not set");
-        }
-
+    protected final void runGoal(Class<? extends DarmokMojo> mojoClass, String baseDir) {
         try {
             DarmokMojo mojo = mojoClass.getConstructor().newInstance();
 
             MavenProject project = new MavenProject();
             project.setArtifactId("code-prj");
             mojo.project = project;
-            mojo.setBaseDir(codePrjDir.toString());
+            mojo.setBaseDir(baseDir);
 
             Object starterProp = getProperty("processStarter");
             if (starterProp instanceof ProcessStarter starter) {
@@ -60,10 +49,18 @@ public abstract class MavenTestObject extends TestObject {
                     new ClaudeRunner(log, model, retries, wait, maxSeconds, sessionEnabled, testUuidSupplier, starter));
             }
 
-            for (String key : mojoDefaults.stringPropertyNames()) {
-                Object override = properties.get(key);
-                String value = override != null ? override.toString() : mojoDefaults.getProperty(key);
-                setField(mojo, key, value);
+            // Iterate public fields (Mojo @Parameter fields are public). The Maven
+            // @Parameter annotation has CLASS retention, so reflection can't filter
+            // by it at runtime — using public visibility as the proxy works because
+            // internal state fields are private/protected.
+            for (Class<?> c = mojoClass; c != null && c != Object.class; c = c.getSuperclass()) {
+                for (Field field : c.getDeclaredFields()) {
+                    if (Modifier.isStatic(field.getModifiers())) continue;
+                    String name = field.getName();
+                    Object override = properties.get(name);
+                    String value = override != null ? override.toString() : env.getProperty(name);
+                    if (value != null) setField(mojo, name, value);
+                }
             }
 
             mojo.execute();
@@ -73,32 +70,43 @@ public abstract class MavenTestObject extends TestObject {
         }
     }
 
-    protected final void createFile(Path path) {
+    protected final SourceFileRepository sr() {
+        return (SourceFileRepository) getProperty("repository");
+    }
+
+    /** Convert a production-yielded absolute Path to an SFR-relative String. */
+    protected final String relativize(Path absolute) {
+        Path scenarioRoot = (Path) getProperty("scenario.root");
+        return scenarioRoot.relativize(absolute).toString().replace('\\', '/');
+    }
+
+    /** Resolve the SFR-relative path back to an absolute Path (for production-code consumers like DarmokMojoMetrics). */
+    protected final Path resolveFullPath() {
+        Path scenarioRoot = (Path) getProperty("scenario.root");
+        return scenarioRoot.resolve(resolveFilePath());
+    }
+
+    protected final void createFile(String path) {
         if (path == null) {
             return;
         }
         try {
-            Files.createDirectories(path.getParent());
-            if (!Files.exists(path)) {
-                Files.writeString(path, "placeholder");
+            if (!sr().contains("", path)) {
+                sr().put("", path, "placeholder");
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    protected final void deleteFile(Path path) {
+    protected final void deleteFile(String path) {
         if (path == null) {
             return;
         }
-        try {
-            Files.deleteIfExists(path);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        sr().delete("", path);
     }
 
-    protected final void createOrDeleteFile(Path path) {
+    protected final void createOrDeleteFile(String path) {
         String stateType = (String) getProperty("stateType");
         if ("isn't".equals(stateType)) {
             deleteFile(path);
@@ -126,41 +134,41 @@ public abstract class MavenTestObject extends TestObject {
         return mojoLog;
     }
 
-    protected final Path resolveFilePath() {
-        Object baseDir = getProperty(component + ".baseDir");
-        if (baseDir == null) {
+    protected final String resolveFilePath() {
+        Object componentPath = getProperty(component + ".componentPath");
+        if (componentPath == null) {
             return null;
         }
-        return ((Path) baseDir).resolve(object);
+        return componentPath + "/" + object;
     }
 
-    protected final String getFileContent(Path path) {
+    protected final String getFileContent(String path) {
         String state = getFileState(path);
         return state != null ? state.replaceAll("\r", "").trim() : null;
     }
 
-    protected final String getFileState(Path path) {
-        if (path == null || !Files.exists(path)) {
+    protected final String getFileState(String path) {
+        if (path == null) {
+            return null;
+        }
+        SourceFileRepository sr = sr();
+        if (!sr.contains("", path)) {
             return null;
         }
         try {
-            return Files.readString(path);
-        } catch (IOException e) {
+            return sr.get("", path);
+        } catch (Exception e) {
             return null;
         }
     }
 
-    protected final void writeFile(Path path, String content) {
+    protected final void writeFile(String path, String content) {
         if (path == null) {
             return;
         }
         try {
-            Files.createDirectories(path.getParent());
-            if (content == null) {
-                content = "";
-            }
-            Files.writeString(path, content);
-        } catch (IOException e) {
+            sr().put("", path, content == null ? "" : content);
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
