@@ -68,6 +68,8 @@ public interface GenFromExistingGoal {
 
     public void setRefactorSessionMode(HashMap<String, String> keyMap);
 
+    public void setSvcMavenPluginGoal(HashMap<String, String> keyMap);
+
     public void setExecutedButFails(HashMap<String, String> keyMap);
 
     public void setExecutedButFailsWith(HashMap<String, String> keyMap);
@@ -113,6 +115,4 @@ public interface GenFromExistingGoal {
     public void setMvnUmlToCucumberGuiceCommandExit(HashMap<String, String> keyMap);
 
     public void setMvnUmlToCucumberGuiceCommandOutput(HashMap<String, String> keyMap);
-
-    public void setSvcMavenPluginGoal(HashMap<String, String> keyMap);
 }

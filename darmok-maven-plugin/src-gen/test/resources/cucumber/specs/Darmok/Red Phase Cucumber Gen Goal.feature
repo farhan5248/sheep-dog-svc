@@ -23,10 +23,9 @@ Feature: Red Phase Cucumber Gen Goal
           """
       And The code-prj project src/main/java/org/farhan/objects/LoginHappyPath.java file is created
 
-  @GH328 @CucumberContextConfiguration`
+  @CucumberContextConfiguration`
   Scenario: Spring-flavored cucumber-gen goal flips the runner log invocation
 
-    \@GH328
     Projects whose generated stepdefs are wired with Spring (cucumber-spring on the classpath, `\@CucumberContextConfiguration` on the runner) need the spring flavour of the cucumber-gen output, not the guice flavour.
     Setting `svcMavenPluginGoal` to `uml-to-cucumber-spring` reroutes the second mvn call in the red phase to the spring goal; every other observable in the run is unchanged from the guice default.
 

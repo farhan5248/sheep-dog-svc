@@ -4,6 +4,7 @@ import java.io.Closeable;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
@@ -46,19 +47,13 @@ public class DarmokMojoLog extends DarmokMojoFile<DarmokMojoLog.LogEntry> implem
 	}
 
 	public static Path findDatedLog(Path logDir, String prefix) {
-		if (!Files.isDirectory(logDir)) {
-			return logDir.resolve(prefix + ".log");
-		}
 		try (var stream = Files.list(logDir)) {
 			return stream
-				.filter(p -> {
-					String name = p.getFileName().toString();
-					return name.startsWith(prefix + ".") && name.endsWith(".log");
-				})
+				.filter(p -> p.getFileName().toString().startsWith(prefix + "."))
 				.findFirst()
 				.orElse(logDir.resolve(prefix + ".log"));
 		} catch (IOException e) {
-			return logDir.resolve(prefix + ".log");
+			throw new UncheckedIOException(e);
 		}
 	}
 
@@ -206,7 +201,7 @@ public class DarmokMojoLog extends DarmokMojoFile<DarmokMojoLog.LogEntry> implem
 	}
 
 	private static boolean matches(String expected, String actual) {
-		if (expected == null || "Any".equals(expected)) {
+		if ("Any".equals(expected)) {
 			return true;
 		}
 		return expected.trim().equals(normalizeCommandExtensions(actual.trim()));
@@ -220,7 +215,7 @@ public class DarmokMojoLog extends DarmokMojoFile<DarmokMojoLog.LogEntry> implem
 	@Override
 	protected List<LogEntry> parse(Path logFile) {
 		List<LogEntry> result = new ArrayList<>();
-		if (logFile == null || !Files.exists(logFile)) {
+		if (!Files.exists(logFile)) {
 			return result;
 		}
 		try {
