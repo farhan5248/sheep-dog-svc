@@ -54,7 +54,7 @@ public class RedPhase extends RgrPhase {
 		Files.writeString(Path.of(runnerClassPath), runnerContent + "\n", StandardCharsets.UTF_8);
 		mojoLog.debug("  Created runner class: " + runnerClassPath);
 
-		int testExitCode = maven.run(baseDir, "test", "-Dtest=" + runnerClassName);
+		int testExitCode = maven.run(baseDir, Path.of(baseDir, "log.txt"), "test", "-Dtest=" + runnerClassName);
 
 		if (testExitCode == 0) {
 			mojoLog.debug("  Tests are PASSING - no failing tests to fix (returning 100)");

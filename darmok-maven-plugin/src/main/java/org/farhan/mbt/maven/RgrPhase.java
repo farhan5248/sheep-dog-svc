@@ -115,10 +115,11 @@ public abstract class RgrPhase {
 
 	protected void runVerifyLoop() throws Exception {
 		String name = phase().displayName;
+		java.nio.file.Path logFile = java.nio.file.Path.of(targetDir, "log.txt");
 		for (int attempt = 1; attempt <= maxVerifyAttempts; attempt++) {
 			mojoLog.info("  " + name + ": Verify running...");
 			long verifyStart = System.currentTimeMillis();
-			int verifyExit = maven.run(targetDir, "clean", "verify");
+			int verifyExit = maven.run(targetDir, logFile, "clean", "verify");
 			long verifyDuration = System.currentTimeMillis() - verifyStart;
 			if (verifyExit == 0) {
 				mojoLog.info("  " + name + ": Verify passed (" + DarmokMojoState.formatDuration(verifyDuration) + ")");

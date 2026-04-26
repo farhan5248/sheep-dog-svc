@@ -54,6 +54,19 @@ Abstract base class that owns the external-process lifecycle — stream stdout t
 **Examples**:
  - `public int run(String workingDirectory, String... args)`
 
+## run (with file output)
+
+**Desc**: Like `run`, but additionally tees each stdout line to `logFile`. When `logFile` is null, behavior is identical to `run`. Used by Red Phase's `mvn test` and Phase Verification's `mvn clean verify` so the green-phase claude prompt can read the most recent mvn failure detail directly from the file (issue 325).
+
+**Rule**: ONE method name follows run-with-file pattern.
+ - **Name**: `^run$`
+ - **Return**: `^int$`
+ - **Parameters**: `^\(String\s+\w+,\s*Path\s+\w+,\s*String\.\.\.\s+\w+\)$`
+ - **Modifier**: `^public$`
+
+**Examples**:
+ - `public int run(String workingDirectory, Path logFile, String... args)`
+
 ## capture
 
 **Desc**: Builds the command, starts the process via the ProcessStarter seam, reads stdout to a string, and returns the trimmed output. Throws IOException on non-zero exit. Used by runners that need the subprocess's output as a value (e.g. GitRunner.getCurrentCommit) rather than streamed to the log.

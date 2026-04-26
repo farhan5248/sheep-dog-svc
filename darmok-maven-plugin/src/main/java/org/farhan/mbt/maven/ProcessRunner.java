@@ -1,9 +1,12 @@
 package org.farhan.mbt.maven;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -45,6 +48,10 @@ public abstract class ProcessRunner {
 	}
 
 	public int run(String workingDirectory, String... args) throws Exception {
+		return run(workingDirectory, null, args);
+	}
+
+	public int run(String workingDirectory, Path logFile, String... args) throws Exception {
 		List<String> command = buildCommand(args);
 
 		ProcessBuilder pb = new ProcessBuilder(command);
@@ -56,10 +63,17 @@ public abstract class ProcessRunner {
 		Process process = starter.start(pb);
 		process.getOutputStream().close();
 		try (BufferedReader reader = new BufferedReader(
-				new InputStreamReader(process.getInputStream()))) {
+				new InputStreamReader(process.getInputStream()));
+			 BufferedWriter writer = logFile != null
+				? Files.newBufferedWriter(logFile)
+				: null) {
 			String line;
 			while ((line = reader.readLine()) != null) {
 				log.debug(line);
+				if (writer != null) {
+					writer.write(line);
+					writer.newLine();
+				}
 			}
 		}
 		return process.waitFor();

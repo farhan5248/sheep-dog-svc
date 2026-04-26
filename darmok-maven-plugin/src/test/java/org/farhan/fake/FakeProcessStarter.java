@@ -264,7 +264,7 @@ public class FakeProcessStarter implements ProcessStarter {
 			if (!implFileExists(cmd)) {
 				return new FakeProcess("tests failing: impl class missing", 1);
 			}
-			return new FakeProcess("", 0);
+			return new FakeProcess("BUILD SUCCESS", 0);
 		}
 
 		if (cmd.size() >= 3 && cmd.get(0).toLowerCase().startsWith("mvn")
@@ -295,12 +295,12 @@ public class FakeProcessStarter implements ProcessStarter {
 			String mode = "green".equals(currentPhase) ? mvnVerifyModeGreen : mvnVerifyModeRefactor;
 			int count = "green".equals(currentPhase) ? ++greenVerifyCalls : ++refactorVerifyCalls;
 			if ("fail-once".equals(mode)) {
-				return count == 1 ? new FakeProcess("", 1) : new FakeProcess("", 0);
+				return count == 1 ? new FakeProcess("BUILD FAILURE", 1) : new FakeProcess("BUILD SUCCESS", 0);
 			}
 			if ("fail-all".equals(mode)) {
-				return new FakeProcess("", 1);
+				return new FakeProcess("BUILD FAILURE", 1);
 			}
-			return new FakeProcess("", 0);
+			return new FakeProcess("BUILD SUCCESS", 0);
 		}
 
 		return new FakeProcess("", 0);

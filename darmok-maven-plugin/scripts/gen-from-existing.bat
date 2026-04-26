@@ -17,5 +17,6 @@ call mvn org.farhan:darmok-maven-plugin:gen-from-existing ^
     -DmodelRefactor="opus" ^
     -DmodelGreen="opus" ^
     -DmaxClaudeSeconds="720" ^
+    -DallowlistAdditionalPaths="scenarios-list.txt" ^
     -DscenariosFile="scenarios-list.txt"
 cd scripts
