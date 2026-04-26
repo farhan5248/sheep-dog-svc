@@ -3,7 +3,7 @@ REM All Darmok parameters are specified explicitly so `git log` on this script
 REM shows exactly which parameters were used for a given run/branch. If a
 REM Rebuild* branch needs different values (e.g. a different model, a tighter
 REM retry budget), override here and the diff is self-documenting.
-
+REM mvn org.farhan:darmok-maven-plugin:gen-from-existing -DmetricsDir="C:\minikube-data\darmok-metrics" -DgitBranch="main" -DmodelRefactor="opus" -DmodelGreen="opus" -DmaxClaudeSeconds="720" -DallowlistAdditionalPaths="scenarios-list-gh183.txt" -DscenariosFile="scenarios-list-gh183.txt"
 cd ..
 call mvn org.farhan:darmok-maven-plugin:gen-from-existing ^
     -DmetricsDir="C:\minikube-data\darmok-metrics" ^
@@ -17,6 +17,6 @@ call mvn org.farhan:darmok-maven-plugin:gen-from-existing ^
     -DmodelRefactor="opus" ^
     -DmodelGreen="opus" ^
     -DmaxClaudeSeconds="720" ^
-    -DallowlistAdditionalPaths="scenarios-list.txt" ^
-    -DscenariosFile="scenarios-list.txt"
+    -DallowlistAdditionalPaths="scenarios-list-gh183.txt" ^
+    -DscenariosFile="scenarios-list-gh183.txt"
 cd scripts
