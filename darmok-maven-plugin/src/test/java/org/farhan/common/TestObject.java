@@ -137,10 +137,6 @@ public abstract class TestObject {
 
     private void processInputOutputsStepDefinitionRef(String stateDesc, String operation, String partDesc,
             String partType, String stateType) {
-        boolean negativeTest = false;
-        if (stateType.contentEquals("isn't") || stateType.contentEquals("won't be")) {
-            negativeTest = true;
-        }
         String sectionName = (partDesc + " " + partType).trim();
         HashMap<String, String> row = new HashMap<String, String>();
         row.put(stateDesc, "");
@@ -152,7 +148,7 @@ public abstract class TestObject {
             if (operation.equals("get")) {
                 String expectedValue = convertToPascalCase(stateDesc);
                 String actual = returnValue == null ? null : returnValue.toString();
-                if (TestState.contains(convertToPascalCase(stateDesc))) {
+                if (TestState.contains(expectedValue)) {
                     String mappedActual;
                     if (actual == null)
                         mappedActual = TestState.Absent.name();
@@ -160,17 +156,9 @@ public abstract class TestObject {
                         mappedActual = TestState.Empty.name();
                     else
                         mappedActual = TestState.Present.name();
-                    if (negativeTest) {
-                        Assertions.assertNotEquals(expectedValue, mappedActual);
-                    } else {
-                        Assertions.assertEquals(expectedValue, mappedActual);
-                    }
+                    Assertions.assertEquals(expectedValue, mappedActual);
                 } else {
-                    if (negativeTest) {
-                        Assertions.assertNull(actual);
-                    } else {
-                        Assertions.assertNotNull(actual);
-                    }
+                    Assertions.assertNotNull(actual);
                 }
             }
         } catch (Exception e) {

@@ -1,6 +1,7 @@
 package org.farhan.mbt.maven;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -43,14 +44,15 @@ public class DarmokMojoMetrics extends DarmokMojoFile<Map<String, String>> {
 	}
 
 	private static String escape(String s) {
-		if (s.contains(",") || s.contains("\"") || s.contains("\n")) {
+		if (s.contains(",") || s.contains("\"")) {
 			return "\"" + s.replace("\"", "\"\"") + "\"";
 		}
 		return s;
 	}
 
 	// =========================================================================
-	// Read-side: CSV parsing and sequential row matching
+	// Read-side: assumes the file was produced by append() — header line plus
+	// N contiguous full-column rows, scenario field optionally quoted.
 	// =========================================================================
 
 	public String matchAndGetTimestamp(HashMap<String, String> keyMap) {
@@ -87,43 +89,32 @@ public class DarmokMojoMetrics extends DarmokMojoFile<Map<String, String>> {
 
 	private String column(HashMap<String, String> keyMap, String columnName) {
 		ensureMatched(keyMap);
-		return lastMatch == null ? null : lastMatch.get(columnName);
+		return lastMatch.get(columnName);
 	}
 
 	@Override
 	protected Map<String, String> findNext(HashMap<String, String> keyMap) {
-		if (cursor() < entries().size()) {
-			Map<String, String> row = entries().get(cursor());
-			advanceCursor();
-			return row;
-		}
-		return null;
+		Map<String, String> row = entries().get(cursor());
+		advanceCursor();
+		return row;
 	}
 
 	@Override
 	protected List<Map<String, String>> parse(Path file) {
 		List<Map<String, String>> result = new ArrayList<>();
-		if (file == null || !Files.exists(file)) {
-			return result;
-		}
 		try {
 			List<String> lines = Files.readAllLines(file, StandardCharsets.UTF_8);
-			if (lines.isEmpty()) {
-				return result;
-			}
 			String[] headers = lines.get(0).split(",");
 			for (int i = 1; i < lines.size(); i++) {
-				String line = lines.get(i);
-				if (line.isEmpty()) continue;
-				List<String> values = splitCsv(line);
+				List<String> values = splitCsv(lines.get(i));
 				Map<String, String> row = new LinkedHashMap<>();
 				for (int j = 0; j < headers.length; j++) {
-					row.put(headers[j].trim(), j < values.size() ? values.get(j) : "");
+					row.put(headers[j].trim(), values.get(j));
 				}
 				result.add(row);
 			}
 		} catch (IOException e) {
-			// return what we have
+			throw new UncheckedIOException(e);
 		}
 		return result;
 	}
@@ -136,7 +127,7 @@ public class DarmokMojoMetrics extends DarmokMojoFile<Map<String, String>> {
 			char c = line.charAt(i);
 			if (inQuotes) {
 				if (c == '"') {
-					if (i + 1 < line.length() && line.charAt(i + 1) == '"') {
+					if (line.charAt(i + 1) == '"') {
 						cur.append('"');
 						i++;
 					} else {
@@ -145,15 +136,13 @@ public class DarmokMojoMetrics extends DarmokMojoFile<Map<String, String>> {
 				} else {
 					cur.append(c);
 				}
+			} else if (c == ',') {
+				values.add(cur.toString());
+				cur.setLength(0);
+			} else if (c == '"') {
+				inQuotes = true;
 			} else {
-				if (c == ',') {
-					values.add(cur.toString());
-					cur.setLength(0);
-				} else if (c == '"' && cur.length() == 0) {
-					inQuotes = true;
-				} else {
-					cur.append(c);
-				}
+				cur.append(c);
 			}
 		}
 		values.add(cur.toString());

@@ -2,7 +2,6 @@ package org.farhan.impl;
 
 import static io.cucumber.spring.CucumberTestContext.SCOPE_CUCUMBER_GLUE;
 
-import java.nio.file.Path;
 import java.util.HashMap;
 
 import org.farhan.common.MavenTestObject;
@@ -16,69 +15,62 @@ import org.springframework.stereotype.Component;
 public class MetricsCsvFileImpl extends MavenTestObject implements MetricsCsvFile {
 
 	@Override
+	public String getAbsent(HashMap<String, String> keyMap) {
+		return getFileState(resolveFilePath());
+	}
+
+	@Override
 	public String getAsFollows(HashMap<String, String> keyMap) {
-		String stateType = (String) getProperty("stateType");
-		if ("won't be".equals(stateType)) {
-			return null;
-		}
-		return getFileState(metrics().getFile());
+		DarmokMojoMetrics metrics = new DarmokMojoMetrics(resolveFilePath());
+		setProperty("metrics", metrics);
+		return getFileState(metrics.getFile());
 	}
 
 	@Override
 	public String getTimestamp(HashMap<String, String> keyMap) {
-		return metrics().matchAndGetTimestamp(keyMap);
+		DarmokMojoMetrics metrics = (DarmokMojoMetrics) getProperty("metrics");
+		return metrics.matchAndGetTimestamp(keyMap);
 	}
 
 	@Override
 	public String getGitBranch(HashMap<String, String> keyMap) {
-		return metrics().matchAndGetGitBranch(keyMap);
+		DarmokMojoMetrics metrics = (DarmokMojoMetrics) getProperty("metrics");
+		return metrics.matchAndGetGitBranch(keyMap);
 	}
 
 	@Override
 	public String getCommit(HashMap<String, String> keyMap) {
-		return metrics().matchAndGetCommit(keyMap);
-	}
-
-	@Override
-	public String getAbsent(HashMap<String, String> keyMap) {
-		return getFileState(metrics().getFile());
+		DarmokMojoMetrics metrics = (DarmokMojoMetrics) getProperty("metrics");
+		return metrics.matchAndGetCommit(keyMap);
 	}
 
 	@Override
 	public String getScenario(HashMap<String, String> keyMap) {
-		return metrics().matchAndGetScenario(keyMap);
+		DarmokMojoMetrics metrics = (DarmokMojoMetrics) getProperty("metrics");
+		return metrics.matchAndGetScenario(keyMap);
 	}
 
 	@Override
 	public String getPhaseRedMs(HashMap<String, String> keyMap) {
-		return metrics().matchAndGetPhaseRedMs(keyMap);
+		DarmokMojoMetrics metrics = (DarmokMojoMetrics) getProperty("metrics");
+		return metrics.matchAndGetPhaseRedMs(keyMap);
 	}
 
 	@Override
 	public String getPhaseGreenMs(HashMap<String, String> keyMap) {
-		return metrics().matchAndGetPhaseGreenMs(keyMap);
+		DarmokMojoMetrics metrics = (DarmokMojoMetrics) getProperty("metrics");
+		return metrics.matchAndGetPhaseGreenMs(keyMap);
 	}
 
 	@Override
 	public String getPhaseRefactorMs(HashMap<String, String> keyMap) {
-		return metrics().matchAndGetPhaseRefactorMs(keyMap);
+		DarmokMojoMetrics metrics = (DarmokMojoMetrics) getProperty("metrics");
+		return metrics.matchAndGetPhaseRefactorMs(keyMap);
 	}
 
 	@Override
 	public String getPhaseTotalMs(HashMap<String, String> keyMap) {
-		return metrics().matchAndGetPhaseTotalMs(keyMap);
-	}
-
-	private DarmokMojoMetrics metrics() {
-		DarmokMojoMetrics cached = (DarmokMojoMetrics) getProperty("metrics");
-		if (cached != null) {
-			return cached;
-		}
-		// Metrics live under the project baseDir (DarmokMojo.resolveMetricsDir default),
-		// independent of the log.dir / LOG_PATH that controls log file location.
-		Path metricsDir = (Path) getProperty(component + ".baseDir");
-		DarmokMojoMetrics fresh = new DarmokMojoMetrics(metricsDir.resolve("metrics.csv"));
-		setProperty("metrics", fresh);
-		return fresh;
+		DarmokMojoMetrics metrics = (DarmokMojoMetrics) getProperty("metrics");
+		return metrics.matchAndGetPhaseTotalMs(keyMap);
 	}
 }

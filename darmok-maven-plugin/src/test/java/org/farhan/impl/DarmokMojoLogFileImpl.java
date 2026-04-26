@@ -15,20 +15,11 @@ public class DarmokMojoLogFileImpl extends MavenTestObject implements DarmokMojo
 
 	@Override
 	public String getAsFollows(HashMap<String, String> keyMap) {
-		// TODO: "won't be" guard needed until TestObject.processInputOutputsStepDefinitionRef handles negation for "as follows"
-		String stateType = (String) getProperty("stateType");
-		if ("won't be".equals(stateType)) {
-			return null;
-		}
 		return getFileState(getDarmokMojoLog("darmok.mojo").getFile());
 	}
 
 	@Override
 	public String getAsFollowsWithThisFailure(HashMap<String, String> keyMap) {
-		String stateType = (String) getProperty("stateType");
-		if ("won't be".equals(stateType)) {
-			return null;
-		}
 		return getFileState(getDarmokMojoLog("darmok.mojo").getFile());
 	}
 
