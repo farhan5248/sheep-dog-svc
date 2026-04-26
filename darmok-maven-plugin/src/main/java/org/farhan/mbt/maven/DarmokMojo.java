@@ -89,6 +89,9 @@ public abstract class DarmokMojo extends AbstractMojo {
 	@Parameter(property = "baselineVerifyEnabled", defaultValue = "true")
 	public boolean baselineVerifyEnabled;
 
+	@Parameter(property = "greenFullPathsEnabled", defaultValue = "false")
+	public boolean greenFullPathsEnabled;
+
 	@Parameter(property = "stage", defaultValue = "true")
 	public boolean stage;
 
@@ -185,7 +188,7 @@ public abstract class DarmokMojo extends AbstractMojo {
 		greenPhase = new GreenPhase(
 			makeClaudeRunner(modelGreen),
 			maven, phaseGit, mojoLog, sheepDogRoot, baseDir, artifactId, maxVerifyAttempts, maxTimeoutAttempts, maxClaudeSeconds,
-			maxAllowlistAttempts, effectiveAllowlist);
+			maxAllowlistAttempts, effectiveAllowlist, greenFullPathsEnabled);
 		refactorPhase = new RefactorPhase(
 			makeClaudeRunner(modelRefactor),
 			maven, phaseGit, mojoLog, sheepDogRoot, baseDir, artifactId, maxVerifyAttempts, maxTimeoutAttempts, maxClaudeSeconds,

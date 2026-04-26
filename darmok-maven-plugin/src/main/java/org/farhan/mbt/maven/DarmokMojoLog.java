@@ -209,7 +209,8 @@ public class DarmokMojoLog extends DarmokMojoFile<DarmokMojoLog.LogEntry> implem
 
 	private static String normalizeCommandExtensions(String s) {
 		return s.replace("mvn.cmd", "mvn")
-			.replace("claude.cmd", "claude");
+			.replace("claude.cmd", "claude")
+			.replace('\\', '/');
 	}
 
 	@Override

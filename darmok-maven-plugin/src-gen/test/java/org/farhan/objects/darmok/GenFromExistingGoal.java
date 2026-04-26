@@ -115,4 +115,6 @@ public interface GenFromExistingGoal {
     public void setMvnUmlToCucumberGuiceCommandExit(HashMap<String, String> keyMap);
 
     public void setMvnUmlToCucumberGuiceCommandOutput(HashMap<String, String> keyMap);
+
+    public void setGreenFullPathsEnabled(HashMap<String, String> keyMap);
 }

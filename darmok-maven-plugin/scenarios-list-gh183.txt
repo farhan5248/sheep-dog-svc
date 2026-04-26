@@ -1,3 +1,0 @@
-File: Darmok/Green Full Paths
-  Scenario: Green emits full paths when greenFullPathsEnabled is true
-    Tag: GH183
