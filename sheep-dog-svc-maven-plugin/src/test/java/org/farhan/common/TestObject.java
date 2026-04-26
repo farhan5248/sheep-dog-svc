@@ -7,6 +7,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.lang.reflect.Field;
+import java.time.format.DateTimeFormatter;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -35,7 +36,19 @@ import io.cucumber.datatable.DataTable;
 public abstract class TestObject {
 
     public enum TestState {
-        Absent, Empty, Present, Any;
+        Absent(null), Empty(""), Present(null), Any(null),
+        Timestamp("yyyy-MM-dd'T'HH:mm:ss.SSSXXX"),
+        Milliseconds("[0-9]+");
+
+        private final String value;
+
+        TestState(String value) {
+            this.value = value;
+        }
+
+        public String value() {
+            return value;
+        }
 
         private static final Set<String> NAMES = Arrays.stream(values()).map(Enum::name).collect(Collectors.toSet());
 
@@ -124,10 +137,6 @@ public abstract class TestObject {
 
     private void processInputOutputsStepDefinitionRef(String stateDesc, String operation, String partDesc,
             String partType, String stateType) {
-        boolean negativeTest = false;
-        if (stateType.contentEquals("isn't") || stateType.contentEquals("won't be")) {
-            negativeTest = true;
-        }
         String sectionName = (partDesc + " " + partType).trim();
         HashMap<String, String> row = new HashMap<String, String>();
         row.put(stateDesc, "");
@@ -139,7 +148,7 @@ public abstract class TestObject {
             if (operation.equals("get")) {
                 String expectedValue = convertToPascalCase(stateDesc);
                 String actual = returnValue == null ? null : returnValue.toString();
-                if (TestState.contains(convertToPascalCase(stateDesc))) {
+                if (TestState.contains(expectedValue)) {
                     String mappedActual;
                     if (actual == null)
                         mappedActual = TestState.Absent.name();
@@ -147,17 +156,9 @@ public abstract class TestObject {
                         mappedActual = TestState.Empty.name();
                     else
                         mappedActual = TestState.Present.name();
-                    if (negativeTest) {
-                        Assertions.assertNotEquals(expectedValue, mappedActual);
-                    } else {
-                        Assertions.assertEquals(expectedValue, mappedActual);
-                    }
+                    Assertions.assertEquals(expectedValue, mappedActual);
                 } else {
-                    if (negativeTest) {
-                        Assertions.assertNull(actual);
-                    } else {
-                        Assertions.assertNotNull(actual);
-                    }
+                    Assertions.assertNotNull(actual);
                 }
             }
         } catch (Exception e) {
@@ -195,6 +196,20 @@ public abstract class TestObject {
                         }
                         Map<String, String> actualByStore = toStoreMap(returnValue);
                         for (String actual : actualByStore.values()) {
+                            if (TestState.Timestamp.name().equals(expectedValue)) {
+                                try {
+                                    DateTimeFormatter.ofPattern(TestState.Timestamp.value()).parse(actual);
+                                } catch (Exception e) {
+                                    Assertions.fail("Expected Timestamp format but got: " + actual);
+                                }
+                                continue;
+                            }
+                            if (TestState.Milliseconds.name().equals(expectedValue)) {
+                                if (actual == null || !actual.matches(TestState.Milliseconds.value())) {
+                                    Assertions.fail("Expected Milliseconds format but got: " + actual);
+                                }
+                                continue;
+                            }
                             if (fieldName.equals("State") && TestState.contains(expectedValue)) {
                                 String mappedActual;
                                 if (actual == null)
@@ -290,7 +305,7 @@ public abstract class TestObject {
 
     private static String replaceKeyword(String value) {
         if (value.contentEquals(TestState.Empty.name().toLowerCase())) {
-            return "";
+            return TestState.Empty.value();
         } else {
             return value;
         }

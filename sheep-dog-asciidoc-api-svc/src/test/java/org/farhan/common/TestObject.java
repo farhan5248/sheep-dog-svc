@@ -6,11 +6,11 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.lang.reflect.Field;
+import java.time.format.DateTimeFormatter;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.farhan.dsl.grammar.ISheepDogFactory;
-import org.farhan.dsl.grammar.SheepDogFactory;
 import org.junit.jupiter.api.Assertions;
 
 import io.cucumber.datatable.DataTable;
@@ -20,8 +20,9 @@ import io.cucumber.datatable.DataTable;
  *
  * <p>
  * Purpose: hold shared properties and table-interpretation logic used when
- * running Cucumber-driven tests. Projects that need cursor/path navigation
- * extend {@link PathNavigatorTestObject} instead of this class directly.
+ * running Cucumber-driven tests. Projects extend a bounded-context subclass
+ * (MavenTestObject, EMFTestObject, RESTTestObject, MCPTestObject, ...) rather
+ * than this class directly.
  *
  * <p>
  * Table-style interpretation supports two feature-file shapes:
@@ -35,7 +36,19 @@ import io.cucumber.datatable.DataTable;
 public abstract class TestObject {
 
     public enum TestState {
-        Absent, Empty, Present, Any;
+        Absent(null), Empty(""), Present(null), Any(null),
+        Timestamp("yyyy-MM-dd'T'HH:mm:ss.SSSXXX"),
+        Milliseconds("[0-9]+");
+
+        private final String value;
+
+        TestState(String value) {
+            this.value = value;
+        }
+
+        public String value() {
+            return value;
+        }
 
         private static final Set<String> NAMES = Arrays.stream(values()).map(Enum::name).collect(Collectors.toSet());
 
@@ -48,7 +61,6 @@ public abstract class TestObject {
 
     public static void reset() {
         TestObject.properties.clear();
-        SheepDogFactory.instance = ISheepDogFactory.eINSTANCE;
     }
 
     protected static Object getProperty(String key) {
@@ -125,10 +137,6 @@ public abstract class TestObject {
 
     private void processInputOutputsStepDefinitionRef(String stateDesc, String operation, String partDesc,
             String partType, String stateType) {
-        boolean negativeTest = false;
-        if (stateType.contentEquals("isn't") || stateType.contentEquals("won't be")) {
-            negativeTest = true;
-        }
         String sectionName = (partDesc + " " + partType).trim();
         HashMap<String, String> row = new HashMap<String, String>();
         row.put(stateDesc, "");
@@ -140,14 +148,7 @@ public abstract class TestObject {
             if (operation.equals("get")) {
                 String expectedValue = convertToPascalCase(stateDesc);
                 String actual = returnValue == null ? null : returnValue.toString();
-                // TODO temporary stub: skip assertion for "created as follows" pre-check.
-                // The method can't determine what to return because it lacks context.
-                // Class section should be path::to::class class. Then the part desc
-                // property can be used to identify what to assert exists or not.
-                if (stateDesc.contentEquals("created as follows")) {
-                    return;
-                }
-                if (TestState.contains(convertToPascalCase(stateDesc))) {
+                if (TestState.contains(expectedValue)) {
                     String mappedActual;
                     if (actual == null)
                         mappedActual = TestState.Absent.name();
@@ -155,17 +156,9 @@ public abstract class TestObject {
                         mappedActual = TestState.Empty.name();
                     else
                         mappedActual = TestState.Present.name();
-                    if (negativeTest) {
-                        Assertions.assertNotEquals(expectedValue, mappedActual);
-                    } else {
-                        Assertions.assertEquals(expectedValue, mappedActual);
-                    }
+                    Assertions.assertEquals(expectedValue, mappedActual);
                 } else {
-                    if (negativeTest) {
-                        Assertions.assertNull(actual);
-                    } else {
-                        Assertions.assertNotNull(actual);
-                    }
+                    Assertions.assertNotNull(actual);
                 }
             }
         } catch (Exception e) {
@@ -203,6 +196,20 @@ public abstract class TestObject {
                         }
                         Map<String, String> actualByStore = toStoreMap(returnValue);
                         for (String actual : actualByStore.values()) {
+                            if (TestState.Timestamp.name().equals(expectedValue)) {
+                                try {
+                                    DateTimeFormatter.ofPattern(TestState.Timestamp.value()).parse(actual);
+                                } catch (Exception e) {
+                                    Assertions.fail("Expected Timestamp format but got: " + actual);
+                                }
+                                continue;
+                            }
+                            if (TestState.Milliseconds.name().equals(expectedValue)) {
+                                if (actual == null || !actual.matches(TestState.Milliseconds.value())) {
+                                    Assertions.fail("Expected Milliseconds format but got: " + actual);
+                                }
+                                continue;
+                            }
                             if (fieldName.equals("State") && TestState.contains(expectedValue)) {
                                 String mappedActual;
                                 if (actual == null)
@@ -298,7 +305,7 @@ public abstract class TestObject {
 
     private static String replaceKeyword(String value) {
         if (value.contentEquals(TestState.Empty.name().toLowerCase())) {
-            return "";
+            return TestState.Empty.value();
         } else {
             return value;
         }
@@ -338,6 +345,39 @@ public abstract class TestObject {
 
     protected void setObject(String object) {
         this.object = object;
+    }
+
+    protected static void setField(Object target, String fieldName, String value) {
+        try {
+            Field field = findField(target.getClass(), fieldName);
+            if (field == null) {
+                return;
+            }
+            field.setAccessible(true);
+            Class<?> type = field.getType();
+            if (type == String.class) {
+                field.set(target, value);
+            } else if (type == int.class || type == Integer.class) {
+                field.set(target, Integer.parseInt(value));
+            } else if (type == boolean.class || type == Boolean.class) {
+                field.set(target, Boolean.parseBoolean(value));
+            }
+        } catch (NoSuchFieldException e) {
+            // field doesn't exist on this class, skip
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to set field " + fieldName, e);
+        }
+    }
+
+    protected static Field findField(Class<?> clazz, String fieldName) throws NoSuchFieldException {
+        while (clazz != null) {
+            try {
+                return clazz.getDeclaredField(fieldName);
+            } catch (NoSuchFieldException e) {
+                clazz = clazz.getSuperclass();
+            }
+        }
+        throw new NoSuchFieldException(fieldName);
     }
 
 }
