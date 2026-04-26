@@ -11,13 +11,15 @@ public class RedPhase extends RgrPhase {
 	private final String specsDir;
 	private final String host;
 	private final boolean onlyChanges;
+	private final String svcMavenPluginGoal;
 
-	public RedPhase(MavenRunner maven, DarmokMojoLog mojoLog, String baseDir, String specsDir, String host, boolean onlyChanges) {
+	public RedPhase(MavenRunner maven, DarmokMojoLog mojoLog, String baseDir, String specsDir, String host, boolean onlyChanges, String svcMavenPluginGoal) {
 		super(null, maven, null, mojoLog, null, null, null, 0, 0, 0, 0, List.of());
 		this.baseDir = baseDir;
 		this.specsDir = specsDir;
 		this.host = host;
 		this.onlyChanges = onlyChanges;
+		this.svcMavenPluginGoal = svcMavenPluginGoal;
 	}
 
 	@Override
@@ -44,7 +46,7 @@ public class RedPhase extends RgrPhase {
 		maven.run(specsDirAbsolute, "org.farhan:sheep-dog-svc-maven-plugin:asciidoctor-to-uml",
 				"-Dtags=" + pattern, "-Dhost=" + host, "-DonlyChanges=" + onlyChanges);
 
-		maven.run(baseDir, "org.farhan:sheep-dog-svc-maven-plugin:uml-to-cucumber-guice",
+		maven.run(baseDir, "org.farhan:sheep-dog-svc-maven-plugin:" + svcMavenPluginGoal,
 				"-Dtags=" + pattern, "-Dhost=" + host, "-DonlyChanges=" + onlyChanges);
 
 		String runnerClassPath = baseDir

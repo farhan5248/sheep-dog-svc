@@ -80,6 +80,9 @@ public abstract class DarmokMojo extends AbstractMojo {
 	@Parameter(property = "onlyChanges", defaultValue = "false")
 	public boolean onlyChanges;
 
+	@Parameter(property = "svcMavenPluginGoal", defaultValue = "uml-to-cucumber-guice")
+	public String svcMavenPluginGoal;
+
 	@Parameter(property = "claudeSessionIdEnabled", defaultValue = "true")
 	public boolean claudeSessionIdEnabled;
 
@@ -178,7 +181,7 @@ public abstract class DarmokMojo extends AbstractMojo {
 		uuidSupplier = () -> UUID.randomUUID().toString();
 		List<String> effectiveAllowlist = parseAllowlist(allowlistBasePaths, allowlistAdditionalPaths);
 		GitRunner phaseGit = gitRunnerFactory.create(runnerLog);
-		redPhase = new RedPhase(maven, mojoLog, baseDir, specsDir, host, onlyChanges);
+		redPhase = new RedPhase(maven, mojoLog, baseDir, specsDir, host, onlyChanges, svcMavenPluginGoal);
 		greenPhase = new GreenPhase(
 			makeClaudeRunner(modelGreen),
 			maven, phaseGit, mojoLog, sheepDogRoot, baseDir, artifactId, maxVerifyAttempts, maxTimeoutAttempts, maxClaudeSeconds,

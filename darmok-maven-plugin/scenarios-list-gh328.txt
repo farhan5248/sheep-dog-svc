@@ -1,3 +1,0 @@
-File: Darmok/Red Phase Cucumber Gen Goal
-  Scenario: Spring-flavored cucumber-gen goal flips the runner log invocation
-    Tag: GH328

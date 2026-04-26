@@ -113,4 +113,6 @@ public interface GenFromExistingGoal {
     public void setMvnUmlToCucumberGuiceCommandExit(HashMap<String, String> keyMap);
 
     public void setMvnUmlToCucumberGuiceCommandOutput(HashMap<String, String> keyMap);
+
+    public void setSvcMavenPluginGoal(HashMap<String, String> keyMap);
 }

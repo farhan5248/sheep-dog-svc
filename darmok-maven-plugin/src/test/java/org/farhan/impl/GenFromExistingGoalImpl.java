@@ -321,4 +321,9 @@ public class GenFromExistingGoalImpl extends MavenTestObject implements GenFromE
 		setProperty("allowlistBasePaths", keyMap.get("AllowlistBasePaths"));
 	}
 
+	@Override
+	public void setSvcMavenPluginGoal(HashMap<String, String> keyMap) {
+		setProperty("svcMavenPluginGoal", keyMap.get("SvcMavenPluginGoal"));
+	}
+
 }
