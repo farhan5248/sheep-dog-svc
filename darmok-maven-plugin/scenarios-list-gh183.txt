@@ -1,6 +1,4 @@
 File: Darmok/Claude Retry Loop Session ID
-  Scenario: Green initial call carries the injected session ID
-    Tag: GH183
   Scenario: Green verify-fail resume reuses the captured session ID
     Tag: GH183
 

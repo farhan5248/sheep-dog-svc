@@ -24,16 +24,18 @@ Feature: Claude Retry Loop Session ID
           """
       And The code-prj project src/main/java/org/farhan/objects/LoginHappyPath.java file isn't created
 
-  @GH311
+  @GH311 @GH183
   Scenario: Green initial call carries the injected session ID
 
-    \@GH311
+    \@GH311 \@GH183
     The first claude call in the green phase emits `--session-id <green-uuid>` right after `--print`. Pins down the initial-call observable so a regression that drops the flag is caught explicitly.
 
-     When The darmok plugin gen-from-existing goal is executed and succeeds
+     When The darmok plugin gen-from-existing goal is executed and succeeds with
+          | GreenFullPathsEnabled |
+          | true                  |
      Then The code-prj project darmok.runners.log file will be as follows
-          | Level | Category | Content                                                                                                                                                    |
-          | DEBUG | runner   | Executing: claude --print --session-id 00000000-0000-0000-0000-000000000001 --dangerously-skip-permissions --model opus /rgr-green code-prj loginHappyPath |
+          | Level | Category | Content                                                                                                                                                                                                                                                                                                                                                                      |
+          | DEBUG | runner   | Executing: claude --print --session-id 00000000-0000-0000-0000-000000000001 --dangerously-skip-permissions --model opus /rgr-green target/darmok-test/sheep-dog-svc/code-prj loginHappyPathTest target/darmok-test/sheep-dog-svc/code-prj/log.txt target/darmok-test/sheep-dog-svc/code-prj/target/site/jacoco-with-tests target/darmok-test/sheep-dog-svc/code-prj/site/uml |
 
   @GH311
   Scenario: Green verify-fail resume reuses the captured session ID
