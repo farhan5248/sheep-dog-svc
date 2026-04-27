@@ -9,7 +9,7 @@
 	</parent>
 	<groupId>org.farhan</groupId>
 	<artifactId>sheep-dog-asciidoc-api-svc</artifactId>
-	<version>1.25</version>
+	<version>1.26-SNAPSHOT</version>
 	<name>Sheep Dog AsciiDoc API Service</name>
 
 	<properties>
