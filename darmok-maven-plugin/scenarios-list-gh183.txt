@@ -1,6 +1,4 @@
 File: Darmok/Directory Allowlist
-  Scenario: Refactor allowlist passes on the first attempt
-    Tag: GH183
   Scenario: Green allowlist fails once then succeeds after revert and resume
     Tag: GH183
   Scenario: Green allowlist fails for every attempt

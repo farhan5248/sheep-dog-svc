@@ -46,13 +46,15 @@ Feature: Directory Allowlist
           | DEBUG | runner   | Executing: claude --print --session-id 00000000-0000-0000-0000-000000000001 --dangerously-skip-permissions --model opus /rgr-green target/darmok-test/sheep-dog-svc/code-prj loginHappyPathTest target/darmok-test/sheep-dog-svc/code-prj/log.txt target/darmok-test/sheep-dog-svc/code-prj/target/site/jacoco-with-tests target/darmok-test/sheep-dog-svc/code-prj/site/uml |
           | DEBUG | runner   | Running: git status --porcelain                                                                                                                                                                                                                                                                                                                                              |
 
-  @GH141
+  @GH141 @GH183
   Scenario: Refactor allowlist passes on the first attempt
 
-    \@GH141
+    \@GH141 \@GH183
     Symmetric with the green-allowlist happy-path case. Confirms the allowlist check runs inside refactor too ? the sub-step is not accidentally bound to green.
 
-     When The darmok plugin gen-from-existing goal is executed and succeeds
+     When The darmok plugin gen-from-existing goal is executed and succeeds with
+          | GreenFullPathsEnabled |
+          | true                  |
      Then The code-prj project darmok.mojo.log file will be as follows
           | Level | Category | Content                                      |
           | INFO  | mojo     | Refactor: Running...                         |
