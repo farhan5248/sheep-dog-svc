@@ -1,3 +1,0 @@
-File: Darmok/Green Prompt Template
-  Scenario: Green phase invokes claude with rendered template path
-    Tag: GH326

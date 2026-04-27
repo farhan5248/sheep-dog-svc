@@ -1,5 +1,9 @@
 package org.farhan.mbt.maven;
 
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 
 public class GreenPhase extends RgrPhase {
@@ -33,7 +37,27 @@ public class GreenPhase extends RgrPhase {
 		String logPath = targetDir + "/log.txt";
 		String jacocoPath = targetDir + "/target/site/jacoco-with-tests";
 		String umlDir = targetDir + "/site/uml";
-		String args = "/rgr-green " + targetDir + " " + runnerClassName + " " + logPath + " " + jacocoPath + " " + umlDir;
+
+		String args;
+		if (greenPromptTemplateEnabled) {
+			String template;
+			try (InputStream is = getClass().getResourceAsStream("/prompts/green.md")) {
+				template = new String(is.readAllBytes(), StandardCharsets.UTF_8);
+			}
+			String rendered = template
+				.replace("${projectPath}", targetDir)
+				.replace("${runnerClassName}", runnerClassName)
+				.replace("${logPath}", logPath)
+				.replace("${jacocoPath}", jacocoPath)
+				.replace("${umlDir}", umlDir);
+			Path renderedPath = Path.of(targetDir, "target", "darmok", "green.md");
+			Files.createDirectories(renderedPath.getParent());
+			Files.writeString(renderedPath, rendered, StandardCharsets.UTF_8);
+			args = "@" + renderedPath.toString().replace('\\', '/');
+		} else {
+			args = "/rgr-green " + targetDir + " " + runnerClassName + " " + logPath + " " + jacocoPath + " " + umlDir;
+		}
+
 		int claudeExit = claude.run(workingDir, args);
 		return runTimeoutRecoveryLoop(claudeExit);
 	}
