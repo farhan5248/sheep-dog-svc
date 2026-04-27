@@ -40,23 +40,25 @@ Feature: Refactor Session Mode
           | DEBUG | runner   | Executing: claude --resume 00000000-0000-0000-0000-000000000001 --print --dangerously-skip-permissions --model opus /compact                                                                                                                                                                                                                                                 |
           | DEBUG | runner   | Executing: claude --resume 00000000-0000-0000-0000-000000000001 --print --dangerously-skip-permissions --model opus /rgr-refactor forward code-prj                                                                                                                                                                                                                           |
 
-  @GH287
+  @GH287 @GH183
   Scenario: Continue mode refactor verify-fail resume stays on green session
 
-    \@GH287
+    \@GH287 \@GH183
     After a failed `mvn clean verify` during the refactor phase, the resume call carries `--resume <green-uuid>` ? the same UUID green used. Proves that the inherited session capture flows through every downstream refactor sub-machine (Phase Verification here, transitively Phase Timeout and Directory Allowlist), not just the initial `/rgr-refactor` call.
 
     Given The darmok plugin gen-from-existing goal mvn clean verify command is executed but fails once then succeeds
           | Phase    |
           | Refactor |
-     When The darmok plugin gen-from-existing goal is executed and succeeds
+     When The darmok plugin gen-from-existing goal is executed and succeeds with
+          | GreenFullPathsEnabled |
+          | true                  |
      Then The code-prj project darmok.runners.log file will be as follows
-          | Level | Category | Content                                                                                                                                                       |
-          | DEBUG | runner   | Executing: claude --print --session-id 00000000-0000-0000-0000-000000000001 --dangerously-skip-permissions --model opus /rgr-green code-prj loginHappyPath    |
-          | DEBUG | runner   | Running: mvn clean verify                                                                                                                                     |
-          | DEBUG | runner   | Executing: claude --resume 00000000-0000-0000-0000-000000000001 --print --dangerously-skip-permissions --model opus /compact                                  |
-          | DEBUG | runner   | Executing: claude --resume 00000000-0000-0000-0000-000000000001 --print --dangerously-skip-permissions --model opus /rgr-refactor forward code-prj            |
-          | DEBUG | runner   | Running: mvn clean verify                                                                                                                                     |
-          | DEBUG | runner   | Executing: claude --resume 00000000-0000-0000-0000-000000000001 --print --dangerously-skip-permissions --model opus mvn clean verify failures should be fixed |
-          | DEBUG | runner   | Running: mvn clean verify                                                                                                                                     |
+          | Level | Category | Content                                                                                                                                                                                                                                                                                                                                                                      |
+          | DEBUG | runner   | Executing: claude --print --session-id 00000000-0000-0000-0000-000000000001 --dangerously-skip-permissions --model opus /rgr-green target/darmok-test/sheep-dog-svc/code-prj loginHappyPathTest target/darmok-test/sheep-dog-svc/code-prj/log.txt target/darmok-test/sheep-dog-svc/code-prj/target/site/jacoco-with-tests target/darmok-test/sheep-dog-svc/code-prj/site/uml |
+          | DEBUG | runner   | Running: mvn clean verify                                                                                                                                                                                                                                                                                                                                                    |
+          | DEBUG | runner   | Executing: claude --resume 00000000-0000-0000-0000-000000000001 --print --dangerously-skip-permissions --model opus /compact                                                                                                                                                                                                                                                 |
+          | DEBUG | runner   | Executing: claude --resume 00000000-0000-0000-0000-000000000001 --print --dangerously-skip-permissions --model opus /rgr-refactor forward code-prj                                                                                                                                                                                                                           |
+          | DEBUG | runner   | Running: mvn clean verify                                                                                                                                                                                                                                                                                                                                                    |
+          | DEBUG | runner   | Executing: claude --resume 00000000-0000-0000-0000-000000000001 --print --dangerously-skip-permissions --model opus mvn clean verify failures should be fixed                                                                                                                                                                                                                |
+          | DEBUG | runner   | Running: mvn clean verify                                                                                                                                                                                                                                                                                                                                                    |
 
