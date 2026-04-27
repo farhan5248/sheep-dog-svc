@@ -25,18 +25,20 @@ Feature: Refactor Session Mode
           """
       And The code-prj project src/main/java/org/farhan/objects/LoginHappyPath.java file isn't created
 
-  @GH287
+  @GH287 @GH183
   Scenario: Continue mode runs compact then starts refactor on green session
 
-    \@GH287
+    \@GH287 \@GH183
     Refactor's first observable claude line is a `/compact` resume on green's UUID, followed immediately by `/rgr-refactor` carried by `--resume <green-uuid>` rather than `--session-id <fresh-uuid>`. Pins down two observables together because they appear in the same runner-log sequence: the compact preamble, and the absence of a fresh refactor UUID on the initial refactor call.
 
-     When The darmok plugin gen-from-existing goal is executed and succeeds
+     When The darmok plugin gen-from-existing goal is executed and succeeds with
+          | GreenFullPathsEnabled |
+          | true                  |
      Then The code-prj project darmok.runners.log file will be as follows
-          | Level | Category | Content                                                                                                                                                    |
-          | DEBUG | runner   | Executing: claude --print --session-id 00000000-0000-0000-0000-000000000001 --dangerously-skip-permissions --model opus /rgr-green code-prj loginHappyPath |
-          | DEBUG | runner   | Executing: claude --resume 00000000-0000-0000-0000-000000000001 --print --dangerously-skip-permissions --model opus /compact                               |
-          | DEBUG | runner   | Executing: claude --resume 00000000-0000-0000-0000-000000000001 --print --dangerously-skip-permissions --model opus /rgr-refactor forward code-prj         |
+          | Level | Category | Content                                                                                                                                                                                                                                                                                                                                                                      |
+          | DEBUG | runner   | Executing: claude --print --session-id 00000000-0000-0000-0000-000000000001 --dangerously-skip-permissions --model opus /rgr-green target/darmok-test/sheep-dog-svc/code-prj loginHappyPathTest target/darmok-test/sheep-dog-svc/code-prj/log.txt target/darmok-test/sheep-dog-svc/code-prj/target/site/jacoco-with-tests target/darmok-test/sheep-dog-svc/code-prj/site/uml |
+          | DEBUG | runner   | Executing: claude --resume 00000000-0000-0000-0000-000000000001 --print --dangerously-skip-permissions --model opus /compact                                                                                                                                                                                                                                                 |
+          | DEBUG | runner   | Executing: claude --resume 00000000-0000-0000-0000-000000000001 --print --dangerously-skip-permissions --model opus /rgr-refactor forward code-prj                                                                                                                                                                                                                           |
 
   @GH287
   Scenario: Continue mode refactor verify-fail resume stays on green session
