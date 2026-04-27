@@ -17,6 +17,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
+import io.cucumber.java.Scenario;
 import io.cucumber.spring.CucumberContextConfiguration;
 
 /**
@@ -51,7 +52,7 @@ public class TestConfig {
 	private static final Path SCENARIO_ROOT = Path.of("target/darmok-test");
 
 	@Before
-	public void resetTestProject() throws Exception {
+	public void resetTestProject(Scenario scenario) throws Exception {
 		TestObject.reset();
 		new SourceFileRepository(SCENARIO_ROOT.toString()).clear("");
 		Path codePrjDir = SCENARIO_ROOT.resolve("sheep-dog-svc").resolve("code-prj");
@@ -61,6 +62,7 @@ public class TestConfig {
 		Files.createDirectories(specPrjDir);
 		Files.createDirectories(logDir);
 		TestObject.properties.put("scenario.root", SCENARIO_ROOT);
+		TestObject.properties.put("scenarioName", scenario.getName());
 		TestObject.properties.put("repository", new SourceFileRepository(SCENARIO_ROOT.toString()));
 		TestObject.properties.put("code-prj.componentPath", "sheep-dog-svc/code-prj");
 		TestObject.properties.put("spec-prj.componentPath", "spec-prj");

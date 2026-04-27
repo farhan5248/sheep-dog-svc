@@ -33,18 +33,25 @@ class FakeRunnerState {
 	private final Path codePrjBaseDir;
 	private final Path eventLogPath;
 	private final Path scenariosListPath;
+	private final String scenarioName;
 	private String currentPhase;
 	private String scenariosListSnapshot;
 
-	FakeRunnerState(Path codePrjBaseDir, Path eventLogPath) {
+	FakeRunnerState(Path codePrjBaseDir, Path eventLogPath, String scenarioName) {
 		this.codePrjBaseDir = codePrjBaseDir;
 		this.eventLogPath = eventLogPath;
+		this.scenarioName = scenarioName;
 		this.scenariosListPath = codePrjBaseDir == null ? null : codePrjBaseDir.resolve("scenarios-list.txt");
 		this.scenariosListSnapshot = readScenariosList();
+		appendEventLog("[fake] Scenario: " + (scenarioName == null ? "<unset>" : scenarioName));
 	}
 
 	Path codePrjBaseDir() {
 		return codePrjBaseDir;
+	}
+
+	String scenarioName() {
+		return scenarioName;
 	}
 
 	String currentPhase() {

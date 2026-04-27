@@ -34,7 +34,8 @@ public class FakeProcessStarter implements ProcessStarter {
 		Path baseDir = baseDirObj instanceof Path ? (Path) baseDirObj : null;
 		Object logDirObj = properties.get("log.dir");
 		Path eventLogPath = logDirObj instanceof Path p ? p.resolve("mojo.event.log") : null;
-		this.state = new FakeRunnerState(baseDir, eventLogPath);
+		String scenarioName = FakeProperties.string(properties, "scenarioName");
+		this.state = new FakeRunnerState(baseDir, eventLogPath, scenarioName);
 		this.claude = new ClaudeProcessFake(properties, state);
 		this.mvn = new MvnProcessFake(properties, state);
 		this.git = new GitProcessFake(properties, state);
