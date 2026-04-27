@@ -23,15 +23,17 @@ Feature: Gen From Comparison
           """
       And The code-prj project src/main/java/org/farhan/objects/LoginHappyPath.java file isn't created
 
+  @GH183
   Scenario: Comparison skill runs, then the normal RGR cycle completes
 
+    \@GH183
     The `gen-from-comparison` goal exists so Darmok can compare two implementation candidates (e.g. a prior run's code vs a fresh generation) before deciding which to keep.
     The `/rgr-gen-from-comparison` Claude skill runs once at the start of each scenario iteration to perform that comparison analysis; if it succeeds, the standard Red ? Green ? Refactor flow proceeds exactly as in `gen-from-existing`.
     This Test-Case verifies the comparison call is made, that it doesn't interfere with the core RGR cycle, and that the observable scenarios-processed outcome is the same.
 
      When The darmok plugin gen-from-comparison goal is executed and succeeds with
-          | ModelComparison | ModelGreen | ModelRefactor |
-          | sonnet          | sonnet     | sonnet        |
+          | ModelComparison | ModelGreen | ModelRefactor | GreenFullPathsEnabled |
+          | sonnet          | sonnet     | sonnet        | true                  |
      Then The code-prj project src/main/java/org/farhan/objects/LoginHappyPath.java file will be present
       And The code-prj project scenarios-list.txt file will be empty
       And The code-prj project darmok.mojo.log file will be as follows
@@ -49,8 +51,8 @@ Feature: Gen From Comparison
           | INFO  | mojo     | RGR Automation Complete!                                                      |
           | INFO  | mojo     | Total scenarios processed: 1                                                  |
       And The code-prj project darmok.runners.log file will be as follows
-          | Level | Category | Content                                                                                                                                                        |
-          | DEBUG | runner   | Executing: claude --print --session-id 00000000-0000-0000-0000-000000000001 --dangerously-skip-permissions --model sonnet /rgr-gen-from-comparison darmok-prj  |
-          | DEBUG | runner   | Executing: claude --print --session-id 00000000-0000-0000-0000-000000000002 --dangerously-skip-permissions --model sonnet /rgr-green darmok-prj loginHappyPath |
-          | DEBUG | runner   | Executing: claude --resume 00000000-0000-0000-0000-000000000002 --print --dangerously-skip-permissions --model sonnet /rgr-refactor forward darmok-prj         |
+          | Level | Category | Content                                                                                                                                                                                                                                                                                                                                                                        |
+          | DEBUG | runner   | Executing: claude --print --session-id 00000000-0000-0000-0000-000000000001 --dangerously-skip-permissions --model sonnet /rgr-gen-from-comparison darmok-prj                                                                                                                                                                                                                  |
+          | DEBUG | runner   | Executing: claude --print --session-id 00000000-0000-0000-0000-000000000002 --dangerously-skip-permissions --model sonnet /rgr-green target/darmok-test/sheep-dog-svc/code-prj loginHappyPathTest target/darmok-test/sheep-dog-svc/code-prj/log.txt target/darmok-test/sheep-dog-svc/code-prj/target/site/jacoco-with-tests target/darmok-test/sheep-dog-svc/code-prj/site/uml |
+          | DEBUG | runner   | Executing: claude --resume 00000000-0000-0000-0000-000000000002 --print --dangerously-skip-permissions --model sonnet /rgr-refactor forward darmok-prj                                                                                                                                                                                                                         |
 

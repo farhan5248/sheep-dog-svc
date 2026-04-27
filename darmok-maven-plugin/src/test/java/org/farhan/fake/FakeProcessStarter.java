@@ -356,7 +356,14 @@ public class FakeProcessStarter implements ProcessStarter {
 			.orElse("");
 		String[] parts = rgrGreenArg.split(" ");
 		if (parts.length < 3) return;
-		String tag = parts[parts.length - 1];
+		String tag;
+		if (parts.length > 3) {
+			// Full-paths format: /rgr-green <projectPath> <runnerClassName> <logPath> <jacocoPath> <umlDir>
+			tag = parts[2].replaceFirst("Test$", "");
+		} else {
+			// Legacy format: /rgr-green <artifactId> <pattern>
+			tag = parts[2];
+		}
 		String titleCaseTag = Character.toUpperCase(tag.charAt(0)) + tag.substring(1);
 		Path implFile = codePrjBaseDir.resolve("src/main/java/org/farhan/objects/" + titleCaseTag + ".java");
 		try {
