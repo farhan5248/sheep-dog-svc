@@ -5,13 +5,21 @@ import java.io.File;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 import org.apache.maven.plugin.logging.Log;
 
-public class ClaudeRunner extends ProcessRunner {
+/**
+ * Single-invocation primitive that runs the {@code claude} CLI once and
+ * returns its exit code. Output lines are captured into the caller-supplied
+ * list so callers can decide whether the failure is retryable. The retry
+ * loop itself is owned by callers — see {@link DarmokMojo#runClaudeWithRetry}
+ * (used directly by {@link GenFromComparisonMojo}) and {@link RgrPhase}'s
+ * {@code runClaudeWithRetry} / {@code resumeClaudeWithRetry} wrappers (used
+ * by the Green and Refactor phases).
+ */
+public class ClaudeRunner extends ProcessRunner implements Claude {
 
 	// Sentinel exit code returned when the claude subprocess is destroyed after
 	// exceeding maxClaudeSeconds. Callers (GreenPhase/RefactorPhase) recognise
@@ -19,33 +27,16 @@ public class ClaudeRunner extends ProcessRunner {
 	// normal failure. Matches the convention used by GNU coreutils timeout(1).
 	public static final int TIMEOUT_EXIT_CODE = -124;
 
-	// Retryable error patterns
-	private static final String[] RETRYABLE_PATTERNS = {
-		"API Error: 500",
-		"API Error: 529",
-		"Internal server error",
-		"overloaded"
-	};
-
-	private int maxRetries;
-	private int retryWaitSeconds;
-	private int maxClaudeSeconds;
-	private String model;
-	private boolean sessionIdEnabled;
-	private Supplier<String> uuidSupplier;
+	private final int maxClaudeSeconds;
+	private final String model;
+	private final boolean sessionIdEnabled;
+	private final Supplier<String> uuidSupplier;
 	private String sessionId;
 
-	public ClaudeRunner(Log log, String model, int maxRetries, int retryWaitSeconds, int maxClaudeSeconds,
+	public ClaudeRunner(Log log, String model, int maxClaudeSeconds,
 			boolean sessionIdEnabled, Supplier<String> uuidSupplier) {
-		this(log, model, maxRetries, retryWaitSeconds, maxClaudeSeconds, sessionIdEnabled, uuidSupplier, ProcessBuilder::start);
-	}
-
-	public ClaudeRunner(Log log, String model, int maxRetries, int retryWaitSeconds, int maxClaudeSeconds,
-			boolean sessionIdEnabled, Supplier<String> uuidSupplier, ProcessStarter starter) {
-		super(log, starter);
+		super(log);
 		this.model = model;
-		this.maxRetries = maxRetries;
-		this.retryWaitSeconds = retryWaitSeconds;
 		this.maxClaudeSeconds = maxClaudeSeconds;
 		this.sessionIdEnabled = sessionIdEnabled;
 		this.uuidSupplier = uuidSupplier;
@@ -75,11 +66,12 @@ public class ClaudeRunner extends ProcessRunner {
 	}
 
 	@Override
-	public int run(String workingDirectory, String... args) throws Exception {
-		return runWithRetry(buildCommand(args), workingDirectory);
+	public int run(String workingDirectory, List<String> outputLines, String... args) throws Exception {
+		return executeCommand(buildCommand(args), workingDirectory, outputLines);
 	}
 
-	public int resume(String workingDirectory, String message) throws Exception {
+	@Override
+	public int resume(String workingDirectory, List<String> outputLines, String message) throws Exception {
 		List<String> command = new ArrayList<>();
 		command.add(isWindows() ? "claude.cmd" : "claude");
 		command.add("--resume");
@@ -93,51 +85,7 @@ public class ClaudeRunner extends ProcessRunner {
 			command.add(model);
 		}
 		command.add(message);
-		return runWithRetry(command, workingDirectory);
-	}
-
-	private int runWithRetry(List<String> command, String workingDirectory) throws Exception {
-		Log log = getLog();
-		int attempt = 0;
-		int exitCode = -1;
-
-		while (attempt < maxRetries) {
-			attempt++;
-
-			if (attempt > 1) {
-				log.debug("Retry attempt " + attempt + " of " + maxRetries + "...");
-			}
-
-			List<String> outputLines = new ArrayList<>();
-			exitCode = executeCommand(command, workingDirectory, outputLines);
-
-			if (exitCode == TIMEOUT_EXIT_CODE) {
-				// Timeout is orthogonal to the API-retry loop; surface the sentinel
-				// so the phase can run mvn clean install and decide what to do.
-				return TIMEOUT_EXIT_CODE;
-			}
-
-			if (exitCode == 0) {
-				log.debug("Claude CLI completed successfully");
-				break;
-			}
-
-			String matchedPattern = findRetryableError(outputLines);
-			if (matchedPattern != null && attempt < maxRetries) {
-				log.warn("Retryable error detected: " + matchedPattern);
-				log.warn("Claude CLI exited with code " + exitCode);
-				log.warn("Waiting " + retryWaitSeconds + " seconds before retry...");
-				Thread.sleep(retryWaitSeconds * 1000L);
-			} else {
-				if (matchedPattern != null) {
-					log.error("Retryable error detected: " + matchedPattern);
-					log.error("Max retries (" + maxRetries + ") exhausted");
-				}
-				log.debug("Claude CLI exited with code " + exitCode);
-				break;
-			}
-		}
-		return exitCode;
+		return executeCommand(command, workingDirectory, outputLines);
 	}
 
 	private int executeCommand(List<String> command, String workingDirectory,
@@ -149,7 +97,7 @@ public class ClaudeRunner extends ProcessRunner {
 		ProcessBuilder pb = new ProcessBuilder(command);
 		pb.directory(new File(workingDirectory));
 		pb.redirectErrorStream(true);
-		Process process = getStarter().start(pb);
+		Process process = pb.start();
 		process.getOutputStream().close();
 
 		// Read stdout in a background thread so waitFor(timeout) can actually
@@ -198,24 +146,13 @@ public class ClaudeRunner extends ProcessRunner {
 		return process.exitValue();
 	}
 
+	@Override
 	public String getSessionId() {
 		return sessionId;
 	}
 
+	@Override
 	public void setSessionId(String sessionId) {
 		this.sessionId = sessionId;
-	}
-
-	private String findRetryableError(List<String> outputLines) {
-		synchronized (outputLines) {
-			for (String line : outputLines) {
-				for (String pattern : RETRYABLE_PATTERNS) {
-					if (line.contains(pattern)) {
-						return pattern;
-					}
-				}
-			}
-		}
-		return null;
 	}
 }

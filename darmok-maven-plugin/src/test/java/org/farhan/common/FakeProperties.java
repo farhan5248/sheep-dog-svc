@@ -1,11 +1,9 @@
-package org.farhan.fake;
+package org.farhan.common;
 
 import java.util.Map;
 
 /**
- * Shared property-Map readers for the per-runner fakes — keeps the
- * string-vs-int parsing consistent across {@link ClaudeProcessFake},
- * {@link MvnProcessFake}, and {@link GitProcessFake}.
+ * Shared property-Map readers for the per-command fakes.
  */
 final class FakeProperties {
 

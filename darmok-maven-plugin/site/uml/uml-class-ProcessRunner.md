@@ -16,18 +16,6 @@ Abstract base class that owns the external-process lifecycle — stream stdout t
 **Examples**:
  - `public ProcessRunner(Log log)`
 
-## ProcessRunner (test seam)
-
-**Desc**: Test-only constructor that accepts a ProcessStarter test seam so tests can inject a FakeProcessStarter without spawning real subprocesses.
-
-**Rule**: ONE constructor matches ProcessRunner test seam pattern.
- - **Name**: `^ProcessRunner$`
- - **Parameters**: `^\(Log\s+\w+,\s*ProcessStarter\s+\w+\)$`
- - **Modifier**: `^public$`
-
-**Examples**:
- - `public ProcessRunner(Log log, ProcessStarter starter)`
-
 ## buildCommand
 
 **Desc**: Constructs the command list from arguments. Subclasses override to prepend tool-specific executable.

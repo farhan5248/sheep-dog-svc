@@ -32,9 +32,20 @@
 **Regex**: `^ProcessRunner$`
  - `ProcessRunner`
 
+### {Tool}
+
+**Desc**: Per-command interface that abstracts the external CLI. Implemented by both the production runner (`{Tool}Runner`) and the test fake (`{Tool}RunnerFake`); the Mojo and phases hold the interface, so the factory decides which side is wired in without callers needing to know.
+
+**Rule**: SOME class matches {Tool} pattern
+
+**Regex**: `^{Tool}$`
+ - `Claude`
+ - `Git`
+ - `Maven`
+
 ### {Tool}Runner
 
-**Desc**: Specialized process runner that extends ProcessRunner with tool-specific command construction. Separates tool-specific command building from shared process execution logic.
+**Desc**: Specialized process runner that extends ProcessRunner with tool-specific command construction and implements its `{Tool}` interface. Separates tool-specific command building from shared process execution logic.
 
 **Rule**: SOME class matches {Tool}Runner pattern
 
@@ -45,7 +56,7 @@
 
 ### {Tool}RunnerFactory
 
-**Desc**: Functional interface (SAM) for constructing a {Tool}Runner. Production wires the runner's public constructor via method reference; tests substitute a lambda that binds a FakeProcessStarter to the runner's test-seam constructor.
+**Desc**: Functional interface (SAM) for constructing a `{Tool}` implementation. Production wires the runner's public constructor via method reference (`{Tool}Runner::new`); tests substitute a lambda that returns the matching test fake. Returning the interface type lets either side satisfy the Mojo without it knowing which.
 
 **Rule**: SOME class matches {Tool}RunnerFactory pattern
 
@@ -133,7 +144,7 @@
 
 ### TestConfig
 
-**Desc**: Spring context configuration and Cucumber lifecycle hooks for scenario glue. Creates fresh temp directories per scenario, stashes their paths in TestObject.properties, and wires a FakeProcess-based ProcessStarter so no real subprocesses are spawned.
+**Desc**: Spring context configuration and Cucumber lifecycle hooks for scenario glue. Creates fresh temp directories per scenario and stashes their paths in TestObject.properties; the per-scenario impl methods seed the property bag with the per-command fakes (`ClaudeRunnerFake` / `MavenRunnerFake` / `GitRunnerFake`) which the Mojo's runner factories return so no real subprocesses are spawned.
 
 **Rule**: ONE class matches TestConfig pattern
 

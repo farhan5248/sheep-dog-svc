@@ -15,9 +15,9 @@ Concrete RGR phase. `RedPhase` runs the upstream sheep-dog-svc-maven-plugin goal
  - **Modifier**: `^public$`
 
 **Examples**:
- - `public RedPhase(MavenRunner maven, DarmokMojoLog mojoLog, String baseDir, String specsDir, String host, boolean onlyChanges)`
- - `public GreenPhase(ClaudeRunner claude, MavenRunner maven, GitRunner git, DarmokMojoLog mojoLog, String workingDir, String targetDir, String artifactId, int maxVerifyAttempts, int maxTimeoutAttempts, int maxClaudeSeconds, int maxAllowlistAttempts, List<String> allowlistPaths)`
- - `public RefactorPhase(ClaudeRunner claude, MavenRunner maven, GitRunner git, DarmokMojoLog mojoLog, String workingDir, String targetDir, String artifactId, int maxVerifyAttempts, int maxTimeoutAttempts, int maxClaudeSeconds, int maxAllowlistAttempts, List<String> allowlistPaths)`
+ - `public RedPhase(Maven maven, DarmokMojoLog mojoLog, String baseDir, String specsDir, String host, boolean onlyChanges, String svcMavenPluginGoal)`
+ - `public GreenPhase(Claude claude, Maven maven, Git git, DarmokMojoLog mojoLog, Log runnerLog, String workingDir, String targetDir, String artifactId, int maxVerifyAttempts, int maxTimeoutAttempts, int maxClaudeSeconds, int maxAllowlistAttempts, int maxRetries, int retryWaitSeconds, List<String> allowlistPaths)`
+ - `public RefactorPhase(Claude claude, Maven maven, Git git, DarmokMojoLog mojoLog, Log runnerLog, String workingDir, String targetDir, String artifactId, int maxVerifyAttempts, int maxTimeoutAttempts, int maxClaudeSeconds, int maxAllowlistAttempts, int maxRetries, int retryWaitSeconds, List<String> allowlistPaths, String refactorSessionMode)`
 
 ## phase
 
@@ -51,16 +51,16 @@ Concrete RGR phase. `RedPhase` runs the upstream sheep-dog-svc-maven-plugin goal
 
 ## prepareSession
 
-**Desc**: RefactorPhase-only. Pre-phase hook called by `DarmokMojo.processScenario` **before** `refactorPhase.run(state)` — i.e. outside the `phase_refactor_ms` timing window — so the `/compact` resume and the session-inheritance step don't inflate the refactor metric. No-op when `refactorSessionMode=fresh`. When `refactorSessionMode=continue` (issue #287), copies green's UUID into refactor's `ClaudeRunner` via `setSessionId`, then issues `claude --resume <green-uuid> /compact` to scope refactor's review to the files green just touched.
+**Desc**: RefactorPhase-only. Pre-phase hook called by `DarmokMojo.processScenario` **before** `refactorPhase.run(state)` — i.e. outside the `phase_refactor_ms` timing window — so the `/compact` resume and the session-inheritance step don't inflate the refactor metric. No-op when `refactorSessionMode=fresh`. When `refactorSessionMode=continue` (issue #287), copies green's UUID into refactor's `Claude` via `setSessionId`, then issues `claude --resume <green-uuid> /compact` to scope refactor's review to the files green just touched.
 
 **Rule**: SOME method names follow prepareSession pattern.
  - **Name**: `^prepareSession$`
  - **Return**: `^void$`
- - **Parameters**: `^\(ClaudeRunner\s+\w+\)$`
+ - **Parameters**: `^\(Claude\s+\w+\)$`
  - **Modifier**: `^public$`
 
 **Examples**:
- - `public void prepareSession(ClaudeRunner greenClaude) throws Exception` (RefactorPhase)
+ - `public void prepareSession(Claude greenClaude) throws Exception` (RefactorPhase)
 
 ## executeClaudeOrMaven
 

@@ -4,7 +4,9 @@ import static io.cucumber.spring.CucumberTestContext.SCOPE_CUCUMBER_GLUE;
 
 import java.util.HashMap;
 
-import org.farhan.fake.FakeProcessStarter;
+import org.farhan.fake.ClaudeRunnerFake;
+import org.farhan.fake.GitRunnerFake;
+import org.farhan.fake.MavenRunnerFake;
 import org.farhan.common.MavenTestObject;
 import org.farhan.mbt.maven.GenFromExistingMojo;
 import org.farhan.objects.darmok.GenFromExistingGoal;
@@ -101,25 +103,33 @@ public class GenFromExistingGoalImpl extends MavenTestObject implements GenFromE
 
 	@Override
 	public void setExecutedAndSucceeds(HashMap<String, String> keyMap) {
-		setProperty("processStarter", new FakeProcessStarter(properties));
+		setProperty("claude", new ClaudeRunnerFake(properties));
+		setProperty("maven", new MavenRunnerFake(properties));
+		setProperty("git", new GitRunnerFake(properties));
 		runGoal(GenFromExistingMojo.class, getProperty("code-prj.baseDir").toString());
 	}
 
 	@Override
 	public void setExecutedButFails(HashMap<String, String> keyMap) {
-		setProperty("processStarter", new FakeProcessStarter(properties));
+		setProperty("claude", new ClaudeRunnerFake(properties));
+		setProperty("maven", new MavenRunnerFake(properties));
+		setProperty("git", new GitRunnerFake(properties));
 		runGoal(GenFromExistingMojo.class, getProperty("code-prj.baseDir").toString());
 	}
 
 	@Override
 	public void setExecutedAndSucceedsWith(HashMap<String, String> keyMap) {
-		setProperty("processStarter", new FakeProcessStarter(properties));
+		setProperty("claude", new ClaudeRunnerFake(properties));
+		setProperty("maven", new MavenRunnerFake(properties));
+		setProperty("git", new GitRunnerFake(properties));
 		runGoal(GenFromExistingMojo.class, getProperty("code-prj.baseDir").toString());
 	}
 
 	@Override
 	public void setExecutedButFailsWith(HashMap<String, String> keyMap) {
-		setProperty("processStarter", new FakeProcessStarter(properties));
+		setProperty("claude", new ClaudeRunnerFake(properties));
+		setProperty("maven", new MavenRunnerFake(properties));
+		setProperty("git", new GitRunnerFake(properties));
 		runGoal(GenFromExistingMojo.class, getProperty("code-prj.baseDir").toString());
 	}
 

@@ -5,16 +5,12 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Supplier;
-
 import org.apache.maven.project.MavenProject;
-import org.farhan.mbt.maven.ClaudeRunner;
+import org.farhan.mbt.maven.Claude;
 import org.farhan.mbt.maven.DarmokMojo;
-import org.farhan.mbt.maven.GitRunner;
-import org.farhan.mbt.maven.MavenRunner;
 import org.farhan.mbt.maven.DarmokMojoLog;
-import org.farhan.mbt.maven.ProcessRunner.ProcessStarter;
+import org.farhan.mbt.maven.Git;
+import org.farhan.mbt.maven.Maven;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 
@@ -38,15 +34,24 @@ public abstract class MavenTestObject extends TestObject {
             mojo.project = project;
             mojo.setBaseDir(baseDir);
 
-            Object starterProp = getProperty("processStarter");
-            if (starterProp instanceof ProcessStarter starter) {
-                AtomicInteger uuidCounter = new AtomicInteger(0);
-                Supplier<String> testUuidSupplier = () ->
-                    String.format("00000000-0000-0000-0000-%012d", uuidCounter.incrementAndGet());
-                mojo.setGitRunnerFactory(log -> new GitRunner(log, starter));
-                mojo.setMavenRunnerFactory(log -> new MavenRunner(log, starter));
-                mojo.setClaudeRunnerFactory((log, model, retries, wait, maxSeconds, sessionEnabled, uuidSupplier) ->
-                    new ClaudeRunner(log, model, retries, wait, maxSeconds, sessionEnabled, testUuidSupplier, starter));
+            Object claudeProp = getProperty("claude");
+            Object mvnProp = getProperty("maven");
+            Object gitProp = getProperty("git");
+            if (claudeProp instanceof Claude claudeFake
+                    && mvnProp instanceof Maven mavenFake
+                    && gitProp instanceof Git gitFake) {
+                mojo.setGitRunnerFactory(log -> {
+                    if (gitFake instanceof org.farhan.common.CommandFake fake) fake.setRunnerLog(log);
+                    return gitFake;
+                });
+                mojo.setMavenRunnerFactory(log -> {
+                    if (mavenFake instanceof org.farhan.common.CommandFake fake) fake.setRunnerLog(log);
+                    return mavenFake;
+                });
+                mojo.setClaudeRunnerFactory((log, model, maxSeconds, sessionEnabled, uuidSupplier) -> {
+                    if (claudeFake instanceof org.farhan.common.CommandFake fake) fake.setRunnerLog(log);
+                    return claudeFake;
+                });
             }
 
             // Iterate public fields (Mojo @Parameter fields are public). The Maven

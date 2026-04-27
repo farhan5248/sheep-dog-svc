@@ -1,4 +1,4 @@
-package org.farhan.fake;
+package org.farhan.common;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -11,7 +11,7 @@ import java.time.format.DateTimeFormatter;
 
 /**
  * Per-scenario fake-side state. Owns the {@code mojo.event.log} tap that
- * {@link DarmokRunnersLogFileImpl} cross-checks against the production runner
+ * {@code DarmokRunnersLogFileImpl} cross-checks against the production runner
  * log when asserting on {@code Running:} lines.
  */
 class FakeRunnerState {

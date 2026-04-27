@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.logging.Log;
 
 public abstract class RgrPhase {
 
@@ -11,10 +12,11 @@ public abstract class RgrPhase {
 	static final String TIMEOUT_RESUME_MESSAGE = "pls continue";
 	static final String ALLOWLIST_RESUME_MESSAGE = "only modify files under src/main/java or src/test/java/org/farhan/impl";
 
-	protected final ClaudeRunner claude;
-	protected final MavenRunner maven;
-	protected final GitRunner git;
+	protected final Claude claude;
+	protected final Maven maven;
+	protected final Git git;
 	protected final DarmokMojoLog mojoLog;
+	protected final Log runnerLog;
 	protected final String workingDir;
 	protected final String targetDir;
 	protected final String artifactId;
@@ -22,16 +24,19 @@ public abstract class RgrPhase {
 	protected final int maxTimeoutAttempts;
 	protected final int maxClaudeSeconds;
 	protected final int maxAllowlistAttempts;
+	protected final int maxRetries;
+	protected final int retryWaitSeconds;
 	protected final List<String> allowlistPaths;
 
-	protected RgrPhase(ClaudeRunner claude, MavenRunner maven, GitRunner git, DarmokMojoLog mojoLog,
+	protected RgrPhase(Claude claude, Maven maven, Git git, DarmokMojoLog mojoLog, Log runnerLog,
 			String workingDir, String targetDir, String artifactId,
 			int maxVerifyAttempts, int maxTimeoutAttempts, int maxClaudeSeconds,
-			int maxAllowlistAttempts, List<String> allowlistPaths) {
+			int maxAllowlistAttempts, int maxRetries, int retryWaitSeconds, List<String> allowlistPaths) {
 		this.claude = claude;
 		this.maven = maven;
 		this.git = git;
 		this.mojoLog = mojoLog;
+		this.runnerLog = runnerLog;
 		this.workingDir = workingDir;
 		this.targetDir = targetDir;
 		this.artifactId = artifactId;
@@ -39,7 +44,19 @@ public abstract class RgrPhase {
 		this.maxTimeoutAttempts = maxTimeoutAttempts;
 		this.maxClaudeSeconds = maxClaudeSeconds;
 		this.maxAllowlistAttempts = maxAllowlistAttempts;
+		this.maxRetries = maxRetries;
+		this.retryWaitSeconds = retryWaitSeconds;
 		this.allowlistPaths = allowlistPaths;
+	}
+
+	protected int runClaudeWithRetry(String wd, String... args) throws Exception {
+		return DarmokMojo.runClaudeWithRetry(runnerLog, maxRetries, retryWaitSeconds,
+			outputLines -> claude.run(wd, outputLines, args));
+	}
+
+	protected int resumeClaudeWithRetry(String wd, String message) throws Exception {
+		return DarmokMojo.runClaudeWithRetry(runnerLog, maxRetries, retryWaitSeconds,
+			outputLines -> claude.resume(wd, outputLines, message));
 	}
 
 	protected abstract Phase phase();
@@ -109,7 +126,7 @@ public abstract class RgrPhase {
 			attempt++;
 			mojoLog.info("  " + name + ": Install failed, resuming claude (attempt " + attempt
 				+ " of " + maxTimeoutAttempts + ")...");
-			claude.resume(workingDir, TIMEOUT_RESUME_MESSAGE);
+			resumeClaudeWithRetry(workingDir, TIMEOUT_RESUME_MESSAGE);
 		}
 	}
 
@@ -127,7 +144,7 @@ public abstract class RgrPhase {
 			}
 			if (attempt < maxVerifyAttempts) {
 				mojoLog.warn("  " + name + ": Verify failed (attempt " + attempt + "/" + maxVerifyAttempts + "), resuming claude...");
-				claude.resume(workingDir, VERIFY_RESUME_MESSAGE);
+				resumeClaudeWithRetry(workingDir, VERIFY_RESUME_MESSAGE);
 			}
 		}
 		mojoLog.error("  " + name + ": Verify failed after " + maxVerifyAttempts + " attempts, aborting");
@@ -151,7 +168,7 @@ public abstract class RgrPhase {
 				for (String path : violations) {
 					git.run(targetDir, "checkout", "HEAD", "--", path);
 				}
-				claude.resume(workingDir, allowlistResumeMessage());
+				resumeClaudeWithRetry(workingDir, allowlistResumeMessage());
 			}
 		}
 		mojoLog.error("  " + name + ": Allowlist check failed after " + maxAllowlistAttempts + " attempts, aborting");

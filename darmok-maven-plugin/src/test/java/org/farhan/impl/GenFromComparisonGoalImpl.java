@@ -5,7 +5,9 @@ import static io.cucumber.spring.CucumberTestContext.SCOPE_CUCUMBER_GLUE;
 import java.util.HashMap;
 
 import org.farhan.common.MavenTestObject;
-import org.farhan.fake.FakeProcessStarter;
+import org.farhan.fake.ClaudeRunnerFake;
+import org.farhan.fake.GitRunnerFake;
+import org.farhan.fake.MavenRunnerFake;
 import org.farhan.mbt.maven.GenFromComparisonMojo;
 import org.farhan.objects.darmok.GenFromComparisonGoal;
 import org.springframework.context.annotation.Scope;
@@ -18,7 +20,9 @@ public class GenFromComparisonGoalImpl extends MavenTestObject implements GenFro
 	@Override
 	public void setExecutedAndSucceedsWith(HashMap<String, String> keyMap) {
 		setProperty("targetProject", "darmok-prj");
-		setProperty("processStarter", new FakeProcessStarter(properties));
+		setProperty("claude", new ClaudeRunnerFake(properties));
+		setProperty("maven", new MavenRunnerFake(properties));
+		setProperty("git", new GitRunnerFake(properties));
 		runGoal(GenFromComparisonMojo.class, getProperty("code-prj.baseDir").toString());
 	}
 

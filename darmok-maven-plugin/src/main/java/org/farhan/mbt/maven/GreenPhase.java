@@ -6,14 +6,17 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
+import org.apache.maven.plugin.logging.Log;
+
 public class GreenPhase extends RgrPhase {
 
-	public GreenPhase(ClaudeRunner claude, MavenRunner maven, GitRunner git, DarmokMojoLog mojoLog,
+	public GreenPhase(Claude claude, Maven maven, Git git, DarmokMojoLog mojoLog, Log runnerLog,
 			String workingDir, String targetDir, String artifactId,
 			int maxVerifyAttempts, int maxTimeoutAttempts, int maxClaudeSeconds,
-			int maxAllowlistAttempts, List<String> allowlistPaths) {
-		super(claude, maven, git, mojoLog, workingDir, targetDir, artifactId,
-			maxVerifyAttempts, maxTimeoutAttempts, maxClaudeSeconds, maxAllowlistAttempts, allowlistPaths);
+			int maxAllowlistAttempts, int maxRetries, int retryWaitSeconds, List<String> allowlistPaths) {
+		super(claude, maven, git, mojoLog, runnerLog, workingDir, targetDir, artifactId,
+			maxVerifyAttempts, maxTimeoutAttempts, maxClaudeSeconds, maxAllowlistAttempts,
+			maxRetries, retryWaitSeconds, allowlistPaths);
 	}
 
 	@Override
@@ -48,7 +51,7 @@ public class GreenPhase extends RgrPhase {
 		Files.writeString(renderedPath, rendered, StandardCharsets.UTF_8);
 		String args = "@" + renderedPath.toString().replace('\\', '/');
 
-		int claudeExit = claude.run(workingDir, args);
+		int claudeExit = runClaudeWithRetry(workingDir, args);
 		return runTimeoutRecoveryLoop(claudeExit);
 	}
 }

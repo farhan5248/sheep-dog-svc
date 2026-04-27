@@ -5,14 +5,10 @@ import java.util.List;
 
 import org.apache.maven.plugin.logging.Log;
 
-public class MavenRunner extends ProcessRunner {
+public class MavenRunner extends ProcessRunner implements Maven {
 
 	public MavenRunner(Log log) {
 		super(log);
-	}
-
-	public MavenRunner(Log log, ProcessStarter starter) {
-		super(log, starter);
 	}
 
 	@Override

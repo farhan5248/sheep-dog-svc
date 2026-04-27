@@ -1,5 +1,0 @@
-# Captured path through claude/mvn/git FSMs for: Claude exhausts retries on overloaded
-sequences:
-  git: [git-1, git-2, git-3, git-4]
-  mvn: [mvn-1, mvn-3, mvn-4, mvn-5]
-  claude: [claude-11, claude-11, claude-11]

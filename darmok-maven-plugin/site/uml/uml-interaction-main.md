@@ -54,7 +54,7 @@ MavenProject project = new MavenProject();
 project.setArtifactId("code-prj");
 mojo.project = project;
 mojo.setBaseDir(codePrjDir.toString());
-// ... wire runner factories with FakeProcessStarter, populate @Parameter fields ...
+// ... wire runner factories with the per-command fakes, populate @Parameter fields ...
 mojo.execute();
 ```
 
@@ -93,15 +93,19 @@ mojo.setBaseDir(codePrjDir.toString());
 
 ### set{Tool}RunnerFactory
 
-Test-only setters that swap the production runner factories (`{Tool}Runner::new`) for lambdas that bind a `FakeProcessStarter`. Called by `MavenTestObject.executeMojo` so no real subprocesses are spawned. Three setters: `setGitRunnerFactory`, `setMavenRunnerFactory`, `setClaudeRunnerFactory`.
+Test-only setters that swap the production runner factories (`{Tool}Runner::new`) for lambdas that return the matching per-command fake (`{Tool}RunnerFake`). Called by `MavenTestObject.executeMojo` so no real subprocesses are spawned. The factory's return type is the `{Tool}` interface, so the Mojo doesn't know whether it got the real runner or the fake. Three setters: `setGitRunnerFactory`, `setMavenRunnerFactory`, `setClaudeRunnerFactory`.
 
 **Example: factory wiring in `MavenTestObject.executeMojo`**
 ```java
-ProcessStarter starter = (ProcessStarter) getProperty("processStarter");
-mojo.setGitRunnerFactory(log -> new GitRunner(log, starter));
-mojo.setMavenRunnerFactory(log -> new MavenRunner(log, starter));
-mojo.setClaudeRunnerFactory((log, model, retries, wait, maxSeconds, sessionEnabled, uuidSupplier) ->
-    new ClaudeRunner(log, model, retries, wait, maxSeconds, sessionEnabled, testUuidSupplier, starter));
+Git gitFake = (Git) getProperty("git");
+Maven mavenFake = (Maven) getProperty("maven");
+Claude claudeFake = (Claude) getProperty("claude");
+mojo.setGitRunnerFactory(log -> { ((CommandFake) gitFake).setRunnerLog(log); return gitFake; });
+mojo.setMavenRunnerFactory(log -> { ((CommandFake) mavenFake).setRunnerLog(log); return mavenFake; });
+mojo.setClaudeRunnerFactory((log, model, maxSeconds, sessionEnabled, uuidSupplier) -> {
+    ((CommandFake) claudeFake).setRunnerLog(log);
+    return claudeFake;
+});
 ```
 
 ## RgrPhase
@@ -130,7 +134,7 @@ if (state.exitCode != 100) {
 
 ### prepareSession
 
-`RefactorPhase`-only. Pre-phase hook called by `DarmokMojo.processScenario` **before** `refactorPhase.run(state)` so the work it performs is excluded from the timed `phase_refactor_ms` window. No-op when `refactorSessionMode=fresh`. When `refactorSessionMode=continue` (issue #287) it copies green's UUID into refactor's `ClaudeRunner` and issues `claude --resume <green-uuid> /compact` to scope refactor's review to the files green just touched.
+`RefactorPhase`-only. Pre-phase hook called by `DarmokMojo.processScenario` **before** `refactorPhase.run(state)` so the work it performs is excluded from the timed `phase_refactor_ms` window. No-op when `refactorSessionMode=fresh`. When `refactorSessionMode=continue` (issue #287) it copies green's UUID into refactor's `Claude` and issues `claude --resume <green-uuid> /compact` to scope refactor's review to the files green just touched.
 
 **Example: untimed session inheritance in `DarmokMojo.processScenario`** (`src/main/java/org/farhan/mbt/maven/DarmokMojo.java`)
 ```java
@@ -142,7 +146,7 @@ state = refactorPhase.run(state);
 
 ### run
 
-Public entry point shared by all `{Tool}Runner` subclasses (Claude overrides; Git/Maven inherit unchanged). Callers pass a working directory and command arguments; the runner returns the subprocess exit code with stdout streamed to the wrapped `Log`.
+Public entry point shared by Git and Maven (inherited from ProcessRunner). Callers pass a working directory and command arguments; the runner returns the subprocess exit code with stdout streamed to the wrapped `Log`. Claude has its own `run` overload (with `outputLines` capture) declared on the `{Tool}Runner` layer — see below.
 
 **Example: maven goal invocation in `RgrPhase.runVerifyLoop`** (`src/main/java/org/farhan/mbt/maven/RgrPhase.java`)
 ```java
@@ -154,6 +158,16 @@ int verifyExit = maven.run(targetDir, "clean", "verify");
 git.run(baseDir, "add", ".");
 int diffQuietExit = git.run(baseDir, "diff", "--cached", "--quiet");
 git.run(baseDir, "commit", "-m", commitMsg);
+```
+
+### run (with file output)
+
+Tee variant of `run`. Each stdout line is mirrored both to the Log and to the supplied `Path logFile`, so a downstream phase (or assertion) can read the raw output back from disk. Used by `RgrPhase.runVerifyLoop` to capture `mvn clean verify` output to `log.txt` before resuming claude (issue 325).
+
+**Example: tee verify output in `RgrPhase.runVerifyLoop`** (`src/main/java/org/farhan/mbt/maven/RgrPhase.java`)
+```java
+java.nio.file.Path logFile = java.nio.file.Path.of(targetDir, "log.txt");
+int verifyExit = maven.run(targetDir, logFile, "clean", "verify");
 ```
 
 ## {Tool}Runner
@@ -233,6 +247,16 @@ if (!gitBranch.equals(actualBranch)) {
     throw new MojoExecutionException("Darmok configured for branch '" + gitBranch
         + "' but current HEAD is on '" + actualBranch + "'. Aborting.");
 }
+```
+
+### captureOutput
+
+`GitRunner`-only. Captures stdout of an arbitrary `git` invocation as a trimmed string; throws on non-zero exit. Used by `RgrPhase.runAllowlistCheck` to read `git status --porcelain` so the allowlist gate can decide which paths Claude tried to modify.
+
+**Example: allowlist scan in `RgrPhase.runAllowlistCheck`** (`src/main/java/org/farhan/mbt/maven/RgrPhase.java`)
+```java
+String porcelain = git.captureOutput(targetDir, "status", "--porcelain");
+List<String> violations = findAllowlistViolations(porcelain);
 ```
 
 ## DarmokMojoState
@@ -383,19 +407,22 @@ metrics.append(state);
 
 ### create
 
-Single abstract method of a functional interface. Interface body shown as its functional equivalent — production wires this via a constructor method reference (`{Tool}Runner::new`); tests substitute a lambda that binds a FakeProcessStarter.
+Single abstract method of a functional interface. Returns the `{Tool}` interface so production and tests can satisfy it with different implementations. Production wires this via a constructor method reference (`{Tool}Runner::new`); tests substitute a lambda that returns the test fake (`{Tool}RunnerFake`) from the property bag.
 
 **Example: create method body (functional equivalent)**
 ```java
-GitRunner create(Log log) { return new GitRunner(log); }
+Git create(Log log) { return new GitRunner(log); }
 ```
 
 **Example: Production wiring via constructor reference**
 ```java
-GitRunnerFactory gitRunnerFactory = GitRunner::new;
+GitRunnerFactory gitRunnerFactory = GitRunner::new;  // GitRunner implements Git
 ```
 
-**Example: Test wiring via FakeProcessStarter**
+**Example: Test wiring via `{Tool}RunnerFake`**
 ```java
-mojo.setGitRunnerFactory(log -> new GitRunner(log, starter));
+mojo.setGitRunnerFactory(log -> {
+    ((CommandFake) gitFake).setRunnerLog(log);
+    return gitFake;  // GitRunnerFake implements Git
+});
 ```

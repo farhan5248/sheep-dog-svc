@@ -17,6 +17,12 @@ call mvn org.farhan:darmok-maven-plugin:gen-from-existing ^
     -DmodelRefactor="opus" ^
     -DmodelGreen="opus" ^
     -DmaxClaudeSeconds="720" ^
-    -DallowlistAdditionalPaths="scenarios-list-gh183.txt" ^
+REM allowlistAdditionalPaths grants Darmok write access beyond the default
+REM (src/main/java/, src/test/java/org/farhan/impl/) for paths that need to
+REM evolve alongside the feature: the active scenarios-list, the per-command
+REM fake classes (org.farhan.fake), and the captured FSM YAMLs. Remove the
+REM fake/ + captures/ entries once #327 lands and they're in the default
+REM allowlist.
+    -DallowlistAdditionalPaths="scenarios-list-gh183.txt,src/test/java/org/farhan/fake/,src/test/resources/captures/" ^
     -DscenariosFile="scenarios-list-gh183.txt"
 cd scripts

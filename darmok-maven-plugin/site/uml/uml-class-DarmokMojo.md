@@ -67,7 +67,7 @@ Abstract base Mojo providing shared lifecycle, scenario iteration, RGR phase orc
 
 ## set{Tool}RunnerFactory
 
-**Desc**: Test-only setter that substitutes a runner factory so tests can inject a FakeProcessStarter-backed runner. Default factories use the production runner constructors (e.g. `GitRunner::new`).
+**Desc**: Test-only setter that substitutes a runner factory so tests can inject a `{Tool}RunnerFake` in place of the production runner. Default factories use the production runner constructors (e.g. `GitRunner::new`); tests provide a lambda that returns the fake from the property bag.
 
 **Rule**: SOME method names follow set{Tool}RunnerFactory pattern.
  - **Name**: `^set{Tool}RunnerFactory$`

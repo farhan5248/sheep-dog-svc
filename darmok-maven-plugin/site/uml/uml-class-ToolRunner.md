@@ -4,11 +4,13 @@
 
 **Extends**: ProcessRunner
 
-Concrete subclasses of `ProcessRunner` that prepend a tool-specific executable to each command. This file describes the **subclass layer** (per-tool command construction); the parent file `uml-class-ProcessRunner.md` describes the **base-class layer** (process I/O lifecycle). Three subclasses today: `GitRunner`, `MavenRunner`, `ClaudeRunner`. Two of them (`Maven`, `Claude`) are platform-aware via the inherited `isWindows()` helper.
+**Implements**: {Tool}
+
+Concrete subclasses of `ProcessRunner` that prepend a tool-specific executable to each command. Each subclass implements its corresponding {Tool} interface (`Git`, `Maven`, `Claude`) so test fakes can substitute for the production runner without subclassing it. This file describes the **subclass layer** (per-tool command construction); the parent file `uml-class-ProcessRunner.md` describes the **base-class layer** (process I/O lifecycle). Three subclasses today: `GitRunner`, `MavenRunner`, `ClaudeRunner`. Two of them (`Maven`, `Claude`) are platform-aware via the inherited `isWindows()` helper.
 
 ## {Tool}Runner
 
-**Desc**: Constructs a runner by passing the Log to the ProcessRunner superclass. ClaudeRunner additionally accepts model, retry, wait, session-id flag, and UUID supplier parameters (the latter two added in issue #311 to support `--session-id` on `--print` invocations).
+**Desc**: Constructs a runner by passing the Log to the ProcessRunner superclass. ClaudeRunner additionally accepts model, maxClaudeSeconds, session-id flag, and UUID supplier parameters. Retry/timeout-loop parameters live on the orchestrator (`DarmokMojo.runClaudeWithRetry` / `RgrPhase.runClaudeWithRetry`), not on the runner itself.
 
 **Rule**: SOME constructor matches {Tool}Runner pattern.
  - **Name**: `^{Tool}Runner$`
@@ -18,21 +20,7 @@ Concrete subclasses of `ProcessRunner` that prepend a tool-specific executable t
 **Examples**:
  - `public GitRunner(Log log)`
  - `public MavenRunner(Log log)`
- - `public ClaudeRunner(Log log, String model, int maxRetries, int retryWaitSeconds, int maxClaudeSeconds, boolean sessionIdEnabled, Supplier<String> uuidSupplier)`
-
-## {Tool}Runner (test seam)
-
-**Desc**: Test-only constructor variant that appends a ProcessStarter test seam parameter so tests can inject a FakeProcessStarter without spawning real subprocesses.
-
-**Rule**: SOME constructors match {Tool}Runner test seam pattern.
- - **Name**: `^{Tool}Runner$`
- - **Parameters**: `^\(Log\s+\w+(,\s*(String|int|boolean|Supplier<String>)\s+\w+)*,\s*ProcessStarter\s+\w+\)$`
- - **Modifier**: `^public$`
-
-**Examples**:
- - `public GitRunner(Log log, ProcessStarter starter)`
- - `public MavenRunner(Log log, ProcessStarter starter)`
- - `public ClaudeRunner(Log log, String model, int maxRetries, int retryWaitSeconds, int maxClaudeSeconds, boolean sessionIdEnabled, Supplier<String> uuidSupplier, ProcessStarter starter)`
+ - `public ClaudeRunner(Log log, String model, int maxClaudeSeconds, boolean sessionIdEnabled, Supplier<String> uuidSupplier)`
 
 ## buildCommand
 
@@ -51,29 +39,29 @@ Concrete subclasses of `ProcessRunner` that prepend a tool-specific executable t
 
 ## run
 
-**Desc**: ClaudeRunner overrides run to add retry logic with configurable max retries and wait seconds. Retries on known API error patterns (500, 529, overloaded). Each invocation is bounded by maxClaudeSeconds via a two-phase timeout — `waitFor(maxClaudeSeconds, SECONDS)` on the process handle followed by `readerThread.join(maxClaudeSeconds * 1000L)` on the stdout-reader thread. Hitting either bound triggers `destroyForcibly()` on the subprocess and returns the sentinel `TIMEOUT_EXIT_CODE` so the calling phase can enter timeout recovery. The reader-side bound covers the Windows failure mode (issue 290) where `claude.cmd` parent exits cleanly but a grandchild `node` keeps the stdout pipe open silently — without it the main thread would sit in `readerThread.join()` past the budget. GitRunner and MavenRunner inherit ProcessRunner.run unchanged.
+**Desc**: ClaudeRunner-only. Single-invocation primitive — runs the claude subprocess once and returns its exit code. Output lines are captured into the caller-supplied `outputLines` list so the orchestrator can decide whether the failure is retryable. The invocation is bounded by `maxClaudeSeconds` via a two-phase timeout — `waitFor(maxClaudeSeconds, SECONDS)` on the process handle followed by `readerThread.join(maxClaudeSeconds * 1000L)` on the stdout-reader thread. Hitting either bound triggers `destroyForcibly()` on the subprocess and returns the sentinel `TIMEOUT_EXIT_CODE` so the calling phase can enter timeout recovery. The reader-side bound covers the Windows failure mode (issue 290) where `claude.cmd` parent exits cleanly but a grandchild `node` keeps the stdout pipe open silently — without it the main thread would sit in `readerThread.join()` past the budget. The retry/wait-and-resume loop is owned by callers (`DarmokMojo.runClaudeWithRetry`); the runner stays single-invocation. GitRunner and MavenRunner inherit `ProcessRunner.run(String, String...)` and `ProcessRunner.run(String, Path, String...)` unchanged.
 
 **Rule**: SOME method names follow run pattern.
  - **Name**: `^run$`
  - **Return**: `^int$`
- - **Parameters**: `^\(String\s+\w+,\s*String\.\.\.\s+\w+\)$`
+ - **Parameters**: `^\(String\s+\w+,\s*List<String>\s+\w+,\s*String\.\.\.\s+\w+\)$`
  - **Modifier**: `^public$`
 
 **Examples**:
- - `public int run(String workingDirectory, String... args)` (ClaudeRunner — with retry logic)
+ - `public int run(String workingDirectory, List<String> outputLines, String... args)` (ClaudeRunner — single-invocation)
 
 ## resume
 
-**Desc**: ClaudeRunner-only. Invokes `claude --resume` with a continuation message so the most recent session can be nudged forward — used by GreenPhase and RefactorPhase both when `mvn clean verify` fails (message `mvn clean verify failures should be fixed`) and when the initial claude call times out (message `pls continue`, inside the timeout-recovery loop). Single-shot (no API-retry loop, but still bounded by maxClaudeSeconds); the caller's outer verify/timeout loop controls retries.
+**Desc**: ClaudeRunner-only. Single-invocation `claude --resume <message>` that nudges the latest claude session forward — used by GreenPhase and RefactorPhase both when `mvn clean verify` fails (`mvn clean verify failures should be fixed`) and when the initial claude call times out (`pls continue`, inside the timeout-recovery loop). Bounded by `maxClaudeSeconds`; output lines are captured into `outputLines` so the orchestrator can drive retries on retryable error patterns. Phase-side verify/timeout/allowlist loops control coarse retries; the orchestrator handles API-error retries.
 
 **Rule**: SOME method names follow resume pattern.
  - **Name**: `^resume$`
  - **Return**: `^int$`
- - **Parameters**: `^\(String\s+\w+,\s*String\s+\w+\)$`
+ - **Parameters**: `^\(String\s+\w+,\s*List<String>\s+\w+,\s*String\s+\w+\)$`
  - **Modifier**: `^public$`
 
 **Examples**:
- - `public int resume(String workingDirectory, String message)` (ClaudeRunner — for phase-verify recovery)
+ - `public int resume(String workingDirectory, List<String> outputLines, String message)` (ClaudeRunner)
 
 ## getSessionId
 
@@ -126,3 +114,16 @@ Concrete subclasses of `ProcessRunner` that prepend a tool-specific executable t
 
 **Examples**:
  - `public String getCurrentBranch(String workingDirectory)` (GitRunner)
+
+## captureOutput
+
+**Desc**: GitRunner convenience method exposing `ProcessRunner.capture` through the `Git` interface so test fakes can substitute. Returns trimmed stdout; throws on non-zero exit.
+
+**Rule**: SOME method names follow captureOutput pattern.
+ - **Name**: `^captureOutput$`
+ - **Return**: `^String$`
+ - **Parameters**: `^\(String\s+\w+,\s*String\.\.\.\s+\w+\)$`
+ - **Modifier**: `^public$`
+
+**Examples**:
+ - `public String captureOutput(String workingDirectory, String... args)` (GitRunner)

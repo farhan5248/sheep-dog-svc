@@ -1,4 +1,0 @@
-# Captured path through claude/mvn/git FSMs for: Scenario name contains a double quote
-sequences:
-  git: [git-12, git-2, git-3, git-19, git-7]
-  mvn: [mvn-1, mvn-3, mvn-4, mvn-8]

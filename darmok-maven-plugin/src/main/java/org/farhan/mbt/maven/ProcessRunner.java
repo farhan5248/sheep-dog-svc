@@ -12,27 +12,17 @@ import java.util.List;
 
 import org.apache.maven.plugin.logging.Log;
 
+/**
+ * Base for production runners that drive an external command line. Tests do not
+ * extend this — the {@link Git} / {@link Maven} / {@link Claude} interfaces are
+ * the swap points, and test fakes implement those interfaces directly.
+ */
 public abstract class ProcessRunner {
 
-	/**
-	 * Test seam: abstraction over {@link ProcessBuilder#start()} so tests can
-	 * substitute a fake {@link Process} without spawning real subprocesses.
-	 */
-	@FunctionalInterface
-	public interface ProcessStarter {
-		Process start(ProcessBuilder pb) throws IOException;
-	}
-
 	private final Log log;
-	private final ProcessStarter starter;
 
 	public ProcessRunner(Log log) {
-		this(log, ProcessBuilder::start);
-	}
-
-	public ProcessRunner(Log log, ProcessStarter starter) {
 		this.log = log;
-		this.starter = starter;
 	}
 
 	protected static boolean isWindows() {
@@ -60,7 +50,7 @@ public abstract class ProcessRunner {
 
 		log.debug("Running: " + String.join(" ", command));
 
-		Process process = starter.start(pb);
+		Process process = pb.start();
 		process.getOutputStream().close();
 		try (BufferedReader reader = new BufferedReader(
 				new InputStreamReader(process.getInputStream()));
@@ -88,7 +78,7 @@ public abstract class ProcessRunner {
 
 		log.debug("Running: " + String.join(" ", command));
 
-		Process process = starter.start(pb);
+		Process process = pb.start();
 		process.getOutputStream().close();
 		StringBuilder output = new StringBuilder();
 		try (BufferedReader reader = new BufferedReader(
@@ -107,9 +97,5 @@ public abstract class ProcessRunner {
 
 	protected Log getLog() {
 		return log;
-	}
-
-	protected ProcessStarter getStarter() {
-		return starter;
 	}
 }

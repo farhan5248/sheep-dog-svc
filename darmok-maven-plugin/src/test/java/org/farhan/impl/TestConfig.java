@@ -6,8 +6,6 @@ import java.nio.file.Path;
 
 import org.farhan.common.SourceFileRepository;
 import org.farhan.common.TestObject;
-import org.farhan.fake.FakeProcess;
-import org.farhan.mbt.maven.ProcessRunner.ProcessStarter;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.ComponentScan;
@@ -70,15 +68,6 @@ public class TestConfig {
 		TestObject.properties.put("spec-prj.baseDir", specPrjDir);
 		TestObject.properties.put("log.dir", logDir);
 		System.setProperty("LOG_PATH", logDir.toString());
-		ProcessStarter starter = pb -> {
-			// git diff --cached --quiet returns 1 when there ARE staged changes (so commitIfChanged proceeds)
-			String cmd = String.join(" ", pb.command());
-			if (cmd.contains("diff") && cmd.contains("--cached") && cmd.contains("--quiet")) {
-				return new FakeProcess("", 1);
-			}
-			return new FakeProcess("", 0);
-		};
-		TestObject.properties.put("processStarter", starter);
 	}
 
 	@After

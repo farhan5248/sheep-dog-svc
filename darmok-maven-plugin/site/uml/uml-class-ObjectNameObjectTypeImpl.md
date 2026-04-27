@@ -23,7 +23,7 @@ Test object implementation that bridges Cucumber step definitions to file system
 
 ## set{StateDesc}
 
-**Desc**: Mutates state or triggers action. File impls delegate to `createOrDeleteFile` (branches on the `stateType` property — creates for `is created`, deletes for `isn't created`) or `writeFile`. Goal impls buffer parameters (setStage, setModelGreen, setMaxClaudeSeconds, etc.) into TestObject.properties; the setExecuted/setExecutedWith terminal setters construct a FakeProcessStarter from those accumulated properties and then call `executeMojo`.
+**Desc**: Mutates state or triggers action. File impls delegate to `createOrDeleteFile` (branches on the `stateType` property — creates for `is created`, deletes for `isn't created`) or `writeFile`. Goal impls buffer parameters (setStage, setModelGreen, setMaxClaudeSeconds, etc.) into TestObject.properties; the setExecuted/setExecutedWith terminal setters construct the per-command fakes (`ClaudeRunnerFake` / `MavenRunnerFake` / `GitRunnerFake`) from the accumulated properties and then call `executeMojo`.
 
 **Rule**: SOME method names follow set{StateDesc} pattern.
  - **Name**: `^set{StateDesc}$`

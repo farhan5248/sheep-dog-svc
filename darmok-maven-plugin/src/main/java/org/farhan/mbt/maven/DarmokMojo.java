@@ -13,6 +13,7 @@ import java.util.function.Supplier;
 
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 
@@ -113,8 +114,8 @@ public abstract class DarmokMojo extends AbstractMojo {
 
 	// Instance fields
 	String baseDir;
-	private GitRunner git;
-	private MavenRunner maven;
+	private Git git;
+	private Maven maven;
 	DarmokMojoLog mojoLog;
 	DarmokMojoLog runnerLog;
 	DarmokMojoMetrics metrics;
@@ -180,21 +181,92 @@ public abstract class DarmokMojo extends AbstractMojo {
 			? targetProject : project.getArtifactId();
 		uuidSupplier = () -> UUID.randomUUID().toString();
 		List<String> effectiveAllowlist = parseAllowlist(allowlistBasePaths, allowlistAdditionalPaths);
-		GitRunner phaseGit = gitRunnerFactory.create(runnerLog);
+		Git phaseGit = gitRunnerFactory.create(runnerLog);
 		redPhase = new RedPhase(maven, mojoLog, baseDir, specsDir, host, onlyChanges, svcMavenPluginGoal);
 		greenPhase = new GreenPhase(
 			makeClaudeRunner(modelGreen),
-			maven, phaseGit, mojoLog, sheepDogRoot, baseDir, artifactId, maxVerifyAttempts, maxTimeoutAttempts, maxClaudeSeconds,
-			maxAllowlistAttempts, effectiveAllowlist);
+			maven, phaseGit, mojoLog, runnerLog, sheepDogRoot, baseDir, artifactId, maxVerifyAttempts, maxTimeoutAttempts, maxClaudeSeconds,
+			maxAllowlistAttempts, maxRetries, retryWaitSeconds, effectiveAllowlist);
 		refactorPhase = new RefactorPhase(
 			makeClaudeRunner(modelRefactor),
-			maven, phaseGit, mojoLog, sheepDogRoot, baseDir, artifactId, maxVerifyAttempts, maxTimeoutAttempts, maxClaudeSeconds,
-			maxAllowlistAttempts, effectiveAllowlist, refactorSessionMode);
+			maven, phaseGit, mojoLog, runnerLog, sheepDogRoot, baseDir, artifactId, maxVerifyAttempts, maxTimeoutAttempts, maxClaudeSeconds,
+			maxAllowlistAttempts, maxRetries, retryWaitSeconds, effectiveAllowlist, refactorSessionMode);
 	}
 
-	protected ClaudeRunner makeClaudeRunner(String model) {
-		return claudeRunnerFactory.create(runnerLog, model, maxRetries, retryWaitSeconds, maxClaudeSeconds,
+	protected Claude makeClaudeRunner(String model) {
+		return claudeRunnerFactory.create(runnerLog, model, maxClaudeSeconds,
 			claudeSessionIdEnabled, uuidSupplier);
+	}
+
+	/**
+	 * Functional interface for one claude invocation that exposes its captured
+	 * stdout to the retry-loop driver. Implementations call
+	 * {@link ClaudeRunner#run(String, List, String...)} or
+	 * {@link ClaudeRunner#resume(String, List, String)} with the supplied
+	 * outputLines list.
+	 */
+	@FunctionalInterface
+	protected interface ClaudeCall {
+		int call(List<String> outputLines) throws Exception;
+	}
+
+	private static final String[] RETRYABLE_PATTERNS = {
+		"API Error: 500",
+		"API Error: 529",
+		"Internal server error",
+		"overloaded"
+	};
+
+	/**
+	 * Drives a claude invocation through the retry loop — owns the loop count,
+	 * inter-attempt wait, and retryable-error pattern matching. The runner
+	 * itself stays single-invocation; the retry orchestration lives here at
+	 * the Mojo layer (and is mirrored by {@link RgrPhase}'s instance wrappers
+	 * for phase callers).
+	 */
+	protected static int runClaudeWithRetry(Log log, int maxRetries, int retryWaitSeconds, ClaudeCall call)
+			throws Exception {
+		int exitCode = -1;
+		for (int attempt = 1; attempt <= maxRetries; attempt++) {
+			if (attempt > 1) {
+				log.debug("Retry attempt " + attempt + " of " + maxRetries + "...");
+			}
+			List<String> outputLines = new ArrayList<>();
+			exitCode = call.call(outputLines);
+			if (exitCode == ClaudeRunner.TIMEOUT_EXIT_CODE) {
+				return ClaudeRunner.TIMEOUT_EXIT_CODE;
+			}
+			if (exitCode == 0) {
+				log.debug("Claude CLI completed successfully");
+				return 0;
+			}
+			String matched = findRetryableError(outputLines);
+			if (matched != null && attempt < maxRetries) {
+				log.warn("Retryable error detected: " + matched);
+				log.warn("Claude CLI exited with code " + exitCode);
+				log.warn("Waiting " + retryWaitSeconds + " seconds before retry...");
+				Thread.sleep(retryWaitSeconds * 1000L);
+			} else {
+				if (matched != null) {
+					log.error("Retryable error detected: " + matched);
+					log.error("Max retries (" + maxRetries + ") exhausted");
+				}
+				log.debug("Claude CLI exited with code " + exitCode);
+				return exitCode;
+			}
+		}
+		return exitCode;
+	}
+
+	private static String findRetryableError(List<String> outputLines) {
+		for (String line : outputLines) {
+			for (String pattern : RETRYABLE_PATTERNS) {
+				if (line.contains(pattern)) {
+					return pattern;
+				}
+			}
+		}
+		return null;
 	}
 
 	private List<String> parseAllowlist(String basePaths, String additionalPaths) {

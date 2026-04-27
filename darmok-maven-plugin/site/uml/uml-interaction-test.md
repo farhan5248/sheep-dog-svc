@@ -4,7 +4,7 @@
 
 ### resetTestProject
 
-Spring/Cucumber @Before hook that resets TestObject static state, creates fresh temp directories, and stashes a FakeProcess ProcessStarter in TestObject.properties for MavenTestObject.executeMojo to wire into the mojo via runner factories.
+Spring/Cucumber @Before hook that resets TestObject static state and creates fresh temp directories. The per-command fakes (`ClaudeRunnerFake` / `MavenRunnerFake` / `GitRunnerFake`) are seeded later by the per-scenario impl method (e.g. `setExecutedAndSucceeds`) — this hook just primes the directory layout.
 
 **Example: resetTestProject method body**
 ```java
@@ -23,20 +23,12 @@ public void resetTestProject() throws Exception {
     TestObject.properties.put("spec-prj.baseDir", specPrjDir);
     TestObject.properties.put("log.dir", logDir);
     System.setProperty("LOG_PATH", logDir.toString());
-    ProcessStarter starter = pb -> {
-        String cmd = String.join(" ", pb.command());
-        if (cmd.contains("diff") && cmd.contains("--cached") && cmd.contains("--quiet")) {
-            return new FakeProcess("", 1);
-        }
-        return new FakeProcess("", 0);
-    };
-    TestObject.properties.put("processStarter", starter);
 }
 ```
 
 ### cleanupTestProject
 
-@After hook that deletes the scenario temp directory tree. No static state to restore — the ProcessStarter lived only in TestObject.properties, which is reset per scenario.
+@After hook that deletes the scenario temp directory tree. No static state to restore — the per-command fakes are scoped to TestObject.properties, which is reset per scenario.
 
 **Example: cleanupTestProject method body**
 ```java
@@ -85,7 +77,7 @@ public String getContent(HashMap<String, String> keyMap) {
 
 ### set{StateDesc}
 
-Mutates state or triggers action. Goal impls buffer parameters then call `executeMojo` (which first builds a FakeProcessStarter from the accumulated properties). File impls delegate to `createOrDeleteFile(path)` (respects the `stateType` property — creates for `is created`, deletes for `isn't created`) or `writeFile(path, content)`.
+Mutates state or triggers action. Goal impls buffer parameters, construct the per-command fakes (`ClaudeRunnerFake` / `MavenRunnerFake` / `GitRunnerFake`) from the accumulated properties, then call `executeMojo`. File impls delegate to `createOrDeleteFile(path)` (respects the `stateType` property — creates for `is created`, deletes for `isn't created`) or `writeFile(path, content)`.
 
 **Example: Parameter buffering (GenFromExistingGoalImpl)**
 ```java
@@ -99,7 +91,9 @@ public void setStage(HashMap<String, String> keyMap) {
 ```java
 @Override
 public void setExecuted(HashMap<String, String> keyMap) {
-    setProperty("processStarter", new FakeProcessStarter(properties));
+    setProperty("claude", new ClaudeRunnerFake(properties));
+    setProperty("maven", new MavenRunnerFake(properties));
+    setProperty("git", new GitRunnerFake(properties));
     executeMojo(GenFromExistingMojo.class);
 }
 ```

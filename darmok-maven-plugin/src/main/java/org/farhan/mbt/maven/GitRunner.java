@@ -5,14 +5,10 @@ import java.util.List;
 
 import org.apache.maven.plugin.logging.Log;
 
-public class GitRunner extends ProcessRunner {
+public class GitRunner extends ProcessRunner implements Git {
 
 	public GitRunner(Log log) {
 		super(log);
-	}
-
-	public GitRunner(Log log, ProcessStarter starter) {
-		super(log, starter);
 	}
 
 	@Override
@@ -25,15 +21,18 @@ public class GitRunner extends ProcessRunner {
 		return command;
 	}
 
+	@Override
 	public String getCurrentCommit(String workingDirectory) throws Exception {
 		return capture(workingDirectory, "rev-parse", "HEAD");
 	}
 
+	@Override
 	public String getCurrentBranch(String workingDirectory) throws Exception {
 		return capture(workingDirectory, "rev-parse", "--abbrev-ref", "HEAD");
 	}
 
-	String captureOutput(String workingDirectory, String... args) throws Exception {
+	@Override
+	public String captureOutput(String workingDirectory, String... args) throws Exception {
 		return capture(workingDirectory, args);
 	}
 }

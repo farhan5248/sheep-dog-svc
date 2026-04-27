@@ -1,4 +1,0 @@
-# Captured path through claude/mvn/git FSMs for: Baseline build failure aborts the run
-sequences:
-  git: [git-1]
-  mvn: [mvn-2]

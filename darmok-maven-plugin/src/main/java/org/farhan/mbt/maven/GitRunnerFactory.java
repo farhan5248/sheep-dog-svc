@@ -4,5 +4,5 @@ import org.apache.maven.plugin.logging.Log;
 
 @FunctionalInterface
 public interface GitRunnerFactory {
-	GitRunner create(Log log);
+	Git create(Log log);
 }
