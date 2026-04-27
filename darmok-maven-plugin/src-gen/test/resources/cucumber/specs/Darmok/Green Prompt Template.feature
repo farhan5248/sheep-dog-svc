@@ -22,10 +22,8 @@ Feature: Green Prompt Template
           """
       And The code-prj project src/main/java/org/farhan/objects/LoginHappyPath.java file isn't created
 
-  @GH326 @<rendered-path>`
   Scenario: Green phase invokes claude with rendered template path
 
-    \@GH326
     The runners.log captures the green-phase claude invocation. The command line carries `\@<rendered-path>` and claude reads the prompt from the rendered green.md file. The path is stable across runs (relative-path baseDir from issue 332).
 
      When The darmok plugin gen-from-existing goal is executed and succeeds
