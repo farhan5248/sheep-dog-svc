@@ -32,9 +32,7 @@ Feature: Directory Allowlist
     Default happy path for the green phase. Claude writes only inside the allowlist (`src/main/java/...LoginHappyPath.java` and the matching impl under `src/test/java/org/farhan/impl/`), `git status --porcelain` reports zero out-of-allowlist paths, and the scenario proceeds into Phase Verification.
     Pins down the new `Green: Allowlist check running` log line and the `git status --porcelain` subprocess so a regression that drops the allowlist gate is caught explicitly.
 
-     When The darmok plugin gen-from-existing goal is executed and succeeds with
-          | GreenFullPathsEnabled |
-          | true                  |
+     When The darmok plugin gen-from-existing goal is executed and succeeds
      Then The code-prj project darmok.mojo.log file will be as follows
           | Level | Category | Content                                   |
           | INFO  | mojo     | Green: Running...                         |
@@ -52,9 +50,7 @@ Feature: Directory Allowlist
     \@GH141
     Symmetric with the green-allowlist happy-path case. Confirms the allowlist check runs inside refactor too ? the sub-step is not accidentally bound to green.
 
-     When The darmok plugin gen-from-existing goal is executed and succeeds with
-          | GreenFullPathsEnabled |
-          | true                  |
+     When The darmok plugin gen-from-existing goal is executed and succeeds
      Then The code-prj project darmok.mojo.log file will be as follows
           | Level | Category | Content                                      |
           | INFO  | mojo     | Refactor: Running...                         |
@@ -77,9 +73,7 @@ Feature: Directory Allowlist
     Given The darmok plugin gen-from-existing goal claude command is executed and succeeds with
           | Command Parameters                                                                                                                                                                                                                                   | Attempt | Path    |
           | /rgr-green target/darmok-test/sheep-dog-svc/code-prj loginHappyPathTest target/darmok-test/sheep-dog-svc/code-prj/log.txt target/darmok-test/sheep-dog-svc/code-prj/target/site/jacoco-with-tests target/darmok-test/sheep-dog-svc/code-prj/site/uml | 1       | pom.xml |
-     When The darmok plugin gen-from-existing goal is executed and succeeds with
-          | GreenFullPathsEnabled |
-          | true                  |
+     When The darmok plugin gen-from-existing goal is executed and succeeds
      Then The code-prj project darmok.mojo.log file will be as follows
           | Level | Category | Content                                                                            |
           | INFO  | mojo     | Green: Allowlist check running...                                                  |
@@ -105,9 +99,7 @@ Feature: Directory Allowlist
     Given The darmok plugin gen-from-existing goal claude command is executed and succeeds with
           | Command Parameters                                                                                                                                                                                                                                   | Path    |
           | /rgr-green target/darmok-test/sheep-dog-svc/code-prj loginHappyPathTest target/darmok-test/sheep-dog-svc/code-prj/log.txt target/darmok-test/sheep-dog-svc/code-prj/target/site/jacoco-with-tests target/darmok-test/sheep-dog-svc/code-prj/site/uml | pom.xml |
-     When The darmok plugin gen-from-existing goal is executed but fails with
-          | GreenFullPathsEnabled |
-          | true                  |
+     When The darmok plugin gen-from-existing goal is executed but fails
      Then The code-prj project darmok.mojo.log file will be as follows with this failure
           | Level | Category | Content                                                                            |
           | INFO  | mojo     | Green: Allowlist check running...                                                  |
@@ -124,9 +116,7 @@ Feature: Directory Allowlist
     Given The darmok plugin gen-from-existing goal claude command is executed and succeeds with
           | Command Parameters             | Attempt | Path    |
           | /rgr-refactor forward code-prj | 1       | pom.xml |
-     When The darmok plugin gen-from-existing goal is executed and succeeds with
-          | GreenFullPathsEnabled |
-          | true                  |
+     When The darmok plugin gen-from-existing goal is executed and succeeds
      Then The code-prj project darmok.mojo.log file will be as follows
           | Level | Category | Content                                                                               |
           | INFO  | mojo     | Refactor: Allowlist check running...                                                  |
@@ -151,9 +141,7 @@ Feature: Directory Allowlist
     Given The darmok plugin gen-from-existing goal claude command is executed and succeeds with
           | Command Parameters             | Path    |
           | /rgr-refactor forward code-prj | pom.xml |
-     When The darmok plugin gen-from-existing goal is executed but fails with
-          | GreenFullPathsEnabled |
-          | true                  |
+     When The darmok plugin gen-from-existing goal is executed but fails
      Then The code-prj project darmok.mojo.log file will be as follows with this failure
           | Level | Category | Content                                                                               |
           | INFO  | mojo     | Refactor: Allowlist check running...                                                  |
@@ -171,8 +159,8 @@ Feature: Directory Allowlist
           | Command Parameters                                                                                                                                                                                                                                   | Path                                        |
           | /rgr-green target/darmok-test/sheep-dog-svc/code-prj loginHappyPathTest target/darmok-test/sheep-dog-svc/code-prj/log.txt target/darmok-test/sheep-dog-svc/code-prj/target/site/jacoco-with-tests target/darmok-test/sheep-dog-svc/code-prj/site/uml | src/test/resources/mojo-defaults.properties |
      When The darmok plugin gen-from-existing goal is executed and succeeds with
-          | AllowlistAdditionalPaths                    | GreenFullPathsEnabled |
-          | src/test/resources/mojo-defaults.properties | true                  |
+          | AllowlistAdditionalPaths                    |
+          | src/test/resources/mojo-defaults.properties |
      Then The code-prj project darmok.mojo.log file will be as follows
           | Level | Category | Content                                   |
           | INFO  | mojo     | Green: Allowlist check running...         |
@@ -190,8 +178,8 @@ Feature: Directory Allowlist
           | Command Parameters                                                                                                                                                                                                                                   | Path                                                  |
           | /rgr-green target/darmok-test/sheep-dog-svc/code-prj loginHappyPathTest target/darmok-test/sheep-dog-svc/code-prj/log.txt target/darmok-test/sheep-dog-svc/code-prj/target/site/jacoco-with-tests target/darmok-test/sheep-dog-svc/code-prj/site/uml | src/test/java/org/farhan/impl/LoginHappyPathImpl.java |
      When The darmok plugin gen-from-existing goal is executed but fails with
-          | AllowlistBasePaths | GreenFullPathsEnabled |
-          | src/main/java/     | true                  |
+          | AllowlistBasePaths |
+          | src/main/java/     |
      Then The code-prj project darmok.mojo.log file will be as follows with this failure
           | Level | Category | Content                                                                                                                          |
           | INFO  | mojo     | Green: Allowlist check running...                                                                                                |

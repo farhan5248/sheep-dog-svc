@@ -30,8 +30,8 @@ Feature: Gen From Comparison
     This Test-Case verifies the comparison call is made, that it doesn't interfere with the core RGR cycle, and that the observable scenarios-processed outcome is the same.
 
      When The darmok plugin gen-from-comparison goal is executed and succeeds with
-          | ModelComparison | ModelGreen | ModelRefactor | GreenFullPathsEnabled |
-          | sonnet          | sonnet     | sonnet        | true                  |
+          | ModelComparison | ModelGreen | ModelRefactor |
+          | sonnet          | sonnet     | sonnet        |
      Then The code-prj project src/main/java/org/farhan/objects/LoginHappyPath.java file will be present
       And The code-prj project scenarios-list.txt file will be empty
       And The code-prj project darmok.mojo.log file will be as follows

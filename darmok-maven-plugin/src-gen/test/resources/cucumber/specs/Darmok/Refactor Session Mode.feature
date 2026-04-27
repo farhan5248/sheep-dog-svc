@@ -31,9 +31,7 @@ Feature: Refactor Session Mode
     \@GH287
     Refactor's first observable claude line is a `/compact` resume on green's UUID, followed immediately by `/rgr-refactor` carried by `--resume <green-uuid>` rather than `--session-id <fresh-uuid>`. Pins down two observables together because they appear in the same runner-log sequence: the compact preamble, and the absence of a fresh refactor UUID on the initial refactor call.
 
-     When The darmok plugin gen-from-existing goal is executed and succeeds with
-          | GreenFullPathsEnabled |
-          | true                  |
+     When The darmok plugin gen-from-existing goal is executed and succeeds
      Then The code-prj project darmok.runners.log file will be as follows
           | Level | Category | Content                                                                                                                                                                                                                                                                                                                                                                      |
           | DEBUG | runner   | Executing: claude --print --session-id 00000000-0000-0000-0000-000000000001 --dangerously-skip-permissions --model opus /rgr-green target/darmok-test/sheep-dog-svc/code-prj loginHappyPathTest target/darmok-test/sheep-dog-svc/code-prj/log.txt target/darmok-test/sheep-dog-svc/code-prj/target/site/jacoco-with-tests target/darmok-test/sheep-dog-svc/code-prj/site/uml |
@@ -49,9 +47,7 @@ Feature: Refactor Session Mode
     Given The darmok plugin gen-from-existing goal mvn clean verify command is executed but fails once then succeeds
           | Phase    |
           | Refactor |
-     When The darmok plugin gen-from-existing goal is executed and succeeds with
-          | GreenFullPathsEnabled |
-          | true                  |
+     When The darmok plugin gen-from-existing goal is executed and succeeds
      Then The code-prj project darmok.runners.log file will be as follows
           | Level | Category | Content                                                                                                                                                                                                                                                                                                                                                                      |
           | DEBUG | runner   | Executing: claude --print --session-id 00000000-0000-0000-0000-000000000001 --dangerously-skip-permissions --model opus /rgr-green target/darmok-test/sheep-dog-svc/code-prj loginHappyPathTest target/darmok-test/sheep-dog-svc/code-prj/log.txt target/darmok-test/sheep-dog-svc/code-prj/target/site/jacoco-with-tests target/darmok-test/sheep-dog-svc/code-prj/site/uml |

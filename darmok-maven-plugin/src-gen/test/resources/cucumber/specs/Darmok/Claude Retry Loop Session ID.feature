@@ -30,9 +30,7 @@ Feature: Claude Retry Loop Session ID
     \@GH311
     The first claude call in the green phase emits `--session-id <green-uuid>` right after `--print`. Pins down the initial-call observable so a regression that drops the flag is caught explicitly.
 
-     When The darmok plugin gen-from-existing goal is executed and succeeds with
-          | GreenFullPathsEnabled |
-          | true                  |
+     When The darmok plugin gen-from-existing goal is executed and succeeds
      Then The code-prj project darmok.runners.log file will be as follows
           | Level | Category | Content                                                                                                                                                                                                                                                                                                                                                                      |
           | DEBUG | runner   | Executing: claude --print --session-id 00000000-0000-0000-0000-000000000001 --dangerously-skip-permissions --model opus /rgr-green target/darmok-test/sheep-dog-svc/code-prj loginHappyPathTest target/darmok-test/sheep-dog-svc/code-prj/log.txt target/darmok-test/sheep-dog-svc/code-prj/target/site/jacoco-with-tests target/darmok-test/sheep-dog-svc/code-prj/site/uml |
@@ -46,9 +44,7 @@ Feature: Claude Retry Loop Session ID
     Given The darmok plugin gen-from-existing goal mvn clean verify command is executed but fails once then succeeds
           | Phase |
           | Green |
-     When The darmok plugin gen-from-existing goal is executed and succeeds with
-          | GreenFullPathsEnabled |
-          | true                  |
+     When The darmok plugin gen-from-existing goal is executed and succeeds
      Then The code-prj project darmok.runners.log file will be as follows
           | Level | Category | Content                                                                                                                                                                                                                                                                                                                                                                      |
           | DEBUG | runner   | Executing: claude --print --session-id 00000000-0000-0000-0000-000000000001 --dangerously-skip-permissions --model opus /rgr-green target/darmok-test/sheep-dog-svc/code-prj loginHappyPathTest target/darmok-test/sheep-dog-svc/code-prj/log.txt target/darmok-test/sheep-dog-svc/code-prj/target/site/jacoco-with-tests target/darmok-test/sheep-dog-svc/code-prj/site/uml |

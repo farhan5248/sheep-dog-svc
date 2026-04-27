@@ -32,8 +32,8 @@ Feature: Commit Behavior Full Cycle
     This Test-Case exercises the happy path end-to-end: red fails as expected, green generates the implementation, and refactor stabilizes without issues.
 
      When The darmok plugin gen-from-existing goal is executed and succeeds with
-          | Stage | ModelGreen | ModelRefactor | GreenFullPathsEnabled |
-          | false | sonnet     | sonnet        | true                  |
+          | Stage | ModelGreen | ModelRefactor |
+          | false | sonnet     | sonnet        |
      Then The code-prj project src/main/java/org/farhan/objects/LoginHappyPath.java file will be present
       And The code-prj project scenarios-list.txt file will be empty
       And The code-prj project darmok.mojo.log file will be as follows
@@ -73,8 +73,8 @@ Feature: Commit Behavior Full Cycle
     A `Red: Committing` marker now appears in the mojo log; `Green: Committing` is still absent because green does not commit under staged mode; `Refactor: Committing` logs the amend.
 
      When The darmok plugin gen-from-existing goal is executed and succeeds with
-          | Stage | ModelGreen | ModelRefactor | GreenFullPathsEnabled |
-          | true  | sonnet     | sonnet        | true                  |
+          | Stage | ModelGreen | ModelRefactor |
+          | true  | sonnet     | sonnet        |
      Then The code-prj project src/main/java/org/farhan/objects/LoginHappyPath.java file will be present
       And The code-prj project scenarios-list.txt file will be empty
       And The code-prj project darmok.mojo.log file will be as follows
@@ -107,8 +107,8 @@ Feature: Commit Behavior Full Cycle
     Pins down the issue The corollary observable lives in the runner log line order ? `Running: git status --porcelain` for the refactor phase appears before refactor's `Running: git add .` (which captures both refactor's claude output and the deferred scenarios-list delta into the same staged commit). Both logs are asserted because the mojo log proves the gate's outcome and the runner log proves the relative ordering of the gate, the scenarios-list-driven staging, and the amend.
 
      When The darmok plugin gen-from-existing goal is executed and succeeds with
-          | Stage | ModelGreen | ModelRefactor | GreenFullPathsEnabled |
-          | true  | sonnet     | sonnet        | true                  |
+          | Stage | ModelGreen | ModelRefactor |
+          | true  | sonnet     | sonnet        |
      Then The code-prj project src/main/java/org/farhan/objects/LoginHappyPath.java file will be present
       And The code-prj project scenarios-list.txt file will be empty
       And The code-prj project darmok.mojo.log file will be as follows
@@ -132,8 +132,8 @@ Feature: Commit Behavior Full Cycle
     Complements Test-Case 3 which captures the same property as a runner-log line-order observable.
 
      When The darmok plugin gen-from-existing goal is executed and succeeds with
-          | Stage | ModelGreen | ModelRefactor | GreenFullPathsEnabled |
-          | true  | sonnet     | sonnet        | true                  |
+          | Stage | ModelGreen | ModelRefactor |
+          | true  | sonnet     | sonnet        |
      Then The code-prj project src/main/java/org/farhan/objects/LoginHappyPath.java file will be present
       And The code-prj project scenarios-list.txt file will be empty
 

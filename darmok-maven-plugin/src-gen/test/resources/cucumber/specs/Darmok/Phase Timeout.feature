@@ -30,8 +30,8 @@ Feature: Phase Timeout
 
     Given The darmok plugin gen-from-existing goal claude /rgr-green command is hung until killed
      When The darmok plugin gen-from-existing goal is executed and succeeds with
-          | MaxClaudeSeconds | MaxTimeoutAttempts | GreenFullPathsEnabled |
-          | 1                | 2                  | true                  |
+          | MaxClaudeSeconds | MaxTimeoutAttempts |
+          | 1                | 2                  |
      Then The code-prj project darmok.mojo.log file will be as follows
           | Level | Category | Content                                                  |
           | INFO  | mojo     | Green: Running...                                        |
@@ -55,8 +55,8 @@ Feature: Phase Timeout
           | 1       | 1    |
           | 2       | 0    |
      When The darmok plugin gen-from-existing goal is executed and succeeds with
-          | MaxClaudeSeconds | MaxTimeoutAttempts | GreenFullPathsEnabled |
-          | 1                | 2                  | true                  |
+          | MaxClaudeSeconds | MaxTimeoutAttempts |
+          | 1                | 2                  |
      Then The code-prj project darmok.mojo.log file will be as follows
           | Level | Category | Content                                                    |
           | WARN  | mojo     | Green: Claude timed out after 1s, killing...               |
@@ -77,8 +77,8 @@ Feature: Phase Timeout
     Given The darmok plugin gen-from-existing goal claude /rgr-green command is hung on every call
     Given The darmok plugin gen-from-existing goal mvn clean install command is executed and fails on every call in the green phase
      When The darmok plugin gen-from-existing goal is executed but fails with
-          | MaxClaudeSeconds | MaxTimeoutAttempts | GreenFullPathsEnabled |
-          | 1                | 2                  | true                  |
+          | MaxClaudeSeconds | MaxTimeoutAttempts |
+          | 1                | 2                  |
      Then The code-prj project src/main/java/org/farhan/objects/LoginHappyPath.java file will be absent
       And The code-prj project darmok.mojo.log file will be as follows with this failure
           | Level | Category | Content                                      |
@@ -95,8 +95,8 @@ Feature: Phase Timeout
           | 1       | 1    |
           | 2       | 0    |
      When The darmok plugin gen-from-existing goal is executed and succeeds with
-          | MaxClaudeSeconds | MaxTimeoutAttempts | GreenFullPathsEnabled |
-          | 1                | 2                  | true                  |
+          | MaxClaudeSeconds | MaxTimeoutAttempts |
+          | 1                | 2                  |
      Then The code-prj project darmok.mojo.log file will be as follows
           | Level | Category | Content                                                       |
           | INFO  | mojo     | Refactor: Running...                                          |
@@ -118,8 +118,8 @@ Feature: Phase Timeout
     Given The darmok plugin gen-from-existing goal claude /rgr-refactor command is hung on every call
     Given The darmok plugin gen-from-existing goal mvn clean install command is executed and fails on every call in the refactor phase
      When The darmok plugin gen-from-existing goal is executed but fails with
-          | MaxClaudeSeconds | MaxTimeoutAttempts | GreenFullPathsEnabled |
-          | 1                | 2                  | true                  |
+          | MaxClaudeSeconds | MaxTimeoutAttempts |
+          | 1                | 2                  |
      Then The code-prj project darmok.mojo.log file will be as follows with this failure
           | Level | Category | Content                                         |
           | WARN  | mojo     | Refactor: Claude timed out after 1s, killing... |
@@ -131,8 +131,8 @@ Feature: Phase Timeout
 
     Given The darmok plugin gen-from-existing goal claude /rgr-green command is exited but its stdout stays open
      When The darmok plugin gen-from-existing goal is executed and succeeds with
-          | MaxClaudeSeconds | MaxTimeoutAttempts | GreenFullPathsEnabled |
-          | 1                | 2                  | true                  |
+          | MaxClaudeSeconds | MaxTimeoutAttempts |
+          | 1                | 2                  |
      Then The code-prj project darmok.mojo.log file will be as follows
           | Level | Category | Content                                                  |
           | WARN  | mojo     | Green: Claude timed out after 1s, killing...             |

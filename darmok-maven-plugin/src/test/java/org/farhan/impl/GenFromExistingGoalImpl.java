@@ -326,9 +326,4 @@ public class GenFromExistingGoalImpl extends MavenTestObject implements GenFromE
 		setProperty("svcMavenPluginGoal", keyMap.get("SvcMavenPluginGoal"));
 	}
 
-	@Override
-	public void setGreenFullPathsEnabled(HashMap<String, String> keyMap) {
-		setProperty("greenFullPathsEnabled", keyMap.get("GreenFullPathsEnabled"));
-	}
-
 }

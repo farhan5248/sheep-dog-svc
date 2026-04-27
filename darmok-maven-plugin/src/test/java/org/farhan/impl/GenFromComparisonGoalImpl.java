@@ -37,7 +37,4 @@ public class GenFromComparisonGoalImpl extends MavenTestObject implements GenFro
 		setProperty("modelRefactor", keyMap.get("ModelRefactor"));
 	}
 
-	public void setGreenFullPathsEnabled(HashMap<String, String> keyMap) {
-		setProperty("greenFullPathsEnabled", keyMap.get("GreenFullPathsEnabled"));
-	}
 }

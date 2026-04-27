@@ -11,6 +11,4 @@ public interface GenFromComparisonGoal {
     public void setModelGreen(HashMap<String, String> keyMap);
 
     public void setModelRefactor(HashMap<String, String> keyMap);
-
-    public void setGreenFullPathsEnabled(HashMap<String, String> keyMap);
 }

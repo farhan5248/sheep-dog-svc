@@ -26,9 +26,7 @@ Feature: Green Full Paths
 
     Sets the flag on via the When-with table. GreenPhase replaces the legacy `/rgr-green code-prj loginHappyPath` shape with `<projectPath> <runnerClassName> <logPath> <jacocoPath> <umlDir>` ? paths anchored on the test baseDir (`target/darmok-test/sheep-dog-svc/code-prj`). The runner-log line proves the new shape; backslash-vs-forward-slash differences across platforms are absorbed by `DarmokMojoLog.normalizeCommandExtensions`.
 
-     When The darmok plugin gen-from-existing goal is executed and succeeds with
-          | GreenFullPathsEnabled |
-          | true                  |
+     When The darmok plugin gen-from-existing goal is executed and succeeds
      Then The code-prj project darmok.runners.log file will be as follows
           | Level | Category | Content                                                                                                                                                                                                                                                                                                                                                                      |
           | DEBUG | runner   | Executing: claude --print --session-id 00000000-0000-0000-0000-000000000001 --dangerously-skip-permissions --model opus /rgr-green target/darmok-test/sheep-dog-svc/code-prj loginHappyPathTest target/darmok-test/sheep-dog-svc/code-prj/log.txt target/darmok-test/sheep-dog-svc/code-prj/target/site/jacoco-with-tests target/darmok-test/sheep-dog-svc/code-prj/site/uml |
