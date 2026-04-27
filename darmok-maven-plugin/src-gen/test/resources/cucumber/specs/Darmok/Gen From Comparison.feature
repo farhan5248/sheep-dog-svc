@@ -23,10 +23,8 @@ Feature: Gen From Comparison
           """
       And The code-prj project src/main/java/org/farhan/objects/LoginHappyPath.java file isn't created
 
-  @GH183
   Scenario: Comparison skill runs, then the normal RGR cycle completes
 
-    \@GH183
     The `gen-from-comparison` goal exists so Darmok can compare two implementation candidates (e.g. a prior run's code vs a fresh generation) before deciding which to keep.
     The `/rgr-gen-from-comparison` Claude skill runs once at the start of each scenario iteration to perform that comparison analysis; if it succeeds, the standard Red ? Green ? Refactor flow proceeds exactly as in `gen-from-existing`.
     This Test-Case verifies the comparison call is made, that it doesn't interfere with the core RGR cycle, and that the observable scenarios-processed outcome is the same.

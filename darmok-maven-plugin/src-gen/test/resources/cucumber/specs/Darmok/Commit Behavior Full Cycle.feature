@@ -25,10 +25,8 @@ Feature: Commit Behavior Full Cycle
           """
       And The code-prj project src/main/java/org/farhan/objects/LoginHappyPath.java file isn't created
 
-  @GH183
   Scenario: Red fails, green and refactor succeed, one commit per phase
 
-    \@GH183
     The default (`stage=false`) flow gives each RGR phase its own commit so git history shows the Red ? Green ? Refactor progression explicitly.
     Someone reading the log later can walk the commits backwards to see what the failing test looked like, what code was generated to pass it, and how the refactor stabilized it.
     This Test-Case exercises the happy path end-to-end: red fails as expected, green generates the implementation, and refactor stabilizes without issues.
@@ -67,10 +65,8 @@ Feature: Commit Behavior Full Cycle
           | DEBUG | runner   | Running: git add .                                                                                                                                                                                                                                                                                                                                                             |
           | DEBUG | runner   | Running: git commit -m run-rgr refactor User logs in successfully                                                                                                                                                                                                                                                                                                              |
 
-  @GH183
   Scenario: Red fails, green and refactor succeed, single combined commit
 
-    \@GH183
     With `stage` set to true, Darmok produces one commit per scenario with a `run-rgr <scenario>` message ? unchanged as an observable outcome.
     Internally the shape shifts per issue 141: red commits first (with the stage-combined message), green skips its commit, and refactor amends red's commit with `git commit --amend --no-edit`.
     This way the working tree between phases is never polluted with accumulated red+green+refactor output ? each phase's downstream gates (allowlist, verify) see only that phase's delta.
@@ -106,10 +102,8 @@ Feature: Commit Behavior Full Cycle
           | DEBUG | runner   | Running: git add .                                                                                                                                                                                                                                                                                                                                                             |
           | DEBUG | runner   | Running: git commit --amend --no-edit                                                                                                                                                                                                                                                                                                                                          |
 
-  @GH183
   Scenario: Refactor allowlist runs before scenarios-list mod under stage true
 
-    \@GH183
     Pins down the issue The corollary observable lives in the runner log line order ? `Running: git status --porcelain` for the refactor phase appears before refactor's `Running: git add .` (which captures both refactor's claude output and the deferred scenarios-list delta into the same staged commit). Both logs are asserted because the mojo log proves the gate's outcome and the runner log proves the relative ordering of the gate, the scenarios-list-driven staging, and the amend.
 
      When The darmok plugin gen-from-existing goal is executed and succeeds with
@@ -131,10 +125,8 @@ Feature: Commit Behavior Full Cycle
           | DEBUG | runner   | Running: git add .                                                                                                                                     |
           | DEBUG | runner   | Running: git commit --amend --no-edit                                                                                                                  |
 
-  @GH183
   Scenario: Scenarios-list deletion survives refactor allowlist gate under stage true
 
-    \@GH183
     Pins down the state observable for the issue 314 control-flow reorder, made testable by the issue 322 fake fix. The test fake now synthesizes `git status --porcelain` from in-memory filesystem state, so a broken implementation that runs `removeFirstScenarioFromFile` before refactor's allowlist gate would surface scenarios-list.txt as an out-of-allowlist staged change at gate time, the gate would revert it, and the deletion would never reach any commit ? leaving scenarios-list.txt at its pre-run one-entry content.
     Asserting that scenarios-list.txt is empty after a successful run is the direct state observable: no log-line ordering required, no negative assertion needed, the assertion flips when the reorder is undone.
     Complements Test-Case 3 which captures the same property as a runner-log line-order observable.

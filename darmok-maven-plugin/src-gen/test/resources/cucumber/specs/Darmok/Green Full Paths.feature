@@ -22,10 +22,8 @@ Feature: Green Full Paths
           """
       And The code-prj project src/main/java/org/farhan/objects/LoginHappyPath.java file isn't created
 
-  @GH183
   Scenario: Green emits full paths when greenFullPathsEnabled is true
 
-    \@GH183
     Sets the flag on via the When-with table. GreenPhase replaces the legacy `/rgr-green code-prj loginHappyPath` shape with `<projectPath> <runnerClassName> <logPath> <jacocoPath> <umlDir>` ? paths anchored on the test baseDir (`target/darmok-test/sheep-dog-svc/code-prj`). The runner-log line proves the new shape; backslash-vs-forward-slash differences across platforms are absorbed by `DarmokMojoLog.normalizeCommandExtensions`.
 
      When The darmok plugin gen-from-existing goal is executed and succeeds with

@@ -22,10 +22,8 @@ Feature: Phase Verification
           """
       And The code-prj project src/main/java/org/farhan/objects/LoginHappyPath.java file isn't created
 
-  @GH183
   Scenario: Green verify passes on the first attempt
 
-    \@GH183
     Default happy path for the green phase. Claude generates a correct impl, `mvn clean verify` passes on the first try, and the scenario proceeds into refactor. Pins down the new `Green: Verify running` log line and the `mvn clean verify` subprocess so a regression that drops the verify sub-step is caught explicitly, not just implied by Run RGR Full Cycle's phase-level assertions.
 
      When The darmok plugin gen-from-existing goal is executed and succeeds with

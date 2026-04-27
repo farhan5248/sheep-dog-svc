@@ -25,10 +25,10 @@ Feature: Refactor Session Mode
           """
       And The code-prj project src/main/java/org/farhan/objects/LoginHappyPath.java file isn't created
 
-  @GH287 @GH183
+  @GH287
   Scenario: Continue mode runs compact then starts refactor on green session
 
-    \@GH287 \@GH183
+    \@GH287
     Refactor's first observable claude line is a `/compact` resume on green's UUID, followed immediately by `/rgr-refactor` carried by `--resume <green-uuid>` rather than `--session-id <fresh-uuid>`. Pins down two observables together because they appear in the same runner-log sequence: the compact preamble, and the absence of a fresh refactor UUID on the initial refactor call.
 
      When The darmok plugin gen-from-existing goal is executed and succeeds with
@@ -40,10 +40,10 @@ Feature: Refactor Session Mode
           | DEBUG | runner   | Executing: claude --resume 00000000-0000-0000-0000-000000000001 --print --dangerously-skip-permissions --model opus /compact                                                                                                                                                                                                                                                 |
           | DEBUG | runner   | Executing: claude --resume 00000000-0000-0000-0000-000000000001 --print --dangerously-skip-permissions --model opus /rgr-refactor forward code-prj                                                                                                                                                                                                                           |
 
-  @GH287 @GH183
+  @GH287
   Scenario: Continue mode refactor verify-fail resume stays on green session
 
-    \@GH287 \@GH183
+    \@GH287
     After a failed `mvn clean verify` during the refactor phase, the resume call carries `--resume <green-uuid>` ? the same UUID green used. Proves that the inherited session capture flows through every downstream refactor sub-machine (Phase Verification here, transitively Phase Timeout and Directory Allowlist), not just the initial `/rgr-refactor` call.
 
     Given The darmok plugin gen-from-existing goal mvn clean verify command is executed but fails once then succeeds
