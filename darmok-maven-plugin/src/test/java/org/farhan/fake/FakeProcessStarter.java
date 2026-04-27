@@ -132,8 +132,7 @@ public class FakeProcessStarter implements ProcessStarter {
 		String params = string(properties, "claudeCommandParameters");
 		if (params != null && params.contains("/rgr-refactor")) {
 			this.claudeCommandPhase = "refactor";
-		} else if (params != null && (params.contains("/rgr-green")
-				|| (params.startsWith("@") && params.endsWith("green.md")))) {
+		} else if (params != null && params.startsWith("@") && params.endsWith("green.md")) {
 			this.claudeCommandPhase = "green";
 		} else {
 			this.claudeCommandPhase = null;
@@ -196,7 +195,7 @@ public class FakeProcessStarter implements ProcessStarter {
 		}
 
 		if (joined.contains("claude") && cmd.stream().anyMatch(a ->
-				a.startsWith("/rgr-green") || (a.startsWith("@") && a.endsWith("green.md")))) {
+				a.startsWith("@") && a.endsWith("green.md"))) {
 			greenCalls++;
 			currentPhase = "green";
 			if ("exits-reader-blocked".equals(claudeGreenHangMode)) {
@@ -369,34 +368,20 @@ public class FakeProcessStarter implements ProcessStarter {
 			.filter(a -> a.startsWith("@") && a.endsWith("green.md"))
 			.findFirst()
 			.orElse(null);
-		if (atArg != null) {
-			// Template-rendered format: read the rendered green.md and parse runnerClassName from it.
-			Path renderedPath = Path.of(atArg.substring(1));
-			try {
-				String content = Files.readString(renderedPath, StandardCharsets.UTF_8);
-				java.util.regex.Matcher m = java.util.regex.Pattern
-					.compile("\\*\\*Runner class\\*\\*:\\s*`(\\w+)`")
-					.matcher(content);
-				if (m.find()) {
-					return m.group(1).replaceFirst("Test$", "");
-				}
-			} catch (IOException e) {
-				throw new UncheckedIOException(e);
+		if (atArg == null) return null;
+		Path renderedPath = Path.of(atArg.substring(1));
+		try {
+			String content = Files.readString(renderedPath, StandardCharsets.UTF_8);
+			java.util.regex.Matcher m = java.util.regex.Pattern
+				.compile("\\*\\*Runner class\\*\\*:\\s*`(\\w+)`")
+				.matcher(content);
+			if (m.find()) {
+				return m.group(1).replaceFirst("Test$", "");
 			}
-			return null;
+		} catch (IOException e) {
+			throw new UncheckedIOException(e);
 		}
-		String rgrGreenArg = cmd.stream()
-			.filter(a -> a.startsWith("/rgr-green"))
-			.findFirst()
-			.orElse("");
-		String[] parts = rgrGreenArg.split(" ");
-		if (parts.length < 3) return null;
-		if (parts.length > 3) {
-			// Full-paths format: /rgr-green <projectPath> <runnerClassName> <logPath> <jacocoPath> <umlDir>
-			return parts[2].replaceFirst("Test$", "");
-		}
-		// Legacy format: /rgr-green <artifactId> <pattern>
-		return parts[2];
+		return null;
 	}
 
 	private static boolean shouldHangInitialCall(String hangMode) {

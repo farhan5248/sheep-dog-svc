@@ -8,16 +8,12 @@ import java.util.List;
 
 public class GreenPhase extends RgrPhase {
 
-	private final boolean greenPromptTemplateEnabled;
-
 	public GreenPhase(ClaudeRunner claude, MavenRunner maven, GitRunner git, DarmokMojoLog mojoLog,
 			String workingDir, String targetDir, String artifactId,
 			int maxVerifyAttempts, int maxTimeoutAttempts, int maxClaudeSeconds,
-			int maxAllowlistAttempts, List<String> allowlistPaths,
-			boolean greenPromptTemplateEnabled) {
+			int maxAllowlistAttempts, List<String> allowlistPaths) {
 		super(claude, maven, git, mojoLog, workingDir, targetDir, artifactId,
 			maxVerifyAttempts, maxTimeoutAttempts, maxClaudeSeconds, maxAllowlistAttempts, allowlistPaths);
-		this.greenPromptTemplateEnabled = greenPromptTemplateEnabled;
 	}
 
 	@Override
@@ -32,31 +28,25 @@ public class GreenPhase extends RgrPhase {
 
 	@Override
 	protected int executeClaudeOrMaven(DarmokMojoState state) throws Exception {
-		String pattern = state.tag;
-		String runnerClassName = pattern + "Test";
+		String runnerClassName = state.tag + "Test";
 		String logPath = targetDir + "/log.txt";
 		String jacocoPath = targetDir + "/target/site/jacoco-with-tests";
 		String umlDir = targetDir + "/site/uml";
 
-		String args;
-		if (greenPromptTemplateEnabled) {
-			String template;
-			try (InputStream is = getClass().getResourceAsStream("/prompts/green.md")) {
-				template = new String(is.readAllBytes(), StandardCharsets.UTF_8);
-			}
-			String rendered = template
-				.replace("${projectPath}", targetDir)
-				.replace("${runnerClassName}", runnerClassName)
-				.replace("${logPath}", logPath)
-				.replace("${jacocoPath}", jacocoPath)
-				.replace("${umlDir}", umlDir);
-			Path renderedPath = Path.of(targetDir, "target", "darmok", "green.md");
-			Files.createDirectories(renderedPath.getParent());
-			Files.writeString(renderedPath, rendered, StandardCharsets.UTF_8);
-			args = "@" + renderedPath.toString().replace('\\', '/');
-		} else {
-			args = "/rgr-green " + targetDir + " " + runnerClassName + " " + logPath + " " + jacocoPath + " " + umlDir;
+		String template;
+		try (InputStream is = getClass().getResourceAsStream("/prompts/green.md")) {
+			template = new String(is.readAllBytes(), StandardCharsets.UTF_8);
 		}
+		String rendered = template
+			.replace("${projectPath}", targetDir)
+			.replace("${runnerClassName}", runnerClassName)
+			.replace("${logPath}", logPath)
+			.replace("${jacocoPath}", jacocoPath)
+			.replace("${umlDir}", umlDir);
+		Path renderedPath = Path.of(targetDir, "target", "darmok", "green.md");
+		Files.createDirectories(renderedPath.getParent());
+		Files.writeString(renderedPath, rendered, StandardCharsets.UTF_8);
+		String args = "@" + renderedPath.toString().replace('\\', '/');
 
 		int claudeExit = claude.run(workingDir, args);
 		return runTimeoutRecoveryLoop(claudeExit);
