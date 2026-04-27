@@ -47,8 +47,10 @@ Feature: Phase Timeout
           | DEBUG | runner   | Executing: claude --print --session-id 00000000-0000-0000-0000-000000000001 --dangerously-skip-permissions --model opus /rgr-green target/darmok-test/sheep-dog-svc/code-prj loginHappyPathTest target/darmok-test/sheep-dog-svc/code-prj/log.txt target/darmok-test/sheep-dog-svc/code-prj/target/site/jacoco-with-tests target/darmok-test/sheep-dog-svc/code-prj/site/uml |
           | DEBUG | runner   | Running: mvn clean install                                                                                                                                                                                                                                                                                                                                                   |
 
+  @GH183
   Scenario: Green killed, install fails, resumed claude fixes it
 
+    \@GH183
     First claude hangs and is killed. First install fails (killed session left incomplete code). Darmok resumes the session with the literal message `pls continue`; that call returns within 1 second. Second install passes, so control proceeds.
 
     Given The darmok plugin gen-from-existing goal claude /rgr-green command is hung on first call then completed on resume
@@ -57,8 +59,8 @@ Feature: Phase Timeout
           | 1       | 1    |
           | 2       | 0    |
      When The darmok plugin gen-from-existing goal is executed and succeeds with
-          | MaxClaudeSeconds | MaxTimeoutAttempts |
-          | 1                | 2                  |
+          | MaxClaudeSeconds | MaxTimeoutAttempts | GreenFullPathsEnabled |
+          | 1                | 2                  | true                  |
      Then The code-prj project darmok.mojo.log file will be as follows
           | Level | Category | Content                                                    |
           | WARN  | mojo     | Green: Claude timed out after 1s, killing...               |
@@ -66,11 +68,11 @@ Feature: Phase Timeout
           | INFO  | mojo     | Green: Install passed, proceeding                          |
           | INFO  | mojo     | Green: Verify running...                                   |
       And The code-prj project darmok.runners.log file will be as follows
-          | Level | Category | Content                                                                                                                                                    |
-          | DEBUG | runner   | Executing: claude --print --session-id 00000000-0000-0000-0000-000000000001 --dangerously-skip-permissions --model opus /rgr-green code-prj loginHappyPath |
-          | DEBUG | runner   | Running: mvn clean install                                                                                                                                 |
-          | DEBUG | runner   | Executing: claude --resume 00000000-0000-0000-0000-000000000001 --print --dangerously-skip-permissions --model opus pls continue                           |
-          | DEBUG | runner   | Running: mvn clean install                                                                                                                                 |
+          | Level | Category | Content                                                                                                                                                                                                                                                                                                                                                                      |
+          | DEBUG | runner   | Executing: claude --print --session-id 00000000-0000-0000-0000-000000000001 --dangerously-skip-permissions --model opus /rgr-green target/darmok-test/sheep-dog-svc/code-prj loginHappyPathTest target/darmok-test/sheep-dog-svc/code-prj/log.txt target/darmok-test/sheep-dog-svc/code-prj/target/site/jacoco-with-tests target/darmok-test/sheep-dog-svc/code-prj/site/uml |
+          | DEBUG | runner   | Running: mvn clean install                                                                                                                                                                                                                                                                                                                                                   |
+          | DEBUG | runner   | Executing: claude --resume 00000000-0000-0000-0000-000000000001 --print --dangerously-skip-permissions --model opus pls continue                                                                                                                                                                                                                                             |
+          | DEBUG | runner   | Running: mvn clean install                                                                                                                                                                                                                                                                                                                                                   |
 
   Scenario: Green timeouts exhaust max attempts
 
