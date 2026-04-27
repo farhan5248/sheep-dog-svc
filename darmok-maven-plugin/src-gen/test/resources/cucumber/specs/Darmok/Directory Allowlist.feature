@@ -142,16 +142,18 @@ Feature: Directory Allowlist
           | DEBUG | runner   | Executing: claude --resume 00000000-0000-0000-0000-000000000001 --print --dangerously-skip-permissions --model opus only modify files under src/main/java or src/test/java/org/farhan/impl |
           | DEBUG | runner   | Running: git status --porcelain                                                                                                                                                            |
 
-  @GH141
+  @GH141 @GH183
   Scenario: Refactor allowlist fails for every attempt
 
-    \@GH141
+    \@GH141 \@GH183
     Symmetric with the green-phase exhaustion case. No refactor commit is made; the green commit from this scenario remains in git history under `stage=false` (nothing is committed under `stage=true`).
 
     Given The darmok plugin gen-from-existing goal claude command is executed and succeeds with
           | Command Parameters             | Path    |
           | /rgr-refactor forward code-prj | pom.xml |
-     When The darmok plugin gen-from-existing goal is executed but fails
+     When The darmok plugin gen-from-existing goal is executed but fails with
+          | GreenFullPathsEnabled |
+          | true                  |
      Then The code-prj project darmok.mojo.log file will be as follows with this failure
           | Level | Category | Content                                                                               |
           | INFO  | mojo     | Refactor: Allowlist check running...                                                  |

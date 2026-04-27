@@ -1,6 +1,4 @@
 File: Darmok/Directory Allowlist
-  Scenario: Refactor allowlist fails for every attempt
-    Tag: GH183
   Scenario: Green allowlist passes when an extra path is added via allowlistAdditionalPaths
     Tag: GH183
   Scenario: Green allowlist fails when allowlistBasePaths narrows below default
