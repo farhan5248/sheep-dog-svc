@@ -12,7 +12,7 @@ call mvn org.farhan:darmok-maven-plugin:gen-from-existing ^
     -DretryWaitSeconds="30" ^
     -DmaxTimeoutAttempts="2" ^
     -DmaxAllowlistAttempts="2" ^
-    -DbaselineVerifyEnabled="true" ^
+    -DbaselineVerifyEnabled="false" ^
     -DgitBranch="main" ^
     -DmodelRefactor="opus" ^
     -DmodelGreen="opus" ^

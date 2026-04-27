@@ -80,6 +80,7 @@ paths:
   "Green phase invokes claude with rendered template path": [mvn-1, mvn-3, mvn-4, mvn-5, mvn-6, mvn-6]
   "Green timeouts exhaust max attempts": [mvn-1, mvn-3, mvn-4, mvn-5, mvn-2, mvn-2]
   "Green failure still records a metrics row with red SHA": [mvn-1, mvn-3, mvn-4, mvn-5, mvn-7, mvn-7, mvn-7]
+  "Refactor failure still records a metrics row with red SHA": [mvn-1, mvn-3, mvn-4, mvn-5, mvn-6, mvn-7, mvn-7, mvn-7]
   "Green verify fails for every attempt": [mvn-1, mvn-3, mvn-4, mvn-5, mvn-7, mvn-7, mvn-7]
   "Green verify fails once then succeeds after resume": [mvn-1, mvn-3, mvn-4, mvn-5, mvn-7, mvn-6, mvn-6]
   "Green verify passes on the first attempt": [mvn-1, mvn-3, mvn-4, mvn-5, mvn-6, mvn-6]

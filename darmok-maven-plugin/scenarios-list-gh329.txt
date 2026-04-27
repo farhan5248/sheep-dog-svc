@@ -1,3 +1,0 @@
-File: Darmok/Metrics Csv Failed Runs
-  Scenario: Refactor failure still records a metrics row with red SHA
-    Tag: GH329

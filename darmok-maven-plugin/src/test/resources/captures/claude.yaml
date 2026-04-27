@@ -132,6 +132,7 @@ paths:
   "Green phase invokes claude with rendered template path": [claude-6, claude-7, claude-8]
   "Green timeouts exhaust max attempts": [claude-23, claude-25]
   "Green failure still records a metrics row with red SHA": [claude-6, claude-13, claude-13]
+  "Refactor failure still records a metrics row with red SHA": [claude-6, claude-7, claude-8, claude-13, claude-13]
   "Green verify fails for every attempt": [claude-6, claude-13, claude-13]
   "Green verify fails once then succeeds after resume": [claude-6, claude-13, claude-7, claude-8]
   "Green verify passes on the first attempt": [claude-6, claude-7, claude-8]
