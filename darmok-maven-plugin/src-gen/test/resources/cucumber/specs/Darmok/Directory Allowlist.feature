@@ -95,17 +95,19 @@ Feature: Directory Allowlist
           | DEBUG | runner   | Executing: claude --resume 00000000-0000-0000-0000-000000000001 --print --dangerously-skip-permissions --model opus only modify files under src/main/java or src/test/java/org/farhan/impl                                                                                                                                                                                   |
           | DEBUG | runner   | Running: git status --porcelain                                                                                                                                                                                                                                                                                                                                              |
 
-  @GH141
+  @GH141 @GH183
   Scenario: Green allowlist fails for every attempt
 
-    \@GH141
+    \@GH141 \@GH183
     Every `git status --porcelain` in the green phase finds an out-of-allowlist path. Darmok retries up to `maxAllowlistAttempts` (default 2), each retry preceded by a revert and a `claude --resume`, except the final attempt which aborts without another resume.
     The goal fails with an exception naming the phase and attempt count, the refactor phase is never reached, and no green commit is made.
 
     Given The darmok plugin gen-from-existing goal claude command is executed and succeeds with
-          | Command Parameters                 | Path    |
-          | /rgr-green code-prj loginHappyPath | pom.xml |
-     When The darmok plugin gen-from-existing goal is executed but fails
+          | Command Parameters                                                                                                                                                                                                                                   | Path    |
+          | /rgr-green target/darmok-test/sheep-dog-svc/code-prj loginHappyPathTest target/darmok-test/sheep-dog-svc/code-prj/log.txt target/darmok-test/sheep-dog-svc/code-prj/target/site/jacoco-with-tests target/darmok-test/sheep-dog-svc/code-prj/site/uml | pom.xml |
+     When The darmok plugin gen-from-existing goal is executed but fails with
+          | GreenFullPathsEnabled |
+          | true                  |
      Then The code-prj project darmok.mojo.log file will be as follows with this failure
           | Level | Category | Content                                                                            |
           | INFO  | mojo     | Green: Allowlist check running...                                                  |
