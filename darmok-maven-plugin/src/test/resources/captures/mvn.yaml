@@ -1,0 +1,49 @@
+# Captured vertex catalog for the mvn fake.
+# Each entry is one (in, out, during, after) combo;
+# per-scenario YAMLs reference these ids.
+
+mvn-1:
+  in: "mvn.cmd clean install"
+  out: { exit: 0 }
+mvn-2:
+  in: "mvn.cmd clean install"
+  out: { exit: 1 }
+mvn-3:
+  in: "mvn.cmd org.farhan:sheep-dog-svc-maven-plugin:asciidoctor-to-uml -Dtags=loginHappyPath -Dhost=qa.sheepdog.io -DonlyChanges=false"
+  out: { exit: 0 }
+mvn-4:
+  in: "mvn.cmd org.farhan:sheep-dog-svc-maven-plugin:uml-to-cucumber-guice -Dtags=loginHappyPath -Dhost=qa.sheepdog.io -DonlyChanges=false"
+  out: { exit: 0 }
+mvn-5:
+  in: "mvn.cmd test -Dtest=loginHappyPathTest"
+  out: { exit: 1, stdout: "tests failing: impl class missing" }
+mvn-6:
+  in: "mvn.cmd clean verify"
+  out: { exit: 0, stdout: "BUILD SUCCESS" }
+mvn-7:
+  in: "mvn.cmd clean verify"
+  out: { exit: 1, stdout: "BUILD FAILURE" }
+mvn-8:
+  in: "mvn.cmd test -Dtest=loginHappyPathTest"
+  out: { exit: 0, stdout: "BUILD SUCCESS" }
+mvn-9:
+  in: "mvn.cmd org.farhan:sheep-dog-svc-maven-plugin:uml-to-cucumber-spring -Dtags=loginHappyPath -Dhost=qa.sheepdog.io -DonlyChanges=false"
+  out: { exit: 0 }
+mvn-10:
+  in: "mvn.cmd org.farhan:sheep-dog-svc-maven-plugin:asciidoctor-to-uml -Dtags=loginHappyPath -Dhost=qa.sheepdog.io -DonlyChanges=false"
+  out: { exit: 1, stdout: "svc unreachable: connection refused" }
+mvn-11:
+  in: "mvn.cmd org.farhan:sheep-dog-svc-maven-plugin:uml-to-cucumber-guice -Dtags=loginHappyPath -Dhost=qa.sheepdog.io -DonlyChanges=false"
+  out: { exit: 1, stdout: "TooManyRequests: upstream rate limit" }
+mvn-12:
+  in: "mvn.cmd test -Dtest=loginHappyPathTest"
+  out: { exit: 1, stdout: "COMPILATION ERROR : [ERROR] /suites/loginHappyPathTest.java:[3,1] cannot find symbol" }
+mvn-13:
+  in: "mvn.cmd org.farhan:sheep-dog-svc-maven-plugin:asciidoctor-to-uml -Dtags=logoutHappyPath -Dhost=qa.sheepdog.io -DonlyChanges=false"
+  out: { exit: 0 }
+mvn-14:
+  in: "mvn.cmd org.farhan:sheep-dog-svc-maven-plugin:uml-to-cucumber-guice -Dtags=logoutHappyPath -Dhost=qa.sheepdog.io -DonlyChanges=false"
+  out: { exit: 0 }
+mvn-15:
+  in: "mvn.cmd test -Dtest=logoutHappyPathTest"
+  out: { exit: 0, stdout: "BUILD SUCCESS" }

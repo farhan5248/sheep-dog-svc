@@ -1,0 +1,4 @@
+# Captured path through claude/mvn/git FSMs for: Baseline build passes and scenario loop proceeds
+sequences:
+  git: [git-1]
+  mvn: [mvn-1]

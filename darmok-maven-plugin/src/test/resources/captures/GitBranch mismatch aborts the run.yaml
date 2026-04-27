@@ -1,0 +1,3 @@
+# Captured path through claude/mvn/git FSMs for: GitBranch mismatch aborts the run
+sequences:
+  git: [git-1]

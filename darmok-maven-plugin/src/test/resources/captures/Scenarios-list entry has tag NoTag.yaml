@@ -1,0 +1,4 @@
+# Captured path through claude/mvn/git FSMs for: Scenarios-list entry has tag NoTag
+sequences:
+  git: [git-1]
+  mvn: [mvn-1]

@@ -1,0 +1,4 @@
+# Captured path through claude/mvn/git FSMs for: Spring-flavored cucumber-gen goal flips the runner log invocation
+sequences:
+  git: [git-1, git-2, git-3, git-4, git-7]
+  mvn: [mvn-1, mvn-3, mvn-9, mvn-8]

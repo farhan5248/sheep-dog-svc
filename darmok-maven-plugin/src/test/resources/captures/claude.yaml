@@ -1,0 +1,104 @@
+# Captured vertex catalog for the claude fake.
+# Each entry is one (in, out, during, after) combo;
+# per-scenario YAMLs reference these ids.
+
+claude-1:
+  in: "claude.cmd --print --session-id 00000000-0000-0000-0000-000000000001 --dangerously-skip-permissions --model opus @target/darmok-test/sheep-dog-svc/code-prj/target/darmok/green.md"
+  out: { exit: 1, stdout: "500 Server Error occurred (no API Error: prefix)" }
+claude-2:
+  in: "claude.cmd --print --session-id 00000000-0000-0000-0000-000000000001 --dangerously-skip-permissions --model opus @target/darmok-test/sheep-dog-svc/code-prj/target/darmok/green.md"
+  out: { exit: 137 }
+claude-3:
+  in: "claude.cmd --print --session-id 00000000-0000-0000-0000-000000000001 --dangerously-skip-permissions --model opus @target/darmok-test/sheep-dog-svc/code-prj/target/darmok/green.md"
+  out: { exit: 130 }
+claude-4:
+  in: "claude.cmd --print --session-id 00000000-0000-0000-0000-000000000001 --dangerously-skip-permissions --model opus @target/darmok-test/sheep-dog-svc/code-prj/target/darmok/green.md"
+  out: { exit: 137, stdout: "partial output before the kill" }
+claude-5:
+  in: "claude.cmd --print --session-id 00000000-0000-0000-0000-000000000001 --dangerously-skip-permissions --model opus @target/darmok-test/sheep-dog-svc/code-prj/target/darmok/green.md"
+  out: { exit: 1, stdout: "API Error: 500" }
+claude-6:
+  in: "claude.cmd --print --session-id 00000000-0000-0000-0000-000000000001 --dangerously-skip-permissions --model opus @target/darmok-test/sheep-dog-svc/code-prj/target/darmok/green.md"
+  out: { exit: 0 }
+  after:
+    - { write: "src/main/java/org/farhan/objects/LoginHappyPath.java", content: "placeholder" }
+claude-7:
+  in: "claude.cmd --resume 00000000-0000-0000-0000-000000000001 --print --dangerously-skip-permissions --model opus /compact"
+  out: { exit: 0 }
+claude-8:
+  in: "claude.cmd --resume 00000000-0000-0000-0000-000000000001 --print --dangerously-skip-permissions --model opus /rgr-refactor forward code-prj"
+  out: { exit: 0 }
+claude-9:
+  in: "claude.cmd --print --session-id 00000000-0000-0000-0000-000000000001 --dangerously-skip-permissions --model opus @target/darmok-test/sheep-dog-svc/code-prj/target/darmok/green.md"
+  out: { exit: 1, stdout: "API Error: 529" }
+claude-10:
+  in: "claude.cmd --print --session-id 00000000-0000-0000-0000-000000000001 --dangerously-skip-permissions --model opus @target/darmok-test/sheep-dog-svc/code-prj/target/darmok/green.md"
+  out: { exit: 1, stdout: "Internal server error" }
+claude-11:
+  in: "claude.cmd --print --session-id 00000000-0000-0000-0000-000000000001 --dangerously-skip-permissions --model opus @target/darmok-test/sheep-dog-svc/code-prj/target/darmok/green.md"
+  out: { exit: 1, stdout: "overloaded" }
+claude-12:
+  in: "claude.cmd --resume 00000000-0000-0000-0000-000000000001 --print --dangerously-skip-permissions --model opus /rgr-refactor forward code-prj"
+  out: { exit: 1, stdout: "API Error: 500" }
+claude-13:
+  in: "claude.cmd --resume 00000000-0000-0000-0000-000000000001 --print --dangerously-skip-permissions --model opus mvn clean verify failures should be fixed"
+  out: { exit: 0 }
+claude-14:
+  in: "claude.cmd --print --session-id 00000000-0000-0000-0000-000000000001 --dangerously-skip-permissions --model sonnet @target/darmok-test/sheep-dog-svc/code-prj/target/darmok/green.md"
+  out: { exit: 0 }
+  after:
+    - { write: "src/main/java/org/farhan/objects/LoginHappyPath.java", content: "placeholder" }
+claude-15:
+  in: "claude.cmd --resume 00000000-0000-0000-0000-000000000001 --print --dangerously-skip-permissions --model sonnet /compact"
+  out: { exit: 0 }
+claude-16:
+  in: "claude.cmd --resume 00000000-0000-0000-0000-000000000001 --print --dangerously-skip-permissions --model sonnet /rgr-refactor forward darmok-prj"
+  out: { exit: 0 }
+claude-17:
+  in: "claude.cmd --resume 00000000-0000-0000-0000-000000000001 --print --dangerously-skip-permissions --model opus only modify files under src/main/java or src/test/java/org/farhan/impl"
+  out: { exit: 0 }
+claude-18:
+  in: "claude.cmd --print --session-id 00000000-0000-0000-0000-000000000001 --dangerously-skip-permissions --model sonnet /rgr-gen-from-comparison darmok-prj"
+  out: { exit: 0 }
+claude-19:
+  in: "claude.cmd --print --session-id 00000000-0000-0000-0000-000000000002 --dangerously-skip-permissions --model sonnet @target/darmok-test/sheep-dog-svc/code-prj/target/darmok/green.md"
+  out: { exit: 0 }
+  after:
+    - { write: "src/main/java/org/farhan/objects/LoginHappyPath.java", content: "placeholder" }
+claude-20:
+  in: "claude.cmd --resume 00000000-0000-0000-0000-000000000002 --print --dangerously-skip-permissions --model sonnet /compact"
+  out: { exit: 0 }
+claude-21:
+  in: "claude.cmd --resume 00000000-0000-0000-0000-000000000002 --print --dangerously-skip-permissions --model sonnet /rgr-refactor forward darmok-prj"
+  out: { exit: 0 }
+claude-22:
+  in: "claude.cmd --print --session-id 00000000-0000-0000-0000-000000000001 --dangerously-skip-permissions --model opus @target/darmok-test/sheep-dog-svc/code-prj/target/darmok/green.md"
+  during: { wait_for_destroy: true }
+  out: { exit: 0 }
+  after:
+    - { write: "src/main/java/org/farhan/objects/LoginHappyPath.java", content: "placeholder" }
+claude-23:
+  in: "claude.cmd --print --session-id 00000000-0000-0000-0000-000000000001 --dangerously-skip-permissions --model opus @target/darmok-test/sheep-dog-svc/code-prj/target/darmok/green.md"
+  during: { wait_for_destroy: true }
+  out: { exit: 0 }
+claude-24:
+  in: "claude.cmd --resume 00000000-0000-0000-0000-000000000001 --print --dangerously-skip-permissions --model opus pls continue"
+  out: { exit: 0 }
+  after:
+    - { write: "src/main/java/org/farhan/objects/LoginHappyPath.java", content: "placeholder" }
+claude-25:
+  in: "claude.cmd --resume 00000000-0000-0000-0000-000000000001 --print --dangerously-skip-permissions --model opus pls continue"
+  during: { wait_for_destroy: true }
+  out: { exit: 0 }
+claude-26:
+  in: "claude.cmd --resume 00000000-0000-0000-0000-000000000001 --print --dangerously-skip-permissions --model opus /rgr-refactor forward code-prj"
+  during: { wait_for_destroy: true }
+  out: { exit: 0 }
+claude-27:
+  in: "claude.cmd --resume 00000000-0000-0000-0000-000000000001 --print --dangerously-skip-permissions --model opus pls continue"
+  out: { exit: 0 }
+claude-28:
+  in: "claude.cmd --print --session-id 00000000-0000-0000-0000-000000000001 --dangerously-skip-permissions --model opus @target/darmok-test/sheep-dog-svc/code-prj/target/darmok/green.md"
+  out: { exit: 0, blocked_reader: true }
+  after:
+    - { write: "src/main/java/org/farhan/objects/LoginHappyPath.java", content: "placeholder" }

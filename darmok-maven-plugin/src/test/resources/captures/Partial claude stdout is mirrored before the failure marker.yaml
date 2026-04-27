@@ -1,0 +1,5 @@
+# Captured path through claude/mvn/git FSMs for: Partial claude stdout is mirrored before the failure marker
+sequences:
+  git: [git-1, git-2, git-3, git-4]
+  mvn: [mvn-1, mvn-3, mvn-4, mvn-5]
+  claude: [claude-4]

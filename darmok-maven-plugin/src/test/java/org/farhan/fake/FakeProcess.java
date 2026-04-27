@@ -27,6 +27,7 @@ import java.util.concurrent.TimeUnit;
 public class FakeProcess extends Process {
 
 	private final ByteArrayInputStream stdout;
+	private final String stdoutText;
 	private final ByteArrayOutputStream stdin = new ByteArrayOutputStream();
 	private final int exitCode;
 	private Duration delay = Duration.ZERO;
@@ -36,9 +37,16 @@ public class FakeProcess extends Process {
 	private final CountDownLatch readerRelease = new CountDownLatch(1);
 
 	public FakeProcess(String stdoutText, int exitCode) {
+		this.stdoutText = stdoutText;
 		this.stdout = new ByteArrayInputStream(stdoutText.getBytes(StandardCharsets.UTF_8));
 		this.exitCode = exitCode;
 	}
+
+	// --- capture-side accessors used by FakeCaptureInterceptor ---
+	public int captureExit() { return exitCode; }
+	public String captureStdout() { return stdoutText; }
+	public boolean captureHangs() { return hangs; }
+	public boolean captureBlocksReader() { return blocksReader; }
 
 	public FakeProcess withDelay(Duration delay) {
 		this.delay = delay;

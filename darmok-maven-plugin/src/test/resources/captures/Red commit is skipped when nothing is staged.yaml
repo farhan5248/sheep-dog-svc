@@ -1,0 +1,4 @@
+# Captured path through claude/mvn/git FSMs for: Red commit is skipped when nothing is staged
+sequences:
+  git: [git-1, git-2, git-8, git-7]
+  mvn: [mvn-1, mvn-3, mvn-4, mvn-8]

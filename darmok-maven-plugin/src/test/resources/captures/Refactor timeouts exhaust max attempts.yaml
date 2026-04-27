@@ -1,0 +1,5 @@
+# Captured path through claude/mvn/git FSMs for: Refactor timeouts exhaust max attempts
+sequences:
+  git: [git-1, git-2, git-3, git-4, git-5, git-2]
+  mvn: [mvn-1, mvn-3, mvn-4, mvn-5, mvn-6, mvn-2, mvn-2]
+  claude: [claude-6, claude-7, claude-26, claude-25]

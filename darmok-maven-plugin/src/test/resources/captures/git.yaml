@@ -1,0 +1,64 @@
+# Captured vertex catalog for the git fake.
+# Each entry is one (in, out, during, after) combo;
+# per-scenario YAMLs reference these ids.
+
+git-1:
+  in: "git rev-parse --abbrev-ref HEAD"
+  out: { exit: 0, stdout: "main" }
+git-2:
+  in: "git add ."
+  out: { exit: 0 }
+git-3:
+  in: "git diff --cached --quiet"
+  out: { exit: 1 }
+git-4:
+  in: "git commit -m run-rgr User logs in successfully\n\nCo-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>"
+  out: { exit: 0 }
+git-5:
+  in: "git status --porcelain"
+  out: { exit: 0 }
+git-6:
+  in: "git commit --amend --no-edit"
+  out: { exit: 0 }
+git-7:
+  in: "git rev-parse HEAD"
+  out: { exit: 0, stdout: "abc1234567890abcdef1234567890abcdef12345" }
+git-8:
+  in: "git diff --cached --quiet"
+  out: { exit: 0 }
+git-9:
+  in: "git commit -m run-rgr red User logs in successfully\n\nCo-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>"
+  out: { exit: 0 }
+git-10:
+  in: "git commit -m run-rgr green User logs in successfully\n\nCo-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>"
+  out: { exit: 0 }
+git-11:
+  in: "git commit -m run-rgr refactor User logs in successfully\n\nCo-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>"
+  out: { exit: 0 }
+git-12:
+  in: "git rev-parse --abbrev-ref HEAD"
+  out: { exit: 0, stdout: "Rebuild30" }
+git-13:
+  in: "git status --porcelain"
+  out: { exit: 0, stdout: " M pom.xml" }
+git-14:
+  in: "git checkout HEAD -- pom.xml"
+  out: { exit: 0 }
+git-15:
+  in: "git status --porcelain"
+  out: { exit: 0, stdout: " M src/test/resources/mojo-defaults.properties" }
+git-16:
+  in: "git status --porcelain"
+  out: { exit: 0, stdout: " M src/test/java/org/farhan/impl/LoginHappyPathImpl.java" }
+git-17:
+  in: "git checkout HEAD -- src/test/java/org/farhan/impl/LoginHappyPathImpl.java"
+  out: { exit: 0 }
+git-18:
+  in: "git commit -m run-rgr User logs in, successfully\n\nCo-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>"
+  out: { exit: 0 }
+git-19:
+  in: "git commit -m run-rgr User says \"hi\" successfully\n\nCo-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>"
+  out: { exit: 0 }
+git-20:
+  in: "git commit -m run-rgr User logs out successfully\n\nCo-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>"
+  out: { exit: 0 }

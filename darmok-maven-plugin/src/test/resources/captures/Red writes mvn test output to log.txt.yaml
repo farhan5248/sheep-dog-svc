@@ -1,0 +1,4 @@
+# Captured path through claude/mvn/git FSMs for: Red writes mvn test output to log.txt
+sequences:
+  git: [git-1, git-2, git-3, git-4, git-7]
+  mvn: [mvn-1, mvn-3, mvn-4, mvn-8]
