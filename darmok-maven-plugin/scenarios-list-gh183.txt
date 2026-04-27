@@ -1,6 +1,4 @@
 File: Darmok/Commit Behavior Full Cycle
-  Scenario: Red fails, green and refactor succeed, one commit per phase
-    Tag: GH183
   Scenario: Red fails, green and refactor succeed, single combined commit
     Tag: GH183
   Scenario: Refactor allowlist runs before scenarios-list mod under stage true
