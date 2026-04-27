@@ -115,16 +115,18 @@ Feature: Directory Allowlist
           | INFO  | mojo     | Green: Allowlist check running...                                                  |
           | ERROR | mojo     | Green: Allowlist check failed after 2 attempts, aborting                           |
 
-  @GH141
+  @GH141 @GH183
   Scenario: Refactor allowlist fails once then succeeds after revert and resume
 
-    \@GH141
+    \@GH141 \@GH183
     Symmetric with the green-phase recovery case. Proves the revert-and-resume loop is phase-parametric.
 
     Given The darmok plugin gen-from-existing goal claude command is executed and succeeds with
           | Command Parameters             | Attempt | Path    |
           | /rgr-refactor forward code-prj | 1       | pom.xml |
-     When The darmok plugin gen-from-existing goal is executed and succeeds
+     When The darmok plugin gen-from-existing goal is executed and succeeds with
+          | GreenFullPathsEnabled |
+          | true                  |
      Then The code-prj project darmok.mojo.log file will be as follows
           | Level | Category | Content                                                                               |
           | INFO  | mojo     | Refactor: Allowlist check running...                                                  |
