@@ -326,9 +326,4 @@ public class GenFromExistingGoalImpl extends MavenTestObject implements GenFromE
 		setProperty("svcMavenPluginGoal", keyMap.get("SvcMavenPluginGoal"));
 	}
 
-	@Override
-	public void setGreenPromptTemplateEnabled(HashMap<String, String> keyMap) {
-		setProperty("greenPromptTemplateEnabled", keyMap.get("GreenPromptTemplateEnabled"));
-	}
-
 }

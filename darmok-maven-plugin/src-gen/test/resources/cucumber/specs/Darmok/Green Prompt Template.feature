@@ -1,8 +1,9 @@
-@darmok-maven-plugin @<rendered-path>"`
+@darmok-maven-plugin
 Feature: Green Prompt Template
 
   \@darmok-maven-plugin
-  GreenPhase loads `darmok-maven-plugin/src/main/resources/prompts/green.md` (a template with `${projectPath}`, `${runnerClassName}`, `${logPath}`, `${jacocoPath}`, `${umlDir}` placeholders), substitutes the values, writes the rendered prompt to `${baseDir}/target/darmok/green.md`, and invokes `claude --print "\@<rendered-path>"` so claude reads the prompt from the file. File-based prompt delivery keeps the runners.log assertions short and removes the runtime dependency on `.claude/skills/rgr-green/` being installed. Pinned by issue 326.
+  GreenPhase loads `darmok-maven-plugin/src/main/resources/prompts/green.md` substitutes the values, writes the rendered prompt to green.md, and invokes claude.
+  File-based prompt delivery keeps the runners.log assertions short and removes the runtime dependency on claude skills being installed. Pinned by issue 326.
 
   Background: A failing scenario that reaches green phase
 
@@ -24,7 +25,8 @@ Feature: Green Prompt Template
 
   Scenario: Green phase invokes claude with rendered template path
 
-    The runners.log captures the green-phase claude invocation. The command line carries `\@<rendered-path>` and claude reads the prompt from the rendered green.md file. The path is stable across runs (relative-path baseDir from issue 332).
+    The runners.log captures the green-phase claude invocation.
+    Claude reads the prompt from the rendered green.md file. The path is stable across runs (relative-path baseDir from issue 332).
 
      When The darmok plugin gen-from-existing goal is executed and succeeds
      Then The code-prj project darmok.runners.log file will be as follows
