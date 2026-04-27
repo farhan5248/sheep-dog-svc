@@ -1,6 +1,4 @@
 File: Darmok/Phase Timeout
-  Scenario: Green claude killed and install passes, refactor unaffected
-    Tag: GH183
   Scenario: Green killed, install fails, resumed claude fixes it
     Tag: GH183
 

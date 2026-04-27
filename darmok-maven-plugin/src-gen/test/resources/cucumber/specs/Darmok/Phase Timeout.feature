@@ -24,14 +24,16 @@ Feature: Phase Timeout
           """
       And The code-prj project src/main/java/org/farhan/objects/LoginHappyPath.java file isn't created
 
+  @GH183
   Scenario: Green claude killed and install passes, refactor unaffected
 
+    \@GH183
     The first claude invocation hangs past the 1-second timeout and gets destroyed. The killed session happens to have produced working code, so the first `mvn clean install` returns 0 and Darmok treats the phase as complete ? no resume is needed, and control flows into the 155 verify loop exactly as if claude had returned 0. Refactor runs its normal claude call within the timeout.
 
     Given The darmok plugin gen-from-existing goal claude /rgr-green command is hung until killed
      When The darmok plugin gen-from-existing goal is executed and succeeds with
-          | MaxClaudeSeconds | MaxTimeoutAttempts |
-          | 1                | 2                  |
+          | MaxClaudeSeconds | MaxTimeoutAttempts | GreenFullPathsEnabled |
+          | 1                | 2                  | true                  |
      Then The code-prj project darmok.mojo.log file will be as follows
           | Level | Category | Content                                                  |
           | INFO  | mojo     | Green: Running...                                        |
@@ -41,9 +43,9 @@ Feature: Phase Timeout
           | INFO  | mojo     | Green: Verify running...                                 |
           | INFO  | mojo     | Refactor: Running...                                     |
       And The code-prj project darmok.runners.log file will be as follows
-          | Level | Category | Content                                                                                                                                                    |
-          | DEBUG | runner   | Executing: claude --print --session-id 00000000-0000-0000-0000-000000000001 --dangerously-skip-permissions --model opus /rgr-green code-prj loginHappyPath |
-          | DEBUG | runner   | Running: mvn clean install                                                                                                                                 |
+          | Level | Category | Content                                                                                                                                                                                                                                                                                                                                                                      |
+          | DEBUG | runner   | Executing: claude --print --session-id 00000000-0000-0000-0000-000000000001 --dangerously-skip-permissions --model opus /rgr-green target/darmok-test/sheep-dog-svc/code-prj loginHappyPathTest target/darmok-test/sheep-dog-svc/code-prj/log.txt target/darmok-test/sheep-dog-svc/code-prj/target/site/jacoco-with-tests target/darmok-test/sheep-dog-svc/code-prj/site/uml |
+          | DEBUG | runner   | Running: mvn clean install                                                                                                                                                                                                                                                                                                                                                   |
 
   Scenario: Green killed, install fails, resumed claude fixes it
 
@@ -127,8 +129,9 @@ Feature: Phase Timeout
 
   Scenario: Claude process exits but stdout stays open, reader-side timeout fires
 
-    Covers issue 290. The claude subprocess signals exit promptly (`process.waitFor` returns true within the budget) but a grandchild keeps the stdout pipe open past `maxClaudeSeconds`. Without a bounded wait on the stdout-reader thread, the main thread would sit in `readerThread.join()` for the grandchild's full runtime. The bounded `readerThread.join(maxClaudeSeconds * 1000L)` forces the reader half of `executeCommand` to honour the same budget as the process-handle half ? on timeout we `destroyForcibly()` to release the pipe and treat the call as a timeout, so the phase runs the normal install-check recovery.
+    Covers issue 290. The claude subprocess signals exit promptly (`process.waitFor` returns true within the budget) but a grandchild keeps the stdout pipe open past `maxClaudeSeconds`. Without a bounded wait on the stdout-reader thread, the main thread would sit in `readerThread.join()` for the grandchild's full runtime. The bounded `readerThread.join(maxClaudeSeconds
 
+        * 1000L)` forces the reader half of `executeCommand` to honour the same budget as the process-handle half ? on timeout we `destroyForcibly()` to release the pipe and treat the call as a timeout, so the phase runs the normal install-check recovery.
     Given The darmok plugin gen-from-existing goal claude /rgr-green command is exited but its stdout stays open
      When The darmok plugin gen-from-existing goal is executed and succeeds with
           | MaxClaudeSeconds | MaxTimeoutAttempts |
