@@ -1,0 +1,53 @@
+File: Darmok/Phase Verification
+  Scenario: Green verify passes on the first attempt
+    Tag: GH183
+
+File: Darmok/Gen From Comparison
+  Scenario: Comparison skill runs, then the normal RGR cycle completes
+    Tag: GH183
+
+File: Darmok/Claude Retry Loop Session ID
+  Scenario: Green initial call carries the injected session ID
+    Tag: GH183
+  Scenario: Green verify-fail resume reuses the captured session ID
+    Tag: GH183
+
+File: Darmok/Phase Timeout
+  Scenario: Green claude killed and install passes, refactor unaffected
+    Tag: GH183
+  Scenario: Green killed, install fails, resumed claude fixes it
+    Tag: GH183
+
+File: Darmok/Refactor Session Mode
+  Scenario: Continue mode runs compact then starts refactor on green session
+    Tag: GH183
+  Scenario: Continue mode refactor verify-fail resume stays on green session
+    Tag: GH183
+
+File: Darmok/Commit Behavior Full Cycle
+  Scenario: Red fails, green and refactor succeed, one commit per phase
+    Tag: GH183
+  Scenario: Red fails, green and refactor succeed, single combined commit
+    Tag: GH183
+  Scenario: Refactor allowlist runs before scenarios-list mod under stage true
+    Tag: GH183
+  Scenario: Scenarios-list deletion survives refactor allowlist gate under stage true
+    Tag: GH183
+
+File: Darmok/Directory Allowlist
+  Scenario: Green allowlist passes on the first attempt
+    Tag: GH183
+  Scenario: Refactor allowlist passes on the first attempt
+    Tag: GH183
+  Scenario: Green allowlist fails once then succeeds after revert and resume
+    Tag: GH183
+  Scenario: Green allowlist fails for every attempt
+    Tag: GH183
+  Scenario: Refactor allowlist fails once then succeeds after revert and resume
+    Tag: GH183
+  Scenario: Refactor allowlist fails for every attempt
+    Tag: GH183
+  Scenario: Green allowlist passes when an extra path is added via allowlistAdditionalPaths
+    Tag: GH183
+  Scenario: Green allowlist fails when allowlistBasePaths narrows below default
+    Tag: GH183
