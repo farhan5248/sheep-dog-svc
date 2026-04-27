@@ -1,3 +1,0 @@
-File: Darmok/Directory Allowlist
-  Scenario: Green allowlist fails when allowlistBasePaths narrows below default
-    Tag: GH183

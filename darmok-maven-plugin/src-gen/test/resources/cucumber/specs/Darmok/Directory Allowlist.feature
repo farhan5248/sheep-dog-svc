@@ -181,10 +181,25 @@ Feature: Directory Allowlist
           | INFO  | mojo     | Green: Allowlist check passed, proceeding |
           | INFO  | mojo     | Green: Verify running...                  |
 
+  @GH183
   Scenario: Green allowlist fails when allowlistBasePaths narrows below default
 
+    \@GH183
     The project tightens the base allowlist to `src/main/java/` only, dropping the `src/test/java/org/farhan/impl/` entry from the default.
-    Claude's green call writes to a path that
+    Claude's green call writes to a path that *was* allowed under the default base but is no longer ? the gate now flags it as a violation, reverts it, and resumes the session with the standard correction message.
+    After the second attempt the same write recurs and the loop exhausts.
+    This pins down that `allowlistBasePaths` is not additive on top of the default ? it *replaces* the default base, so narrowing below the default tightens behavior immediately.
 
-        * was* allowed under the default base but is no longer ? the gate now flags it as a violation, reverts it, and resumes the session with the standard correction message.
+    Given The darmok plugin gen-from-existing goal claude command is executed and succeeds with
+          | Command Parameters                                                                                                                                                                                                                                   | Path                                                  |
+          | /rgr-green target/darmok-test/sheep-dog-svc/code-prj loginHappyPathTest target/darmok-test/sheep-dog-svc/code-prj/log.txt target/darmok-test/sheep-dog-svc/code-prj/target/site/jacoco-with-tests target/darmok-test/sheep-dog-svc/code-prj/site/uml | src/test/java/org/farhan/impl/LoginHappyPathImpl.java |
+     When The darmok plugin gen-from-existing goal is executed but fails with
+          | AllowlistBasePaths | GreenFullPathsEnabled |
+          | src/main/java/     | true                  |
+     Then The code-prj project darmok.mojo.log file will be as follows with this failure
+          | Level | Category | Content                                                                                                                          |
+          | INFO  | mojo     | Green: Allowlist check running...                                                                                                |
+          | WARN  | mojo     | Green: Allowlist violation (attempt 1/2), reverting src/test/java/org/farhan/impl/LoginHappyPathImpl.java and resuming claude... |
+          | INFO  | mojo     | Green: Allowlist check running...                                                                                                |
+          | ERROR | mojo     | Green: Allowlist check failed after 2 attempts, aborting                                                                         |
 
