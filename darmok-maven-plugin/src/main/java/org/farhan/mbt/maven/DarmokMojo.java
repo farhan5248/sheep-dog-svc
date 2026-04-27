@@ -423,28 +423,40 @@ public abstract class DarmokMojo extends AbstractMojo {
 				commitIfChanged("run-rgr red " + scenarioName, "Red");
 			}
 
-			state = greenPhase.run(state);
-			if (state.exitCode != 0) {
-				throw new MojoExecutionException("rgr-green failed with exit code " + state.exitCode);
-			}
+			try {
+				state = greenPhase.run(state);
+				if (state.exitCode != 0) {
+					throw new MojoExecutionException("rgr-green failed with exit code " + state.exitCode);
+				}
 
-			git.run(baseDir, "add", ".");
-			if (!stage) {
-				commitIfChanged("run-rgr green " + scenarioName, "Green");
-			}
+				git.run(baseDir, "add", ".");
+				if (!stage) {
+					commitIfChanged("run-rgr green " + scenarioName, "Green");
+				}
 
-			refactorPhase.prepareSession(greenPhase.claude);
-			state = refactorPhase.run(state);
-			if (state.exitCode != 0) {
-				throw new MojoExecutionException("rgr-refactor failed with exit code " + state.exitCode);
-			}
+				refactorPhase.prepareSession(greenPhase.claude);
+				state = refactorPhase.run(state);
+				if (state.exitCode != 0) {
+					throw new MojoExecutionException("rgr-refactor failed with exit code " + state.exitCode);
+				}
 
-			removeFirstScenarioFromFile();
-			git.run(baseDir, "add", ".");
-			if (stage) {
-				amendIfChanged("Refactor");
-			} else {
-				commitIfChanged("run-rgr refactor " + scenarioName, "Refactor");
+				removeFirstScenarioFromFile();
+				git.run(baseDir, "add", ".");
+				if (stage) {
+					amendIfChanged("Refactor");
+				} else {
+					commitIfChanged("run-rgr refactor " + scenarioName, "Refactor");
+				}
+			} catch (MojoExecutionException e) {
+				// Green or refactor failed after red committed. Capture
+				// red's commit SHA and write the metrics row with whatever
+				// durations were captured (zeros for unreached phases)
+				// before propagating the exception.
+				state.commit = git.getCurrentCommit(baseDir);
+				mojoLog.info("  Commit: " + state.commit);
+				state.totalDurationMs = System.currentTimeMillis() - totalStart;
+				metrics.append(state);
+				throw e;
 			}
 		}
 
