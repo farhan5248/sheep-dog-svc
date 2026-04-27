@@ -1,6 +1,4 @@
 File: Darmok/Commit Behavior Full Cycle
-  Scenario: Refactor allowlist runs before scenarios-list mod under stage true
-    Tag: GH183
   Scenario: Scenarios-list deletion survives refactor allowlist gate under stage true
     Tag: GH183
 

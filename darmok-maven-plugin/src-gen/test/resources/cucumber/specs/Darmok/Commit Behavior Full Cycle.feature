@@ -106,3 +106,28 @@ Feature: Commit Behavior Full Cycle
           | DEBUG | runner   | Running: git add .                                                                                                                                                                                                                                                                                                                                                             |
           | DEBUG | runner   | Running: git commit --amend --no-edit                                                                                                                                                                                                                                                                                                                                          |
 
+  @GH183
+  Scenario: Refactor allowlist runs before scenarios-list mod under stage true
+
+    \@GH183
+    Pins down the issue The corollary observable lives in the runner log line order ? `Running: git status --porcelain` for the refactor phase appears before refactor's `Running: git add .` (which captures both refactor's claude output and the deferred scenarios-list delta into the same staged commit). Both logs are asserted because the mojo log proves the gate's outcome and the runner log proves the relative ordering of the gate, the scenarios-list-driven staging, and the amend.
+
+     When The darmok plugin gen-from-existing goal is executed and succeeds with
+          | Stage | ModelGreen | ModelRefactor | GreenFullPathsEnabled |
+          | true  | sonnet     | sonnet        | true                  |
+     Then The code-prj project src/main/java/org/farhan/objects/LoginHappyPath.java file will be present
+      And The code-prj project scenarios-list.txt file will be empty
+      And The code-prj project darmok.mojo.log file will be as follows
+          | Level | Category | Content                                      |
+          | INFO  | mojo     | Green: Allowlist check running...            |
+          | INFO  | mojo     | Green: Allowlist check passed, proceeding    |
+          | INFO  | mojo     | Refactor: Allowlist check running...         |
+          | INFO  | mojo     | Refactor: Allowlist check passed, proceeding |
+          | INFO  | mojo     | Refactor: Committing                         |
+      And The code-prj project darmok.runners.log file will be as follows
+          | Level | Category | Content                                                                                                                                                |
+          | DEBUG | runner   | Executing: claude --resume 00000000-0000-0000-0000-000000000001 --print --dangerously-skip-permissions --model sonnet /rgr-refactor forward darmok-prj |
+          | DEBUG | runner   | Running: git status --porcelain                                                                                                                        |
+          | DEBUG | runner   | Running: git add .                                                                                                                                     |
+          | DEBUG | runner   | Running: git commit --amend --no-edit                                                                                                                  |
+
