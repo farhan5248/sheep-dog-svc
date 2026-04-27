@@ -161,18 +161,20 @@ Feature: Directory Allowlist
           | INFO  | mojo     | Refactor: Allowlist check running...                                                  |
           | ERROR | mojo     | Refactor: Allowlist check failed after 2 attempts, aborting                           |
 
+  @GH183
   Scenario: Green allowlist passes when an extra path is added via allowlistAdditionalPaths
 
+    \@GH183
     The base allowlist stays at its default (`src/main/java/`, `src/test/java/org/farhan/impl/`); the project extends it with `allowlistAdditionalPaths=src/test/resources/mojo-defaults.properties` so the green claude session can edit that one file too.
     The motivating case from issue 314: on issue 311 the new `claudeSessionIdEnabled` default value had to be added to `mojo-defaults.properties`, but that path was outside the legacy hardcoded allowlist and Darmok exhausted on the violation.
     With the additional path declared, the same write passes the allowlist gate first try ? no violation log line, no revert, no resume.
 
     Given The darmok plugin gen-from-existing goal claude command is executed and succeeds with
-          | Command Parameters                 | Path                                        |
-          | /rgr-green code-prj loginHappyPath | src/test/resources/mojo-defaults.properties |
+          | Command Parameters                                                                                                                                                                                                                                   | Path                                        |
+          | /rgr-green target/darmok-test/sheep-dog-svc/code-prj loginHappyPathTest target/darmok-test/sheep-dog-svc/code-prj/log.txt target/darmok-test/sheep-dog-svc/code-prj/target/site/jacoco-with-tests target/darmok-test/sheep-dog-svc/code-prj/site/uml | src/test/resources/mojo-defaults.properties |
      When The darmok plugin gen-from-existing goal is executed and succeeds with
-          | AllowlistAdditionalPaths                    |
-          | src/test/resources/mojo-defaults.properties |
+          | AllowlistAdditionalPaths                    | GreenFullPathsEnabled |
+          | src/test/resources/mojo-defaults.properties | true                  |
      Then The code-prj project darmok.mojo.log file will be as follows
           | Level | Category | Content                                   |
           | INFO  | mojo     | Green: Allowlist check running...         |
