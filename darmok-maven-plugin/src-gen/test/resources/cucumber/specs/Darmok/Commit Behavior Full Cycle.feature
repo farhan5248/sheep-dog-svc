@@ -67,3 +67,42 @@ Feature: Commit Behavior Full Cycle
           | DEBUG | runner   | Running: git add .                                                                                                                                                                                                                                                                                                                                                             |
           | DEBUG | runner   | Running: git commit -m run-rgr refactor User logs in successfully                                                                                                                                                                                                                                                                                                              |
 
+  @GH183
+  Scenario: Red fails, green and refactor succeed, single combined commit
+
+    \@GH183
+    With `stage` set to true, Darmok produces one commit per scenario with a `run-rgr <scenario>` message ? unchanged as an observable outcome.
+    Internally the shape shifts per issue 141: red commits first (with the stage-combined message), green skips its commit, and refactor amends red's commit with `git commit --amend --no-edit`.
+    This way the working tree between phases is never polluted with accumulated red+green+refactor output ? each phase's downstream gates (allowlist, verify) see only that phase's delta.
+    A `Red: Committing` marker now appears in the mojo log; `Green: Committing` is still absent because green does not commit under staged mode; `Refactor: Committing` logs the amend.
+
+     When The darmok plugin gen-from-existing goal is executed and succeeds with
+          | Stage | ModelGreen | ModelRefactor | GreenFullPathsEnabled |
+          | true  | sonnet     | sonnet        | true                  |
+     Then The code-prj project src/main/java/org/farhan/objects/LoginHappyPath.java file will be present
+      And The code-prj project scenarios-list.txt file will be empty
+      And The code-prj project darmok.mojo.log file will be as follows
+          | Level | Category | Content                                                                       |
+          | INFO  | mojo     | RGR Automation Plugin (gen-from-existing)                                     |
+          | INFO  | mojo     | Processing Scenario: ProcessDarmok/User logs in successfully [loginHappyPath] |
+          | DEBUG | mojo     | Added tag @loginHappyPath to file                                             |
+          | INFO  | mojo     | Red: Running maven...                                                         |
+          | INFO  | mojo     | Red: Committing                                                               |
+          | INFO  | mojo     | Green: Running...                                                             |
+          | INFO  | mojo     | Refactor: Running...                                                          |
+          | INFO  | mojo     | Refactor: Committing                                                          |
+          | INFO  | mojo     | RGR Automation Complete!                                                      |
+          | INFO  | mojo     | Total scenarios processed: 1                                                  |
+      And The code-prj project darmok.runners.log file will be as follows
+          | Level | Category | Content                                                                                                                                                                                                                                                                                                                                                                        |
+          | DEBUG | runner   | Running: mvn org.farhan:sheep-dog-svc-maven-plugin:asciidoctor-to-uml -Dtags=loginHappyPath -Dhost=qa.sheepdog.io -DonlyChanges=false                                                                                                                                                                                                                                          |
+          | DEBUG | runner   | Running: mvn org.farhan:sheep-dog-svc-maven-plugin:uml-to-cucumber-guice -Dtags=loginHappyPath -Dhost=qa.sheepdog.io -DonlyChanges=false                                                                                                                                                                                                                                       |
+          | DEBUG | runner   | Running: mvn test -Dtest=loginHappyPathTest                                                                                                                                                                                                                                                                                                                                    |
+          | DEBUG | runner   | Running: git add .                                                                                                                                                                                                                                                                                                                                                             |
+          | DEBUG | runner   | Running: git commit -m run-rgr User logs in successfully                                                                                                                                                                                                                                                                                                                       |
+          | DEBUG | runner   | Executing: claude --print --session-id 00000000-0000-0000-0000-000000000001 --dangerously-skip-permissions --model sonnet /rgr-green target/darmok-test/sheep-dog-svc/code-prj loginHappyPathTest target/darmok-test/sheep-dog-svc/code-prj/log.txt target/darmok-test/sheep-dog-svc/code-prj/target/site/jacoco-with-tests target/darmok-test/sheep-dog-svc/code-prj/site/uml |
+          | DEBUG | runner   | Running: git add .                                                                                                                                                                                                                                                                                                                                                             |
+          | DEBUG | runner   | Executing: claude --resume 00000000-0000-0000-0000-000000000001 --print --dangerously-skip-permissions --model sonnet /rgr-refactor forward darmok-prj                                                                                                                                                                                                                         |
+          | DEBUG | runner   | Running: git add .                                                                                                                                                                                                                                                                                                                                                             |
+          | DEBUG | runner   | Running: git commit --amend --no-edit                                                                                                                                                                                                                                                                                                                                          |
+
