@@ -33,9 +33,9 @@ Feature: Phase Verification
           | INFO  | mojo     | Green: Verify running... |
           | INFO  | mojo     | Refactor: Running...     |
       And The code-prj project darmok.runners.log file will be as follows
-          | Level | Category | Content                                                                                                                                                                                                                                                                                                                                                                      |
-          | DEBUG | runner   | Executing: claude --print --session-id 00000000-0000-0000-0000-000000000001 --dangerously-skip-permissions --model opus /rgr-green target/darmok-test/sheep-dog-svc/code-prj loginHappyPathTest target/darmok-test/sheep-dog-svc/code-prj/log.txt target/darmok-test/sheep-dog-svc/code-prj/target/site/jacoco-with-tests target/darmok-test/sheep-dog-svc/code-prj/site/uml |
-          | DEBUG | runner   | Running: mvn clean verify                                                                                                                                                                                                                                                                                                                                                    |
+          | Level | Category | Content                                                                                                                                                                                   |
+          | DEBUG | runner   | Executing: claude --print --session-id 00000000-0000-0000-0000-000000000001 --dangerously-skip-permissions --model opus @target/darmok-test/sheep-dog-svc/code-prj/target/darmok/green.md |
+          | DEBUG | runner   | Running: mvn clean verify                                                                                                                                                                 |
 
   Scenario: Refactor verify passes on the first attempt
 

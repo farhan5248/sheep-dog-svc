@@ -41,9 +41,9 @@ Feature: Phase Timeout
           | INFO  | mojo     | Green: Verify running...                                 |
           | INFO  | mojo     | Refactor: Running...                                     |
       And The code-prj project darmok.runners.log file will be as follows
-          | Level | Category | Content                                                                                                                                                                                                                                                                                                                                                                      |
-          | DEBUG | runner   | Executing: claude --print --session-id 00000000-0000-0000-0000-000000000001 --dangerously-skip-permissions --model opus /rgr-green target/darmok-test/sheep-dog-svc/code-prj loginHappyPathTest target/darmok-test/sheep-dog-svc/code-prj/log.txt target/darmok-test/sheep-dog-svc/code-prj/target/site/jacoco-with-tests target/darmok-test/sheep-dog-svc/code-prj/site/uml |
-          | DEBUG | runner   | Running: mvn clean install                                                                                                                                                                                                                                                                                                                                                   |
+          | Level | Category | Content                                                                                                                                                                                   |
+          | DEBUG | runner   | Executing: claude --print --session-id 00000000-0000-0000-0000-000000000001 --dangerously-skip-permissions --model opus @target/darmok-test/sheep-dog-svc/code-prj/target/darmok/green.md |
+          | DEBUG | runner   | Running: mvn clean install                                                                                                                                                                |
 
   Scenario: Green killed, install fails, resumed claude fixes it
 
@@ -64,11 +64,11 @@ Feature: Phase Timeout
           | INFO  | mojo     | Green: Install passed, proceeding                          |
           | INFO  | mojo     | Green: Verify running...                                   |
       And The code-prj project darmok.runners.log file will be as follows
-          | Level | Category | Content                                                                                                                                                                                                                                                                                                                                                                      |
-          | DEBUG | runner   | Executing: claude --print --session-id 00000000-0000-0000-0000-000000000001 --dangerously-skip-permissions --model opus /rgr-green target/darmok-test/sheep-dog-svc/code-prj loginHappyPathTest target/darmok-test/sheep-dog-svc/code-prj/log.txt target/darmok-test/sheep-dog-svc/code-prj/target/site/jacoco-with-tests target/darmok-test/sheep-dog-svc/code-prj/site/uml |
-          | DEBUG | runner   | Running: mvn clean install                                                                                                                                                                                                                                                                                                                                                   |
-          | DEBUG | runner   | Executing: claude --resume 00000000-0000-0000-0000-000000000001 --print --dangerously-skip-permissions --model opus pls continue                                                                                                                                                                                                                                             |
-          | DEBUG | runner   | Running: mvn clean install                                                                                                                                                                                                                                                                                                                                                   |
+          | Level | Category | Content                                                                                                                                                                                   |
+          | DEBUG | runner   | Executing: claude --print --session-id 00000000-0000-0000-0000-000000000001 --dangerously-skip-permissions --model opus @target/darmok-test/sheep-dog-svc/code-prj/target/darmok/green.md |
+          | DEBUG | runner   | Running: mvn clean install                                                                                                                                                                |
+          | DEBUG | runner   | Executing: claude --resume 00000000-0000-0000-0000-000000000001 --print --dangerously-skip-permissions --model opus pls continue                                                          |
+          | DEBUG | runner   | Running: mvn clean install                                                                                                                                                                |
 
   Scenario: Green timeouts exhaust max attempts
 

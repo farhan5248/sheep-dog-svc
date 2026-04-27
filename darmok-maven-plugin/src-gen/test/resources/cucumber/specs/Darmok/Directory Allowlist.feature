@@ -40,9 +40,9 @@ Feature: Directory Allowlist
           | INFO  | mojo     | Green: Allowlist check passed, proceeding |
           | INFO  | mojo     | Green: Verify running...                  |
       And The code-prj project darmok.runners.log file will be as follows
-          | Level | Category | Content                                                                                                                                                                                                                                                                                                                                                                      |
-          | DEBUG | runner   | Executing: claude --print --session-id 00000000-0000-0000-0000-000000000001 --dangerously-skip-permissions --model opus /rgr-green target/darmok-test/sheep-dog-svc/code-prj loginHappyPathTest target/darmok-test/sheep-dog-svc/code-prj/log.txt target/darmok-test/sheep-dog-svc/code-prj/target/site/jacoco-with-tests target/darmok-test/sheep-dog-svc/code-prj/site/uml |
-          | DEBUG | runner   | Running: git status --porcelain                                                                                                                                                                                                                                                                                                                                              |
+          | Level | Category | Content                                                                                                                                                                                   |
+          | DEBUG | runner   | Executing: claude --print --session-id 00000000-0000-0000-0000-000000000001 --dangerously-skip-permissions --model opus @target/darmok-test/sheep-dog-svc/code-prj/target/darmok/green.md |
+          | DEBUG | runner   | Running: git status --porcelain                                                                                                                                                           |
 
   @GH141
   Scenario: Refactor allowlist passes on the first attempt
@@ -71,8 +71,8 @@ Feature: Directory Allowlist
     Exactly one green commit is made ? it captures the allowlist-clean output from the resumed claude session.
 
     Given The darmok plugin gen-from-existing goal claude command is executed and succeeds with
-          | Command Parameters                                                                                                                                                                                                                                   | Attempt | Path    |
-          | /rgr-green target/darmok-test/sheep-dog-svc/code-prj loginHappyPathTest target/darmok-test/sheep-dog-svc/code-prj/log.txt target/darmok-test/sheep-dog-svc/code-prj/target/site/jacoco-with-tests target/darmok-test/sheep-dog-svc/code-prj/site/uml | 1       | pom.xml |
+          | Command Parameters                                                | Attempt | Path    |
+          | @target/darmok-test/sheep-dog-svc/code-prj/target/darmok/green.md | 1       | pom.xml |
      When The darmok plugin gen-from-existing goal is executed and succeeds
      Then The code-prj project darmok.mojo.log file will be as follows
           | Level | Category | Content                                                                            |
@@ -82,12 +82,12 @@ Feature: Directory Allowlist
           | INFO  | mojo     | Green: Allowlist check passed, proceeding                                          |
           | INFO  | mojo     | Green: Verify running...                                                           |
       And The code-prj project darmok.runners.log file will be as follows
-          | Level | Category | Content                                                                                                                                                                                                                                                                                                                                                                      |
-          | DEBUG | runner   | Executing: claude --print --session-id 00000000-0000-0000-0000-000000000001 --dangerously-skip-permissions --model opus /rgr-green target/darmok-test/sheep-dog-svc/code-prj loginHappyPathTest target/darmok-test/sheep-dog-svc/code-prj/log.txt target/darmok-test/sheep-dog-svc/code-prj/target/site/jacoco-with-tests target/darmok-test/sheep-dog-svc/code-prj/site/uml |
-          | DEBUG | runner   | Running: git status --porcelain                                                                                                                                                                                                                                                                                                                                              |
-          | DEBUG | runner   | Running: git checkout HEAD -- pom.xml                                                                                                                                                                                                                                                                                                                                        |
-          | DEBUG | runner   | Executing: claude --resume 00000000-0000-0000-0000-000000000001 --print --dangerously-skip-permissions --model opus only modify files under src/main/java or src/test/java/org/farhan/impl                                                                                                                                                                                   |
-          | DEBUG | runner   | Running: git status --porcelain                                                                                                                                                                                                                                                                                                                                              |
+          | Level | Category | Content                                                                                                                                                                                    |
+          | DEBUG | runner   | Executing: claude --print --session-id 00000000-0000-0000-0000-000000000001 --dangerously-skip-permissions --model opus @target/darmok-test/sheep-dog-svc/code-prj/target/darmok/green.md  |
+          | DEBUG | runner   | Running: git status --porcelain                                                                                                                                                            |
+          | DEBUG | runner   | Running: git checkout HEAD -- pom.xml                                                                                                                                                      |
+          | DEBUG | runner   | Executing: claude --resume 00000000-0000-0000-0000-000000000001 --print --dangerously-skip-permissions --model opus only modify files under src/main/java or src/test/java/org/farhan/impl |
+          | DEBUG | runner   | Running: git status --porcelain                                                                                                                                                            |
 
   @GH141
   Scenario: Green allowlist fails for every attempt
@@ -97,8 +97,8 @@ Feature: Directory Allowlist
     The goal fails with an exception naming the phase and attempt count, the refactor phase is never reached, and no green commit is made.
 
     Given The darmok plugin gen-from-existing goal claude command is executed and succeeds with
-          | Command Parameters                                                                                                                                                                                                                                   | Path    |
-          | /rgr-green target/darmok-test/sheep-dog-svc/code-prj loginHappyPathTest target/darmok-test/sheep-dog-svc/code-prj/log.txt target/darmok-test/sheep-dog-svc/code-prj/target/site/jacoco-with-tests target/darmok-test/sheep-dog-svc/code-prj/site/uml | pom.xml |
+          | Command Parameters                                                | Path    |
+          | @target/darmok-test/sheep-dog-svc/code-prj/target/darmok/green.md | pom.xml |
      When The darmok plugin gen-from-existing goal is executed but fails
      Then The code-prj project darmok.mojo.log file will be as follows with this failure
           | Level | Category | Content                                                                            |
@@ -156,8 +156,8 @@ Feature: Directory Allowlist
     With the additional path declared, the same write passes the allowlist gate first try ? no violation log line, no revert, no resume.
 
     Given The darmok plugin gen-from-existing goal claude command is executed and succeeds with
-          | Command Parameters                                                                                                                                                                                                                                   | Path                                        |
-          | /rgr-green target/darmok-test/sheep-dog-svc/code-prj loginHappyPathTest target/darmok-test/sheep-dog-svc/code-prj/log.txt target/darmok-test/sheep-dog-svc/code-prj/target/site/jacoco-with-tests target/darmok-test/sheep-dog-svc/code-prj/site/uml | src/test/resources/mojo-defaults.properties |
+          | Command Parameters                                                | Path                                        |
+          | @target/darmok-test/sheep-dog-svc/code-prj/target/darmok/green.md | src/test/resources/mojo-defaults.properties |
      When The darmok plugin gen-from-existing goal is executed and succeeds with
           | AllowlistAdditionalPaths                    |
           | src/test/resources/mojo-defaults.properties |
@@ -175,8 +175,8 @@ Feature: Directory Allowlist
     This pins down that `allowlistBasePaths` is not additive on top of the default ? it *replaces* the default base, so narrowing below the default tightens behavior immediately.
 
     Given The darmok plugin gen-from-existing goal claude command is executed and succeeds with
-          | Command Parameters                                                                                                                                                                                                                                   | Path                                                  |
-          | /rgr-green target/darmok-test/sheep-dog-svc/code-prj loginHappyPathTest target/darmok-test/sheep-dog-svc/code-prj/log.txt target/darmok-test/sheep-dog-svc/code-prj/target/site/jacoco-with-tests target/darmok-test/sheep-dog-svc/code-prj/site/uml | src/test/java/org/farhan/impl/LoginHappyPathImpl.java |
+          | Command Parameters                                                | Path                                                  |
+          | @target/darmok-test/sheep-dog-svc/code-prj/target/darmok/green.md | src/test/java/org/farhan/impl/LoginHappyPathImpl.java |
      When The darmok plugin gen-from-existing goal is executed but fails with
           | AllowlistBasePaths |
           | src/main/java/     |

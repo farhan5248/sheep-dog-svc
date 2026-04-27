@@ -56,6 +56,8 @@ public interface GenFromExistingGoal {
 
     public void setGitBranch(HashMap<String, String> keyMap);
 
+    public void setGreenPromptTemplateEnabled(HashMap<String, String> keyMap);
+
     public void setMaxClaudeSeconds(HashMap<String, String> keyMap);
 
     public void setMaxTimeoutAttempts(HashMap<String, String> keyMap);
@@ -115,6 +117,4 @@ public interface GenFromExistingGoal {
     public void setMvnUmlToCucumberGuiceCommandExit(HashMap<String, String> keyMap);
 
     public void setMvnUmlToCucumberGuiceCommandOutput(HashMap<String, String> keyMap);
-
-    public void setGreenPromptTemplateEnabled(HashMap<String, String> keyMap);
 }
