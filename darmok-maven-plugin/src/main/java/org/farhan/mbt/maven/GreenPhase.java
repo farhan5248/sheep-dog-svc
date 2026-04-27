@@ -4,12 +4,16 @@ import java.util.List;
 
 public class GreenPhase extends RgrPhase {
 
+	private final boolean greenPromptTemplateEnabled;
+
 	public GreenPhase(ClaudeRunner claude, MavenRunner maven, GitRunner git, DarmokMojoLog mojoLog,
 			String workingDir, String targetDir, String artifactId,
 			int maxVerifyAttempts, int maxTimeoutAttempts, int maxClaudeSeconds,
-			int maxAllowlistAttempts, List<String> allowlistPaths) {
+			int maxAllowlistAttempts, List<String> allowlistPaths,
+			boolean greenPromptTemplateEnabled) {
 		super(claude, maven, git, mojoLog, workingDir, targetDir, artifactId,
 			maxVerifyAttempts, maxTimeoutAttempts, maxClaudeSeconds, maxAllowlistAttempts, allowlistPaths);
+		this.greenPromptTemplateEnabled = greenPromptTemplateEnabled;
 	}
 
 	@Override

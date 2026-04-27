@@ -194,7 +194,8 @@ public class FakeProcessStarter implements ProcessStarter {
 			return new FakeProcess("", 0);
 		}
 
-		if (joined.contains("claude") && cmd.stream().anyMatch(a -> a.startsWith("/rgr-green"))) {
+		if (joined.contains("claude") && cmd.stream().anyMatch(a ->
+				a.startsWith("/rgr-green") || (a.startsWith("@") && a.endsWith("green.md")))) {
 			greenCalls++;
 			currentPhase = "green";
 			if ("exits-reader-blocked".equals(claudeGreenHangMode)) {
