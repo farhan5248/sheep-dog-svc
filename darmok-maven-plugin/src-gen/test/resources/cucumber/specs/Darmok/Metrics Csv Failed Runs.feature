@@ -44,3 +44,20 @@ Feature: Metrics Csv Failed Runs
           | Timestamp | GitBranch | Commit                                   | Scenario                  | PhaseRedMs   | PhaseGreenMs | PhaseRefactorMs | PhaseTotalMs |
           | Timestamp | Rebuild30 | abc1234567890abcdef1234567890abcdef12345 | User logs in successfully | Milliseconds | Milliseconds | 0               | Milliseconds |
 
+  @GH329
+  Scenario: Refactor failure still records a metrics row with red SHA
+
+    \@GH329
+    Refactor-phase verify exhausts after `maxVerifyAttempts`. Red and green both completed, so both their durations are clocked; refactor ran partially, so its column carries whatever was clocked before the abort.
+    Under `stage=true` (default) refactor would have amended red's commit on success ? on failure no amend fires, so red's original SHA is what `Commit` carries.
+
+    Given The darmok plugin gen-from-existing goal mvn clean verify command is executed but fails for all attempts
+          | Phase    |
+          | Refactor |
+     When The darmok plugin gen-from-existing goal is executed but fails with
+          | GitBranch |
+          | Rebuild30 |
+     Then The code-prj project metrics.csv file will be as follows
+          | Timestamp | GitBranch | Commit                                   | Scenario                  | PhaseRedMs   | PhaseGreenMs | PhaseRefactorMs | PhaseTotalMs |
+          | Timestamp | Rebuild30 | abc1234567890abcdef1234567890abcdef12345 | User logs in successfully | Milliseconds | Milliseconds | Milliseconds    | Milliseconds |
+
