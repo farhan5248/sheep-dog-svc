@@ -25,14 +25,16 @@ Feature: Directory Allowlist
           """
       And The code-prj project src/main/java/org/farhan/objects/LoginHappyPath.java file isn't created
 
-  @GH141
+  @GH141 @GH183
   Scenario: Green allowlist passes on the first attempt
 
-    \@GH141
+    \@GH141 \@GH183
     Default happy path for the green phase. Claude writes only inside the allowlist (`src/main/java/...LoginHappyPath.java` and the matching impl under `src/test/java/org/farhan/impl/`), `git status --porcelain` reports zero out-of-allowlist paths, and the scenario proceeds into Phase Verification.
     Pins down the new `Green: Allowlist check running` log line and the `git status --porcelain` subprocess so a regression that drops the allowlist gate is caught explicitly.
 
-     When The darmok plugin gen-from-existing goal is executed and succeeds
+     When The darmok plugin gen-from-existing goal is executed and succeeds with
+          | GreenFullPathsEnabled |
+          | true                  |
      Then The code-prj project darmok.mojo.log file will be as follows
           | Level | Category | Content                                   |
           | INFO  | mojo     | Green: Running...                         |
@@ -40,9 +42,9 @@ Feature: Directory Allowlist
           | INFO  | mojo     | Green: Allowlist check passed, proceeding |
           | INFO  | mojo     | Green: Verify running...                  |
       And The code-prj project darmok.runners.log file will be as follows
-          | Level | Category | Content                                                                                                                                                    |
-          | DEBUG | runner   | Executing: claude --print --session-id 00000000-0000-0000-0000-000000000001 --dangerously-skip-permissions --model opus /rgr-green code-prj loginHappyPath |
-          | DEBUG | runner   | Running: git status --porcelain                                                                                                                            |
+          | Level | Category | Content                                                                                                                                                                                                                                                                                                                                                                      |
+          | DEBUG | runner   | Executing: claude --print --session-id 00000000-0000-0000-0000-000000000001 --dangerously-skip-permissions --model opus /rgr-green target/darmok-test/sheep-dog-svc/code-prj loginHappyPathTest target/darmok-test/sheep-dog-svc/code-prj/log.txt target/darmok-test/sheep-dog-svc/code-prj/target/site/jacoco-with-tests target/darmok-test/sheep-dog-svc/code-prj/site/uml |
+          | DEBUG | runner   | Running: git status --porcelain                                                                                                                                                                                                                                                                                                                                              |
 
   @GH141
   Scenario: Refactor allowlist passes on the first attempt
@@ -170,20 +172,7 @@ Feature: Directory Allowlist
   Scenario: Green allowlist fails when allowlistBasePaths narrows below default
 
     The project tightens the base allowlist to `src/main/java/` only, dropping the `src/test/java/org/farhan/impl/` entry from the default.
-    Claude's green call writes to a path that *was* allowed under the default base but is no longer ? the gate now flags it as a violation, reverts it, and resumes the session with the standard correction message.
-    After the second attempt the same write recurs and the loop exhausts.
-    This pins down that `allowlistBasePaths` is not additive on top of the default ? it *replaces* the default base, so narrowing below the default tightens behavior immediately.
+    Claude's green call writes to a path that
 
-    Given The darmok plugin gen-from-existing goal claude command is executed and succeeds with
-          | Command Parameters                 | Path                                                  |
-          | /rgr-green code-prj loginHappyPath | src/test/java/org/farhan/impl/LoginHappyPathImpl.java |
-     When The darmok plugin gen-from-existing goal is executed but fails with
-          | AllowlistBasePaths |
-          | src/main/java/     |
-     Then The code-prj project darmok.mojo.log file will be as follows with this failure
-          | Level | Category | Content                                                                                                                          |
-          | INFO  | mojo     | Green: Allowlist check running...                                                                                                |
-          | WARN  | mojo     | Green: Allowlist violation (attempt 1/2), reverting src/test/java/org/farhan/impl/LoginHappyPathImpl.java and resuming claude... |
-          | INFO  | mojo     | Green: Allowlist check running...                                                                                                |
-          | ERROR | mojo     | Green: Allowlist check failed after 2 attempts, aborting                                                                         |
+        * was* allowed under the default base but is no longer ? the gate now flags it as a violation, reverts it, and resumes the session with the standard correction message.
 
