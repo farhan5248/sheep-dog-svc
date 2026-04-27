@@ -75,6 +75,18 @@ public String getContent(HashMap<String, String> keyMap) {
 }
 ```
 
+**Example: Structured-file column delegation (MetricsCsvFileImpl)**
+
+Each column getter delegates to a `DarmokMojoMetrics` matcher cached on the TestObject property bag — the impl does not reinterpret the column value. A column written as the literal string `0` (e.g. `phase_refactor_ms` on a green-failure row, where refactor never ran) round-trips as `"0"` and the spec asserts `0` directly. A column written as a non-zero millisecond count round-trips as a numeric string and the spec asserts `Milliseconds` (the `[0-9]+` TestState placeholder). The impl never decides between the two — that's the writer's job. Issue 329.
+
+```java
+@Override
+public String getPhaseRefactorMs(HashMap<String, String> keyMap) {
+    DarmokMojoMetrics metrics = (DarmokMojoMetrics) getProperty("metrics");
+    return metrics.matchAndGetPhaseRefactorMs(keyMap);
+}
+```
+
 ### set{StateDesc}
 
 Mutates state or triggers action. Goal impls buffer parameters, construct the per-command fakes (`ClaudeRunnerFake` / `MavenRunnerFake` / `GitRunnerFake`) from the accumulated properties, then call `executeMojo`. File impls delegate to `createOrDeleteFile(path)` (respects the `stateType` property — creates for `is created`, deletes for `isn't created`) or `writeFile(path, content)`.
