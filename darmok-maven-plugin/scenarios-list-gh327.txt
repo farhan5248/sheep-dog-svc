@@ -1,3 +1,0 @@
-File: Darmok/Directory Allowlist
-  Scenario: Non-matching scenarios-list-shaped file is treated as a violation
-    Tag: GH327
