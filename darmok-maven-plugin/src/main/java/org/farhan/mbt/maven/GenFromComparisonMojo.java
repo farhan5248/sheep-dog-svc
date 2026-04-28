@@ -35,7 +35,7 @@ public class GenFromComparisonMojo extends DarmokMojo {
 
 	private int runGenFromComparison() throws Exception {
 		Claude runner = makeClaudeRunner(modelComparison);
-		return runClaudeWithRetry(runnerLog, maxRetries, retryWaitSeconds,
+		return runClaudeWithRetry(runnerLog, mojoLog, maxRetries, retryWaitSeconds,
 			outputLines -> runner.run(sheepDogRoot, outputLines, "/rgr-gen-from-comparison " + artifactId));
 	}
 }

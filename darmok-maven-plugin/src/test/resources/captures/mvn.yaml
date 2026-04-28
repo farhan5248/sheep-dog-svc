@@ -47,6 +47,9 @@ mvn-14:
 mvn-15:
   in: "mvn.cmd test -Dtest=logoutHappyPathTest"
   out: { exit: 0, stdout: "BUILD SUCCESS" }
+mvn-16:
+  in: "mvn.cmd test -Dtest=logoutHappyPathTest"
+  out: { exit: 1, stdout: "tests failing: impl class missing" }
 
 # Scenario paths (one entry per scenario that exercises this command).
 paths:
@@ -67,6 +70,7 @@ paths:
   "Claude retries on overloaded then succeeds": [mvn-1, mvn-3, mvn-4, mvn-5, mvn-6, mvn-6]
   "Commit SHA is recorded after RGR phases complete": [mvn-1, mvn-3, mvn-4, mvn-5, mvn-6, mvn-6]
   "Comparison skill runs, then the normal RGR cycle completes": [mvn-1, mvn-3, mvn-4, mvn-5, mvn-6, mvn-6]
+  "Each scenario gets its own session ID": [mvn-1, mvn-3, mvn-4, mvn-5, mvn-6, mvn-6, mvn-13, mvn-14, mvn-16, mvn-6, mvn-6]
   "Continue mode refactor verify-fail resume stays on green session": [mvn-1, mvn-3, mvn-4, mvn-5, mvn-6, mvn-7, mvn-6]
   "Continue mode runs compact then starts refactor on green session": [mvn-1, mvn-3, mvn-4, mvn-5, mvn-6, mvn-6]
   "Green allowlist fails for every attempt": [mvn-1, mvn-3, mvn-4, mvn-5]
@@ -80,6 +84,7 @@ paths:
   "Green phase invokes claude with rendered template path": [mvn-1, mvn-3, mvn-4, mvn-5, mvn-6, mvn-6]
   "Green timeouts exhaust max attempts": [mvn-1, mvn-3, mvn-4, mvn-5, mvn-2, mvn-2]
   "Green failure still records a metrics row with red SHA": [mvn-1, mvn-3, mvn-4, mvn-5, mvn-7, mvn-7, mvn-7]
+  "Mojo log surfaces error reason on non-retryable failure": [mvn-1, mvn-3, mvn-4, mvn-5]
   "Refactor failure still records a metrics row with red SHA": [mvn-1, mvn-3, mvn-4, mvn-5, mvn-6, mvn-7, mvn-7, mvn-7]
   "Green verify fails for every attempt": [mvn-1, mvn-3, mvn-4, mvn-5, mvn-7, mvn-7, mvn-7]
   "Green verify fails once then succeeds after resume": [mvn-1, mvn-3, mvn-4, mvn-5, mvn-7, mvn-6, mvn-6]

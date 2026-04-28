@@ -58,3 +58,17 @@ Feature: Claude Retry Loop Non-Retryable
           | Level | Category | Content                         |
           | DEBUG | runner   | Claude CLI exited with code 130 |
 
+  Scenario: Mojo log surfaces error reason on non-retryable failure
+
+    A non-retryable claude failure (exit non-zero, no retryable-pattern match) used to leave the user-facing mojo log with a bare `Green: Completed` line and no diagnostic ? the actual failure reason only landed in the runner log, which the operator then had to dig through.
+    The mojo log now gets an ERROR-level line carrying claude's last stdout, so the diagnostic surfaces immediately.
+    The trigger here is the session-id-already-in-use error that prompted issue 337, but the surfacing applies to every non-retryable claude failure.
+
+    Given The darmok plugin gen-from-existing goal claude /rgr-green command is executed but fails with
+          | Exit | Output                                                                    |
+          | 1    | Error: Session ID 00000000-0000-0000-0000-000000000001 is already in use. |
+     When The darmok plugin gen-from-existing goal is executed but fails
+     Then The code-prj project darmok.mojo.log file will be as follows with this failure
+          | Level | Category | Content                                                                                           |
+          | ERROR | mojo     | Claude failed (exit 1): Error: Session ID 00000000-0000-0000-0000-000000000001 is already in use. |
+

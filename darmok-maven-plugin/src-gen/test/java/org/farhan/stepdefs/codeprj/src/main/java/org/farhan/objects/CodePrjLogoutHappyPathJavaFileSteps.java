@@ -14,4 +14,9 @@ public class CodePrjLogoutHappyPathJavaFileSteps extends TestSteps {
     public void isCreated() {
         object.setVertexStep("", "", "is", "created");
     }
+
+    @Given("^The code-prj project src/main/java/org/farhan/objects/LogoutHappyPath.java file isn't created$")
+    public void isntCreated() {
+        object.setVertexStep("", "", "isn't", "created");
+    }
 }

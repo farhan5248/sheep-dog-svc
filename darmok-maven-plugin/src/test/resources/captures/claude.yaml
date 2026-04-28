@@ -102,6 +102,20 @@ claude-28:
   out: { exit: 0, blocked_reader: true }
   after:
     - { write: "src/main/java/org/farhan/objects/LoginHappyPath.java", content: "placeholder" }
+claude-29:
+  in: "claude.cmd --print --session-id 00000000-0000-0000-0000-000000000002 --dangerously-skip-permissions --model opus @target/darmok-test/sheep-dog-svc/code-prj/target/darmok/green.md"
+  out: { exit: 0 }
+  after:
+    - { write: "src/main/java/org/farhan/objects/LogoutHappyPath.java", content: "placeholder" }
+claude-30:
+  in: "claude.cmd --resume 00000000-0000-0000-0000-000000000002 --print --dangerously-skip-permissions --model opus /compact"
+  out: { exit: 0 }
+claude-31:
+  in: "claude.cmd --resume 00000000-0000-0000-0000-000000000002 --print --dangerously-skip-permissions --model opus /rgr-refactor forward code-prj"
+  out: { exit: 0 }
+claude-32:
+  in: "claude.cmd --print --session-id 00000000-0000-0000-0000-000000000001 --dangerously-skip-permissions --model opus @target/darmok-test/sheep-dog-svc/code-prj/target/darmok/green.md"
+  out: { exit: 1, stdout: "Error: Session ID 00000000-0000-0000-0000-000000000001 is already in use." }
 
 # Scenario paths (one entry per scenario that exercises this command).
 paths:
@@ -119,6 +133,7 @@ paths:
   "Claude retries on overloaded then succeeds": [claude-11, claude-6, claude-7, claude-8]
   "Commit SHA is recorded after RGR phases complete": [claude-6, claude-7, claude-8]
   "Comparison skill runs, then the normal RGR cycle completes": [claude-18, claude-19, claude-20, claude-21]
+  "Each scenario gets its own session ID": [claude-6, claude-7, claude-8, claude-29, claude-30, claude-31]
   "Continue mode refactor verify-fail resume stays on green session": [claude-6, claude-7, claude-8, claude-13]
   "Continue mode runs compact then starts refactor on green session": [claude-6, claude-7, claude-8]
   "Green allowlist fails for every attempt": [claude-6, claude-17]
@@ -132,6 +147,7 @@ paths:
   "Green phase invokes claude with rendered template path": [claude-6, claude-7, claude-8]
   "Green timeouts exhaust max attempts": [claude-23, claude-25]
   "Green failure still records a metrics row with red SHA": [claude-6, claude-13, claude-13]
+  "Mojo log surfaces error reason on non-retryable failure": [claude-32]
   "Refactor failure still records a metrics row with red SHA": [claude-6, claude-7, claude-8, claude-13, claude-13]
   "Green verify fails for every attempt": [claude-6, claude-13, claude-13]
   "Green verify fails once then succeeds after resume": [claude-6, claude-13, claude-7, claude-8]

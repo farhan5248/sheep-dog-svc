@@ -50,12 +50,12 @@ public abstract class RgrPhase {
 	}
 
 	protected int runClaudeWithRetry(String wd, String... args) throws Exception {
-		return DarmokMojo.runClaudeWithRetry(runnerLog, maxRetries, retryWaitSeconds,
+		return DarmokMojo.runClaudeWithRetry(runnerLog, mojoLog, maxRetries, retryWaitSeconds,
 			outputLines -> claude.run(wd, outputLines, args));
 	}
 
 	protected int resumeClaudeWithRetry(String wd, String message) throws Exception {
-		return DarmokMojo.runClaudeWithRetry(runnerLog, maxRetries, retryWaitSeconds,
+		return DarmokMojo.runClaudeWithRetry(runnerLog, mojoLog, maxRetries, retryWaitSeconds,
 			outputLines -> claude.resume(wd, outputLines, message));
 	}
 

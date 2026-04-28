@@ -224,8 +224,8 @@ public abstract class DarmokMojo extends AbstractMojo {
 	 * the Mojo layer (and is mirrored by {@link RgrPhase}'s instance wrappers
 	 * for phase callers).
 	 */
-	protected static int runClaudeWithRetry(Log log, int maxRetries, int retryWaitSeconds, ClaudeCall call)
-			throws Exception {
+	protected static int runClaudeWithRetry(Log log, DarmokMojoLog mojoLog,
+			int maxRetries, int retryWaitSeconds, ClaudeCall call) throws Exception {
 		int exitCode = -1;
 		for (int attempt = 1; attempt <= maxRetries; attempt++) {
 			if (attempt > 1) {
@@ -252,6 +252,12 @@ public abstract class DarmokMojo extends AbstractMojo {
 					log.error("Max retries (" + maxRetries + ") exhausted");
 				}
 				log.debug("Claude CLI exited with code " + exitCode);
+				// Surface the failure reason on the user-facing mojo log so the
+				// operator doesn't have to dig through the runner log to find
+				// what claude actually said. Issue 337.
+				String lastLine = outputLines.isEmpty() ? "no output"
+					: outputLines.get(outputLines.size() - 1);
+				mojoLog.error("Claude failed (exit " + exitCode + "): " + lastLine);
 				return exitCode;
 			}
 		}
@@ -396,6 +402,14 @@ public abstract class DarmokMojo extends AbstractMojo {
 			removeFirstScenarioFromFile();
 			return;
 		}
+
+		// Reset cached session-ids — green and refactor ClaudeRunner instances
+		// are constructed once in init() and reused across scenarios. Without
+		// this reset the prior scenario's UUID is re-emitted on the next
+		// initial claude --print call, which the real CLI rejects with
+		// "Session ID <uuid> is already in use." Issue 337.
+		greenPhase.claude.setSessionId(null);
+		refactorPhase.claude.setSessionId(null);
 
 		// Add tag to asciidoc file
 		addTagToAsciidoc(fileName, scenarioName, tag);
