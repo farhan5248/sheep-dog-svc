@@ -179,7 +179,14 @@ public class DarmokMojoLog extends DarmokMojoFile<DarmokMojoLog.LogEntry> implem
 
 	public String matchAndGetContent(HashMap<String, String> keyMap) {
 		ensureMatched(keyMap);
-		return lastMatch != null ? normalizeCommandExtensions(lastMatch.content()) : null;
+		if (lastMatch == null) {
+			return null;
+		}
+		String expectedContent = keyMap.get("Content");
+		if (expectedContent != null && expectedContent.contains("(Any)")) {
+			return expectedContent;
+		}
+		return normalizeCommandExtensions(lastMatch.content());
 	}
 
 	@Override
@@ -204,7 +211,13 @@ public class DarmokMojoLog extends DarmokMojoFile<DarmokMojoLog.LogEntry> implem
 		if ("Any".equals(expected)) {
 			return true;
 		}
-		return expected.trim().equals(normalizeCommandExtensions(actual.trim()));
+		String normalizedExpected = expected.trim();
+		String normalizedActual = normalizeCommandExtensions(actual.trim());
+		if (normalizedExpected.contains("(Any)")) {
+			String regex = Pattern.quote(normalizedExpected).replace("(Any)", "\\E.*\\Q");
+			return normalizedActual.matches(regex);
+		}
+		return normalizedExpected.equals(normalizedActual);
 	}
 
 	private static String normalizeCommandExtensions(String s) {

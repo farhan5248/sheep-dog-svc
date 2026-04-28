@@ -144,7 +144,11 @@ public abstract class RgrPhase {
 			}
 			if (attempt < maxVerifyAttempts) {
 				mojoLog.warn("  " + name + ": Verify failed (attempt " + attempt + "/" + maxVerifyAttempts + "), resuming claude...");
+				mojoLog.info("  " + name + ": Running...");
+				long resumeStart = System.currentTimeMillis();
 				resumeClaudeWithRetry(workingDir, VERIFY_RESUME_MESSAGE);
+				long resumeDuration = System.currentTimeMillis() - resumeStart;
+				mojoLog.info("  " + name + ": Completed (" + DarmokMojoState.formatDuration(resumeDuration) + ")");
 			}
 		}
 		mojoLog.error("  " + name + ": Verify failed after " + maxVerifyAttempts + " attempts, aborting");
@@ -168,7 +172,11 @@ public abstract class RgrPhase {
 				for (String path : violations) {
 					git.run(targetDir, "checkout", "HEAD", "--", path);
 				}
+				mojoLog.info("  " + name + ": Running...");
+				long resumeStart = System.currentTimeMillis();
 				resumeClaudeWithRetry(workingDir, allowlistResumeMessage());
+				long resumeDuration = System.currentTimeMillis() - resumeStart;
+				mojoLog.info("  " + name + ": Completed (" + DarmokMojoState.formatDuration(resumeDuration) + ")");
 			}
 		}
 		mojoLog.error("  " + name + ": Allowlist check failed after " + maxAllowlistAttempts + " attempts, aborting");

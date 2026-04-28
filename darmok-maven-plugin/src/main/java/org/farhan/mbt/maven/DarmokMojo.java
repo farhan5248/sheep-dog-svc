@@ -333,7 +333,11 @@ public abstract class DarmokMojo extends AbstractMojo {
 		if (!baselineVerifyEnabled) {
 			return;
 		}
+		mojoLog.info("Baseline: Running maven...");
+		long start = System.currentTimeMillis();
 		int exit = maven.run(baseDir, "clean", "install");
+		long duration = System.currentTimeMillis() - start;
+		mojoLog.info("Baseline: Completed maven (" + DarmokMojoState.formatDuration(duration) + ")");
 		if (exit != 0) {
 			String msg = "Baseline build failed. Aborting.";
 			mojoLog.error(msg);

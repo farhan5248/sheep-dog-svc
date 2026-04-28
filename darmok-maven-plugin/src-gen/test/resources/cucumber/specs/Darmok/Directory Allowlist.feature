@@ -187,3 +187,35 @@ Feature: Directory Allowlist
           | INFO  | mojo     | Green: Allowlist check running...                                                                                                |
           | ERROR | mojo     | Green: Allowlist check failed after 2 attempts, aborting                                                                         |
 
+  Scenario: Green allowlist retry brackets the resume call with Running and Completed lines
+
+    Issue 335: when an allowlist violation triggers `claude --resume`, the mojo log brackets the resume invocation with `Green: Running...` / `Green: Completed (<duration>)` ? same shape as the initial phase-entry pair. Visibility for how long the corrective claude run took. The bracket only fires on the recover transition; an exhausted loop has no resume call.
+
+    Given The darmok plugin gen-from-existing goal claude command is executed and succeeds with
+          | Command Parameters                                                | Attempt | Path    |
+          | @target/darmok-test/sheep-dog-svc/code-prj/target/darmok/green.md | 1       | pom.xml |
+     When The darmok plugin gen-from-existing goal is executed and succeeds
+     Then The code-prj project darmok.mojo.log file will be as follows
+          | Level | Category | Content                                                                            |
+          | WARN  | mojo     | Green: Allowlist violation (attempt 1/2), reverting pom.xml and resuming claude... |
+          | INFO  | mojo     | Green: Running...                                                                  |
+          | INFO  | mojo     | Green: Completed (Any)                                                             |
+          | INFO  | mojo     | Green: Allowlist check running...                                                  |
+          | INFO  | mojo     | Green: Allowlist check passed, proceeding                                          |
+
+  Scenario: Refactor allowlist retry brackets the resume call with Running and Completed lines
+
+    Issue 335: symmetric with the green-phase recovery case. Proves the resume bracket is phase-parametric and not bolted to green.
+
+    Given The darmok plugin gen-from-existing goal claude command is executed and succeeds with
+          | Command Parameters             | Attempt | Path    |
+          | /rgr-refactor forward code-prj | 1       | pom.xml |
+     When The darmok plugin gen-from-existing goal is executed and succeeds
+     Then The code-prj project darmok.mojo.log file will be as follows
+          | Level | Category | Content                                                                               |
+          | WARN  | mojo     | Refactor: Allowlist violation (attempt 1/2), reverting pom.xml and resuming claude... |
+          | INFO  | mojo     | Refactor: Running...                                                                  |
+          | INFO  | mojo     | Refactor: Completed (Any)                                                             |
+          | INFO  | mojo     | Refactor: Allowlist check running...                                                  |
+          | INFO  | mojo     | Refactor: Allowlist check passed, proceeding                                          |
+
