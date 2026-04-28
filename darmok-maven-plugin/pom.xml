@@ -275,7 +275,7 @@
 			<plugin>
 				<groupId>org.farhan</groupId>
 				<artifactId>darmok-maven-plugin</artifactId>
-				<version>1.29</version>
+				<version>1.30</version>
 				<configuration>
 					<svcMavenPluginGoal>uml-to-cucumber-spring</svcMavenPluginGoal>
 				</configuration>
