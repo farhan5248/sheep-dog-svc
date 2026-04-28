@@ -26,10 +26,8 @@ Feature: Metrics Csv Failed Runs
           | Command Parameters          | GitBranch |
           | rev-parse --abbrev-ref HEAD | Rebuild30 |
 
-  @GH329
   Scenario: Green failure still records a metrics row with red SHA
 
-    \@GH329
     Green-phase verify exhausts after `maxVerifyAttempts` and `processScenario` throws.
     Red has already committed `run-rgr <scenario>` so red's SHA is captured on the state object the moment that commit lands; the failure path writes the metrics row before propagating the exception.
     Refactor never ran, so its column is 0; green ran partially, so its column carries whatever was clocked.
@@ -44,10 +42,8 @@ Feature: Metrics Csv Failed Runs
           | Timestamp | GitBranch | Commit                                   | Scenario                  | PhaseRedMs   | PhaseGreenMs | PhaseRefactorMs | PhaseTotalMs |
           | Timestamp | Rebuild30 | abc1234567890abcdef1234567890abcdef12345 | User logs in successfully | Milliseconds | Milliseconds | 0               | Milliseconds |
 
-  @GH329
   Scenario: Refactor failure still records a metrics row with red SHA
 
-    \@GH329
     Refactor-phase verify exhausts after `maxVerifyAttempts`. Red and green both completed, so both their durations are clocked; refactor ran partially, so its column carries whatever was clocked before the abort.
     Under `stage=true` (default) refactor would have amended red's commit on success ? on failure no amend fires, so red's original SHA is what `Commit` carries.
 

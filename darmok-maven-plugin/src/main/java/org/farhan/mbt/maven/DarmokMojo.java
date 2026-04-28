@@ -448,25 +448,20 @@ public abstract class DarmokMojo extends AbstractMojo {
 					commitIfChanged("run-rgr refactor " + scenarioName, "Refactor");
 				}
 			} catch (MojoExecutionException e) {
-				// Green or refactor failed after red committed. Capture
-				// red's commit SHA and write the metrics row with whatever
-				// durations were captured (zeros for unreached phases)
-				// before propagating the exception.
-				state.commit = git.getCurrentCommit(baseDir);
-				mojoLog.info("  Commit: " + state.commit);
-				state.totalDurationMs = System.currentTimeMillis() - totalStart;
-				metrics.append(state);
+				// Green or refactor failed after red committed. Write the
+				// metrics row with whatever durations were captured (zeros
+				// for unreached phases) before propagating the exception.
+				recordMetrics(state, totalStart);
 				throw e;
 			}
 		}
 
-		// Capture the HEAD commit AFTER all scenario commits have been made.
-		// This is the commit this scenario produced (stage=true single commit,
-		// stage=false refactor commit, or the skip-path red commit). The metric
-		// row is attributable to this commit.
+		recordMetrics(state, totalStart);
+	}
+
+	private void recordMetrics(DarmokMojoState state, long totalStart) throws Exception {
 		state.commit = git.getCurrentCommit(baseDir);
 		mojoLog.info("  Commit: " + state.commit);
-
 		state.totalDurationMs = System.currentTimeMillis() - totalStart;
 		metrics.append(state);
 	}

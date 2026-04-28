@@ -14,8 +14,8 @@ call mvn org.farhan:darmok-maven-plugin:gen-from-existing ^
     -DmaxAllowlistAttempts="2" ^
     -DbaselineVerifyEnabled="false" ^
     -DgitBranch="main" ^
-    -DmodelRefactor="opus" ^
-    -DmodelGreen="opus" ^
+    -DmodelRefactor="sonnet" ^
+    -DmodelGreen="sonnet" ^
     -DmaxClaudeSeconds="720" ^
     -DallowlistAdditionalPaths="scenarios-list-gh%1%.txt,src/test/java/org/farhan/fake/,src/test/resources/captures/" ^
     -DscenariosFile="scenarios-list-gh%1%.txt"
