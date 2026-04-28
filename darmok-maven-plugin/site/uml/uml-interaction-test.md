@@ -59,6 +59,8 @@ public String getLevel(HashMap<String, String> keyMap) {
 }
 ```
 
+Issue 335 added new bracket lines to `darmok.mojo.log` (`Baseline: Running maven...` / `Baseline: Completed maven (<duration>)` around the baseline mvn call, plus `<phase>: Running...` / `<phase>: Completed (<duration>)` around the allowlist-resume and verify-resume `claude --resume` calls). The new lines are asserted via the same `getLevel` / `getCategory` / `getContent` columns shown above — no new impl methods, no new fakes, no new state. The `(Any)` cell in the new Test-Cases delegates to `DarmokMojoLog`'s existing `Any`-wildcard match path (see `matches` in `DarmokMojoLog.findNext`), so duration values aren't pinned down by the spec.
+
 **Example: File state delegation (ScenariosListTxtFileImpl)**
 ```java
 @Override
