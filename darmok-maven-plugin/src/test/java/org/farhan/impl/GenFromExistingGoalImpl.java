@@ -336,4 +336,15 @@ public class GenFromExistingGoalImpl extends MavenTestObject implements GenFromE
 		setProperty("svcMavenPluginGoal", keyMap.get("SvcMavenPluginGoal"));
 	}
 
+	@Override
+	public void setScenariosFile(HashMap<String, String> keyMap) {
+		String newName = keyMap.get("ScenariosFile");
+		setProperty("scenariosFile", newName);
+		String basePath = getProperty("code-prj.componentPath") + "/";
+		String content = getFileContent(basePath + "scenarios-list.txt");
+		if (content != null) {
+			writeFile(basePath + newName, content);
+		}
+	}
+
 }

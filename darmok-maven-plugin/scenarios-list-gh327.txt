@@ -1,5 +1,3 @@
 File: Darmok/Directory Allowlist
-  Scenario: Active scenarios-list file is allowlisted automatically
-    Tag: GH327
   Scenario: Non-matching scenarios-list-shaped file is treated as a violation
     Tag: GH327

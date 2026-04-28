@@ -139,6 +139,7 @@ paths:
   "Green allowlist fails for every attempt": [claude-6, claude-17]
   "Green allowlist fails once then succeeds after revert and resume": [claude-6, claude-17, claude-7, claude-8]
   "Green allowlist fails when allowlistBasePaths narrows below default": [claude-6, claude-17]
+  "Active scenarios-list file is allowlisted automatically": [claude-6, claude-7, claude-8]
   "Green allowlist passes on the first attempt": [claude-6, claude-7, claude-8]
   "Green allowlist passes when an extra path is added via allowlistAdditionalPaths": [claude-6, claude-7, claude-8]
   "Green claude killed and install passes, refactor unaffected": [claude-22, claude-7, claude-8]

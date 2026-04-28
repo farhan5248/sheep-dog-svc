@@ -181,6 +181,9 @@ public abstract class DarmokMojo extends AbstractMojo {
 			? targetProject : project.getArtifactId();
 		uuidSupplier = () -> UUID.randomUUID().toString();
 		List<String> effectiveAllowlist = parseAllowlist(allowlistBasePaths, allowlistAdditionalPaths);
+		if (scenariosFile != null && !scenariosFile.isEmpty()) {
+			effectiveAllowlist.add(scenariosFile);
+		}
 		Git phaseGit = gitRunnerFactory.create(runnerLog);
 		redPhase = new RedPhase(maven, mojoLog, baseDir, specsDir, host, onlyChanges, svcMavenPluginGoal);
 		greenPhase = new GreenPhase(
