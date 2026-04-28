@@ -265,12 +265,12 @@
 			<plugin>
 				<groupId>org.farhan</groupId>
 				<artifactId>sheep-dog-svc-maven-plugin</artifactId>
-				<version>1.20</version>
+				<version>1.23</version>
 			</plugin>
 			<plugin>
 				<groupId>org.farhan</groupId>
 				<artifactId>sheep-dog-mgmt-maven-plugin</artifactId>
-				<version>1.45</version>
+				<version>1.46</version>
 			</plugin>
 			<plugin>
 				<groupId>org.farhan</groupId>
