@@ -34,6 +34,17 @@ public abstract class CommandFake {
 	private static final Map<String, Map<String, List<String>>> PATHS = new ConcurrentHashMap<>();
 	private static final Map<String, Integer> INDICES = new ConcurrentHashMap<>();
 
+	/**
+	 * Clear per-scenario replay cursors. Called between Cucumber scenarios so a
+	 * same-named scenario re-run across suite runners (multi-tag scenarios in a
+	 * single JVM) starts each path from index 0 rather than picking up the
+	 * exhausted cursor from the previous run. Catalog and path maps are
+	 * load-once YAML caches and are not cleared.
+	 */
+	public static void resetIndices() {
+		INDICES.clear();
+	}
+
 	private final Path codePrjBaseDir;
 	private final String scenarioName;
 	private final FakeRunnerState state;

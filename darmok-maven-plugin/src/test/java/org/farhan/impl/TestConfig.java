@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+import org.farhan.common.CommandFake;
 import org.farhan.common.SourceFileRepository;
 import org.farhan.common.TestObject;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -52,6 +53,7 @@ public class TestConfig {
 	@Before
 	public void resetTestProject(Scenario scenario) throws Exception {
 		TestObject.reset();
+		CommandFake.resetIndices();
 		new SourceFileRepository(SCENARIO_ROOT.toString()).clear("");
 		Path codePrjDir = SCENARIO_ROOT.resolve("sheep-dog-svc").resolve("code-prj");
 		Path specPrjDir = SCENARIO_ROOT.resolve("spec-prj");
