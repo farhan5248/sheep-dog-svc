@@ -245,3 +245,22 @@ Feature: Directory Allowlist
           | INFO  | mojo     | Green: Allowlist check passed, proceeding |
           | INFO  | mojo     | Green: Verify running...                  |
 
+  @GH327
+  Scenario: Non-matching scenarios-list-shaped file is treated as a violation
+
+    \@GH327
+    Only the configured `scenariosFile` value is auto-allowlisted. Any other scenarios-list-shaped path that surfaces in `git status --porcelain` is still a violation. Pins down that the auto-add is exact-value, not pattern-based ? a stale `scenarios-list-gh<other>.txt` left over from a prior run won't sneak past the gate. Issue 327.
+
+    Given The darmok plugin gen-from-existing goal claude command is executed and succeeds with
+          | Command Parameters                                                | Path                     |
+          | @target/darmok-test/sheep-dog-svc/code-prj/target/darmok/green.md | scenarios-list-gh999.txt |
+     When The darmok plugin gen-from-existing goal is executed but fails with
+          | ScenariosFile            |
+          | scenarios-list-gh327.txt |
+     Then The code-prj project darmok.mojo.log file will be as follows with this failure
+          | Level | Category | Content                                                                                             |
+          | INFO  | mojo     | Green: Allowlist check running...                                                                   |
+          | WARN  | mojo     | Green: Allowlist violation (attempt 1/2), reverting scenarios-list-gh999.txt and resuming claude... |
+          | INFO  | mojo     | Green: Allowlist check running...                                                                   |
+          | ERROR | mojo     | Green: Allowlist check failed after 2 attempts, aborting                                            |
+

@@ -82,6 +82,7 @@ paths:
   "Green allowlist fails for every attempt": [mvn-1, mvn-3, mvn-4, mvn-5]
   "Green allowlist fails once then succeeds after revert and resume": [mvn-1, mvn-3, mvn-4, mvn-5, mvn-6, mvn-6]
   "Green allowlist fails when allowlistBasePaths narrows below default": [mvn-1, mvn-3, mvn-4, mvn-5]
+  "Non-matching scenarios-list-shaped file is treated as a violation": [mvn-1, mvn-3, mvn-4, mvn-5]
   "Active scenarios-list file is allowlisted automatically": [mvn-1, mvn-3, mvn-4, mvn-5, mvn-6, mvn-6]
   "Green allowlist passes on the first attempt": [mvn-1, mvn-3, mvn-4, mvn-5, mvn-6, mvn-6]
   "Green allowlist passes when an extra path is added via allowlistAdditionalPaths": [mvn-1, mvn-3, mvn-4, mvn-5, mvn-6, mvn-6]

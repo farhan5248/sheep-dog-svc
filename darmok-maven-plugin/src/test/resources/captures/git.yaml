@@ -65,6 +65,12 @@ git-20:
 git-21:
   in: "git status --porcelain"
   out: { exit: 0, stdout: " M scenarios-list-gh327.txt" }
+git-22:
+  in: "git status --porcelain"
+  out: { exit: 0, stdout: " M scenarios-list-gh999.txt" }
+git-23:
+  in: "git checkout HEAD -- scenarios-list-gh999.txt"
+  out: { exit: 0 }
 
 # Scenario paths (one entry per scenario that exercises this command).
 paths:
@@ -99,6 +105,7 @@ paths:
   "Green allowlist fails once then succeeds after revert and resume": [git-1, git-2, git-3, git-4, git-13, git-14, git-5, git-2, git-5, git-2, git-3, git-6, git-7]
   "Green allowlist fails when allowlistBasePaths narrows below default": [git-1, git-2, git-3, git-4, git-16, git-17, git-16]
   "Active scenarios-list file is allowlisted automatically": [git-1, git-2, git-3, git-4, git-21, git-2, git-5, git-2, git-3, git-6, git-7]
+  "Non-matching scenarios-list-shaped file is treated as a violation": [git-1, git-2, git-3, git-4, git-22, git-23, git-22]
   "Green allowlist passes on the first attempt": [git-1, git-2, git-3, git-4, git-5, git-2, git-5, git-2, git-3, git-6, git-7]
   "Green allowlist passes when an extra path is added via allowlistAdditionalPaths": [git-1, git-2, git-3, git-4, git-15, git-2, git-5, git-2, git-3, git-6, git-7]
   "Green claude killed and install passes, refactor unaffected": [git-1, git-2, git-3, git-4, git-5, git-2, git-5, git-2, git-3, git-6, git-7]
