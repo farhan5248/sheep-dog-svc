@@ -135,6 +135,7 @@ paths:
   "The asciidoctor-to-uml command fails": [mvn-1, mvn-10, mvn-4, mvn-5, mvn-6, mvn-6]
   "The asciidoctor-to-uml command fails non-retryably": [mvn-1, mvn-10]
   "The uml-to-cucumber-guice command fails non-retryably": [mvn-1, mvn-3, mvn-11]
+  "Uml-to-cucumber-guice exhausts retries on Service-not-available": [mvn-1, mvn-3, mvn-18, mvn-18, mvn-18]
   "Uml-to-cucumber-guice retries on Service-not-available then succeeds": [mvn-1, mvn-3, mvn-18, mvn-4, mvn-5, mvn-6, mvn-6]
   "The generated runner class fails to compile": [mvn-1, mvn-3, mvn-4, mvn-12, mvn-6, mvn-6]
   "The matching test-case is the last in the file with no body": [mvn-1, mvn-3, mvn-4, mvn-8]

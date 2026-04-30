@@ -92,6 +92,11 @@ public class GenFromExistingGoalImpl extends MavenTestObject implements GenFromE
 	}
 
 	@Override
+	public void setMvnUmlToCucumberGuiceCommandExecutedButFailsWith(HashMap<String, String> keyMap) {
+		setProperty("mvnUmlToCucumberMode", "fail");
+	}
+
+	@Override
 	public void setMvnUmlToCucumberGuiceCommandExit(HashMap<String, String> keyMap) {
 		setProperty("mvnUmlToCucumberExit", keyMap.get("Exit"));
 	}

@@ -77,3 +77,27 @@ Feature: Red Phase Maven Retry
           | DEBUG | runner   | Retry attempt 2 of 3...                                           |
           | DEBUG | runner   | Maven CLI completed successfully                                  |
 
+  @GH349
+  Scenario: Uml-to-cucumber-guice exhausts retries on Service-not-available
+
+    \@GH349
+    Same exhaustion shape as the asciidoctor-to-uml case, applied to the second red-phase maven goal. Asciidoctor-to-uml succeeds; uml-to-cucumber-guice fails on every attempt up to `maxRetries`; the goal aborts with `rgr-red failed`.
+
+    Given The darmok plugin gen-from-existing goal mvn uml-to-cucumber-guice command is executed but fails with
+          | Pattern                                                     |
+          | Service did not become available within 300000 milliseconds |
+     When The darmok plugin gen-from-existing goal is executed but fails
+     Then The code-prj project darmok.runners.log file will be as follows with this failure
+          | Level | Category | Content                                                           |
+          | ERROR | runner   | Retryable error detected: Service did not become available within |
+          | ERROR | runner   | Max retries (3) exhausted                                         |
+          | DEBUG | runner   | Maven CLI exited with code 1                                      |
+      And The code-prj project darmok.mojo.log file will be as follows with this failure
+          | Level | Category | Content                                                                            |
+          | ERROR | mojo     | Maven failed (exit 1): Service did not become available within 300000 milliseconds |
+      And The code-prj project darmok.mojo.log file won't be as follows
+          | Level | Category | Content                  |
+          | INFO  | mojo     | Green: Running...        |
+          | INFO  | mojo     | Refactor: Running...     |
+          | INFO  | mojo     | RGR Automation Complete! |
+
