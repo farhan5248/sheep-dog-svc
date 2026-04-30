@@ -119,6 +119,7 @@ claude-32:
 
 # Scenario paths (one entry per scenario that exercises this command).
 paths:
+  "Asciidoctor-to-uml retries on Service-not-available then succeeds": [claude-14, claude-15, claude-16]
   "Claude exhausts retries on API Error 500": [claude-5, claude-5, claude-5]
   "Claude exhausts retries on API Error 529": [claude-9, claude-9, claude-9]
   "Claude exhausts retries on Internal server error": [claude-10, claude-10, claude-10]

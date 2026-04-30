@@ -185,7 +185,7 @@ public abstract class DarmokMojo extends AbstractMojo {
 			effectiveAllowlist.add(scenariosFile);
 		}
 		Git phaseGit = gitRunnerFactory.create(runnerLog);
-		redPhase = new RedPhase(maven, mojoLog, runnerLog, baseDir, specsDir, host, onlyChanges, svcMavenPluginGoal);
+		redPhase = new RedPhase(maven, mojoLog, runnerLog, baseDir, specsDir, host, onlyChanges, svcMavenPluginGoal, maxRetries, retryWaitSeconds);
 		greenPhase = new GreenPhase(
 			makeClaudeRunner(modelGreen),
 			maven, phaseGit, mojoLog, runnerLog, sheepDogRoot, baseDir, artifactId, maxVerifyAttempts, maxTimeoutAttempts, maxClaudeSeconds,

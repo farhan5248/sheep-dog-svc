@@ -50,10 +50,14 @@ mvn-15:
 mvn-16:
   in: "mvn.cmd test -Dtest=logoutHappyPathTest"
   out: { exit: 1, stdout: "tests failing: impl class missing" }
+mvn-17:
+  in: "mvn.cmd org.farhan:sheep-dog-svc-maven-plugin:asciidoctor-to-uml -Dtags=loginHappyPath -Dhost=qa.sheepdog.io -DonlyChanges=false"
+  out: { exit: 1, stdout: "Service did not become available within 300000 milliseconds" }
 
 # Scenario paths (one entry per scenario that exercises this command).
 paths:
   "A second run on the same day appends to the existing log": [mvn-1, mvn-1, mvn-3, mvn-4, mvn-8]
+  "Asciidoctor-to-uml retries on Service-not-available then succeeds": [mvn-1, mvn-17, mvn-3, mvn-4, mvn-5, mvn-6, mvn-6]
   "Baseline build failure aborts the run": [mvn-2]
   "Baseline build passes and scenario loop proceeds": [mvn-1]
   "Baseline emits Running and Completed bracket lines": [mvn-1]

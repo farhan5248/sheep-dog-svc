@@ -15,8 +15,8 @@ public class RedPhase extends RgrPhase {
 	private final boolean onlyChanges;
 	private final String svcMavenPluginGoal;
 
-	public RedPhase(Maven maven, DarmokMojoLog mojoLog, Log runnerLog, String baseDir, String specsDir, String host, boolean onlyChanges, String svcMavenPluginGoal) {
-		super(null, maven, null, mojoLog, runnerLog, null, null, null, 0, 0, 0, 0, 0, 0, List.of());
+	public RedPhase(Maven maven, DarmokMojoLog mojoLog, Log runnerLog, String baseDir, String specsDir, String host, boolean onlyChanges, String svcMavenPluginGoal, int maxRetries, int retryWaitSeconds) {
+		super(null, maven, null, mojoLog, runnerLog, null, null, null, 0, 0, 0, 0, maxRetries, retryWaitSeconds, List.of());
 		this.baseDir = baseDir;
 		this.specsDir = specsDir;
 		this.host = host;
@@ -39,6 +39,10 @@ public class RedPhase extends RgrPhase {
 		return " maven";
 	}
 
+	private static final String[] MAVEN_RETRYABLE_PATTERNS = {
+		"Service did not become available within"
+	};
+
 	@Override
 	protected int executeClaudeOrMaven(DarmokMojoState state) throws Exception {
 		String pattern = state.tag;
@@ -48,18 +52,18 @@ public class RedPhase extends RgrPhase {
 		Path mvnLog = Path.of(baseDir, "target", "darmok-mvn-stdout.log");
 		Files.createDirectories(mvnLog.getParent());
 
-		int asciidocExit = maven.run(specsDirAbsolute, mvnLog,
+		int asciidocExit = runMavenWithRetry(specsDirAbsolute, mvnLog,
 				"org.farhan:sheep-dog-svc-maven-plugin:asciidoctor-to-uml",
 				"-Dtags=" + pattern, "-Dhost=" + host, "-DonlyChanges=" + onlyChanges);
 		if (asciidocExit != 0) {
-			return handleMavenFailure(asciidocExit, mvnLog);
+			return asciidocExit;
 		}
 
-		int cucumberExit = maven.run(baseDir, mvnLog,
+		int cucumberExit = runMavenWithRetry(baseDir, mvnLog,
 				"org.farhan:sheep-dog-svc-maven-plugin:" + svcMavenPluginGoal,
 				"-Dtags=" + pattern, "-Dhost=" + host, "-DonlyChanges=" + onlyChanges);
 		if (cucumberExit != 0) {
-			return handleMavenFailure(cucumberExit, mvnLog);
+			return cucumberExit;
 		}
 
 		String runnerClassPath = baseDir
@@ -77,6 +81,42 @@ public class RedPhase extends RgrPhase {
 		}
 		mojoLog.debug("  Tests are FAILING - ready for green phase (returning 0)");
 		return 0;
+	}
+
+	private int runMavenWithRetry(String workingDirectory, Path logFile, String... args) throws Exception {
+		for (int attempt = 1; attempt <= maxRetries; attempt++) {
+			if (attempt > 1) {
+				runnerLog.debug("Retry attempt " + attempt + " of " + maxRetries + "...");
+			}
+			int exitCode = maven.run(workingDirectory, logFile, args);
+			if (exitCode == 0) {
+				runnerLog.debug("Maven CLI completed successfully");
+				return 0;
+			}
+			String matched = findMavenRetryableError(logFile);
+			if (matched != null && attempt < maxRetries) {
+				runnerLog.warn("Retryable error detected: " + matched);
+				runnerLog.warn("Maven CLI exited with code " + exitCode);
+				runnerLog.warn("Waiting " + retryWaitSeconds + " seconds before retry...");
+				Thread.sleep(retryWaitSeconds * 1000L);
+			} else {
+				return handleMavenFailure(exitCode, logFile);
+			}
+		}
+		return -1;
+	}
+
+	private static String findMavenRetryableError(Path logFile) throws Exception {
+		if (!Files.exists(logFile)) return null;
+		List<String> lines = Files.readAllLines(logFile);
+		for (String line : lines) {
+			for (String pattern : MAVEN_RETRYABLE_PATTERNS) {
+				if (line.contains(pattern)) {
+					return pattern;
+				}
+			}
+		}
+		return null;
 	}
 
 	private int handleMavenFailure(int exitCode, Path logFile) throws Exception {
