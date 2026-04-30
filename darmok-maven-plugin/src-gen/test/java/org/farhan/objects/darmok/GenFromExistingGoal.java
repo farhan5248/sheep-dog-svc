@@ -78,11 +78,17 @@ public interface GenFromExistingGoal {
 
     public void setAllowlistBasePaths(HashMap<String, String> keyMap);
 
+    public void setMvnAsciidoctorToUmlCommandExecutedAndSucceedsWith(HashMap<String, String> keyMap);
+
+    public void setMvnAsciidoctorToUmlCommandPattern(HashMap<String, String> keyMap);
+
     public void setMvnAsciidoctorToUmlCommandExecutedButFailed(HashMap<String, String> keyMap);
 
     public void setMvnAsciidoctorToUmlCommandExit(HashMap<String, String> keyMap);
 
     public void setMvnAsciidoctorToUmlCommandOutput(HashMap<String, String> keyMap);
+
+    public void setMvnAsciidoctorToUmlCommandExecutedButFailsWith(HashMap<String, String> keyMap);
 
     public void setMvnCleanInstallCommandExecutedAndFailsOnEveryCallInTheGreenPhase(HashMap<String, String> keyMap);
 
@@ -112,21 +118,15 @@ public interface GenFromExistingGoal {
 
     public void setMvnTestCommandOutput(HashMap<String, String> keyMap);
 
+    public void setMvnUmlToCucumberGuiceCommandExecutedAndSucceedsWith(HashMap<String, String> keyMap);
+
+    public void setMvnUmlToCucumberGuiceCommandPattern(HashMap<String, String> keyMap);
+
     public void setMvnUmlToCucumberGuiceCommandExecutedButFailed(HashMap<String, String> keyMap);
 
     public void setMvnUmlToCucumberGuiceCommandExit(HashMap<String, String> keyMap);
 
     public void setMvnUmlToCucumberGuiceCommandOutput(HashMap<String, String> keyMap);
-
-    public void setMvnAsciidoctorToUmlCommandExecutedAndSucceedsWith(HashMap<String, String> keyMap);
-
-    public void setMvnAsciidoctorToUmlCommandPattern(HashMap<String, String> keyMap);
-
-    public void setMvnAsciidoctorToUmlCommandExecutedButFailsWith(HashMap<String, String> keyMap);
-
-    public void setMvnUmlToCucumberGuiceCommandExecutedAndSucceedsWith(HashMap<String, String> keyMap);
-
-    public void setMvnUmlToCucumberGuiceCommandPattern(HashMap<String, String> keyMap);
 
     public void setMvnUmlToCucumberGuiceCommandExecutedButFailsWith(HashMap<String, String> keyMap);
 }

@@ -21,46 +21,8 @@ Feature: Red Phase Maven Failures
           Some description
           """
 
-  Scenario: The asciidoctor-to-uml command fails
-
-    The first red-phase maven invocation fails (e.g. the AsciiDoc API service is unreachable). The failure output reaches the runner log but red proceeds to the next step.
-
-    Given The darmok plugin gen-from-existing goal mvn asciidoctor-to-uml command is executed but failed
-          | Exit | Output                              |
-          | 1    | svc unreachable: connection refused |
-     When The darmok plugin gen-from-existing goal is executed but fails
-     Then The code-prj project darmok.runners.log file will be as follows with this failure
-          | Level | Category | Content                             |
-          | DEBUG | runner   | svc unreachable: connection refused |
-
-  Scenario: The uml-to-cucumber-guice command fails
-
-    The second red-phase maven invocation fails (e.g. the Cucumber gen service rate-limited the request). Same contract ? captured in the log, not acted on.
-
-    Given The darmok plugin gen-from-existing goal mvn uml-to-cucumber-guice command is executed but failed
-          | Exit | Output                               |
-          | 1    | TooManyRequests: upstream rate limit |
-     When The darmok plugin gen-from-existing goal is executed but fails
-     Then The code-prj project darmok.runners.log file will be as follows with this failure
-          | Level | Category | Content                              |
-          | DEBUG | runner   | TooManyRequests: upstream rate limit |
-
-  Scenario: The generated runner class fails to compile
-
-    The red phase writes a cucumber runner class (`<Tag>Test.java`) and then runs `mvn test` on it. If the generated source has a compile error, `mvn test` exits non-zero ? which is exactly how Darmok distinguishes "tests failing, green phase should fire" from "tests passing, skip green". Under current semantics, this failure mode collapses into "tests failing" and green phase runs, potentially wasting a claude invocation on a problem that was actually a codegen bug.
-
-    Given The darmok plugin gen-from-existing goal mvn test command is executed but failed
-          | Exit | Output                                                                               |
-          | 1    | COMPILATION ERROR : [ERROR] /suites/loginHappyPathTest.java:[3,1] cannot find symbol |
-     When The darmok plugin gen-from-existing goal is executed but fails
-     Then The code-prj project darmok.runners.log file will be as follows with this failure
-          | Level | Category | Content                                                                              |
-          | DEBUG | runner   | COMPILATION ERROR : [ERROR] /suites/loginHappyPathTest.java:[3,1] cannot find symbol |
-
-  @GH349
   Scenario: The asciidoctor-to-uml command fails non-retryably
 
-    \@GH349
     The first red-phase maven invocation fails with output that does NOT match the retryable pattern (e.g. the AsciiDoc API service rejected the request outright). The retry loop returns immediately on attempt 1, the maven failure is surfaced to the mojo log, and the red phase aborts with `rgr-red failed`.
 
     Given The darmok plugin gen-from-existing goal mvn asciidoctor-to-uml command is executed but failed
@@ -80,10 +42,8 @@ Feature: Red Phase Maven Failures
           | INFO  | mojo     | Refactor: Running...     |
           | INFO  | mojo     | RGR Automation Complete! |
 
-  @GH349
   Scenario: The uml-to-cucumber-guice command fails non-retryably
 
-    \@GH349
     The second red-phase maven invocation fails with output that does NOT match the retryable pattern. Same contract ? return immediately on attempt 1, surface to mojo log, abort red.
 
     Given The darmok plugin gen-from-existing goal mvn uml-to-cucumber-guice command is executed but failed
@@ -102,4 +62,16 @@ Feature: Red Phase Maven Failures
           | INFO  | mojo     | Green: Running...        |
           | INFO  | mojo     | Refactor: Running...     |
           | INFO  | mojo     | RGR Automation Complete! |
+
+  Scenario: The generated runner class fails to compile
+
+    The red phase writes a cucumber runner class (`<Tag>Test.java`) and then runs `mvn test` on it. If the generated source has a compile error, `mvn test` exits non-zero ? which is exactly how Darmok distinguishes "tests failing, green phase should fire" from "tests passing, skip green". Under current semantics, this failure mode collapses into "tests failing" and green phase runs, potentially wasting a claude invocation on a problem that was actually a codegen bug.
+
+    Given The darmok plugin gen-from-existing goal mvn test command is executed but failed
+          | Exit | Output                                                                               |
+          | 1    | COMPILATION ERROR : [ERROR] /suites/loginHappyPathTest.java:[3,1] cannot find symbol |
+     When The darmok plugin gen-from-existing goal is executed but fails
+     Then The code-prj project darmok.runners.log file will be as follows with this failure
+          | Level | Category | Content                                                                              |
+          | DEBUG | runner   | COMPILATION ERROR : [ERROR] /suites/loginHappyPathTest.java:[3,1] cannot find symbol |
 

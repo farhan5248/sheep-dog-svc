@@ -21,10 +21,8 @@ Feature: Red Phase Maven Retry
           Some description
           """
 
-  @GH349
   Scenario: Asciidoctor-to-uml retries on Service-not-available then succeeds
 
-    \@GH349
     The first red-phase maven invocation fails on attempt 1 with the retryable pattern; the loop detects the match, waits, retries, and the second invocation succeeds. The runner log records the retry detection at WARN (not ERROR, since recovery followed). Red phase proceeds to `uml-to-cucumber-guice` and the rest of the cycle as usual.
 
     Given The darmok plugin gen-from-existing goal mvn asciidoctor-to-uml command is executed and succeeds with
@@ -37,10 +35,8 @@ Feature: Red Phase Maven Retry
           | DEBUG | runner   | Retry attempt 2 of 3...                                           |
           | DEBUG | runner   | Maven CLI completed successfully                                  |
 
-  @GH349
   Scenario: Asciidoctor-to-uml exhausts retries on Service-not-available
 
-    \@GH349
     Every attempt up to `maxRetries` returns the same retryable pattern. The retry loop logs each detection, the final attempt escalates to ERROR with `Max retries exhausted`, the failure is surfaced to the mojo log, and the goal aborts with `rgr-red failed`.
 
     Given The darmok plugin gen-from-existing goal mvn asciidoctor-to-uml command is executed but fails with
@@ -61,10 +57,8 @@ Feature: Red Phase Maven Retry
           | INFO  | mojo     | Refactor: Running...     |
           | INFO  | mojo     | RGR Automation Complete! |
 
-  @GH349
   Scenario: Uml-to-cucumber-guice retries on Service-not-available then succeeds
 
-    \@GH349
     Same retry contract applied to the second red-phase maven goal. Asciidoctor-to-uml succeeds on its first attempt; uml-to-cucumber-guice fails on its first attempt with the retryable pattern, recovers on its second.
 
     Given The darmok plugin gen-from-existing goal mvn uml-to-cucumber-guice command is executed and succeeds with
@@ -77,10 +71,8 @@ Feature: Red Phase Maven Retry
           | DEBUG | runner   | Retry attempt 2 of 3...                                           |
           | DEBUG | runner   | Maven CLI completed successfully                                  |
 
-  @GH349
   Scenario: Uml-to-cucumber-guice exhausts retries on Service-not-available
 
-    \@GH349
     Same exhaustion shape as the asciidoctor-to-uml case, applied to the second red-phase maven goal. Asciidoctor-to-uml succeeds; uml-to-cucumber-guice fails on every attempt up to `maxRetries`; the goal aborts with `rgr-red failed`.
 
     Given The darmok plugin gen-from-existing goal mvn uml-to-cucumber-guice command is executed but fails with

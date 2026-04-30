@@ -86,9 +86,19 @@ public class DarmokGenFromExistingGoalSteps extends TestSteps {
         object.doEdgeStep("", "", "is", "executed but fails with", dataTable);
     }
 
+    @Given("^The darmok plugin gen-from-existing goal mvn asciidoctor-to-uml command is executed and succeeds with$")
+    public void mvnAsciidoctorToUmlCommandIsExecutedAndSucceedsWith(DataTable dataTable) {
+        object.doEdgeStep("mvn asciidoctor-to-uml", "command", "is", "executed and succeeds with", dataTable);
+    }
+
     @Given("^The darmok plugin gen-from-existing goal mvn asciidoctor-to-uml command is executed but failed$")
     public void mvnAsciidoctorToUmlCommandIsExecutedButFailed(DataTable dataTable) {
         object.doEdgeStep("mvn asciidoctor-to-uml", "command", "is", "executed but failed", dataTable);
+    }
+
+    @Given("^The darmok plugin gen-from-existing goal mvn asciidoctor-to-uml command is executed but fails with$")
+    public void mvnAsciidoctorToUmlCommandIsExecutedButFailsWith(DataTable dataTable) {
+        object.doEdgeStep("mvn asciidoctor-to-uml", "command", "is", "executed but fails with", dataTable);
     }
 
     @Given("^The darmok plugin gen-from-existing goal mvn clean install command is executed and fails on every call in the green phase$")
@@ -131,24 +141,14 @@ public class DarmokGenFromExistingGoalSteps extends TestSteps {
         object.doEdgeStep("mvn test", "command", "is", "executed but failed", dataTable);
     }
 
-    @Given("^The darmok plugin gen-from-existing goal mvn uml-to-cucumber-guice command is executed but failed$")
-    public void mvnUmlToCucumberGuiceCommandIsExecutedButFailed(DataTable dataTable) {
-        object.doEdgeStep("mvn uml-to-cucumber-guice", "command", "is", "executed but failed", dataTable);
-    }
-
-    @Given("^The darmok plugin gen-from-existing goal mvn asciidoctor-to-uml command is executed and succeeds with$")
-    public void mvnAsciidoctorToUmlCommandIsExecutedAndSucceedsWith(DataTable dataTable) {
-        object.doEdgeStep("mvn asciidoctor-to-uml", "command", "is", "executed and succeeds with", dataTable);
-    }
-
-    @Given("^The darmok plugin gen-from-existing goal mvn asciidoctor-to-uml command is executed but fails with$")
-    public void mvnAsciidoctorToUmlCommandIsExecutedButFailsWith(DataTable dataTable) {
-        object.doEdgeStep("mvn asciidoctor-to-uml", "command", "is", "executed but fails with", dataTable);
-    }
-
     @Given("^The darmok plugin gen-from-existing goal mvn uml-to-cucumber-guice command is executed and succeeds with$")
     public void mvnUmlToCucumberGuiceCommandIsExecutedAndSucceedsWith(DataTable dataTable) {
         object.doEdgeStep("mvn uml-to-cucumber-guice", "command", "is", "executed and succeeds with", dataTable);
+    }
+
+    @Given("^The darmok plugin gen-from-existing goal mvn uml-to-cucumber-guice command is executed but failed$")
+    public void mvnUmlToCucumberGuiceCommandIsExecutedButFailed(DataTable dataTable) {
+        object.doEdgeStep("mvn uml-to-cucumber-guice", "command", "is", "executed but failed", dataTable);
     }
 
     @Given("^The darmok plugin gen-from-existing goal mvn uml-to-cucumber-guice command is executed but fails with$")
