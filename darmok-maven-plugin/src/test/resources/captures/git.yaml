@@ -147,6 +147,7 @@ paths:
   "Scenarios-list.txt is absent": [git-1]
   "Spring-flavored cucumber-gen goal flips the runner log invocation": [git-1, git-2, git-3, git-4, git-7]
   "The asciidoctor-to-uml command fails": [git-1, git-2, git-3, git-4, git-5, git-2, git-5, git-2, git-3, git-6, git-7]
+  "The asciidoctor-to-uml command fails non-retryably": [git-1]
   "The generated runner class fails to compile": [git-1, git-2, git-3, git-4, git-5, git-2, git-5, git-2, git-3, git-6, git-7]
   "The matching test-case is the last in the file with no body": [git-1, git-2, git-3, git-4, git-7]
   "The refactor phase also retries on retryable errors": [git-1, git-2, git-3, git-4, git-5, git-2, git-5, git-2, git-3, git-6, git-7]

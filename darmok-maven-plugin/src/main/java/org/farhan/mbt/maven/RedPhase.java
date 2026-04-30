@@ -5,6 +5,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
+import org.apache.maven.plugin.logging.Log;
+
 public class RedPhase extends RgrPhase {
 
 	private final String baseDir;
@@ -13,8 +15,8 @@ public class RedPhase extends RgrPhase {
 	private final boolean onlyChanges;
 	private final String svcMavenPluginGoal;
 
-	public RedPhase(Maven maven, DarmokMojoLog mojoLog, String baseDir, String specsDir, String host, boolean onlyChanges, String svcMavenPluginGoal) {
-		super(null, maven, null, mojoLog, null, null, null, null, 0, 0, 0, 0, 0, 0, List.of());
+	public RedPhase(Maven maven, DarmokMojoLog mojoLog, Log runnerLog, String baseDir, String specsDir, String host, boolean onlyChanges, String svcMavenPluginGoal) {
+		super(null, maven, null, mojoLog, runnerLog, null, null, null, 0, 0, 0, 0, 0, 0, List.of());
 		this.baseDir = baseDir;
 		this.specsDir = specsDir;
 		this.host = host;
@@ -43,11 +45,22 @@ public class RedPhase extends RgrPhase {
 		String runnerClassName = pattern + "Test";
 
 		String specsDirAbsolute = Path.of(baseDir, specsDir).normalize().toString();
-		maven.run(specsDirAbsolute, "org.farhan:sheep-dog-svc-maven-plugin:asciidoctor-to-uml",
-				"-Dtags=" + pattern, "-Dhost=" + host, "-DonlyChanges=" + onlyChanges);
+		Path mvnLog = Path.of(baseDir, "target", "darmok-mvn-stdout.log");
+		Files.createDirectories(mvnLog.getParent());
 
-		maven.run(baseDir, "org.farhan:sheep-dog-svc-maven-plugin:" + svcMavenPluginGoal,
+		int asciidocExit = maven.run(specsDirAbsolute, mvnLog,
+				"org.farhan:sheep-dog-svc-maven-plugin:asciidoctor-to-uml",
 				"-Dtags=" + pattern, "-Dhost=" + host, "-DonlyChanges=" + onlyChanges);
+		if (asciidocExit != 0) {
+			return handleMavenFailure(asciidocExit, mvnLog);
+		}
+
+		int cucumberExit = maven.run(baseDir, mvnLog,
+				"org.farhan:sheep-dog-svc-maven-plugin:" + svcMavenPluginGoal,
+				"-Dtags=" + pattern, "-Dhost=" + host, "-DonlyChanges=" + onlyChanges);
+		if (cucumberExit != 0) {
+			return handleMavenFailure(cucumberExit, mvnLog);
+		}
 
 		String runnerClassPath = baseDir
 			+ "/src/test/java/org/farhan/suites/" + runnerClassName + ".java";
@@ -64,6 +77,23 @@ public class RedPhase extends RgrPhase {
 		}
 		mojoLog.debug("  Tests are FAILING - ready for green phase (returning 0)");
 		return 0;
+	}
+
+	private int handleMavenFailure(int exitCode, Path logFile) throws Exception {
+		String lastLine = "no output";
+		if (Files.exists(logFile)) {
+			List<String> lines = Files.readAllLines(logFile);
+			for (int i = lines.size() - 1; i >= 0; i--) {
+				String line = lines.get(i).trim();
+				if (!line.isEmpty()) {
+					lastLine = line;
+					break;
+				}
+			}
+		}
+		runnerLog.debug("Maven CLI exited with code " + exitCode);
+		mojoLog.error("Maven failed (exit " + exitCode + "): " + lastLine);
+		return exitCode;
 	}
 
 	private String generateRunnerClassContent(String pattern, String runnerClassName) {

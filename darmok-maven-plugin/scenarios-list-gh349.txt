@@ -1,6 +1,4 @@
 File: Darmok/Red Phase Maven Failures
-  Scenario: The asciidoctor-to-uml command fails non-retryably
-    Tag: GH349
   Scenario: The uml-to-cucumber-guice command fails non-retryably
     Tag: GH349
 

@@ -2,7 +2,7 @@
 Feature: Red Phase Maven Failures
 
   \@darmok-maven-plugin
-  During the red phase Darmok invokes three maven commands in sequence: `asciidoctor-to-uml`, `uml-to-cucumber-guice`, and `test`. Today only the final `mvn test` exit code drives the red-phase return value. Non-zero exits from the earlier two commands are captured in the runner log but don't halt red ? the failure is visible, just not acted on. This Test-Suite pins that current behavior across the three failure points so a future change to halt on intermediate failures surfaces as an expected test break.
+  During the red phase Darmok invokes three maven commands in sequence: `asciidoctor-to-uml`, `uml-to-cucumber-guice`, and `test`. The first two are wrapped in the maven retry loop (issue 349) ? a non-retryable failure (no `Service did not become available within` pattern in `log.txt`) returns immediately and aborts the red phase with `rgr-red failed with exit code N`. The third call, `mvn test`, is excluded from retry: its non-zero exit is the red-phase signal "tests failing, proceed to green", not an infra failure, so the existing `TestsPass` / `TestsFail` branch fires unchanged. Retryable failures are pinned in the sibling `Red Phase Maven Retry.asciidoc`.
 
   Background: A failing scenario that enters the red phase
 
@@ -56,4 +56,27 @@ Feature: Red Phase Maven Failures
      Then The code-prj project darmok.runners.log file will be as follows with this failure
           | Level | Category | Content                                                                              |
           | DEBUG | runner   | COMPILATION ERROR : [ERROR] /suites/loginHappyPathTest.java:[3,1] cannot find symbol |
+
+  @GH349
+  Scenario: The asciidoctor-to-uml command fails non-retryably
+
+    \@GH349
+    The first red-phase maven invocation fails with output that does NOT match the retryable pattern (e.g. the AsciiDoc API service rejected the request outright). The retry loop returns immediately on attempt 1, the maven failure is surfaced to the mojo log, and the red phase aborts with `rgr-red failed`.
+
+    Given The darmok plugin gen-from-existing goal mvn asciidoctor-to-uml command is executed but failed
+          | Exit | Output                              |
+          | 1    | svc unreachable: connection refused |
+     When The darmok plugin gen-from-existing goal is executed but fails
+     Then The code-prj project darmok.runners.log file will be as follows with this failure
+          | Level | Category | Content                             |
+          | DEBUG | runner   | svc unreachable: connection refused |
+          | DEBUG | runner   | Maven CLI exited with code 1        |
+      And The code-prj project darmok.mojo.log file will be as follows with this failure
+          | Level | Category | Content                                                    |
+          | ERROR | mojo     | Maven failed (exit 1): svc unreachable: connection refused |
+      And The code-prj project darmok.mojo.log file won't be as follows
+          | Level | Category | Content                  |
+          | INFO  | mojo     | Green: Running...        |
+          | INFO  | mojo     | Refactor: Running...     |
+          | INFO  | mojo     | RGR Automation Complete! |
 
