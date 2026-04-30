@@ -61,6 +61,8 @@ Feature: Phase Timeout
           | Level | Category | Content                                                    |
           | WARN  | mojo     | Green: Claude timed out after 1s, killing...               |
           | INFO  | mojo     | Green: Install failed, resuming claude (attempt 2 of 2)... |
+          | INFO  | mojo     | Green: Running...                                          |
+          | INFO  | mojo     | Green: Completed (Any)                                     |
           | INFO  | mojo     | Green: Install passed, proceeding                          |
           | INFO  | mojo     | Green: Verify running...                                   |
       And The code-prj project darmok.runners.log file will be as follows
@@ -102,6 +104,8 @@ Feature: Phase Timeout
           | INFO  | mojo     | Refactor: Running...                                          |
           | WARN  | mojo     | Refactor: Claude timed out after 1s, killing...               |
           | INFO  | mojo     | Refactor: Install failed, resuming claude (attempt 2 of 2)... |
+          | INFO  | mojo     | Refactor: Running...                                          |
+          | INFO  | mojo     | Refactor: Completed (Any)                                     |
           | INFO  | mojo     | Refactor: Install passed, proceeding                          |
           | INFO  | mojo     | Refactor: Verify running...                                   |
       And The code-prj project darmok.runners.log file will be as follows

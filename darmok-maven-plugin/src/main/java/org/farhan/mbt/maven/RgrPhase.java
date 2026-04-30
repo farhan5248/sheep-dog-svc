@@ -129,7 +129,11 @@ public abstract class RgrPhase {
 			attempt++;
 			mojoLog.info("  " + name + ": Install failed, resuming claude (attempt " + attempt
 				+ " of " + maxTimeoutAttempts + ")...");
+			mojoLog.info("  " + name + ": Running...");
+			long resumeStart = System.currentTimeMillis();
 			resumeClaudeWithRetry(workingDir, TIMEOUT_RESUME_MESSAGE);
+			long resumeDuration = System.currentTimeMillis() - resumeStart;
+			mojoLog.info("  " + name + ": Completed (" + DarmokMojoState.formatDuration(resumeDuration) + ")");
 		}
 	}
 
