@@ -188,7 +188,8 @@ public class ConvertUMLToCucumber extends org.farhan.mbt.cucumber.ConvertUMLToCu
 			tgtObjTestSuite.addFeatureTag(tag);
 		}
 
-		if (!srcTestSuite.getDescription().isEmpty()) {
+		if (!srcTestSuite.getDescription().isEmpty()
+				&& !String.join("\n", srcTestSuite.getDescription()).equals(tgtObjTestSuite.getFeatureDescription())) {
 			tgtObjTestSuite.clearFeatureStatement();
 			for (String statement : srcTestSuite.getDescription()) {
 				tgtObjTestSuite.addFeatureStatement(statement);
