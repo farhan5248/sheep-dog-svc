@@ -126,6 +126,7 @@ paths:
   "Spring-flavored cucumber-gen goal flips the runner log invocation": [mvn-1, mvn-3, mvn-9, mvn-8]
   "The asciidoctor-to-uml command fails": [mvn-1, mvn-10, mvn-4, mvn-5, mvn-6, mvn-6]
   "The asciidoctor-to-uml command fails non-retryably": [mvn-1, mvn-10]
+  "The uml-to-cucumber-guice command fails non-retryably": [mvn-1, mvn-3, mvn-11]
   "The generated runner class fails to compile": [mvn-1, mvn-3, mvn-4, mvn-12, mvn-6, mvn-6]
   "The matching test-case is the last in the file with no body": [mvn-1, mvn-3, mvn-4, mvn-8]
   "The refactor phase also retries on retryable errors": [mvn-1, mvn-3, mvn-4, mvn-5, mvn-6, mvn-6]

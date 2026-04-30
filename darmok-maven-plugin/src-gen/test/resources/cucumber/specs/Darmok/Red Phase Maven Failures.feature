@@ -80,3 +80,26 @@ Feature: Red Phase Maven Failures
           | INFO  | mojo     | Refactor: Running...     |
           | INFO  | mojo     | RGR Automation Complete! |
 
+  @GH349
+  Scenario: The uml-to-cucumber-guice command fails non-retryably
+
+    \@GH349
+    The second red-phase maven invocation fails with output that does NOT match the retryable pattern. Same contract ? return immediately on attempt 1, surface to mojo log, abort red.
+
+    Given The darmok plugin gen-from-existing goal mvn uml-to-cucumber-guice command is executed but failed
+          | Exit | Output                               |
+          | 1    | TooManyRequests: upstream rate limit |
+     When The darmok plugin gen-from-existing goal is executed but fails
+     Then The code-prj project darmok.runners.log file will be as follows with this failure
+          | Level | Category | Content                              |
+          | DEBUG | runner   | TooManyRequests: upstream rate limit |
+          | DEBUG | runner   | Maven CLI exited with code 1         |
+      And The code-prj project darmok.mojo.log file will be as follows with this failure
+          | Level | Category | Content                                                     |
+          | ERROR | mojo     | Maven failed (exit 1): TooManyRequests: upstream rate limit |
+      And The code-prj project darmok.mojo.log file won't be as follows
+          | Level | Category | Content                  |
+          | INFO  | mojo     | Green: Running...        |
+          | INFO  | mojo     | Refactor: Running...     |
+          | INFO  | mojo     | RGR Automation Complete! |
+
