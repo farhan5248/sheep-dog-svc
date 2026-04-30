@@ -20,4 +20,4 @@ Modify only files under:
 
 Do not modify files under `${projectPath}/src/test/java/org/farhan/fake/`.
 
-Don't read code outside `${projectPath}`. Use logging statements to debug as needed.
+Don't read code outside `${projectPath}`. To debug, set `LOG_LEVEL=DEBUG` and read the test-fake log file (path configured in `src/test/resources/logback-test.xml`) — SLF4J DEBUG is already wired in `TestObject` and the Fake hierarchy. Don't add `System.out.println` traces to `src/test/java/org/farhan/common/` or `src/test/java/org/farhan/fake/`; those paths are outside the allowlist and your changes will be reverted.

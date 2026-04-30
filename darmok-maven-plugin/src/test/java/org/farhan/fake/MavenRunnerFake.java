@@ -11,12 +11,16 @@ import java.util.Map;
 
 import org.farhan.common.CommandFake;
 import org.farhan.mbt.maven.Maven;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Replay-driven fake for the production {@code MavenRunner}. Walks the
  * {@code captures/mvn.yaml} path declared for the active scenario.
  */
 public class MavenRunnerFake extends CommandFake implements Maven {
+
+	private static final Logger logger = LoggerFactory.getLogger(MavenRunnerFake.class);
 
 	public MavenRunnerFake(Map<String, Object> properties) {
 		super(properties);
@@ -33,18 +37,22 @@ public class MavenRunnerFake extends CommandFake implements Maven {
 
 	@Override
 	public int run(String workingDirectory, String... args) {
+		logger.debug("run cwd={} args={}", workingDirectory, java.util.Arrays.asList(args));
 		simulateSubprocessTime();
 		Vertex v = consume();
 		logRun(v);
+		logger.debug("run exit={} stdoutLen={}", v.exit(), v.stdout() == null ? 0 : v.stdout().length());
 		return v.exit();
 	}
 
 	@Override
 	public int run(String workingDirectory, Path logFile, String... args) {
+		logger.debug("run cwd={} logFile={} args={}", workingDirectory, logFile, java.util.Arrays.asList(args));
 		simulateSubprocessTime();
 		Vertex v = consume();
 		logRun(v);
 		writeStdoutToLogFile(logFile, v.stdout());
+		logger.debug("run exit={} stdoutLen={}", v.exit(), v.stdout() == null ? 0 : v.stdout().length());
 		return v.exit();
 	}
 

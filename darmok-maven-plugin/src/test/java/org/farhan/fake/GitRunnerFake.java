@@ -11,6 +11,8 @@ import java.util.Map;
 
 import org.farhan.common.CommandFake;
 import org.farhan.mbt.maven.Git;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Replay-driven fake for the production {@code GitRunner}. Walks the
@@ -18,6 +20,8 @@ import org.farhan.mbt.maven.Git;
  * {@link Git} method consumes one vertex.
  */
 public class GitRunnerFake extends CommandFake implements Git {
+
+	private static final Logger logger = LoggerFactory.getLogger(GitRunnerFake.class);
 
 	public GitRunnerFake(Map<String, Object> properties) {
 		super(properties);
@@ -34,16 +38,20 @@ public class GitRunnerFake extends CommandFake implements Git {
 
 	@Override
 	public int run(String workingDirectory, String... args) {
+		logger.debug("run cwd={} args={}", workingDirectory, java.util.Arrays.asList(args));
 		Vertex v = consume();
 		logRun(v);
+		logger.debug("run exit={} stdoutLen={}", v.exit(), v.stdout() == null ? 0 : v.stdout().length());
 		return v.exit();
 	}
 
 	@Override
 	public int run(String workingDirectory, Path logFile, String... args) {
+		logger.debug("run cwd={} logFile={} args={}", workingDirectory, logFile, java.util.Arrays.asList(args));
 		Vertex v = consume();
 		logRun(v);
 		writeStdoutToLogFile(logFile, v.stdout());
+		logger.debug("run exit={} stdoutLen={}", v.exit(), v.stdout() == null ? 0 : v.stdout().length());
 		return v.exit();
 	}
 
@@ -59,9 +67,12 @@ public class GitRunnerFake extends CommandFake implements Git {
 
 	@Override
 	public String captureOutput(String workingDirectory, String... args) {
+		logger.debug("captureOutput cwd={} args={}", workingDirectory, java.util.Arrays.asList(args));
 		Vertex v = consume();
 		logCapture(v);
-		return v.stdout().trim();
+		String output = v.stdout().trim();
+		logger.debug("captureOutput outputLen={}", output.length());
+		return output;
 	}
 
 	private static void writeStdoutToLogFile(Path logFile, String stdout) {

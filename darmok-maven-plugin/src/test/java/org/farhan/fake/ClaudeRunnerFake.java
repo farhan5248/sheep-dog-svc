@@ -7,6 +7,8 @@ import java.util.Map;
 import org.farhan.common.CommandFake;
 import org.farhan.mbt.maven.Claude;
 import org.farhan.mbt.maven.ClaudeRunner;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Replay-driven fake for the production {@code ClaudeRunner}. Walks the
@@ -18,6 +20,8 @@ import org.farhan.mbt.maven.ClaudeRunner;
  * {@code wait_for_destroy} or {@code blocked_reader}).
  */
 public class ClaudeRunnerFake extends CommandFake implements Claude {
+
+	private static final Logger logger = LoggerFactory.getLogger(ClaudeRunnerFake.class);
 
 	private String sessionId;
 
@@ -36,26 +40,28 @@ public class ClaudeRunnerFake extends CommandFake implements Claude {
 
 	@Override
 	public int run(String workingDirectory, List<String> outputLines, String... args) {
+		logger.debug("run cwd={} args={}", workingDirectory, java.util.Arrays.asList(args));
 		simulateSubprocessTime();
 		Vertex v = consume();
 		logExecute(v);
 		appendStdoutLines(outputLines, v.stdout());
-		if (v.hangs() || v.blocked()) {
-			return ClaudeRunner.TIMEOUT_EXIT_CODE;
-		}
-		return v.exit();
+		int exit = (v.hangs() || v.blocked()) ? ClaudeRunner.TIMEOUT_EXIT_CODE : v.exit();
+		logger.debug("run exit={} hangs={} blocked={} stdoutLen={}",
+				exit, v.hangs(), v.blocked(), v.stdout() == null ? 0 : v.stdout().length());
+		return exit;
 	}
 
 	@Override
 	public int resume(String workingDirectory, List<String> outputLines, String message) {
+		logger.debug("resume cwd={} messageLen={}", workingDirectory, message == null ? -1 : message.length());
 		simulateSubprocessTime();
 		Vertex v = consume();
 		logExecute(v);
 		appendStdoutLines(outputLines, v.stdout());
-		if (v.hangs() || v.blocked()) {
-			return ClaudeRunner.TIMEOUT_EXIT_CODE;
-		}
-		return v.exit();
+		int exit = (v.hangs() || v.blocked()) ? ClaudeRunner.TIMEOUT_EXIT_CODE : v.exit();
+		logger.debug("resume exit={} hangs={} blocked={} stdoutLen={}",
+				exit, v.hangs(), v.blocked(), v.stdout() == null ? 0 : v.stdout().length());
+		return exit;
 	}
 
 	/**

@@ -6,6 +6,8 @@ import java.util.List;
 
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.farhan.dsl.grammar.ICell;
 import org.farhan.dsl.grammar.IDescription;
 import org.farhan.dsl.grammar.ILine;
@@ -35,7 +37,10 @@ import org.farhan.mock.TestStepNameParser;
  */
 public abstract class PathNavigatorTestObject extends TestObject {
 
+    private static final Logger logger = LoggerFactory.getLogger(PathNavigatorTestObject.class);
+
     public boolean createNodeDependencies(String path) {
+        logger.debug("createNodeDependencies path={}", path);
         try {
             EObject document = (EObject) SheepDogUtility
                     .getAncestor(getProperty("cursor"), ITestDocument.class);
@@ -46,17 +51,21 @@ public abstract class PathNavigatorTestObject extends TestObject {
                 appendSegment(fragment, seg);
                 Object found = resource.getEObject(fragment.toString());
                 if (found != null) {
+                    logger.debug("createNodeDependencies resolved segment={} fragment={}", seg.type(), fragment);
                     current = found;
                 } else {
+                    logger.debug("createNodeDependencies creating segment={} fragment={}", seg.type(), fragment);
                     current = createNode(current, seg.type());
-                    if (current == null)
+                    if (current == null) {
+                        logger.debug("createNodeDependencies createNode returned null segment={}", seg.type());
                         break;
+                    }
                 }
                 setProperty("cursor", current);
             }
             return true;
         } catch (Exception e) {
-            System.err.println("PathNavigatorTestObject.createNodeDependencies failed for path=" + path + ": " + e);
+            logger.error("createNodeDependencies failed for path={}", path, e);
             setProperty("cursor", null);
             return false;
         }
@@ -64,9 +73,19 @@ public abstract class PathNavigatorTestObject extends TestObject {
 
     public void navigateToDocument(String fullName) {
         ITestProject workspace = (ITestProject) getProperty("workspace");
-        setProperty("cursor", workspace.getTestDocumentList().stream()
+        ITestDocument match = workspace.getTestDocumentList().stream()
                 .filter(td -> td.getFullName().contentEquals(fullName))
-                .findFirst().orElse(null));
+                .findFirst().orElse(null);
+        if (match == null && logger.isDebugEnabled()) {
+            List<String> available = new ArrayList<>();
+            for (ITestDocument td : workspace.getTestDocumentList()) {
+                available.add(td.getFullName());
+            }
+            logger.debug("navigateToDocument no match fullName={} available={}", fullName, available);
+        } else {
+            logger.debug("navigateToDocument fullName={} matched={}", fullName, match != null);
+        }
+        setProperty("cursor", match);
     }
 
     public void navigateToDocument() {
@@ -78,10 +97,12 @@ public abstract class PathNavigatorTestObject extends TestObject {
     }
 
     public boolean navigateToNode(String path, boolean fallback) {
+        logger.debug("navigateToNode path={} fallback={}", path, fallback);
         try {
             EObject document = (EObject) SheepDogUtility
                     .getAncestor(getProperty("cursor"), ITestDocument.class);
             if (document == null) {
+                logger.debug("navigateToNode no document ancestor for cursor; clearing cursor");
                 setProperty("cursor", null);
                 return true;
             }
@@ -90,6 +111,7 @@ public abstract class PathNavigatorTestObject extends TestObject {
             // An invalid/empty path (e.g. "stepDefinitionList" missing its index)
             // parses to an empty segment list and resolves to the document itself.
             if (reversed.isEmpty()) {
+                logger.debug("navigateToNode empty segments; cursor=document");
                 setProperty("cursor", document);
                 return true;
             }
@@ -100,18 +122,21 @@ public abstract class PathNavigatorTestObject extends TestObject {
                 }
                 EObject target = resource.getEObject(fragment.toString());
                 if (target != null) {
+                    logger.debug("navigateToNode resolved drop={} fragment={}", drop, fragment);
                     setProperty("cursor", target);
                     return true;
                 }
                 if (!fallback) {
+                    logger.debug("navigateToNode no resolve and fallback=false; clearing cursor fragment={}", fragment);
                     setProperty("cursor", null);
                     return true;
                 }
             }
+            logger.debug("navigateToNode exhausted fallback drops path={}", path);
             setProperty("cursor", null);
             return true;
         } catch (Exception e) {
-            System.err.println("PathNavigatorTestObject.navigateToNode failed for path=" + path + ": " + e);
+            logger.error("navigateToNode failed for path={}", path, e);
             setProperty("cursor", null);
             return true;
         }
@@ -267,6 +292,13 @@ public abstract class PathNavigatorTestObject extends TestObject {
             ICell cell = ((IRow) cursor).getCellList().stream()
                     .filter(c -> c.getName().contentEquals(name))
                     .findFirst().orElse(null);
+            if (cell == null && logger.isDebugEnabled()) {
+                List<String> available = new ArrayList<>();
+                for (ICell c : ((IRow) cursor).getCellList()) {
+                    available.add(c.getName());
+                }
+                logger.debug("assertCellName no match name={} available={}", name, available);
+            }
             setProperty("cursor", cell);
             return cell == null ? null : cell.getName();
         }
@@ -280,6 +312,13 @@ public abstract class PathNavigatorTestObject extends TestObject {
             ILine line = ((IDescription) cursor).getLineList().stream()
                     .filter(l -> l.getContent().equals(content))
                     .findFirst().orElse(null);
+            if (line == null && logger.isDebugEnabled()) {
+                List<String> available = new ArrayList<>();
+                for (ILine l : ((IDescription) cursor).getLineList()) {
+                    available.add(l.getContent());
+                }
+                logger.debug("assertLineContent no match content={} available={}", content, available);
+            }
             setProperty("cursor", line);
             return line == null ? null : line.getContent();
         }
@@ -301,6 +340,13 @@ public abstract class PathNavigatorTestObject extends TestObject {
             IStepDefinition sd = ((IStepObject) cursor).getStepDefinitionList().stream()
                     .filter(s -> s.getName().contentEquals(name))
                     .findFirst().orElse(null);
+            if (sd == null && logger.isDebugEnabled()) {
+                List<String> available = new ArrayList<>();
+                for (IStepDefinition s : ((IStepObject) cursor).getStepDefinitionList()) {
+                    available.add(s.getName());
+                }
+                logger.debug("assertStepDefinitionName no match name={} available={}", name, available);
+            }
             setProperty("cursor", sd);
             return sd == null ? null : sd.getName();
         }
@@ -318,6 +364,13 @@ public abstract class PathNavigatorTestObject extends TestObject {
             IStepParameters sp = ((IStepDefinition) cursor).getStepParametersList().stream()
                     .filter(p -> name.contentEquals(p.getName()))
                     .findFirst().orElse(null);
+            if (sp == null && logger.isDebugEnabled()) {
+                List<String> available = new ArrayList<>();
+                for (IStepParameters p : ((IStepDefinition) cursor).getStepParametersList()) {
+                    available.add(p.getName());
+                }
+                logger.debug("assertStepParametersName no match name={} available={}", name, available);
+            }
             setProperty("cursor", sp);
             return sp == null ? null : sp.getName();
         }
@@ -331,6 +384,13 @@ public abstract class PathNavigatorTestObject extends TestObject {
             ITestData td = ((ITestCase) cursor).getTestDataList().stream()
                     .filter(d -> d.getName().contentEquals(name))
                     .findFirst().orElse(null);
+            if (td == null && logger.isDebugEnabled()) {
+                List<String> available = new ArrayList<>();
+                for (ITestData d : ((ITestCase) cursor).getTestDataList()) {
+                    available.add(d.getName());
+                }
+                logger.debug("assertTestDataName no match name={} available={}", name, available);
+            }
             setProperty("cursor", td);
             return td == null ? null : td.getName();
         }
@@ -344,6 +404,13 @@ public abstract class PathNavigatorTestObject extends TestObject {
             ITestStepContainer tsc = ((ITestSuite) cursor).getTestStepContainerList().stream()
                     .filter(c -> c.getName().contentEquals(name))
                     .findFirst().orElse(null);
+            if (tsc == null && logger.isDebugEnabled()) {
+                List<String> available = new ArrayList<>();
+                for (ITestStepContainer c : ((ITestSuite) cursor).getTestStepContainerList()) {
+                    available.add(c.getName());
+                }
+                logger.debug("assertTestStepContainerName no match name={} available={}", name, available);
+            }
             setProperty("cursor", tsc);
             return tsc == null ? null : tsc.getName();
         }

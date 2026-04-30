@@ -4,6 +4,8 @@ import org.farhan.mbt.maven.MBTMojo;
 import org.farhan.mbt.maven.SourceFileRepository;
 import org.farhan.runners.surefire.TestConfig;
 import org.junit.jupiter.api.Assertions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 
 /**
@@ -14,6 +16,8 @@ import org.springframework.beans.factory.annotation.Value;
  * to.
  */
 public abstract class MavenTestObject extends TestObject {
+
+    private static final Logger logger = LoggerFactory.getLogger(MavenTestObject.class);
 
     protected SourceFileRepository sr = new SourceFileRepository("target/src-gen");
 
@@ -55,16 +59,23 @@ public abstract class MavenTestObject extends TestObject {
     }
 
     protected final String getFileContent() {
+        String key = component + "/" + object;
         try {
-            String raw = sr.get("", component + "/" + object);
+            String raw = sr.get("", key);
+            if (raw == null) {
+                logger.debug("getFileContent null key={}", key);
+            }
             return raw == null ? null : raw.replaceAll("\r", "").trim();
         } catch (Exception e) {
+            logger.debug("getFileContent failed key={} cause={}", key, e.toString());
             Assertions.fail(e);
             return null;
         }
     }
 
     protected final void runGoal(String goal, String baseDir) {
+        logger.debug("runGoal goal={} baseDir={} host={} port={} tags={}",
+                goal, baseDir, serverHost, serverPort, getProperty("tags"));
         try {
             Class<?> mojoClass = Class.forName(goal);
             MBTMojo mojo = (MBTMojo) mojoClass.getConstructor().newInstance();
@@ -79,7 +90,9 @@ public abstract class MavenTestObject extends TestObject {
                 mojo.setScenarioId(TestConfig.scenarioId);
             }
             mojo.execute();
+            logger.debug("runGoal goal={} executed successfully", goal);
         } catch (Exception e) {
+            logger.debug("runGoal goal={} threw {}: {}", goal, e.getClass().getSimpleName(), e.getMessage());
             Assertions.fail(e);
         }
     }

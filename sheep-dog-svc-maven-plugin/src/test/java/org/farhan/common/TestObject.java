@@ -7,11 +7,14 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.time.format.DateTimeFormatter;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Assertions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import io.cucumber.datatable.DataTable;
 
@@ -34,6 +37,8 @@ import io.cucumber.datatable.DataTable;
  * </ul>
  */
 public abstract class TestObject {
+
+    private static final Logger logger = LoggerFactory.getLogger(TestObject.class);
 
     public enum TestState {
         Absent(null), Empty(""), Present(null), Any(null),
@@ -138,12 +143,14 @@ public abstract class TestObject {
     private void processInputOutputsStepDefinitionRef(String stateDesc, String operation, String partDesc,
             String partType, String stateType) {
         String sectionName = (partDesc + " " + partType).trim();
+        String methodName = operation + convertToPascalCase(sectionName) + convertToPascalCase(stateDesc);
+        logger.debug("StepDefRef {} class={} method={} stateDesc={} stateType={}",
+                operation, this.getClass().getSimpleName(), methodName, stateDesc, stateType);
         HashMap<String, String> row = new HashMap<String, String>();
         row.put(stateDesc, "");
         try {
             Object returnValue = this.getClass()
-                    .getMethod(operation + convertToPascalCase(sectionName) + convertToPascalCase(stateDesc),
-                            HashMap.class)
+                    .getMethod(methodName, HashMap.class)
                     .invoke(this, row);
             if (operation.equals("get")) {
                 String expectedValue = convertToPascalCase(stateDesc);
@@ -156,12 +163,25 @@ public abstract class TestObject {
                         mappedActual = TestState.Empty.name();
                     else
                         mappedActual = TestState.Present.name();
+                    if (!expectedValue.equals(mappedActual)) {
+                        logger.debug("StepDefRef mismatch method={} expected={} actual={} rawReturn={}",
+                                methodName, expectedValue, mappedActual, actual);
+                    }
                     Assertions.assertEquals(expectedValue, mappedActual);
                 } else {
+                    if (actual == null) {
+                        logger.debug("StepDefRef null return method={} expectedNonNull stateDesc={}",
+                                methodName, stateDesc);
+                    }
                     Assertions.assertNotNull(actual);
                 }
             }
+        } catch (NoSuchMethodException e) {
+            logger.debug("StepDefRef method not found {}#{} candidates={}",
+                    this.getClass().getSimpleName(), methodName, candidateMethodNames(operation, sectionName));
+            Assertions.fail(e);
         } catch (Exception e) {
+            logger.debug("StepDefRef invocation failed method={} cause={}", methodName, e.toString());
             Assertions.fail(e);
         }
     }
@@ -178,16 +198,18 @@ public abstract class TestObject {
         for (String cell : data.get(0)) {
             headers.add(cell);
         }
+        logger.debug("Table {} class={} section={} headers={} rows={} negative={}",
+                operation, this.getClass().getSimpleName(), sectionName, headers, data.size() - 1, negativeTest);
         for (int i = 1; i < data.size(); i++) {
             HashMap<String, String> row = new HashMap<String, String>();
             for (int j = 0; j < headers.size(); j++) {
                 row.put(headers.get(j), replaceKeyword(data.get(i).get(j)));
             }
             for (String fieldName : headers) {
+                String methodName = operation + convertToPascalCase(sectionName) + convertToPascalCase(fieldName);
                 try {
                     Object returnValue = this.getClass()
-                            .getMethod(operation + convertToPascalCase(sectionName) + convertToPascalCase(fieldName),
-                                    HashMap.class)
+                            .getMethod(methodName, HashMap.class)
                             .invoke(this, row);
                     if (operation.equals("get")) {
                         String expectedValue = row.get(fieldName);
@@ -195,17 +217,22 @@ public abstract class TestObject {
                             continue;
                         }
                         Map<String, String> actualByStore = toStoreMap(returnValue);
-                        for (String actual : actualByStore.values()) {
+                        for (Map.Entry<String, String> entry : actualByStore.entrySet()) {
+                            String actual = entry.getValue();
                             if (TestState.Timestamp.name().equals(expectedValue)) {
                                 try {
                                     DateTimeFormatter.ofPattern(TestState.Timestamp.value()).parse(actual);
                                 } catch (Exception e) {
+                                    logger.debug("Table timestamp parse failed method={} store={} actual={}",
+                                            methodName, entry.getKey(), actual);
                                     Assertions.fail("Expected Timestamp format but got: " + actual);
                                 }
                                 continue;
                             }
                             if (TestState.Milliseconds.name().equals(expectedValue)) {
                                 if (actual == null || !actual.matches(TestState.Milliseconds.value())) {
+                                    logger.debug("Table milliseconds match failed method={} store={} actual={}",
+                                            methodName, entry.getKey(), actual);
                                     Assertions.fail("Expected Milliseconds format but got: " + actual);
                                 }
                                 continue;
@@ -219,20 +246,41 @@ public abstract class TestObject {
                                 else
                                     mappedActual = TestState.Present.name();
                                 if (negativeTest) {
+                                    if (expectedValue.equals(mappedActual)) {
+                                        logger.debug("Table negative State match failed method={} store={} expected!={} actual={}",
+                                                methodName, entry.getKey(), expectedValue, mappedActual);
+                                    }
                                     Assertions.assertNotEquals(expectedValue, mappedActual);
                                 } else {
+                                    if (!expectedValue.equals(mappedActual)) {
+                                        logger.debug("Table State mismatch method={} store={} expected={} actual={} raw={}",
+                                                methodName, entry.getKey(), expectedValue, mappedActual, actual);
+                                    }
                                     Assertions.assertEquals(expectedValue, mappedActual);
                                 }
                             } else {
                                 if (negativeTest) {
+                                    if (java.util.Objects.equals(expectedValue, actual)) {
+                                        logger.debug("Table negative match failed method={} store={} expected!={} actual={}",
+                                                methodName, entry.getKey(), expectedValue, actual);
+                                    }
                                     Assertions.assertNotEquals(expectedValue, actual);
                                 } else {
+                                    if (!java.util.Objects.equals(expectedValue, actual)) {
+                                        logger.debug("Table mismatch method={} store={} expected={} actual={}",
+                                                methodName, entry.getKey(), expectedValue, actual);
+                                    }
                                     Assertions.assertEquals(expectedValue, actual);
                                 }
                             }
                         }
                     }
+                } catch (NoSuchMethodException e) {
+                    logger.debug("Table method not found {}#{} candidates={}",
+                            this.getClass().getSimpleName(), methodName, candidateMethodNames(operation, sectionName));
+                    Assertions.fail(e);
                 } catch (Exception e) {
+                    logger.debug("Table invocation failed method={} cause={}", methodName, e.toString());
                     Assertions.fail(e);
                 }
             }
@@ -248,22 +296,38 @@ public abstract class TestObject {
         }
         String fieldName = "Content";
         String sectionName = (partDesc + " " + partType).trim();
+        String methodName = operation + convertToPascalCase(sectionName) + convertToPascalCase(fieldName);
+        logger.debug("Text {} class={} method={} negative={} textLen={}",
+                operation, this.getClass().getSimpleName(), methodName, negativeTest,
+                text == null ? -1 : text.length());
         HashMap<String, String> row = new HashMap<String, String>();
         row.put(fieldName, text);
         try {
             Object returnValue = this.getClass()
-                    .getMethod(operation + convertToPascalCase(sectionName) + convertToPascalCase(fieldName),
-                            HashMap.class)
+                    .getMethod(methodName, HashMap.class)
                     .invoke(this, row);
             if (operation.equals("get")) {
                 String actual = returnValue == null ? null : returnValue.toString();
                 if (negativeTest) {
+                    if (java.util.Objects.equals(text, actual)) {
+                        logger.debug("Text negative match failed method={} expected!= actualLen={}",
+                                methodName, actual == null ? -1 : actual.length());
+                    }
                     Assertions.assertNotEquals(text, actual);
                 } else {
+                    if (!java.util.Objects.equals(text, actual)) {
+                        logger.debug("Text mismatch method={} expectedLen={} actualLen={}",
+                                methodName, text.length(), actual == null ? -1 : actual.length());
+                    }
                     Assertions.assertEquals(text, actual);
                 }
             }
+        } catch (NoSuchMethodException e) {
+            logger.debug("Text method not found {}#{} candidates={}",
+                    this.getClass().getSimpleName(), methodName, candidateMethodNames(operation, sectionName));
+            Assertions.fail(e);
         } catch (Exception e) {
+            logger.debug("Text invocation failed method={} cause={}", methodName, e.toString());
             Assertions.fail(e);
         }
     }
@@ -309,6 +373,18 @@ public abstract class TestObject {
         } else {
             return value;
         }
+    }
+
+    private List<String> candidateMethodNames(String operation, String sectionName) {
+        String prefix = operation + convertToPascalCase(sectionName);
+        List<String> names = new ArrayList<>();
+        for (Method m : this.getClass().getMethods()) {
+            if (m.getName().startsWith(prefix)) {
+                names.add(m.getName());
+            }
+        }
+        java.util.Collections.sort(names);
+        return names;
     }
 
     private static String convertToPascalCase(String s) {

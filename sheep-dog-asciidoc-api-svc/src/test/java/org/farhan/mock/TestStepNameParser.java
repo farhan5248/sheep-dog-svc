@@ -1,6 +1,8 @@
 package org.farhan.mock;
 
 import org.farhan.dsl.grammar.StepObjectRefFragments;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Mock for the LSP parser service's step-name splitting.
@@ -20,12 +22,19 @@ import org.farhan.dsl.grammar.StepObjectRefFragments;
  */
 public class TestStepNameParser {
 
+    private static final Logger logger = LoggerFactory.getLogger(TestStepNameParser.class);
+
     public static String getStepObjectName(String fullStepName) {
-        return StepObjectRefFragments.getAll(fullStepName);
+        String result = StepObjectRefFragments.getAll(fullStepName);
+        logger.debug("getStepObjectName fullStepName={} stepObjectName={}", fullStepName, result);
+        return result;
     }
 
     public static String getStepDefinitionName(String fullStepName) {
         String stepObjectName = StepObjectRefFragments.getAll(fullStepName);
-        return fullStepName.substring(stepObjectName.length()).trim();
+        String result = fullStepName.substring(stepObjectName.length()).trim();
+        logger.debug("getStepDefinitionName fullStepName={} stepObjectName={} stepDefinitionName={}",
+                fullStepName, stepObjectName, result);
+        return result;
     }
 }

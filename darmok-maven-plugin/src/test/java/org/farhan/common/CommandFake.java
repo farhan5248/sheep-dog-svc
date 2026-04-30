@@ -13,6 +13,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.maven.plugin.logging.Log;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
 
 /**
@@ -27,6 +29,8 @@ import org.yaml.snakeyaml.Yaml;
  * invocations.
  */
 public abstract class CommandFake {
+
+	private static final Logger logger = LoggerFactory.getLogger(CommandFake.class);
 
 	private static final String CAPTURES_ROOT = "/captures/";
 
@@ -66,6 +70,15 @@ public abstract class CommandFake {
 		Map<String, List<String>> paths = PATHS.get(commandKey());
 		this.path = paths == null ? null : paths.get(this.scenarioName);
 		this.indexKey = this.scenarioName + ":" + commandKey();
+		if (this.path == null && logger.isDebugEnabled()) {
+			List<String> available = paths == null ? List.of() : new ArrayList<>(paths.keySet());
+			logger.debug("CommandFake({}) no path for scenario={} available={}",
+					commandKey(), this.scenarioName, available);
+		} else {
+			logger.debug("CommandFake({}) scenario={} pathLen={} catalogSize={}",
+					commandKey(), this.scenarioName, this.path == null ? -1 : this.path.size(),
+					catalog == null ? -1 : catalog.size());
+		}
 	}
 
 	/** "claude", "mvn", or "git" — matches the YAML resource name and vertex id prefix. */
@@ -91,11 +104,17 @@ public abstract class CommandFake {
 	 */
 	protected final Vertex consume() {
 		if (path == null) {
+			Map<String, List<String>> paths = PATHS.get(commandKey());
+			List<String> available = paths == null ? List.of() : new ArrayList<>(paths.keySet());
+			logger.debug("consume() abort: no path for scenario={} command={} available={}",
+					scenarioName, commandKey(), available);
 			throw new IllegalStateException("captures/" + commandKey() + ".yaml has no path for scenario \""
 				+ scenarioName + "\"");
 		}
 		int idx = INDICES.getOrDefault(indexKey, 0);
 		if (idx >= path.size()) {
+			logger.debug("consume() abort: exhausted scenario={} command={} idx={} pathLen={}",
+					scenarioName, commandKey(), idx, path.size());
 			throw new IllegalStateException("captures/" + commandKey() + ".yaml path \"" + scenarioName
 				+ "\" exhausted at call " + (idx + 1) + " — declared " + path.size() + " calls");
 		}
@@ -104,9 +123,14 @@ public abstract class CommandFake {
 
 		Vertex v = catalog.get(vid);
 		if (v == null) {
+			logger.debug("consume() abort: vertex {} missing in catalog command={} catalogKeys={}",
+					vid, commandKey(), new ArrayList<>(catalog.keySet()));
 			throw new IllegalStateException("Vertex '" + vid + "' not found in /captures/"
 				+ commandKey() + ".yaml (referenced by scenario " + scenarioName + ")");
 		}
+		logger.debug("consume() command={} scenario={} idx={} vid={} exit={} stdoutLen={} remaining={}",
+				commandKey(), scenarioName, idx, vid, v.exit,
+				v.stdout == null ? 0 : v.stdout.length(), path.size() - idx - 1);
 		state.appendEventLog(v.in);
 		applyAfter(v);
 		return v;

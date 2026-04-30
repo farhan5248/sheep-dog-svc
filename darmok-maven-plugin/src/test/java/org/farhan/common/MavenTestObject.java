@@ -11,6 +11,8 @@ import org.farhan.mbt.maven.DarmokMojo;
 import org.farhan.mbt.maven.DarmokMojoLog;
 import org.farhan.mbt.maven.Git;
 import org.farhan.mbt.maven.Maven;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 
@@ -22,10 +24,13 @@ import org.springframework.core.env.Environment;
  */
 public abstract class MavenTestObject extends TestObject {
 
+    private static final Logger logger = LoggerFactory.getLogger(MavenTestObject.class);
+
     @Autowired
     private Environment env;
 
     protected final void runGoal(Class<? extends DarmokMojo> mojoClass, String baseDir) {
+        logger.debug("runGoal mojoClass={} baseDir={}", mojoClass.getSimpleName(), baseDir);
         try {
             DarmokMojo mojo = mojoClass.getConstructor().newInstance();
 
@@ -69,8 +74,11 @@ public abstract class MavenTestObject extends TestObject {
             }
 
             mojo.execute();
+            logger.debug("runGoal mojoClass={} executed successfully", mojoClass.getSimpleName());
             setProperty("goal.exception", null);
         } catch (Exception e) {
+            logger.debug("runGoal mojoClass={} threw {}: {}",
+                    mojoClass.getSimpleName(), e.getClass().getSimpleName(), e.getMessage());
             setProperty("goal.exception", e);
         }
     }
@@ -158,11 +166,13 @@ public abstract class MavenTestObject extends TestObject {
         }
         SourceFileRepository sr = sr();
         if (!sr.contains("", path)) {
+            logger.debug("getFileState miss path={}", path);
             return null;
         }
         try {
             return sr.get("", path);
         } catch (Exception e) {
+            logger.debug("getFileState read failed path={} cause={}", path, e.toString());
             return null;
         }
     }

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <property name="LOG_LEVEL" value="${LOG_LEVEL:-INFO}" />
+    <property name="LOG_PATH" value="${LOG_PATH:-/logs}" />
+
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!--
+      Dedicated file for test-infrastructure DEBUG output (TestObject /
+      PathNavigatorTestObject / mock.TestStepNameParser). Test-only override
+      that does not touch the production logback.xml under src/main/resources.
+    -->
+    <appender name="FAKE_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_PATH}/sheep-dog-cucumber-gen-svc.test-fake.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_PATH}/sheep-dog-cucumber-gen-svc.test-fake-%d{yyyy-MM-dd}.log.gz</fileNamePattern>
+            <maxHistory>1</maxHistory>
+            <totalSizeCap>1GB</totalSizeCap>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <root level="${LOG_LEVEL}">
+        <appender-ref ref="CONSOLE" />
+    </root>
+
+    <logger name="org.farhan.common" level="DEBUG" additivity="false">
+        <appender-ref ref="FAKE_FILE" />
+    </logger>
+    <logger name="org.farhan.mock" level="DEBUG" additivity="false">
+        <appender-ref ref="FAKE_FILE" />
+    </logger>
+
+    <logger name="org.springframework" level="INFO" />
+    <logger name="io.cucumber" level="INFO" />
+</configuration>
