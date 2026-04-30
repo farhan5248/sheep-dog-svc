@@ -72,6 +72,11 @@ public class GenFromExistingGoalImpl extends MavenTestObject implements GenFromE
 	}
 
 	@Override
+	public void setMvnAsciidoctorToUmlCommandExecutedButFailsWith(HashMap<String, String> keyMap) {
+		setProperty("mvnAsciidoctorMode", "fail");
+	}
+
+	@Override
 	public void setMvnAsciidoctorToUmlCommandExit(HashMap<String, String> keyMap) {
 		setProperty("mvnAsciidoctorExit", keyMap.get("Exit"));
 	}

@@ -140,4 +140,9 @@ public class DarmokGenFromExistingGoalSteps extends TestSteps {
     public void mvnAsciidoctorToUmlCommandIsExecutedAndSucceedsWith(DataTable dataTable) {
         object.doEdgeStep("mvn asciidoctor-to-uml", "command", "is", "executed and succeeds with", dataTable);
     }
+
+    @Given("^The darmok plugin gen-from-existing goal mvn asciidoctor-to-uml command is executed but fails with$")
+    public void mvnAsciidoctorToUmlCommandIsExecutedButFailsWith(DataTable dataTable) {
+        object.doEdgeStep("mvn asciidoctor-to-uml", "command", "is", "executed but fails with", dataTable);
+    }
 }

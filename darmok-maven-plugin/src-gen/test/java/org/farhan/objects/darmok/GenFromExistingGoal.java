@@ -121,4 +121,6 @@ public interface GenFromExistingGoal {
     public void setMvnAsciidoctorToUmlCommandExecutedAndSucceedsWith(HashMap<String, String> keyMap);
 
     public void setMvnAsciidoctorToUmlCommandPattern(HashMap<String, String> keyMap);
+
+    public void setMvnAsciidoctorToUmlCommandExecutedButFailsWith(HashMap<String, String> keyMap);
 }

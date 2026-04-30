@@ -99,6 +99,11 @@ public class RedPhase extends RgrPhase {
 				runnerLog.warn("Maven CLI exited with code " + exitCode);
 				runnerLog.warn("Waiting " + retryWaitSeconds + " seconds before retry...");
 				Thread.sleep(retryWaitSeconds * 1000L);
+			} else if (matched != null) {
+				runnerLog.error("Retryable error detected: " + matched);
+				runnerLog.error("Max retries (" + maxRetries + ") exhausted");
+				runnerLog.debug("Maven CLI exited with code " + exitCode);
+				return handleMavenFailure(exitCode, logFile);
 			} else {
 				return handleMavenFailure(exitCode, logFile);
 			}
