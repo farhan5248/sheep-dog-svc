@@ -2,8 +2,8 @@
 Feature: Directory Allowlist
 
   \@darmok-maven-plugin
-  Allowlist is the deterministic sub-step that guards each non-deterministic claude phase against writing outside the two permitted directories.
-  After claude `/rgr-green` returns 0 (or a recovered timeout brings the phase back to the same gate) darmok runs `git status --porcelain` on the target project, classifies each changed path against the allowlist ? `src/main/java/` and `src/test/java/org/farhan/impl/` ? and either hands off to Phase Verification or reverts the offending paths with `git checkout HEAD -- <paths>` and resumes the same claude session with the literal message `only modify files under src/main/java or src/test/java/org/farhan/impl`. The loop is bounded by `maxAllowlistAttempts` (default 2). Refactor phase carries the same check with the same wiring. These Test-Cases pin down the observable contract: the new phase-allowlist log lines, the `git status` / `git checkout` / `claude --resume` subprocess sequence, and the failure message when the loop exhausts.
+  Allowlist is the deterministic sub-step that guards each non-deterministic claude phase against writing outside the permitted directories.
+  After claude `/rgr-green` returns 0 (or a recovered timeout brings the phase back to the same gate) darmok runs `git status --porcelain` on the target project, classifies each changed path against the allowlist ? `src/main/java/`, `src/test/java/org/farhan/impl/` and `src/test/resources/` ? and either hands off to Phase Verification or reverts the offending paths with `git checkout HEAD -- <paths>` and resumes the same claude session with the literal message `only modify files under src/main/java, src/test/java/org/farhan/impl or src/test/resources`. The loop is bounded by `maxAllowlistAttempts` (default 2). Refactor phase carries the same check with the same wiring. These Test-Cases pin down the observable contract: the new phase-allowlist log lines, the `git status` / `git checkout` / `claude --resume` subprocess sequence, and the failure message when the loop exhausts.
   Refactor-phase cases mirror green-phase cases and prove the gate is phase-parametric, not bolted to green.
   See issue 141 for the motivation.
 
@@ -76,12 +76,12 @@ Feature: Directory Allowlist
           | INFO  | mojo     | Green: Allowlist check passed, proceeding                                          |
           | INFO  | mojo     | Green: Verify running...                                                           |
       And The code-prj project darmok.runners.log file will be as follows
-          | Level | Category | Content                                                                                                                                                                                    |
-          | DEBUG | runner   | Executing: claude --print --session-id 00000000-0000-0000-0000-000000000001 --dangerously-skip-permissions --model opus @target/darmok-test/sheep-dog-svc/code-prj/target/darmok/green.md  |
-          | DEBUG | runner   | Running: git status --porcelain                                                                                                                                                            |
-          | DEBUG | runner   | Running: git checkout HEAD -- pom.xml                                                                                                                                                      |
-          | DEBUG | runner   | Executing: claude --resume 00000000-0000-0000-0000-000000000001 --print --dangerously-skip-permissions --model opus only modify files under src/main/java or src/test/java/org/farhan/impl |
-          | DEBUG | runner   | Running: git status --porcelain                                                                                                                                                            |
+          | Level | Category | Content                                                                                                                                                                                                        |
+          | DEBUG | runner   | Executing: claude --print --session-id 00000000-0000-0000-0000-000000000001 --dangerously-skip-permissions --model opus @target/darmok-test/sheep-dog-svc/code-prj/target/darmok/green.md                      |
+          | DEBUG | runner   | Running: git status --porcelain                                                                                                                                                                                |
+          | DEBUG | runner   | Running: git checkout HEAD -- pom.xml                                                                                                                                                                          |
+          | DEBUG | runner   | Executing: claude --resume 00000000-0000-0000-0000-000000000001 --print --dangerously-skip-permissions --model opus only modify files under src/main/java, src/test/java/org/farhan/impl or src/test/resources |
+          | DEBUG | runner   | Running: git status --porcelain                                                                                                                                                                                |
 
   Scenario: Green allowlist fails for every attempt
 
@@ -115,12 +115,12 @@ Feature: Directory Allowlist
           | INFO  | mojo     | Refactor: Allowlist check passed, proceeding                                          |
           | INFO  | mojo     | Refactor: Verify running...                                                           |
       And The code-prj project darmok.runners.log file will be as follows
-          | Level | Category | Content                                                                                                                                                                                    |
-          | DEBUG | runner   | Executing: claude --resume 00000000-0000-0000-0000-000000000001 --print --dangerously-skip-permissions --model opus /rgr-refactor forward code-prj                                         |
-          | DEBUG | runner   | Running: git status --porcelain                                                                                                                                                            |
-          | DEBUG | runner   | Running: git checkout HEAD -- pom.xml                                                                                                                                                      |
-          | DEBUG | runner   | Executing: claude --resume 00000000-0000-0000-0000-000000000001 --print --dangerously-skip-permissions --model opus only modify files under src/main/java or src/test/java/org/farhan/impl |
-          | DEBUG | runner   | Running: git status --porcelain                                                                                                                                                            |
+          | Level | Category | Content                                                                                                                                                                                                        |
+          | DEBUG | runner   | Executing: claude --resume 00000000-0000-0000-0000-000000000001 --print --dangerously-skip-permissions --model opus /rgr-refactor forward code-prj                                                             |
+          | DEBUG | runner   | Running: git status --porcelain                                                                                                                                                                                |
+          | DEBUG | runner   | Running: git checkout HEAD -- pom.xml                                                                                                                                                                          |
+          | DEBUG | runner   | Executing: claude --resume 00000000-0000-0000-0000-000000000001 --print --dangerously-skip-permissions --model opus only modify files under src/main/java, src/test/java/org/farhan/impl or src/test/resources |
+          | DEBUG | runner   | Running: git status --porcelain                                                                                                                                                                                |
 
   Scenario: Refactor allowlist fails for every attempt
 
@@ -139,16 +139,15 @@ Feature: Directory Allowlist
 
   Scenario: Green allowlist passes when an extra path is added via allowlistAdditionalPaths
 
-    The base allowlist stays at its default (`src/main/java/`, `src/test/java/org/farhan/impl/`); the project extends it with `allowlistAdditionalPaths=src/test/resources/mojo-defaults.properties` so the green claude session can edit that one file too.
-    The motivating case from issue 314: on issue 311 the new `claudeSessionIdEnabled` default value had to be added to `mojo-defaults.properties`, but that path was outside the legacy hardcoded allowlist and Darmok exhausted on the violation.
-    With the additional path declared, the same write passes the allowlist gate first try ? no violation log line, no revert, no resume.
+    The base allowlist stays at its default (`src/main/java/`, `src/test/java/org/farhan/impl/`, `src/test/resources/`); the project extends it with `allowlistAdditionalPaths=pom.xml` so the green claude session can edit the project pom too.
+    With the additional path declared, the write passes the allowlist gate first try ? no violation log line, no revert, no resume.
 
     Given The darmok plugin gen-from-existing goal claude command is executed and succeeds with
-          | Command Parameters                                                | Path                                        |
-          | @target/darmok-test/sheep-dog-svc/code-prj/target/darmok/green.md | src/test/resources/mojo-defaults.properties |
+          | Command Parameters                                                | Path    |
+          | @target/darmok-test/sheep-dog-svc/code-prj/target/darmok/green.md | pom.xml |
      When The darmok plugin gen-from-existing goal is executed and succeeds with
-          | AllowlistAdditionalPaths                    |
-          | src/test/resources/mojo-defaults.properties |
+          | AllowlistAdditionalPaths |
+          | pom.xml                  |
      Then The code-prj project darmok.mojo.log file will be as follows
           | Level | Category | Content                                   |
           | INFO  | mojo     | Green: Allowlist check running...         |
@@ -239,4 +238,18 @@ Feature: Directory Allowlist
           | WARN  | mojo     | Green: Allowlist violation (attempt 1/2), reverting scenarios-list-gh999.txt and resuming claude... |
           | INFO  | mojo     | Green: Allowlist check running...                                                                   |
           | ERROR | mojo     | Green: Allowlist check failed after 2 attempts, aborting                                            |
+
+  Scenario: Path under src/test/resources is allowlisted by default
+
+    Files under `src/test/resources/` are part of the default base allowlist alongside `src/main/java/` and `src/test/java/org/farhan/impl/`. A claude write to any path under `src/test/resources/` (capture fixtures, application.properties, etc.) passes the gate first try without an explicit `allowlistAdditionalPaths` declaration. Issue 327.
+
+    Given The darmok plugin gen-from-existing goal claude command is executed and succeeds with
+          | Command Parameters                                                | Path                                 |
+          | @target/darmok-test/sheep-dog-svc/code-prj/target/darmok/green.md | src/test/resources/captures/foo.yaml |
+     When The darmok plugin gen-from-existing goal is executed and succeeds
+     Then The code-prj project darmok.mojo.log file will be as follows
+          | Level | Category | Content                                   |
+          | INFO  | mojo     | Green: Allowlist check running...         |
+          | INFO  | mojo     | Green: Allowlist check passed, proceeding |
+          | INFO  | mojo     | Green: Verify running...                  |
 

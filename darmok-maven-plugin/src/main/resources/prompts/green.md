@@ -16,5 +16,8 @@ Modify only files under:
 
 - `${projectPath}/src/main/java/`
 - `${projectPath}/src/test/java/org/farhan/impl/`
+- `${projectPath}/src/test/resources/`
+
+Do not modify files under `${projectPath}/src/test/java/org/farhan/fake/`.
 
 Don't read code outside `${projectPath}`. Use logging statements to debug as needed.

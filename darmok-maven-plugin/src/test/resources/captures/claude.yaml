@@ -55,7 +55,7 @@ claude-16:
   in: "claude.cmd --resume 00000000-0000-0000-0000-000000000001 --print --dangerously-skip-permissions --model sonnet /rgr-refactor forward darmok-prj"
   out: { exit: 0 }
 claude-17:
-  in: "claude.cmd --resume 00000000-0000-0000-0000-000000000001 --print --dangerously-skip-permissions --model opus only modify files under src/main/java or src/test/java/org/farhan/impl"
+  in: "claude.cmd --resume 00000000-0000-0000-0000-000000000001 --print --dangerously-skip-permissions --model opus only modify files under src/main/java, src/test/java/org/farhan/impl or src/test/resources"
   out: { exit: 0 }
 claude-18:
   in: "claude.cmd --print --session-id 00000000-0000-0000-0000-000000000001 --dangerously-skip-permissions --model sonnet /rgr-gen-from-comparison darmok-prj"
@@ -142,6 +142,7 @@ paths:
   "Green allowlist fails when allowlistBasePaths narrows below default": [claude-6, claude-17]
   "Non-matching scenarios-list-shaped file is treated as a violation": [claude-6, claude-17]
   "Active scenarios-list file is allowlisted automatically": [claude-6, claude-7, claude-8]
+  "Path under src/test/resources is allowlisted by default": [claude-6, claude-7, claude-8]
   "Green allowlist passes on the first attempt": [claude-6, claude-7, claude-8]
   "Green allowlist passes when an extra path is added via allowlistAdditionalPaths": [claude-6, claude-7, claude-8]
   "Green claude killed and install passes, refactor unaffected": [claude-22, claude-7, claude-8]

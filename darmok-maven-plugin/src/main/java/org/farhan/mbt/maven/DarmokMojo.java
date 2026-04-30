@@ -72,7 +72,7 @@ public abstract class DarmokMojo extends AbstractMojo {
 	@Parameter(property = "maxAllowlistAttempts", defaultValue = "2")
 	public int maxAllowlistAttempts;
 
-	@Parameter(property = "allowlistBasePaths", defaultValue = "src/main/java/,src/test/java/org/farhan/impl/")
+	@Parameter(property = "allowlistBasePaths", defaultValue = "src/main/java/,src/test/java/org/farhan/impl/,src/test/resources/")
 	public String allowlistBasePaths;
 
 	@Parameter(property = "allowlistAdditionalPaths", defaultValue = "")

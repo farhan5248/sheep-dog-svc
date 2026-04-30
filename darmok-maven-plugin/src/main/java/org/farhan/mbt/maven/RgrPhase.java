@@ -10,7 +10,7 @@ public abstract class RgrPhase {
 
 	static final String VERIFY_RESUME_MESSAGE = "mvn clean verify failures should be fixed";
 	static final String TIMEOUT_RESUME_MESSAGE = "pls continue";
-	static final String ALLOWLIST_RESUME_MESSAGE = "only modify files under src/main/java or src/test/java/org/farhan/impl";
+	static final String ALLOWLIST_RESUME_MESSAGE = "only modify files under src/main/java, src/test/java/org/farhan/impl or src/test/resources";
 
 	protected final Claude claude;
 	protected final Maven maven;
