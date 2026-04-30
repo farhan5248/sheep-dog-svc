@@ -7,6 +7,7 @@ REM mvn org.farhan:darmok-maven-plugin:gen-from-existing -DmetricsDir="C:\miniku
 cd ..
 call mvn org.farhan:darmok-maven-plugin:gen-from-existing ^
     -DmetricsDir="C:\minikube-data\darmok-metrics" ^
+    -DallowlistAdditionalPaths="src/test/resources/captures/" ^
     -DmaxRetries="3" ^
     -DmaxVerifyAttempts="3" ^
     -DretryWaitSeconds="30" ^
