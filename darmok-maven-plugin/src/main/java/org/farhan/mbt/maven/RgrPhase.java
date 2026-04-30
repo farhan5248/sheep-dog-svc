@@ -92,16 +92,19 @@ public abstract class RgrPhase {
 		String suffix = workSuffix();
 		mojoLog.info("  " + name + ": Running" + suffix + "...");
 		long start = System.currentTimeMillis();
-		int exitCode = executeClaudeOrMaven(state);
-		long duration = System.currentTimeMillis() - start;
-		mojoLog.info("  " + name + ": Completed" + suffix + " (" + DarmokMojoState.formatDuration(duration) + ")");
-		if (exitCode == 0 && requiresVerifyLoop()) {
-			runAllowlistCheck();
-			runVerifyLoop();
-			duration = System.currentTimeMillis() - start;
+		int exitCode = 0;
+		try {
+			exitCode = executeClaudeOrMaven(state);
+			long execDuration = System.currentTimeMillis() - start;
+			mojoLog.info("  " + name + ": Completed" + suffix + " (" + DarmokMojoState.formatDuration(execDuration) + ")");
+			if (exitCode == 0 && requiresVerifyLoop()) {
+				runAllowlistCheck();
+				runVerifyLoop();
+			}
+		} finally {
+			state.exitCode = exitCode;
+			state.setDuration(phase(), System.currentTimeMillis() - start);
 		}
-		state.exitCode = exitCode;
-		state.setDuration(phase(), duration);
 		return state;
 	}
 

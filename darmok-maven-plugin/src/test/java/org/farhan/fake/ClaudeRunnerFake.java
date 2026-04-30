@@ -36,6 +36,7 @@ public class ClaudeRunnerFake extends CommandFake implements Claude {
 
 	@Override
 	public int run(String workingDirectory, List<String> outputLines, String... args) {
+		simulateSubprocessTime();
 		Vertex v = consume();
 		logExecute(v);
 		appendStdoutLines(outputLines, v.stdout());
@@ -47,6 +48,7 @@ public class ClaudeRunnerFake extends CommandFake implements Claude {
 
 	@Override
 	public int resume(String workingDirectory, List<String> outputLines, String message) {
+		simulateSubprocessTime();
 		Vertex v = consume();
 		logExecute(v);
 		appendStdoutLines(outputLines, v.stdout());
@@ -54,6 +56,18 @@ public class ClaudeRunnerFake extends CommandFake implements Claude {
 			return ClaudeRunner.TIMEOUT_EXIT_CODE;
 		}
 		return v.exit();
+	}
+
+	/**
+	 * Real claude invocations take seconds; the phase metric needs a non-zero
+	 * duration so tests can distinguish "ran" from "didn't run". 1ms is enough.
+	 */
+	private static void simulateSubprocessTime() {
+		try {
+			Thread.sleep(1);
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+		}
 	}
 
 	@Override

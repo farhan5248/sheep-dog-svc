@@ -38,7 +38,7 @@ public abstract class TestObject {
     public enum TestState {
         Absent(null), Empty(""), Present(null), Any(null),
         Timestamp("yyyy-MM-dd'T'HH:mm:ss.SSSXXX"),
-        Milliseconds("[0-9]+");
+        Milliseconds("[1-9][0-9]*");
 
         private final String value;
 

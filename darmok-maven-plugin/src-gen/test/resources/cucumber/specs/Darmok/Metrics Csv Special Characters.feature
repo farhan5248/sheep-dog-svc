@@ -38,7 +38,7 @@ Feature: Metrics Csv Special Characters
           | Rebuild30 |
      Then The code-prj project metrics.csv file will be as follows
           | Timestamp | GitBranch | Commit                                   | Scenario                   | PhaseRedMs   | PhaseGreenMs | PhaseRefactorMs | PhaseTotalMs |
-          | Timestamp | Rebuild30 | abc1234567890abcdef1234567890abcdef12345 | User logs in, successfully | Milliseconds | Milliseconds | Milliseconds    | Milliseconds |
+          | Timestamp | Rebuild30 | abc1234567890abcdef1234567890abcdef12345 | User logs in, successfully | Milliseconds | 0            | 0               | Milliseconds |
 
   Scenario: Scenario name contains a double quote
 
@@ -65,5 +65,5 @@ Feature: Metrics Csv Special Characters
           | Rebuild30 |
      Then The code-prj project metrics.csv file will be as follows
           | Timestamp | GitBranch | Commit                                   | Scenario                    | PhaseRedMs   | PhaseGreenMs | PhaseRefactorMs | PhaseTotalMs |
-          | Timestamp | Rebuild30 | abc1234567890abcdef1234567890abcdef12345 | User says "hi" successfully | Milliseconds | Milliseconds | Milliseconds    | Milliseconds |
+          | Timestamp | Rebuild30 | abc1234567890abcdef1234567890abcdef12345 | User says "hi" successfully | Milliseconds | 0            | 0               | Milliseconds |
 

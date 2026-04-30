@@ -33,6 +33,7 @@ public class MavenRunnerFake extends CommandFake implements Maven {
 
 	@Override
 	public int run(String workingDirectory, String... args) {
+		simulateSubprocessTime();
 		Vertex v = consume();
 		logRun(v);
 		return v.exit();
@@ -40,10 +41,23 @@ public class MavenRunnerFake extends CommandFake implements Maven {
 
 	@Override
 	public int run(String workingDirectory, Path logFile, String... args) {
+		simulateSubprocessTime();
 		Vertex v = consume();
 		logRun(v);
 		writeStdoutToLogFile(logFile, v.stdout());
 		return v.exit();
+	}
+
+	/**
+	 * Real maven invocations take seconds; the phase metric needs a non-zero
+	 * duration so tests can distinguish "ran" from "didn't run". 1ms is enough.
+	 */
+	private static void simulateSubprocessTime() {
+		try {
+			Thread.sleep(1);
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+		}
 	}
 
 	private static void writeStdoutToLogFile(Path logFile, String stdout) {
