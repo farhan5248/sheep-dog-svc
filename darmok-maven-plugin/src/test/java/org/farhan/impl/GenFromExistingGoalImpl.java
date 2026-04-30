@@ -352,6 +352,16 @@ public class GenFromExistingGoalImpl extends MavenTestObject implements GenFromE
 	}
 
 	@Override
+	public void setMvnUmlToCucumberGuiceCommandExecutedAndSucceedsWith(HashMap<String, String> keyMap) {
+		// Marker step; actual state is seeded via the column-specific setters.
+	}
+
+	@Override
+	public void setMvnUmlToCucumberGuiceCommandPattern(HashMap<String, String> keyMap) {
+		setProperty("mvnUmlToCucumberPattern", keyMap.get("Pattern"));
+	}
+
+	@Override
 	public void setScenariosFile(HashMap<String, String> keyMap) {
 		String newName = keyMap.get("ScenariosFile");
 		setProperty("scenariosFile", newName);

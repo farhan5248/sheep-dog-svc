@@ -53,6 +53,9 @@ mvn-16:
 mvn-17:
   in: "mvn.cmd org.farhan:sheep-dog-svc-maven-plugin:asciidoctor-to-uml -Dtags=loginHappyPath -Dhost=qa.sheepdog.io -DonlyChanges=false"
   out: { exit: 1, stdout: "Service did not become available within 300000 milliseconds" }
+mvn-18:
+  in: "mvn.cmd org.farhan:sheep-dog-svc-maven-plugin:uml-to-cucumber-guice -Dtags=loginHappyPath -Dhost=qa.sheepdog.io -DonlyChanges=false"
+  out: { exit: 1, stdout: "Service did not become available within 300000 milliseconds" }
 
 # Scenario paths (one entry per scenario that exercises this command).
 paths:
@@ -132,6 +135,7 @@ paths:
   "The asciidoctor-to-uml command fails": [mvn-1, mvn-10, mvn-4, mvn-5, mvn-6, mvn-6]
   "The asciidoctor-to-uml command fails non-retryably": [mvn-1, mvn-10]
   "The uml-to-cucumber-guice command fails non-retryably": [mvn-1, mvn-3, mvn-11]
+  "Uml-to-cucumber-guice retries on Service-not-available then succeeds": [mvn-1, mvn-3, mvn-18, mvn-4, mvn-5, mvn-6, mvn-6]
   "The generated runner class fails to compile": [mvn-1, mvn-3, mvn-4, mvn-12, mvn-6, mvn-6]
   "The matching test-case is the last in the file with no body": [mvn-1, mvn-3, mvn-4, mvn-8]
   "The refactor phase also retries on retryable errors": [mvn-1, mvn-3, mvn-4, mvn-5, mvn-6, mvn-6]

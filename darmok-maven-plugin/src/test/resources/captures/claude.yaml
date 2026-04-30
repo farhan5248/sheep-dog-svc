@@ -180,4 +180,5 @@ paths:
   "The generated runner class fails to compile": [claude-6, claude-7, claude-8]
   "The refactor phase also retries on retryable errors": [claude-6, claude-7, claude-12, claude-8]
   "The uml-to-cucumber-guice command fails": [claude-6, claude-7, claude-8]
+  "Uml-to-cucumber-guice retries on Service-not-available then succeeds": [claude-14, claude-15, claude-16]
   "Timestamp is written in timezone-aware ISO format": [claude-6, claude-7, claude-8]

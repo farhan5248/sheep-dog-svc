@@ -61,3 +61,19 @@ Feature: Red Phase Maven Retry
           | INFO  | mojo     | Refactor: Running...     |
           | INFO  | mojo     | RGR Automation Complete! |
 
+  @GH349
+  Scenario: Uml-to-cucumber-guice retries on Service-not-available then succeeds
+
+    \@GH349
+    Same retry contract applied to the second red-phase maven goal. Asciidoctor-to-uml succeeds on its first attempt; uml-to-cucumber-guice fails on its first attempt with the retryable pattern, recovers on its second.
+
+    Given The darmok plugin gen-from-existing goal mvn uml-to-cucumber-guice command is executed and succeeds with
+          | Pattern                                                     |
+          | Service did not become available within 300000 milliseconds |
+     When The darmok plugin gen-from-existing goal is executed and succeeds
+     Then The code-prj project darmok.runners.log file will be as follows
+          | Level | Category | Content                                                           |
+          | WARN  | runner   | Retryable error detected: Service did not become available within |
+          | DEBUG | runner   | Retry attempt 2 of 3...                                           |
+          | DEBUG | runner   | Maven CLI completed successfully                                  |
+

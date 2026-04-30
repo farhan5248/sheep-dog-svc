@@ -123,4 +123,8 @@ public interface GenFromExistingGoal {
     public void setMvnAsciidoctorToUmlCommandPattern(HashMap<String, String> keyMap);
 
     public void setMvnAsciidoctorToUmlCommandExecutedButFailsWith(HashMap<String, String> keyMap);
+
+    public void setMvnUmlToCucumberGuiceCommandExecutedAndSucceedsWith(HashMap<String, String> keyMap);
+
+    public void setMvnUmlToCucumberGuiceCommandPattern(HashMap<String, String> keyMap);
 }
